@@ -1,0 +1,1643 @@
+{
+  "date": "2026-06-13",
+  "generated_at": "2026-06-13T02:00:59.315977+00:00",
+  "newsapi_calls_used": 95,
+  "av_calls_used": 20,
+  "tickers_covered": 200,
+  "positive_catalysts": 20,
+  "dangers_found": 9,
+  "results": {
+    "VIRT": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.198,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "EU crypto rules: Virtu to offer regulated trading in 27 states",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "REAL": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.105,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "PSG Hold Talks for West Ham's Mateus Fernandes, Crysencio Summerville",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "FLG": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.016,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "New York Community Bancorp Hits New 52-Week High of $14.91",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "TNDM": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.153,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "Why Insulet thinks its fully closed loop system will stand apart from rivals",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "ATMU": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.15,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Diluted shares outstanding of Atmus Filtration Technologies, Inc. \u2013 FWB:7LQ",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "CE": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.078,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "CCNP Security News Roundup: Free SDSI Training, New Duo Course",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "CXW": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.197,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "CoreCivic stock hits 52-week high at 25.44 USD By Investing.com",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "FRSH": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.133,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "Is Freshworks Inc. (FRSH) A Good Stock To Buy Now?",
+      "article_count": 51,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "PGNY": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.164,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "What Progyny (PGNY)'s Supermajority Rollback and US$200 Million Buyback Mean For Shareholders",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "IP": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.216,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "node804-panos-mcp added to PyPI",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "IAG": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.288,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": true,
+      "best_headline": "Natural Hazards Commission ups reinsurance cover by 20% at no extra cost, but taxpayers remain exposed",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "ROKU": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.035,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "GAMES OPERATORS S.A.: Uchwa\u0142a ZWZ w sprawie podzia\u0142u zysku netto za rok obrotowy 2025 oraz ustalenia dnia dywidendy i terminu jej wyp\u0142aty",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "TRIP": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.145,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "Paul DePodesta discusses where the Rockies are now (Part II)",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "VICI": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.236,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "Is VICI Properties Stock Underperforming the Nasdaq?",
+      "article_count": 51,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "EC": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.141,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "\u682a\u5f0f\u4f1a\u793eR6B\u304c\u30cb\u30c3\u30bb\u30f3\u306e\u6b21\u4e16\u4ee3EC\u57fa\u76e4\u5237\u65b0\u3092\u652f\u63f4\u3001\u7d71\u5408\u30b3\u30de\u30fc\u30b9\u57fa\u76e4\u69cb\u7bc9\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u306b\u53c2\u753b",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "CB": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.143,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "Sauce Gardner issues bold challenge to every QB on Colts\u2019 schedule",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "AEVA": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.158,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "City of Fargo Selects Aeva CityOS to Advance Intersection Safety and Traffic Operations",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "PRIM": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": -0.187,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "25.6 oz. Maxwell House Breakfast Blend Mild Roast Ground Coffee $6.90 w/ S&S + Free Shipping w/ Prime or on $35+ (4 replies)",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "CI": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.153,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "node804-panos-mcp added to PyPI",
+      "article_count": 55,
+      "sources_used": [
+        "newsapi",
+        "alphavantage"
+      ]
+    },
+    "EWTX": {
+      "news_verdict": "POSITIVE_CATALYST",
+      "news_sentiment_score": 0.155,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "Do New Analyst Upgrades and Option Grants Clarify Edgewise Therapeutics' (EWTX) Long-Term Story?",
+      "article_count": 50,
+      "sources_used": [
+        "alphavantage"
+      ]
+    },
+    "TMC": {
+      "news_verdict": "CAUTION",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "How a TMC split may alter Parliament arithmetic, strengthen NDA\u2019s hand",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ALC": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "SVEDKA Introduces First-of-its-Kind Canned Vodka Water, Delivering the Clearest Way to Drink This Summer",
+      "article_count": 4,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "SEM": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Accelerated Synthesis of Inversely Vulcanized Polymers with Oligoethylene Unit Bearing Comonomer for Lithium\u2013Sulfur Battery Application",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "WTRG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "INGM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "VOD": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "tencentcloud-sdk-python-vod 3.1.114",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "SLS": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "I Am Artemis: Elkin Norena",
+      "article_count": 4,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "MTB": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Megamo Doubles Down on Avinox-Powered Drop Bar Bikes With the Along E-Gravel Bike",
+      "article_count": 3,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "NWG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "MFG": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Windup Watch Fair Chicago Returns July 10th \u2013 12th at an Exciting New Venue",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "SBRA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "NNN": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Six abducted Nagas found dead after 28 days",
+      "article_count": 2,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "OHI": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "NVCR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "STAG": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Huge search operation launched after British tourist, 23, vanished while swimming in sea in Portugal",
+      "article_count": 3,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "GPN": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Wells Fargo Reiterates \u201cOverweight\u201d Rating Global Payments (GPN) With $105 PT; Views 10%+ Pullback As Overdone",
+      "article_count": 1,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AMSC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "FULT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "WH": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Solid-state batteries are now powering EVs in the real world",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "YUMC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "MTCH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "GD": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "tde added to PyPI",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "PNFP": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "PAYC": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Is Paycom Software, Inc. (PAYC) A Good Stock To Buy Now?",
+      "article_count": 1,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "NDAQ": {
+      "news_verdict": "CAUTION",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": true,
+      "has_danger": false,
+      "best_headline": "Nasdaq-100 Index\u00ae June 2026 Quarterly Changes",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "NTR": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Vijay, Zelensky and Macron: what their political appeal has in common for young voters",
+      "article_count": 4,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ATO": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Triple Flag Increases 2026 GEOs Guidance and Announces Steppe Gold Agreement",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "RCUS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "EW": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "MAGA lawmaker dragged online after bizarre claim about Trump being a 'special baby'",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "NTLA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "A": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Criminal Minds\u2019 True Crime Inspiration Gives Away Voit\u2019s Ending",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AA": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Vote for the Varsity 845 girls softball players of the week",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AADX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AAL": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Stocks Settle Sharply Lower on Escalating Middle East Tensions",
+      "article_count": 3,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AAOI": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Applied Optoelectronics (AAOI) Soars Anew on AI Optimism",
+      "article_count": 4,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AAON": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AAP": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "How a TMC split may alter Parliament arithmetic, strengthen NDA\u2019s hand",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AAPL": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Kensington\u3001\u6709\u7dda\u3068\u7121\u7dda\u30e2\u30c7\u30eb\u3092\u63c3\u3048\u305f\u89aa\u6307\u64cd\u4f5c\u30bf\u30a4\u30d7\u306e\u7e26\u578b\u30c8\u30e9\u30c3\u30af\u30dc\u30fc\u30eb\u300cPro Fit\u2122 Ergo TB675 Vertical Trackball\u300d\u3092\u767a\u58f2\u3002",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ABBV": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Up 45% Since 2024: 1 Glaring Reality That Makes AbbVie Stock a Hold at $225",
+      "article_count": 2,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ABM": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "1:1 ABM pages is the easy part",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ABNB": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ABT": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "This is Why Abbott Laboratories (ABT) is One of the Best Deep Value Stock to Invest In",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ABVX": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "ABVX Investors Have Opportunity to Join Abivax S.A. Fraud Investigation with the Schall Law Firm",
+      "article_count": 1,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACA": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "A progeria syndrome links DNA hypermethylation to age-related pathology",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACAD": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Gaze dynamics of cued speech perception",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACGL": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ACHC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ACHR": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "IMAAVY\u00ae (nipocalimab-aahu) demonstrates durable hemoglobin response and rapid onset of effect in pivotal Phase 2/3 study in warm autoimmune hemolytic anemia (wAIHA), an autoantibody-driven disease wit",
+      "article_count": 2,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACI": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Pope tells Catholics to pray for those who \u2018have lost their lives at sea\u2019 in Canary Islands visit",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACIW": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ACLS": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Show HN: Sentinel Den \u2013 Zero-back end, on-device iOS security SDKs",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACM": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Gaze dynamics of cued speech perception",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ACMR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ACN": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "ERO1a fosters glioblastoma aggressiveness and metabolic flexibility by regulating mitochondria-associated membrane dynamics",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADBE": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Stock market today: Dow, S&P 500, Nasdaq rise in wait for historic SpaceX debut amid hopes for Iran-US peace",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADC": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "So Many Analog to Digital Converters",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADEA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ADI": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "This bottle of Australian gin was just named the BEST in the world for 2026",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADM": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "More than 50 Iranian military bases damaged in US strikes since start of war, satellite images show",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADMA": {
+      "news_verdict": "DANGER",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": true,
+      "has_danger": true,
+      "best_headline": "ADMA Investors Have Opportunity to Lead ADMA Biologics, Inc. Securities Fraud Lawsuit Filed by The Rosen Law Firm",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADP": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Fantasy Football: Pair of NFC North rivals lead WR breakout candidates for 2026",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADPT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ADSK": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Stocks Edge Higher as Chipmakers and AI Stocks Rebound",
+      "article_count": 1,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "ADT": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Sierra Achieves FedRAMP High Certification Through Partnership with Knox Systems",
+      "article_count": 2,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AEE": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "specsmith 0.14.0.dev540",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AEG": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Offline innovation and the art of breaking through at Primavera Pro",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AEHR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AEIS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AEM": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Custom-Built, Short-Stroke V8-Powered 2002 BMW M3 Coupe Time Trial/Track Car w/2019 Open Trailer",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AEO": {
+      "news_verdict": "MILD_POSITIVE",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": true,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Your Best-Ranked Page Might Be Invisible to Google\u2019s AI",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AEP": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "You can replace almost every Windows app on Linux \u2014 except these 4",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AER": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "UNC football lands class of 2027 commitment from 4-star O-Lineman",
+      "article_count": 4,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AES": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "AES Announces Pricing of $1 Billion of Senior Notes in Public Offering",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AESI": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AFL": {
+      "news_verdict": "NEUTRAL",
+      "news_sentiment_score": 0.0,
+      "has_positive_catalyst": false,
+      "has_negative_catalyst": false,
+      "has_danger": false,
+      "best_headline": "Where do Socceroos come from? Our map reveals Australia\u2019s junior talent hotspots",
+      "article_count": 5,
+      "sources_used": [
+        "newsapi"
+      ]
+    },
+    "AFRM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AGCO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AGI": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AGNC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AGRO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AHR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AIG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AIZ": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AJG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AKAM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALAB": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALB": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALGM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALGN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALHC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALK": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALKS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALL": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALLE": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALLY": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALMS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ALNY": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMAT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMBA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMCR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMD": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AME": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMGN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMKR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMP": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMPX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMRX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMRZ": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMTM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AMZN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ANET": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ANF": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AON": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AOS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APD": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APG": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APGE": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APLD": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APLE": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APP": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "APTV": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AQN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARCC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARE": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARES": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARIS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARM": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARMK": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AROC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARQT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARWR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ARX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASB": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASC": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASML": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASTH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASTS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ASX": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ATAT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ATEN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ATI": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "ATRO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AU": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AUB": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AUGO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AUPH": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AUR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVAL": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVAV": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVGO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVNT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVPT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVT": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVTR": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AVY": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AWK": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXGN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXIA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXON": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXP": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXS": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXTA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AXTI": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AZN": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "AZO": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "B": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    },
+    "BA": {
+      "news_verdict": "NO_DATA",
+      "news_sentiment_score": 0,
+      "article_count": 0,
+      "sources_used": []
+    }
+  }
+}

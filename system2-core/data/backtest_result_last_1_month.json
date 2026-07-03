@@ -1,0 +1,28 @@
+{
+  "total_trades": 0,
+  "win_rate": 0.0,
+  "avg_r": 0.0,
+  "median_r": 0.0,
+  "profit_factor": 0.0,
+  "stop_rate": 0.0,
+  "tp1_rate": 0.0,
+  "timeout_rate": 0.0,
+  "by_setup_score": {},
+  "by_rvol": {},
+  "by_ema_stack": {},
+  "by_rs": {},
+  "monthly": {},
+  "top_performers": [],
+  "worst_performers": [],
+  "key_insights": [
+    "No trades generated for this period."
+  ],
+  "period": "last_1_month",
+  "universe_size": 5,
+  "date_range": {
+    "start": "2026-05-11",
+    "end": "2026-06-10"
+  },
+  "trades": [],
+  "generated_at": "2026-06-10T15:30:57.234667Z"
+}

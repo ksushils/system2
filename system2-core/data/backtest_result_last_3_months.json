@@ -1,0 +1,227 @@
+{
+  "total_trades": 6,
+  "win_rate": 33.3,
+  "avg_r": 0.64,
+  "median_r": -0.009,
+  "profit_factor": 2.77,
+  "stop_rate": 33.3,
+  "tp1_rate": 33.3,
+  "timeout_rate": 33.3,
+  "by_setup_score": {
+    "high_80+": {
+      "trades": 2,
+      "win_rate": 100.0,
+      "avg_r": 3.0
+    },
+    "mid_60_79": {
+      "trades": 4,
+      "win_rate": 0.0,
+      "avg_r": -0.541
+    }
+  },
+  "by_rvol": {
+    "high_3x+": {
+      "trades": 6,
+      "win_rate": 33.3,
+      "avg_r": 0.64
+    },
+    "moderate_1_5_3x": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "avg_r": 0.0
+    }
+  },
+  "by_ema_stack": {
+    "bull_stack": {
+      "trades": 4,
+      "win_rate": 50.0,
+      "avg_r": 1.459
+    },
+    "no_stack": {
+      "trades": 2,
+      "win_rate": 0.0,
+      "avg_r": -1.0
+    }
+  },
+  "by_rs": {
+    "strong_2pct+": {
+      "trades": 4,
+      "win_rate": 50.0,
+      "avg_r": 1.0
+    },
+    "weak_under_2pct": {
+      "trades": 2,
+      "win_rate": 0.0,
+      "avg_r": -0.082
+    }
+  },
+  "monthly": {
+    "2026-03": {
+      "trades": 1,
+      "avg_r": -1.0,
+      "win_rate": 0.0
+    },
+    "2026-04": {
+      "trades": 3,
+      "avg_r": 1.667,
+      "win_rate": 66.7
+    },
+    "2026-05": {
+      "trades": 2,
+      "avg_r": -0.082,
+      "win_rate": 0.0
+    }
+  },
+  "top_performers": [
+    {
+      "ticker": "AEHR",
+      "avg_r": 3.0
+    },
+    {
+      "ticker": "AAON",
+      "avg_r": -0.009
+    },
+    {
+      "ticker": "AKAM",
+      "avg_r": -0.154
+    },
+    {
+      "ticker": "ALHC",
+      "avg_r": -1.0
+    },
+    {
+      "ticker": "ALKS",
+      "avg_r": -1.0
+    }
+  ],
+  "worst_performers": [
+    {
+      "ticker": "ALHC",
+      "avg_r": -1.0
+    },
+    {
+      "ticker": "ALKS",
+      "avg_r": -1.0
+    },
+    {
+      "ticker": "AKAM",
+      "avg_r": -0.154
+    },
+    {
+      "ticker": "AAON",
+      "avg_r": -0.009
+    },
+    {
+      "ticker": "AEHR",
+      "avg_r": 3.0
+    }
+  ],
+  "key_insights": [
+    "Run a longer backtest to generate signal insights."
+  ],
+  "period": "last_3_months",
+  "universe_size": 100,
+  "date_range": {
+    "start": "2026-03-12",
+    "end": "2026-06-10"
+  },
+  "trades": [
+    {
+      "date": "2026-05-07",
+      "entry_date": "2026-05-08",
+      "ticker": "AAON",
+      "setup_score": 70,
+      "rvol": 6.05,
+      "vwap_pct": 23.35,
+      "bull_ema_stack": true,
+      "rs_vs_spy": 0.0,
+      "entry_price": 132.5,
+      "stop": 119.7779,
+      "tp1": 170.6663,
+      "actual_r": -0.009,
+      "exit_reason": "timeout",
+      "days_held": 10
+    },
+    {
+      "date": "2026-04-06",
+      "entry_date": "2026-04-07",
+      "ticker": "AEHR",
+      "setup_score": 90,
+      "rvol": 3.82,
+      "vwap_pct": 27.57,
+      "bull_ema_stack": true,
+      "rs_vs_spy": 42.27,
+      "entry_price": 49.42,
+      "stop": 42.0859,
+      "tp1": 71.4223,
+      "actual_r": 3.0,
+      "exit_reason": "tp1_hit",
+      "days_held": 4
+    },
+    {
+      "date": "2026-04-08",
+      "entry_date": "2026-04-09",
+      "ticker": "AEHR",
+      "setup_score": 90,
+      "rvol": 3.99,
+      "vwap_pct": 36.46,
+      "bull_ema_stack": true,
+      "rs_vs_spy": 49.71,
+      "entry_price": 62.49,
+      "stop": 54.011,
+      "tp1": 87.9272,
+      "actual_r": 3.0,
+      "exit_reason": "tp1_hit",
+      "days_held": 6
+    },
+    {
+      "date": "2026-05-08",
+      "entry_date": "2026-05-11",
+      "ticker": "AKAM",
+      "setup_score": 70,
+      "rvol": 3.79,
+      "vwap_pct": 33.14,
+      "bull_ema_stack": true,
+      "rs_vs_spy": 0.0,
+      "entry_price": 149.0,
+      "stop": 137.5058,
+      "tp1": 183.4826,
+      "actual_r": -0.154,
+      "exit_reason": "timeout",
+      "days_held": 10
+    },
+    {
+      "date": "2026-04-07",
+      "entry_date": "2026-04-08",
+      "ticker": "ALHC",
+      "setup_score": 65,
+      "rvol": 4.31,
+      "vwap_pct": 16.95,
+      "bull_ema_stack": false,
+      "rs_vs_spy": 15.71,
+      "entry_price": 22.25,
+      "stop": 20.7518,
+      "tp1": 26.7446,
+      "actual_r": -1.0,
+      "exit_reason": "stop_hit",
+      "days_held": 3
+    },
+    {
+      "date": "2026-03-31",
+      "entry_date": "2026-04-01",
+      "ticker": "ALKS",
+      "setup_score": 65,
+      "rvol": 4.23,
+      "vwap_pct": 18.22,
+      "bull_ema_stack": false,
+      "rs_vs_spy": 15.83,
+      "entry_price": 35.81,
+      "stop": 33.6526,
+      "tp1": 42.2823,
+      "actual_r": -1.0,
+      "exit_reason": "stop_hit",
+      "days_held": 4
+    }
+  ],
+  "generated_at": "2026-06-10T16:53:32.201093Z"
+}

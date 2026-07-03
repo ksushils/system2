@@ -1,0 +1,1422 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T00:16:01.850937+00:00",
+  "source": "barchart_per_ticker",
+  "count": 20,
+  "tickers": {
+    "EMBJ": {
+      "ticker": "EMBJ",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:04.730684+00:00",
+      "underlying_price": 57.8,
+      "put_call_ratio": 0.112,
+      "call_volume": 375,
+      "put_volume": 42,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 60.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 60.0,
+          "oi": 1665,
+          "volume": 2
+        },
+        {
+          "strike": 65.0,
+          "oi": 828,
+          "volume": 0
+        },
+        {
+          "strike": 70.0,
+          "oi": 632,
+          "volume": 0
+        },
+        {
+          "strike": 80.0,
+          "oi": 445,
+          "volume": 0
+        },
+        {
+          "strike": 55.0,
+          "oi": 95,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 50.0,
+          "oi": 710,
+          "volume": 5
+        },
+        {
+          "strike": 55.0,
+          "oi": 566,
+          "volume": 7
+        },
+        {
+          "strike": 60.0,
+          "oi": 334,
+          "volume": 0
+        },
+        {
+          "strike": 45.0,
+          "oi": 51,
+          "volume": 0
+        },
+        {
+          "strike": 65.0,
+          "oi": 10,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 28,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.11 - heavy call bias"
+    },
+    "CXW": {
+      "ticker": "CXW",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:07.583339+00:00",
+      "underlying_price": 27.1,
+      "put_call_ratio": 0.002,
+      "call_volume": 5666,
+      "put_volume": 9,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 1.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 21.0,
+          "oi": 4858,
+          "volume": 463
+        },
+        {
+          "strike": 17.0,
+          "oi": 4783,
+          "volume": 453
+        },
+        {
+          "strike": 22.0,
+          "oi": 3254,
+          "volume": 4
+        },
+        {
+          "strike": 30.0,
+          "oi": 1555,
+          "volume": 201
+        },
+        {
+          "strike": 25.0,
+          "oi": 1067,
+          "volume": 4
+        }
+      ],
+      "put_walls": [],
+      "contracts_structured": 34,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.00 - heavy call bias"
+    },
+    "JNJ": {
+      "ticker": "JNJ",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:10.381190+00:00",
+      "underlying_price": 240.87,
+      "put_call_ratio": 0.883,
+      "call_volume": 7969,
+      "put_volume": 7039,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 230.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 230.0,
+          "oi": 10988,
+          "volume": 32
+        },
+        {
+          "strike": 250.0,
+          "oi": 4662,
+          "volume": 141
+        },
+        {
+          "strike": 240.0,
+          "oi": 4432,
+          "volume": 617
+        },
+        {
+          "strike": 270.0,
+          "oi": 2017,
+          "volume": 4
+        },
+        {
+          "strike": 260.0,
+          "oi": 1834,
+          "volume": 978
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 210.0,
+          "oi": 5038,
+          "volume": 29
+        },
+        {
+          "strike": 220.0,
+          "oi": 3795,
+          "volume": 29
+        },
+        {
+          "strike": 200.0,
+          "oi": 2532,
+          "volume": 29
+        },
+        {
+          "strike": 230.0,
+          "oi": 2466,
+          "volume": 152
+        },
+        {
+          "strike": 240.0,
+          "oi": 1761,
+          "volume": 150
+        }
+      ],
+      "contracts_structured": 35,
+      "contracts_sampled": 250,
+      "options_verdict": "NEUTRAL",
+      "options_signal": "Put/call 0.88 - balanced"
+    },
+    "RVMD": {
+      "ticker": "RVMD",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:13.158122+00:00",
+      "underlying_price": 153.87,
+      "put_call_ratio": 0.805,
+      "call_volume": 1819,
+      "put_volume": 1465,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 130.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 180.0,
+          "oi": 5130,
+          "volume": 44
+        },
+        {
+          "strike": 150.0,
+          "oi": 4141,
+          "volume": 77
+        },
+        {
+          "strike": 140.0,
+          "oi": 2937,
+          "volume": 6
+        },
+        {
+          "strike": 130.0,
+          "oi": 2478,
+          "volume": 0
+        },
+        {
+          "strike": 165.0,
+          "oi": 2217,
+          "volume": 51
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 110.0,
+          "oi": 2270,
+          "volume": 1
+        },
+        {
+          "strike": 130.0,
+          "oi": 1730,
+          "volume": 224
+        },
+        {
+          "strike": 140.0,
+          "oi": 1189,
+          "volume": 4
+        },
+        {
+          "strike": 145.0,
+          "oi": 1002,
+          "volume": 25
+        },
+        {
+          "strike": 125.0,
+          "oi": 857,
+          "volume": 1
+        }
+      ],
+      "contracts_structured": 55,
+      "contracts_sampled": 250,
+      "options_verdict": "NEUTRAL",
+      "options_signal": "Put/call 0.81 - balanced"
+    },
+    "CB": {
+      "ticker": "CB",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:15.882860+00:00",
+      "underlying_price": 328.14,
+      "put_call_ratio": 0.864,
+      "call_volume": 368,
+      "put_volume": 318,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 325.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 340.0,
+          "oi": 1867,
+          "volume": 29
+        },
+        {
+          "strike": 325.0,
+          "oi": 1422,
+          "volume": 32
+        },
+        {
+          "strike": 350.0,
+          "oi": 792,
+          "volume": 6
+        },
+        {
+          "strike": 330.0,
+          "oi": 689,
+          "volume": 139
+        },
+        {
+          "strike": 320.0,
+          "oi": 371,
+          "volume": 3
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 300.0,
+          "oi": 476,
+          "volume": 3
+        },
+        {
+          "strike": 305.0,
+          "oi": 380,
+          "volume": 4
+        },
+        {
+          "strike": 330.0,
+          "oi": 300,
+          "volume": 5
+        },
+        {
+          "strike": 310.0,
+          "oi": 292,
+          "volume": 6
+        },
+        {
+          "strike": 290.0,
+          "oi": 266,
+          "volume": 6
+        }
+      ],
+      "contracts_structured": 28,
+      "contracts_sampled": 250,
+      "options_verdict": "NEUTRAL",
+      "options_signal": "Put/call 0.86 - balanced"
+    },
+    "MCHP": {
+      "ticker": "MCHP",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:18.571121+00:00",
+      "underlying_price": 95.24,
+      "put_call_ratio": 0.101,
+      "call_volume": 9012,
+      "put_volume": 908,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 85.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 80.0,
+          "oi": 5657,
+          "volume": 1
+        },
+        {
+          "strike": 100.0,
+          "oi": 3593,
+          "volume": 350
+        },
+        {
+          "strike": 110.0,
+          "oi": 2622,
+          "volume": 3
+        },
+        {
+          "strike": 105.0,
+          "oi": 2454,
+          "volume": 74
+        },
+        {
+          "strike": 90.0,
+          "oi": 2137,
+          "volume": 18
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 95.0,
+          "oi": 2661,
+          "volume": 29
+        },
+        {
+          "strike": 90.0,
+          "oi": 1989,
+          "volume": 34
+        },
+        {
+          "strike": 87.5,
+          "oi": 1108,
+          "volume": 5
+        },
+        {
+          "strike": 85.0,
+          "oi": 1011,
+          "volume": 9
+        },
+        {
+          "strike": 82.5,
+          "oi": 526,
+          "volume": 12
+        }
+      ],
+      "contracts_structured": 48,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.10 - heavy call bias"
+    },
+    "D": {
+      "ticker": "D",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:21.205588+00:00",
+      "underlying_price": 67.91,
+      "put_call_ratio": 0.077,
+      "call_volume": 1185,
+      "put_volume": 91,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 65.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 70.0,
+          "oi": 4264,
+          "volume": 45
+        },
+        {
+          "strike": 67.5,
+          "oi": 2952,
+          "volume": 70
+        },
+        {
+          "strike": 65.0,
+          "oi": 2875,
+          "volume": 28
+        },
+        {
+          "strike": 80.0,
+          "oi": 846,
+          "volume": 0
+        },
+        {
+          "strike": 75.0,
+          "oi": 606,
+          "volume": 26
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 60.0,
+          "oi": 3382,
+          "volume": 10
+        },
+        {
+          "strike": 62.5,
+          "oi": 2945,
+          "volume": 6
+        },
+        {
+          "strike": 65.0,
+          "oi": 2127,
+          "volume": 18
+        },
+        {
+          "strike": 57.5,
+          "oi": 1516,
+          "volume": 2
+        },
+        {
+          "strike": 55.0,
+          "oi": 1383,
+          "volume": 2
+        }
+      ],
+      "contracts_structured": 30,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.08 - heavy call bias"
+    },
+    "AEG": {
+      "ticker": "AEG",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:24.010277+00:00",
+      "underlying_price": 8.66,
+      "put_call_ratio": 0.011,
+      "call_volume": 436,
+      "put_volume": 5,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 5.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 7.5,
+          "oi": 119,
+          "volume": 4
+        },
+        {
+          "strike": 10.0,
+          "oi": 50,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 4,
+          "volume": 0
+        },
+        {
+          "strike": 5.0,
+          "oi": 1,
+          "volume": 1
+        },
+        {
+          "strike": 12.5,
+          "oi": 0,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 5.0,
+          "oi": 10,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 9,
+          "volume": 0
+        },
+        {
+          "strike": 10.0,
+          "oi": 3,
+          "volume": 0
+        },
+        {
+          "strike": 12.5,
+          "oi": 1,
+          "volume": 0
+        },
+        {
+          "strike": 15.0,
+          "oi": 0,
+          "volume": 5
+        }
+      ],
+      "contracts_structured": 12,
+      "contracts_sampled": 48,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.01 - heavy call bias"
+    },
+    "DHT": {
+      "ticker": "DHT",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:27.016533+00:00",
+      "underlying_price": 17.57,
+      "put_call_ratio": 0.039,
+      "call_volume": 2502,
+      "put_volume": 98,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 17.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 19.0,
+          "oi": 7586,
+          "volume": 13
+        },
+        {
+          "strike": 17.0,
+          "oi": 3040,
+          "volume": 156
+        },
+        {
+          "strike": 21.0,
+          "oi": 2585,
+          "volume": 0
+        },
+        {
+          "strike": 18.0,
+          "oi": 1857,
+          "volume": 296
+        },
+        {
+          "strike": 20.0,
+          "oi": 474,
+          "volume": 36
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 16.0,
+          "oi": 1917,
+          "volume": 21
+        },
+        {
+          "strike": 18.0,
+          "oi": 1729,
+          "volume": 5
+        },
+        {
+          "strike": 17.0,
+          "oi": 1318,
+          "volume": 5
+        }
+      ],
+      "contracts_structured": 21,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.04 - heavy call bias"
+    },
+    "DAN": {
+      "ticker": "DAN",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:29.697660+00:00",
+      "underlying_price": 30.81,
+      "put_call_ratio": 0.12,
+      "call_volume": 284,
+      "put_volume": 34,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 22.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 40.0,
+          "oi": 546,
+          "volume": 0
+        },
+        {
+          "strike": 38.0,
+          "oi": 384,
+          "volume": 0
+        },
+        {
+          "strike": 22.0,
+          "oi": 152,
+          "volume": 0
+        },
+        {
+          "strike": 37.0,
+          "oi": 109,
+          "volume": 0
+        },
+        {
+          "strike": 35.0,
+          "oi": 87,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 33.0,
+          "oi": 145,
+          "volume": 2
+        },
+        {
+          "strike": 30.0,
+          "oi": 20,
+          "volume": 1
+        },
+        {
+          "strike": 31.0,
+          "oi": 16,
+          "volume": 3
+        }
+      ],
+      "contracts_structured": 40,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.12 - heavy call bias"
+    },
+    "ED": {
+      "ticker": "ED",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:32.923053+00:00",
+      "underlying_price": 107.74,
+      "put_call_ratio": 0.056,
+      "call_volume": 585,
+      "put_volume": 33,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 105.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 110.0,
+          "oi": 2089,
+          "volume": 22
+        },
+        {
+          "strike": 105.0,
+          "oi": 786,
+          "volume": 1
+        },
+        {
+          "strike": 115.0,
+          "oi": 249,
+          "volume": 0
+        },
+        {
+          "strike": 125.0,
+          "oi": 44,
+          "volume": 0
+        },
+        {
+          "strike": 120.0,
+          "oi": 28,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 100.0,
+          "oi": 869,
+          "volume": 0
+        },
+        {
+          "strike": 105.0,
+          "oi": 267,
+          "volume": 0
+        },
+        {
+          "strike": 110.0,
+          "oi": 127,
+          "volume": 0
+        },
+        {
+          "strike": 95.0,
+          "oi": 55,
+          "volume": 0
+        },
+        {
+          "strike": 90.0,
+          "oi": 9,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 44,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.06 - heavy call bias"
+    },
+    "BANC": {
+      "ticker": "BANC",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:35.911487+00:00",
+      "underlying_price": 20.17,
+      "put_call_ratio": 0.013,
+      "call_volume": 2045,
+      "put_volume": 27,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 20.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 20.0,
+          "oi": 2396,
+          "volume": 1
+        },
+        {
+          "strike": 2.5,
+          "oi": 20,
+          "volume": 0
+        },
+        {
+          "strike": 22.5,
+          "oi": 15,
+          "volume": 0
+        },
+        {
+          "strike": 17.5,
+          "oi": 4,
+          "volume": 0
+        },
+        {
+          "strike": 5.0,
+          "oi": 4,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 17.5,
+          "oi": 1530,
+          "volume": 2
+        },
+        {
+          "strike": 15.0,
+          "oi": 1092,
+          "volume": 0
+        },
+        {
+          "strike": 22.5,
+          "oi": 50,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 19,
+          "volume": 0
+        },
+        {
+          "strike": 12.5,
+          "oi": 14,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 24,
+      "contracts_sampled": 118,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.01 - heavy call bias"
+    },
+    "SBUX": {
+      "ticker": "SBUX",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:39.052633+00:00",
+      "underlying_price": 103.04,
+      "put_call_ratio": 0.87,
+      "call_volume": 10475,
+      "put_volume": 9109,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 99.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 105.0,
+          "oi": 9006,
+          "volume": 589
+        },
+        {
+          "strike": 110.0,
+          "oi": 7435,
+          "volume": 312
+        },
+        {
+          "strike": 95.0,
+          "oi": 5932,
+          "volume": 36
+        },
+        {
+          "strike": 90.0,
+          "oi": 5469,
+          "volume": 4
+        },
+        {
+          "strike": 100.0,
+          "oi": 5225,
+          "volume": 405
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 85.0,
+          "oi": 11482,
+          "volume": 87
+        },
+        {
+          "strike": 100.0,
+          "oi": 8612,
+          "volume": 407
+        },
+        {
+          "strike": 90.0,
+          "oi": 5853,
+          "volume": 66
+        },
+        {
+          "strike": 95.0,
+          "oi": 5525,
+          "volume": 89
+        },
+        {
+          "strike": 80.0,
+          "oi": 2969,
+          "volume": 3
+        }
+      ],
+      "contracts_structured": 46,
+      "contracts_sampled": 250,
+      "options_verdict": "NEUTRAL",
+      "options_signal": "Put/call 0.87 - balanced"
+    },
+    "ZIM": {
+      "ticker": "ZIM",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:42.112928+00:00",
+      "underlying_price": 26.23,
+      "put_call_ratio": 0.816,
+      "call_volume": 1408,
+      "put_volume": 1149,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 24.5,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 30.0,
+          "oi": 2091,
+          "volume": 2
+        },
+        {
+          "strike": 24.16,
+          "oi": 1893,
+          "volume": 43
+        },
+        {
+          "strike": 27.0,
+          "oi": 1206,
+          "volume": 270
+        },
+        {
+          "strike": 26.16,
+          "oi": 985,
+          "volume": 11
+        },
+        {
+          "strike": 26.0,
+          "oi": 860,
+          "volume": 67
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 25.0,
+          "oi": 1774,
+          "volume": 95
+        },
+        {
+          "strike": 24.0,
+          "oi": 946,
+          "volume": 95
+        },
+        {
+          "strike": 26.0,
+          "oi": 694,
+          "volume": 63
+        },
+        {
+          "strike": 12.16,
+          "oi": 628,
+          "volume": 0
+        },
+        {
+          "strike": 24.16,
+          "oi": 407,
+          "volume": 6
+        }
+      ],
+      "contracts_structured": 32,
+      "contracts_sampled": 250,
+      "options_verdict": "NEUTRAL",
+      "options_signal": "Put/call 0.82 - balanced"
+    },
+    "BNL": {
+      "ticker": "BNL",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:45.044547+00:00",
+      "underlying_price": 21.07,
+      "put_call_ratio": 0.0,
+      "call_volume": 22,
+      "put_volume": 0,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 17.5,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 22.5,
+          "oi": 44,
+          "volume": 0
+        },
+        {
+          "strike": 20.0,
+          "oi": 24,
+          "volume": 0
+        },
+        {
+          "strike": 17.5,
+          "oi": 3,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 2,
+          "volume": 2
+        },
+        {
+          "strike": 15.0,
+          "oi": 1,
+          "volume": 2
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 17.5,
+          "oi": 50,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 8,
+          "volume": 0
+        },
+        {
+          "strike": 5.0,
+          "oi": 7,
+          "volume": 0
+        },
+        {
+          "strike": 20.0,
+          "oi": 1,
+          "volume": 0
+        },
+        {
+          "strike": 30.0,
+          "oi": 0,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 26,
+      "contracts_sampled": 100,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.00 - heavy call bias"
+    },
+    "PNW": {
+      "ticker": "PNW",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:47.692617+00:00",
+      "underlying_price": 103.44,
+      "put_call_ratio": 0.391,
+      "call_volume": 23,
+      "put_volume": 9,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 100.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 105.0,
+          "oi": 300,
+          "volume": 0
+        },
+        {
+          "strike": 110.0,
+          "oi": 40,
+          "volume": 0
+        },
+        {
+          "strike": 100.0,
+          "oi": 16,
+          "volume": 0
+        },
+        {
+          "strike": 140.0,
+          "oi": 4,
+          "volume": 0
+        },
+        {
+          "strike": 95.0,
+          "oi": 3,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 80.0,
+          "oi": 35,
+          "volume": 0
+        },
+        {
+          "strike": 100.0,
+          "oi": 27,
+          "volume": 0
+        },
+        {
+          "strike": 95.0,
+          "oi": 16,
+          "volume": 0
+        },
+        {
+          "strike": 105.0,
+          "oi": 4,
+          "volume": 0
+        },
+        {
+          "strike": 90.0,
+          "oi": 3,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 40,
+      "contracts_sampled": 198,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.39 - heavy call bias"
+    },
+    "BUD": {
+      "ticker": "BUD",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:50.575103+00:00",
+      "underlying_price": 82.91,
+      "put_call_ratio": 2.163,
+      "call_volume": 491,
+      "put_volume": 1062,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 80.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 80.0,
+          "oi": 1762,
+          "volume": 1
+        },
+        {
+          "strike": 82.5,
+          "oi": 1283,
+          "volume": 1
+        },
+        {
+          "strike": 85.0,
+          "oi": 812,
+          "volume": 4
+        },
+        {
+          "strike": 77.5,
+          "oi": 600,
+          "volume": 1
+        },
+        {
+          "strike": 84.0,
+          "oi": 587,
+          "volume": 6
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 80.0,
+          "oi": 3661,
+          "volume": 3
+        },
+        {
+          "strike": 72.5,
+          "oi": 1093,
+          "volume": 0
+        },
+        {
+          "strike": 70.0,
+          "oi": 1086,
+          "volume": 0
+        },
+        {
+          "strike": 79.0,
+          "oi": 787,
+          "volume": 0
+        },
+        {
+          "strike": 82.5,
+          "oi": 696,
+          "volume": 1
+        }
+      ],
+      "contracts_structured": 44,
+      "contracts_sampled": 250,
+      "options_verdict": "CAUTION",
+      "options_signal": "Put/call 2.16 - put heavy"
+    },
+    "MUFG": {
+      "ticker": "MUFG",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:53.861795+00:00",
+      "underlying_price": 20.16,
+      "put_call_ratio": 0.028,
+      "call_volume": 533,
+      "put_volume": 15,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 17.5,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 20.0,
+          "oi": 453,
+          "volume": 1
+        },
+        {
+          "strike": 15.0,
+          "oi": 30,
+          "volume": 2
+        },
+        {
+          "strike": 17.5,
+          "oi": 22,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 2,
+          "volume": 2
+        },
+        {
+          "strike": 5.0,
+          "oi": 1,
+          "volume": 2
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 17.5,
+          "oi": 43,
+          "volume": 0
+        },
+        {
+          "strike": 2.5,
+          "oi": 27,
+          "volume": 0
+        },
+        {
+          "strike": 20.0,
+          "oi": 10,
+          "volume": 0
+        },
+        {
+          "strike": 22.5,
+          "oi": 8,
+          "volume": 0
+        },
+        {
+          "strike": 5.0,
+          "oi": 3,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 24,
+      "contracts_sampled": 94,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.03 - heavy call bias"
+    },
+    "TEVA": {
+      "ticker": "TEVA",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:57.061228+00:00",
+      "underlying_price": 34.63,
+      "put_call_ratio": 0.027,
+      "call_volume": 16490,
+      "put_volume": 438,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 32.0,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 37.0,
+          "oi": 9006,
+          "volume": 20
+        },
+        {
+          "strike": 32.0,
+          "oi": 8884,
+          "volume": 38
+        },
+        {
+          "strike": 34.0,
+          "oi": 3355,
+          "volume": 165
+        },
+        {
+          "strike": 33.0,
+          "oi": 3128,
+          "volume": 393
+        },
+        {
+          "strike": 35.0,
+          "oi": 2428,
+          "volume": 300
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 32.0,
+          "oi": 8699,
+          "volume": 7
+        },
+        {
+          "strike": 30.0,
+          "oi": 8039,
+          "volume": 10
+        },
+        {
+          "strike": 34.0,
+          "oi": 5497,
+          "volume": 23
+        },
+        {
+          "strike": 31.0,
+          "oi": 3374,
+          "volume": 0
+        },
+        {
+          "strike": 33.0,
+          "oi": 1553,
+          "volume": 3
+        }
+      ],
+      "contracts_structured": 31,
+      "contracts_sampled": 250,
+      "options_verdict": "BULLISH_CONFIRM",
+      "options_signal": "Put/call 0.03 - heavy call bias"
+    },
+    "GLPI": {
+      "ticker": "GLPI",
+      "source": "barchart_api",
+      "scraped_at": "2026-06-15T00:15:59.848764+00:00",
+      "underlying_price": 47.47,
+      "put_call_ratio": 0.516,
+      "call_volume": 122,
+      "put_volume": 63,
+      "iv_percentile": null,
+      "iv_rank": null,
+      "implied_volatility": null,
+      "expected_move": null,
+      "max_pain": 47.5,
+      "max_pain_expiry": "2026-06-18",
+      "call_walls": [
+        {
+          "strike": 47.5,
+          "oi": 418,
+          "volume": 13
+        },
+        {
+          "strike": 50.0,
+          "oi": 215,
+          "volume": 4
+        },
+        {
+          "strike": 52.5,
+          "oi": 27,
+          "volume": 0
+        },
+        {
+          "strike": 55.0,
+          "oi": 10,
+          "volume": 0
+        },
+        {
+          "strike": 40.0,
+          "oi": 4,
+          "volume": 0
+        }
+      ],
+      "put_walls": [
+        {
+          "strike": 45.0,
+          "oi": 1199,
+          "volume": 0
+        },
+        {
+          "strike": 40.0,
+          "oi": 75,
+          "volume": 0
+        },
+        {
+          "strike": 47.5,
+          "oi": 63,
+          "volume": 0
+        },
+        {
+          "strike": 42.5,
+          "oi": 59,
+          "volume": 0
+        },
+        {
+          "strike": 50.0,
+          "oi": 2,
+          "volume": 0
+        }
+      ],
+      "contracts_structured": 26,
+      "contracts_sampled": 148,
+      "options_verdict": "CONFIRM",
+      "options_signal": "Put/call 0.52 - call favoured"
+    }
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "generated_at": "2026-06-13T11:56:18.136979+00:00",
+  "shadow_portfolio": {
+    "tracked_count": 3056,
+    "skipped_count": 3778,
+    "errors_count": 0,
+    "total_rejections": 6834,
+    "gates_with_data": 16,
+    "overall_avg_5d_return": 0.31,
+    "overall_pct_up": 32.0,
+    "gates": {
+      "avg_volume_below_1m": {
+        "count": 481,
+        "avg_5d_return": 0.56,
+        "pct_went_up": 33.5,
+        "best": 10.89,
+        "worst": -6.05,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "avg_volume_below_1m, dollar_volume_below_20m": {
+        "count": 76,
+        "avg_5d_return": 0.32,
+        "pct_went_up": 42.1,
+        "best": 6.05,
+        "worst": -5.41,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "dollar_volume_below_20m": {
+        "count": 21,
+        "avg_5d_return": 0.33,
+        "pct_went_up": 19.0,
+        "best": 3.57,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "avg_volume_below_1m, earnings_blackout_next_5d": {
+        "count": 4,
+        "avg_5d_return": 0.29,
+        "pct_went_up": 25.0,
+        "best": 1.27,
+        "worst": -0.1,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "earnings_blackout_next_5d": {
+        "count": 21,
+        "avg_5d_return": 0.71,
+        "pct_went_up": 23.8,
+        "best": 10.44,
+        "worst": -3.68,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "weak_setup_not_top40": {
+        "count": 2348,
+        "avg_5d_return": 0.24,
+        "pct_went_up": 31.2,
+        "best": 13.26,
+        "worst": -11.44,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "cluster_cap_2_per_Healthcare": {
+        "count": 15,
+        "avg_5d_return": 1.21,
+        "pct_went_up": 66.7,
+        "best": 4.17,
+        "worst": -0.2,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "cluster_cap_2_per_Financial Services": {
+        "count": 9,
+        "avg_5d_return": 0.33,
+        "pct_went_up": 55.6,
+        "best": 4.02,
+        "worst": -2.4,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "cluster_cap_2_per_Industrials": {
+        "count": 11,
+        "avg_5d_return": 2.28,
+        "pct_went_up": 72.7,
+        "best": 12.29,
+        "worst": -0.38,
+        "gate_effective": false,
+        "review_flag": true,
+        "status": "\u26a0\ufe0f Review"
+      },
+      "cluster_cap_2_per_Consumer Defensive": {
+        "count": 7,
+        "avg_5d_return": 2.3,
+        "pct_went_up": 71.4,
+        "best": 5.48,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": true,
+        "status": "\u26a0\ufe0f Review"
+      },
+      "cluster_cap_2_per_Energy": {
+        "count": 3,
+        "avg_5d_return": -0.83,
+        "pct_went_up": 0.0,
+        "best": -0.52,
+        "worst": -1.22,
+        "gate_effective": true,
+        "review_flag": false,
+        "status": "\u2705 Working"
+      },
+      "cluster_cap_2_per_Communication Services": {
+        "count": 4,
+        "avg_5d_return": -0.15,
+        "pct_went_up": 75.0,
+        "best": 0.93,
+        "worst": -2.17,
+        "gate_effective": true,
+        "review_flag": false,
+        "status": "\u2705 Working"
+      },
+      "cluster_cap_2_per_Consumer Cyclical": {
+        "count": 7,
+        "avg_5d_return": 2.17,
+        "pct_went_up": 85.7,
+        "best": 4.52,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": true,
+        "status": "\u26a0\ufe0f Review"
+      },
+      "recent_shadow_rejection": {
+        "count": 24,
+        "avg_5d_return": 0.0,
+        "pct_went_up": 0.0,
+        "best": 0.0,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40": {
+        "count": 12,
+        "avg_5d_return": 0.0,
+        "pct_went_up": 0.0,
+        "best": 0.0,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      },
+      "contradiction_gate: combined_forecast_dir=STRONG_DOWN": {
+        "count": 5,
+        "avg_5d_return": 0.0,
+        "pct_went_up": 0.0,
+        "best": 0.0,
+        "worst": 0.0,
+        "gate_effective": false,
+        "review_flag": false,
+        "status": "\u26a0\ufe0f Marginal"
+      }
+    },
+    "gates_effective": 2,
+    "gates_to_review": 3,
+    "generated_at": "2026-06-12T23:30:05.212593+00:00"
+  },
+  "stage_funnel": {
+    "total_runs": 8,
+    "successful_runs": 5,
+    "failed_runs": 3,
+    "success_rate": 62.5,
+    "avg_universe": 788,
+    "avg_stage1_survivors": 598,
+    "avg_stage2_top": 34,
+    "avg_finalists": 13,
+    "stage1_pass_rate": 77.7,
+    "stage2_pass_rate": 5.8,
+    "finalist_pass_rate": 37.9,
+    "failure_by_step": {
+      "Set2 Score": 1,
+      "B2 cheap filter": 1,
+      "unknown": 1
+    },
+    "regime_distribution": {
+      "UNKNOWN": 5
+    },
+    "finalist_trend": [
+      {
+        "date": "2026-06-05",
+        "count": 16
+      },
+      {
+        "date": "2026-06-06",
+        "count": 0
+      },
+      {
+        "date": "2026-06-07",
+        "count": 15
+      },
+      {
+        "date": "2026-06-08",
+        "count": 16
+      },
+      {
+        "date": "2026-06-12",
+        "count": 17
+      }
+    ],
+    "runtime_trend": "degrading",
+    "avg_runtime_minutes": 13.1,
+    "generated_at": "2026-06-13T11:56:18.086569+00:00"
+  },
+  "source_value": {
+    "insufficient_data": false,
+    "count": 20,
+    "source_performance": {
+      "pre_market_gap_checked": {
+        "with_count": 10,
+        "with_avg_r": 2.93,
+        "with_win_rate": 20.0,
+        "without_count": 10,
+        "without_avg_r": -1.0,
+        "value_add": 3.93
+      }
+    },
+    "ranked_by_value": [
+      "pre_market_gap_checked"
+    ],
+    "best_source": "pre_market_gap_checked",
+    "weakest_source": "pre_market_gap_checked",
+    "generated_at": "2026-06-12T23:30:06.552507+00:00"
+  },
+  "what_if": {
+    "insufficient_data": false,
+    "count": 78,
+    "strategies": {
+      "enter_all": {
+        "count": 78,
+        "avg_r": 0.32,
+        "win_rate": 25.6,
+        "total_r": 25.01
+      },
+      "chronos_agreeing": {
+        "count": 9,
+        "avg_r": 0.18,
+        "win_rate": 33.3,
+        "total_r": 1.62
+      },
+      "pre_market_favourable": {
+        "count": 8,
+        "avg_r": 2.85,
+        "win_rate": 100.0,
+        "total_r": 22.81
+      },
+      "mfe_above_5pct": {
+        "count": 4,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "total_r": -4
+      }
+    },
+    "best_strategy": "pre_market_favourable",
+    "recommendation": "Based on 78 resolved ideas, 'pre_market_favourable' produced the best avg R (2.85R) from 8 trades",
+    "generated_at": "2026-06-12T23:30:07.217260+00:00"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "presets": [
+    {
+      "name": "Momentum Breakout",
+      "filters": [
+        {
+          "field": "rvol",
+          "op": ">=",
+          "value": 2
+        },
+        {
+          "field": "is_new_52wk_high",
+          "op": "==",
+          "value": true
+        }
+      ],
+      "sort_by": "trade_quality_score",
+      "sort_dir": "desc",
+      "created_at": "2026-06-13T11:08:23.335Z"
+    }
+  ]
+}

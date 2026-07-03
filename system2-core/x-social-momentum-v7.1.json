@@ -1,0 +1,1033 @@
+[
+  {
+    "updatedAt": "2026-05-28T16:33:47.812Z",
+    "createdAt": "2026-05-28T16:33:47.812Z",
+    "id": "4hLGZX6FojpVDXOm",
+    "name": "X Social Momentum Scanner v7.1 - FIXED Google Sheets",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "d5459eb8-32bc-4c1d-bcd0-dfba8581d3f9",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          368
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "*/30 9-16 * * 1-5"
+              }
+            ]
+          }
+        },
+        "id": "86c21644-cdaf-4dfb-be17-4137bb092ea3",
+        "name": "Schedule Trigger - Every 30m US Market",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// X Social Momentum Scanner v7.1 - Build GetXAPI Queries\n// Major changes from v5:\n// - Targets GetXAPI (https://api.getxapi.com) instead of official X API.\n// - ROTATING universe by default for cost control (~$15-30/mo at 30m cadence).\n// - Market-hours gate: skips runs outside US trading + 1h pre/post.\n// - Tweet ID de-dupe across runs to avoid paying for the same tweet twice.\n// - Per-source tagging so we can attribute alpha back to each analyst handle.\n\nconst now = new Date();\nconst lookbackHours = 6; // shorter window since we run every 30m\n\n// Pull persistent state (de-dupe cache + analyst attribution)\nconst staticData = $getWorkflowStaticData(\"global\");\nstaticData.seenTweetIds = staticData.seenTweetIds || {};\nstaticData.analystAttribution = staticData.analystAttribution || {};\nstaticData.rotatingOffset = staticData.rotatingOffset || 0;\n\n// Prune de-dupe cache to last 24h (tweet IDs older than that won't reappear in recent search)\nconst cacheCutoff = now.getTime() - 24 * 60 * 60 * 1000;\nfor (const id of Object.keys(staticData.seenTweetIds)) {\n  if (staticData.seenTweetIds[id] < cacheCutoff) delete staticData.seenTweetIds[id];\n}\n\nconst config = {\n  version: \"v7_1_LLM_Sentiment_Slippage_Fixed\",\n  provider: \"getxapi\",\n\n  // ---- MARKET HOURS GATE ----\n  // Run between 8am ET (1h before open) and 5pm ET (1h after close), Mon-Fri.\n  // Trigger node still fires; we just emit zero queries off-hours.\n  marketHours: {\n    enabled: true,\n    timezone: \"America/New_York\",\n    startHourET: 8,\n    endHourET: 17,\n    weekdaysOnly: true\n  },\n\n  trustedHandles: [\n    \"unusual_whales\", \"OptionAlert\", \"Benzinga\", \"DeItaone\", \"StockMKTNewz\",\n    \"Newsquawk\", \"financialjuice\", \"MarketWatch\", \"IBDinvestors\", \"BreakoutStocks\",\n    \"WSJMarkets\", \"CNBCnow\", \"KobeissiLetter\", \"bespokeinvest\", \"LizAnnSonders\",\n    \"RyanDetrick\", \"charliebilello\", \"allstarcharts\", \"alphatrends\", \"PeterLBrandt\",\n    \"markminervini\", \"DanZanger\", \"TraderLion_\", \"traderstewie\", \"Qullamaggie\",\n    \"SJosephBurns\", \"traderDanielle\", \"Stephanie_Link\", \"howardlindzon\", \"Ritholtz\",\n    \"elerianm\", \"BrianFeroldi\", \"iancassel\", \"awealthofcs\", \"Stocktwits\",\n    \"PiQSuite\", \"TrendSpider\", \"SpotGamma\", \"Options\", \"OptionsHawk\"\n  ],\n\n  fallbackSymbols: [\n    \"NVDA\",\"AMD\",\"AVGO\",\"MU\",\"TSM\",\"MRVL\",\"ARM\",\"INTC\",\"QCOM\",\"ALAB\",\"ONTO\",\"WDC\",\n    \"AMAT\",\"LRCX\",\"KLAC\",\"ASML\",\"VRT\",\"CRWD\",\"NOW\",\"ANET\",\"SMCI\",\"ORCL\",\"PANW\",\"NET\",\"TSLA\",\n    \"META\",\"MSFT\",\"GOOGL\",\"APP\",\"AMZN\",\"PLTR\",\"SNOW\",\"SHOP\",\"RDDT\",\"DDOG\",\"MDB\",\"ZS\",\"TTD\",\"GTLB\",\"NFLX\",\"SPOT\",\n    \"GEV\",\"BE\",\"CEG\",\"CCJ\",\"VST\",\"SMR\",\"OKLO\",\"NEE\",\"PWR\",\"GNRC\",\"HUBB\",\n    \"LEU\",\"NNE\",\"UEC\",\"FCX\",\"MP\",\"NEM\",\"SCCO\",\"WPM\",\"BHP\",\n    \"XOM\",\"CVX\",\"LNG\",\"WMB\",\"COP\",\"SLB\",\"TRGP\",\"OKE\",\"GS\",\"JPM\",\"MS\",\"V\",\"MA\",\"HOOD\",\n    \"LMT\",\"NOC\",\"RTX\",\"GD\",\"KTOS\",\"LDOS\",\"SAIC\",\"HII\",\"RCAT\",\"VKTX\",\"MRNA\",\"REGN\",\"INCY\",\"RXRX\",\n    \"COIN\",\"MARA\",\"MSTR\",\"CLSK\",\"RIOT\",\"HUT\",\"RKLB\",\"LUNR\",\"ASTS\",\"IONQ\"\n  ],\n\n  universeFilters: {\n    exchanges: [\"NYSE\", \"NASDAQ\", \"AMEX\"],\n    minPrice: 1,\n    minMarketCap: 50000000, // raised slightly to reduce penny-stock pump risk\n    maxSymbols: 6500,\n    removeUnitsRightsWarrants: true,\n    removeFundsEtfsPreferreds: true\n  },\n\n  apiControl: {\n    // BALANCED mode: 1 analyst-feed query per run + ROTATING cashtag slice.\n    // Slice = 600 symbols per run, full universe cycled ~every 5.5 hours during market hours.\n    universeScanMode: \"ROTATING\",\n    rotatingSliceSize: 600,\n    maxGetXAPICashtagsPerQuery: 30, // GetXAPI advanced_search returns 20/page; keep query small\n    maxPagesPerQuery: 1, // ~20 tweets per call. Don't paginate to keep cost predictable\n    analystFeedBatchSize: 8 // 8 handles per OR-query, so ~5 queries for 40 handles\n  },\n\n  thresholds: {\n    minScoreToShow: 55,\n    actionableWatch: 80,\n    watchForTrigger: 70,\n    interesting: 60,\n    minUniqueAuthorsForLong: 3,\n    minRVOL: 1.5,\n    noChasePct: 12,\n    hardNoChasePct: 20,\n    smallCapPumpRiskMarketCap: 300000000,\n    maxNewTrackerIdeasPerRun: 8,\n    maxTrackerDays: 10\n  },\n\n  // ---- PAPER TRADING CONFIG ----\n  paperTrading: {\n    enabled: true,\n    startingCapital: 100000,\n    maxPositionPct: 0.05,        // 5% of equity per trade\n    maxOpenPositions: 10,\n    stopLossPct: 0.06,           // 6% hard stop\n    takeProfitPct: 0.15,         // 15% target\n    trailingStopAfterPct: 0.08,  // start trailing once +8%\n    trailingDistancePct: 0.04,\n    maxHoldDays: 10,\n    minDecisionGrade: \"WATCH FOR TRIGGER\" // only auto-paper-buy this or better\n  }\n};\n\n// ---- MARKET HOURS GATE ----\nfunction isMarketWindow() {\n  if (!config.marketHours.enabled) return true;\n  // Get ET hour. Use Intl rather than naive offsets to handle DST.\n  const fmt = new Intl.DateTimeFormat(\"en-US\", {\n    timeZone: config.marketHours.timezone,\n    hour: \"numeric\", hour12: false, weekday: \"short\"\n  });\n  const parts = fmt.formatToParts(now);\n  const hour = parseInt(parts.find(p => p.type === \"hour\").value, 10);\n  const weekday = parts.find(p => p.type === \"weekday\").value;\n  const isWeekday = ![\"Sat\", \"Sun\"].includes(weekday);\n  const inHours = hour >= config.marketHours.startHourET && hour < config.marketHours.endHourET;\n  return (!config.marketHours.weekdaysOnly || isWeekday) && inHours;\n}\n\nif (!isMarketWindow()) {\n  return [{\n    json: {\n      skip: true,\n      reason: \"Outside US market window (8am-5pm ET, weekdays).\",\n      asOf: now.toISOString(),\n      config\n    }\n  }];\n}\n\n// ---- UNIVERSE BUILD ----\nfunction unwrapFmpUniverse(inputItems) {\n  const rows = [];\n  for (const item of inputItems || []) {\n    const j = item.json;\n    const body = j?.body || j;\n    if (Array.isArray(body)) rows.push(...body);\n    else if (Array.isArray(body?.data)) rows.push(...body.data);\n    else if (Array.isArray(body?.results)) rows.push(...body.results);\n  }\n  return rows;\n}\n\nfunction toNum(x) {\n  if (x === null || x === undefined || x === \"\") return null;\n  const n = Number(String(x).replace(/,/g, \"\"));\n  return Number.isFinite(n) ? n : null;\n}\n\nfunction buildUniverse(rows) {\n  const f = config.universeFilters;\n  const allowedExchanges = new Set(f.exchanges.map(x => x.toUpperCase()));\n  const badName = /(ETF|ETN|TRUST|FUND|PREFERRED|PREF|WARRANT|RIGHT|UNIT|NOTES|DEPOSITARY)/i;\n  const out = [];\n  const seen = new Set();\n  for (const row of rows || []) {\n    const symbol = String(row.symbol || row.ticker || \"\").trim().toUpperCase();\n    if (!symbol || seen.has(symbol)) continue;\n    if (!/^[A-Z]{1,5}$/.test(symbol)) continue;\n    const exchange = String(row.exchangeShortName || row.exchange || row.exchangeName || \"\").toUpperCase();\n    if (exchange && !allowedExchanges.has(exchange)) continue;\n    const name = String(row.companyName || row.name || \"\");\n    if (f.removeUnitsRightsWarrants && /(WARRANT|RIGHT|UNIT)/i.test(name)) continue;\n    if (f.removeFundsEtfsPreferreds && badName.test(name)) continue;\n    const price = toNum(row.price);\n    if (price !== null && price < f.minPrice) continue;\n    const marketCap = toNum(row.marketCap);\n    if (marketCap !== null && marketCap < f.minMarketCap) continue;\n    seen.add(symbol);\n    out.push(symbol);\n    if (out.length >= f.maxSymbols) break;\n  }\n  return out;\n}\n\nfunction cleanHandles(handles) {\n  return [...new Set(handles.map(h => String(h || \"\").replace(\"@\",\"\").trim()).filter(Boolean))];\n}\n\nfunction chunkArr(arr, size) {\n  const out = [];\n  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));\n  return out;\n}\n\nlet symbolUniverse = buildUniverse(unwrapFmpUniverse($input.all()));\nlet universeSource = \"FMP company-screener\";\nif (!symbolUniverse.length) {\n  symbolUniverse = [...new Set(config.fallbackSymbols)];\n  universeSource = \"fallbackSymbols (FMP universe returned nothing)\";\n}\n\n// Rotating slice (so we don't scan all 6500 in one run)\nconst sliceSize = config.apiControl.rotatingSliceSize;\nconst totalSym = symbolUniverse.length;\nconst startIdx = staticData.rotatingOffset % totalSym;\nlet scanSlice;\nif (startIdx + sliceSize <= totalSym) {\n  scanSlice = symbolUniverse.slice(startIdx, startIdx + sliceSize);\n} else {\n  scanSlice = symbolUniverse.slice(startIdx).concat(symbolUniverse.slice(0, sliceSize - (totalSym - startIdx)));\n}\nstaticData.rotatingOffset = (startIdx + sliceSize) % totalSym;\n\nconfig.symbolUniverse = symbolUniverse; // full list passed downstream for filtering ticker extraction\nconfig.scanSliceSymbols = scanSlice;\nconfig.universeSource = universeSource;\nconfig.universeCount = symbolUniverse.length;\nconfig.scanSliceSize = scanSlice.length;\n\n// ---- BUILD GetXAPI QUERIES ----\n// GetXAPI advanced_search uses the same operators as X (from:, OR, etc).\n// Each call returns ~20 tweets and costs $0.001.\nconst items = [];\nconst handles = cleanHandles(config.trustedHandles);\n\n// Q1: Analyst feed - split into batches of N handles per query\nconst handleBatches = chunkArr(handles, config.apiControl.analystFeedBatchSize);\nfor (const batch of handleBatches) {\n  const fromClause = batch.map(h => `from:${h}`).join(\" OR \");\n  // GetXAPI uses Latest by default - that's what we want for live momentum\n  const q = `(${fromClause}) (stock OR stocks OR shares OR calls OR puts OR breakout OR \"price target\" OR upgrade OR earnings OR catalyst OR squeeze OR buy OR watch OR long) lang:en -is:retweet`;\n  items.push({\n    json: {\n      source_query_type: \"analyst_feed\",\n      handles_in_query: batch,\n      q,\n      product: \"Latest\",\n      config\n    }\n  });\n}\n\n// Q2: Cashtag scan over rotating slice (batched into reasonable-length queries)\nconst cashtagBatches = chunkArr(scanSlice.map(s => `$${s}`), config.apiControl.maxGetXAPICashtagsPerQuery);\nfor (const batch of cashtagBatches) {\n  const q = `(${batch.join(\" OR \")}) lang:en -is:retweet`;\n  items.push({\n    json: {\n      source_query_type: \"cashtag_rotation\",\n      q,\n      product: \"Latest\",\n      config\n    }\n  });\n}\n\n// Q3: Catalyst-keyword discovery (catches stocks outside the slice)\nconst discoveryQueries = [\n  `(\"breakout\" OR \"unusual volume\" OR \"call sweep\" OR \"short squeeze\" OR \"FDA approval\" OR \"price target raised\" OR \"earnings beat\") (stock OR shares OR calls OR $) lang:en -is:retweet`,\n  `(\"watchlist\" OR \"scanner\" OR \"momentum\" OR \"relative volume\" OR \"gapper\") (stock OR ticker OR $) lang:en -is:retweet`\n];\nfor (const q of discoveryQueries) {\n  items.push({\n    json: {\n      source_query_type: \"keyword_discovery\",\n      q,\n      product: \"Latest\",\n      config\n    }\n  });\n}\n\nif (!items.length) {\n  return [{ json: { skip: true, reason: \"No queries built\", config } }];\n}\nreturn items;\n"
+        },
+        "id": "31307bd9-4fc2-4d92-a5e7-1aaeb29e1092",
+        "name": "Build GetXAPI Queries",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://api.getxapi.com/twitter/tweet/advanced_search",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "q",
+                "value": "={{$json.q}}"
+              },
+              {
+                "name": "product",
+                "value": "={{$json.product || 'Latest'}}"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{\"Bearer \" + $env.GETXAPI_KEY}}"
+              }
+            ]
+          },
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 1,
+                "batchInterval": 500
+              }
+            },
+            "response": {},
+            "timeout": 30000
+          }
+        },
+        "id": "0cc8502f-d608-4931-bbb8-6ad9abeb6514",
+        "name": "GetXAPI Search",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          800,
+          480
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// X Social Momentum Scanner v6 - Parse GetXAPI Responses + Build FMP Request\n// GetXAPI response shape (per docs):\n//   { query, tweet_count, has_more, next_cursor, tweets: [\n//     { id, url, text, retweetCount, replyCount, likeCount, quoteCount, viewCount,\n//       createdAt, lang, isReply, author: { userName, id, isVerified, isBlueVerified,\n//       followers, ... } }\n//   ] }\n\nconst allResponses = $input.all().map(i => i.json);\nconst queryItems = $items(\"Build GetXAPI Queries\").map(i => i.json);\nconst firstItem = queryItems[0] || {};\n\n// Handle skip case from upstream\nif (firstItem.skip) {\n  return [{ json: { skip: true, reason: firstItem.reason, asOf: new Date().toISOString() } }];\n}\n\nconst config = firstItem.config || {};\nconst universeSymbols = new Set((config.symbolUniverse || []).map(s => String(s).toUpperCase()));\nconst trusted = new Set((config.trustedHandles || []).map(h => String(h).replace(\"@\",\"\").toLowerCase()));\n\nconst staticData = $getWorkflowStaticData(\"global\");\nstaticData.seenTweetIds = staticData.seenTweetIds || {};\nstaticData.analystAttribution = staticData.analystAttribution || {};\n\nconst STOPWORDS = new Set([\n  \"A\",\"I\",\"AI\",\"AM\",\"PM\",\"CEO\",\"CFO\",\"USA\",\"US\",\"UK\",\"EU\",\"EPS\",\"GDP\",\"CPI\",\"FOMC\",\"SEC\",\"FDA\",\"IPO\",\"ETF\",\"ATH\",\"HOD\",\"LOD\",\"RTH\",\n  \"THE\",\"AND\",\"FOR\",\"ARE\",\"YOU\",\"BUY\",\"SELL\",\"PUT\",\"CALL\",\"CALLS\",\"PUTS\",\"DD\",\"ER\",\"IT\",\"OR\",\"ON\",\"IN\",\"TO\",\n  \"Q1\",\"Q2\",\"Q3\",\"Q4\",\"YOY\",\"QOQ\",\"ROI\",\"ROE\",\"PE\",\"PT\",\"TF\",\"SL\",\"TP\",\"RSI\",\"MA\",\"EMA\",\"SMA\",\"VWAP\",\"OPEX\",\"JPOW\"\n]);\n\nfunction getTweetsFromResponse(resp) {\n  const body = resp?.body || resp;\n  if (!body) return { tweets: [], error: \"empty body\" };\n  if (body.error) return { tweets: [], error: body.error };\n  // GetXAPI returns tweets directly under \"tweets\"\n  const tweets = Array.isArray(body.tweets) ? body.tweets : [];\n  return { tweets, error: null };\n}\n\nfunction extractSymbols(tweetText) {\n  const out = new Set();\n  const re = /\\$([A-Z]{1,5})(?![A-Z])/g;\n  let m;\n  while ((m = re.exec(tweetText || \"\")) !== null) {\n    const s = m[1].toUpperCase();\n    if (!STOPWORDS.has(s)) out.add(s);\n  }\n  // Plain ticker only if in confirmed FMP universe (avoids false positives)\n  const caps = String(tweetText || \"\").match(/\\b[A-Z]{2,5}\\b/g) || [];\n  for (const raw of caps) {\n    const s = raw.toUpperCase();\n    if (!STOPWORDS.has(s) && universeSymbols.has(s)) out.add(s);\n  }\n  // STRICT: only return symbols that exist in the FMP universe.\n  // This is a fix from v5 which let any <=5 char uppercase token through.\n  return [...out].filter(s => universeSymbols.has(s));\n}\n\nfunction classifyReason(text) {\n  const t = String(text || \"\").toLowerCase();\n  const reasons = [];\n  if (/breakout|breaking out|resistance|52.?week|all.time.high|ath|higher high|trendline/.test(t)) reasons.push(\"technical_breakout\");\n  if (/call sweep|calls|option|options|flow|premium|unusual option/.test(t)) reasons.push(\"options_flow_chatter\");\n  if (/earnings|guidance|beat|revenue|eps|margin/.test(t)) reasons.push(\"earnings_or_guidance\");\n  if (/upgrade|price target|pt raised|initiated|outperform|overweight/.test(t)) reasons.push(\"analyst_upgrade_or_pt\");\n  if (/short squeeze|squeeze|short interest|borrow|float/.test(t)) reasons.push(\"squeeze_chatter\");\n  if (/fda|phase [123]|trial|approval|pdufa|clinical|biotech/.test(t)) reasons.push(\"biotech_catalyst\");\n  if (/contract|partnership|deal|order|award|supply|customer/.test(t)) reasons.push(\"contract_or_partnership\");\n  if (/ai|gpu|datacenter|data center|semiconductor|chip|server|nuclear|power grid/.test(t)) reasons.push(\"theme_momentum\");\n  if (/insider|13g|13d|buyback|repurchase|filing/.test(t)) reasons.push(\"filing_or_insider\");\n  if (/pump|moon|100x|next runner|low float|explode|send it|to the moon|rocket/.test(t)) reasons.push(\"pump_language\");\n  if (!reasons.length) reasons.push(\"generic_stock_mention\");\n  return [...new Set(reasons)];\n}\n\nfunction compactText(text) {\n  return String(text || \"\").replace(/\\s+/g, \" \").trim().slice(0, 280);\n}\n\nconst stats = {};\nconst diagnostics = {\n  responses: allResponses.length,\n  tweets_seen: 0,\n  tweets_deduped: 0,\n  tweets_with_symbols: 0,\n  api_errors: []\n};\n\nconst nowMs = Date.now();\n\nfor (const resp of allResponses) {\n  const { tweets, error } = getTweetsFromResponse(resp);\n  if (error) diagnostics.api_errors.push(String(error).slice(0, 200));\n\n  for (const tweet of tweets) {\n    diagnostics.tweets_seen += 1;\n    const tid = String(tweet.id || \"\");\n    if (!tid) continue;\n    if (staticData.seenTweetIds[tid]) {\n      diagnostics.tweets_deduped += 1;\n      continue;\n    }\n    staticData.seenTweetIds[tid] = nowMs;\n\n    const author = tweet.author || {};\n    const username = String(author.userName || \"\").toLowerCase();\n    const text = tweet.text || \"\";\n    const symbols = extractSymbols(text);\n    if (!symbols.length) continue;\n    diagnostics.tweets_with_symbols += 1;\n\n    const engagement =\n      (tweet.likeCount || 0) +\n      (tweet.replyCount || 0) * 2 +\n      (tweet.retweetCount || 0) * 2 +\n      (tweet.quoteCount || 0) * 2;\n\n    const isTrusted = trusted.has(username);\n    const authorFollowers = author.followers || 0;\n    const reasons = classifyReason(text);\n\n    for (const sym of symbols) {\n      if (!stats[sym]) {\n        stats[sym] = {\n          symbol: sym,\n          mentionCount: 0,\n          uniqueAuthors: [],\n          trustedMentionAuthors: [], // <-- new: tracks WHICH analysts surfaced this\n          trustedMentions: 0,\n          engagement: 0,\n          followersReachApprox: 0,\n          reasonCounts: {},\n          pumpLanguageHits: 0,\n          samplePosts: []\n        };\n      }\n      const row = stats[sym];\n      row.mentionCount += 1;\n      if (username && !row.uniqueAuthors.includes(username)) row.uniqueAuthors.push(username);\n      if (isTrusted) {\n        row.trustedMentions += 1;\n        if (!row.trustedMentionAuthors.includes(username)) row.trustedMentionAuthors.push(username);\n      }\n      row.engagement += engagement;\n      row.followersReachApprox += authorFollowers;\n      for (const r of reasons) {\n        row.reasonCounts[r] = (row.reasonCounts[r] || 0) + 1;\n        if (r === \"pump_language\") row.pumpLanguageHits += 1;\n      }\n      if (row.samplePosts.length < 5) {\n        row.samplePosts.push({\n          tweetId: tid,\n          author: username || \"unknown\",\n          trusted: isTrusted,\n          created_at: tweet.createdAt,\n          engagement,\n          text: compactText(text),\n          reasons\n        });\n      }\n    }\n  }\n}\n\nfunction computeSocialScore(row) {\n  const mention = Math.min(25, row.mentionCount * 4);\n  const unique = Math.min(15, row.uniqueAuthors.length * 3);\n  const engagement = Math.min(15, Math.log10(row.engagement + 1) * 5);\n  const trustedScore = Math.min(20, row.trustedMentions * 10);\n  const reach = Math.min(10, Math.log10(row.followersReachApprox + 10) * 2);\n  const reasonStrength =\n    (row.reasonCounts.technical_breakout ? 4 : 0) +\n    (row.reasonCounts.options_flow_chatter ? 4 : 0) +\n    (row.reasonCounts.earnings_or_guidance ? 4 : 0) +\n    (row.reasonCounts.analyst_upgrade_or_pt ? 4 : 0) +\n    (row.reasonCounts.biotech_catalyst ? 4 : 0) +\n    (row.reasonCounts.contract_or_partnership ? 4 : 0);\n  const penalty = Math.min(15, row.pumpLanguageHits * 5);\n  return Math.max(0, Math.round(mention + unique + engagement + trustedScore + reach + Math.min(15, reasonStrength) - penalty));\n}\n\nlet candidates = Object.values(stats).map(row => {\n  const reasonsSorted = Object.entries(row.reasonCounts).sort((a,b) => b[1]-a[1]).map(([k]) => k);\n  return {\n    ...row,\n    uniqueAuthorCount: row.uniqueAuthors.length,\n    topReasons: reasonsSorted.slice(0, 5),\n    socialScore: computeSocialScore(row)\n  };\n}).sort((a,b) => b.socialScore - a.socialScore || b.mentionCount - a.mentionCount);\n\ncandidates = candidates.slice(0, 30);\nconst symbols = candidates.map(c => c.symbol).filter(Boolean);\nconst symbols_csv = symbols.join(\",\");\n\nreturn [{\n  json: {\n    asOf: new Date().toISOString(),\n    source: \"GetXAPI advanced_search\",\n    version: config.version || \"v6\",\n    diagnostics,\n    config,\n    candidates,\n    symbols,\n    symbols_csv,\n    skip: false\n  }\n}];\n"
+        },
+        "id": "ae72f453-b99f-4ac3-b35e-23b3a0d5db65",
+        "name": "Parse GetXAPI Responses",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1024,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://financialmodelingprep.com/stable/batch-quote",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "symbols",
+                "value": "={{$json.symbols_csv}}"
+              },
+              {
+                "name": "apikey",
+                "value": "={{$env.FMP_API_KEY}}"
+              }
+            ]
+          },
+          "options": {
+            "response": {},
+            "timeout": 30000
+          }
+        },
+        "id": "7e6adcb8-8ba8-4860-88b9-889be3edfe2e",
+        "name": "FMP Batch Quote",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1472,
+          480
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "url": "https://financialmodelingprep.com/stable/news/stock",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "symbols",
+                "value": "={{$items(\"Parse GetXAPI Responses\")[0].json.symbols_csv}}"
+              },
+              {
+                "name": "limit",
+                "value": "50"
+              },
+              {
+                "name": "page",
+                "value": "0"
+              },
+              {
+                "name": "apikey",
+                "value": "={{$env.FMP_API_KEY}}"
+              }
+            ]
+          },
+          "options": {
+            "response": {},
+            "timeout": 30000
+          }
+        },
+        "id": "12c9b59b-383c-434f-b1ca-09ba647a87db",
+        "name": "FMP Stock News",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1680,
+          480
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// v7 - Score Candidates only. No paper trading yet (happens after LLM gate).\nconst parseOut = $items(\"Parse GetXAPI Responses\")[0]?.json || {};\nif (parseOut.skip) {\n  return [{ json: {\n    skip: true,\n    reason: parseOut.reason || \"Upstream skipped\",\n    asOf: new Date().toISOString()\n  }}];\n}\n\nconst config = parseOut.config || {};\nconst thresholds = config.thresholds || {};\nconst candidates = parseOut.candidates || [];\n\nfunction flattenNodeItems(name) {\n  try {\n    const raw = $items(name).map(i => i.json);\n    if (raw.length === 1 && Array.isArray(raw[0])) return raw[0];\n    return raw.flatMap(x => Array.isArray(x) ? x : [x]);\n  } catch (e) { return []; }\n}\n\nconst quoteRows = flattenNodeItems(\"FMP Batch Quote\");\nconst newsRows = flattenNodeItems(\"FMP Stock News\");\n\nfunction symOfQuote(q) { return String(q.symbol || q.ticker || q.Symbol || \"\").toUpperCase(); }\nconst quoteMap = {};\nfor (const q of quoteRows) {\n  const s = symOfQuote(q);\n  if (s) quoteMap[s] = q;\n}\n\nconst newsBySymbol = {};\nfor (const n of newsRows) {\n  const rawSymbols = n.symbols || n.symbol || n.tickers || n.ticker || [];\n  const arr = Array.isArray(rawSymbols) ? rawSymbols : String(rawSymbols || \"\").split(\",\");\n  for (const s0 of arr) {\n    const s = String(s0).replace(\"$\",\"\").trim().toUpperCase();\n    if (!s) continue;\n    if (!newsBySymbol[s]) newsBySymbol[s] = [];\n    newsBySymbol[s].push({\n      publishedDate: n.publishedDate || n.date || n.datetime,\n      title: n.title || n.headline || \"\",\n      site: n.site || n.publisher || \"\",\n      url: n.url || n.link || \"\"\n    });\n  }\n}\n\nfunction toNum(v) {\n  if (v === null || v === undefined) return null;\n  const n = Number(String(v).replace(/[,%$]/g, \"\"));\n  return Number.isFinite(n) ? n : null;\n}\nfunction pctFromQuote(q) {\n  return toNum(q.changesPercentage ?? q.changePercentage ?? q.changePercent ?? q.percent_change ?? q.change);\n}\nfunction reasonText(reasons) {\n  const map = {\n    technical_breakout: \"technical breakout chatter\",\n    options_flow_chatter: \"options/call-flow chatter\",\n    earnings_or_guidance: \"earnings/guidance discussion\",\n    analyst_upgrade_or_pt: \"analyst upgrade/price-target discussion\",\n    squeeze_chatter: \"short-squeeze chatter\",\n    biotech_catalyst: \"biotech/FDA catalyst\",\n    contract_or_partnership: \"contract/partnership catalyst\",\n    theme_momentum: \"theme momentum\",\n    filing_or_insider: \"filing/insider/buyback discussion\",\n    pump_language: \"pump-language risk\",\n    generic_stock_mention: \"generic mention\"\n  };\n  return (reasons || []).map(r => map[r] || r).join(\", \");\n}\n\nfunction scoreCandidate(c) {\n  const q = quoteMap[c.symbol] || {};\n  const price = toNum(q.price ?? q.close ?? q.previousClose);\n  const changePct = pctFromQuote(q);\n  const volume = toNum(q.volume);\n  const avgVolume = toNum(q.avgVolume ?? q.averageVolume);\n  const rvol = volume && avgVolume ? volume / avgVolume : null;\n  const marketCap = toNum(q.marketCap);\n  const priceAvg50 = toNum(q.priceAvg50 ?? q.priceAvg50d ?? q.ma50);\n  const priceAvg200 = toNum(q.priceAvg200 ?? q.priceAvg200d ?? q.ma200);\n  const news = newsBySymbol[c.symbol] || [];\n  const hasRealNews = news.length > 0;\n\n  let catalystScore = 0;\n  if (hasRealNews) catalystScore += 12;\n  if (c.topReasons?.some(r => [\"earnings_or_guidance\",\"analyst_upgrade_or_pt\",\"biotech_catalyst\",\"contract_or_partnership\",\"filing_or_insider\"].includes(r))) catalystScore += 8;\n  catalystScore = Math.min(20, catalystScore);\n\n  let technicalScore = 0;\n  if (changePct !== null && changePct > 0) technicalScore += 4;\n  if (rvol !== null && rvol >= (thresholds.minRVOL || 1.5)) technicalScore += 6;\n  if (price && priceAvg50 && price > priceAvg50) technicalScore += 5;\n  if (price && priceAvg200 && price > priceAvg200) technicalScore += 3;\n  if (changePct !== null && changePct > (thresholds.noChasePct || 12)) technicalScore -= 4;\n  technicalScore = Math.max(0, Math.min(18, technicalScore));\n\n  const socialComponent = Math.min(45, Math.round((c.socialScore || 0) * 0.45));\n  const totalScore = Math.round(socialComponent + catalystScore + technicalScore);\n\n  const pumpFlags = [];\n  if ((c.pumpLanguageHits || 0) > 0) pumpFlags.push(\"pump language detected\");\n  if (c.uniqueAuthorCount < (thresholds.minUniqueAuthorsForLong || 3)) pumpFlags.push(\"too few unique accounts\");\n  if (marketCap !== null && marketCap < (thresholds.smallCapPumpRiskMarketCap || 300000000)) pumpFlags.push(\"small-cap/low-float pump risk\");\n  if (changePct !== null && changePct >= (thresholds.hardNoChasePct || 20) && !hasRealNews) pumpFlags.push(\"already vertical without confirmed news\");\n  if (!hasRealNews && c.trustedMentions === 0 && c.socialScore < 70) pumpFlags.push(\"social-only, no trusted source/news confirmation\");\n\n  let decision = \"IGNORE\";\n  if (pumpFlags.length >= 2) decision = \"AVOID - PUMP RISK\";\n  else if (totalScore >= (thresholds.actionableWatch || 80)) decision = \"ACTIONABLE WATCH\";\n  else if (totalScore >= (thresholds.watchForTrigger || 70)) decision = \"WATCH FOR TRIGGER\";\n  else if (totalScore >= (thresholds.interesting || 60)) decision = \"INTERESTING - NEEDS CONFIRMATION\";\n  else if (totalScore >= (thresholds.minScoreToShow || 55)) decision = \"LOW PRIORITY WATCH\";\n\n  return {\n    rank: 0,\n    symbol: c.symbol,\n    totalScore, socialScore: c.socialScore,\n    mentionCount: c.mentionCount,\n    uniqueAuthorCount: c.uniqueAuthorCount,\n    trustedMentions: c.trustedMentions,\n    trustedMentionAuthors: c.trustedMentionAuthors || [],\n    engagement: c.engagement,\n    whyXIsTalking: reasonText(c.topReasons),\n    topReasons: c.topReasons,\n    price, changePct, volume, avgVolume,\n    rvol: rvol ? Number(rvol.toFixed(2)) : null,\n    marketCap, hasRealNews,\n    latestNews: news.slice(0, 3),\n    pumpFlags, decision,\n    samplePosts: c.samplePosts\n  };\n}\n\nlet ranked = candidates.map(scoreCandidate)\n  .filter(x => x.totalScore >= (thresholds.minScoreToShow || 55) || x.decision.includes(\"PUMP\"))\n  .sort((a,b) => b.totalScore - a.totalScore);\nranked = ranked.map((x, i) => ({...x, rank: i + 1}));\n\n// Identify which candidates need LLM review. Only top-scoring tradeable\n// candidates get reviewed (cost control).\nconst llmReviewSet = new Set(\n  ranked\n    .filter(r => [\"ACTIONABLE WATCH\",\"WATCH FOR TRIGGER\"].includes(r.decision))\n    .slice(0, 15)\n    .map(r => r.symbol)\n);\n\nreturn [{\n  json: {\n    asOf: new Date().toISOString(),\n    config,\n    ranked,\n    llmReviewSymbols: [...llmReviewSet],\n    quoteMap,\n    newsBySymbol,\n    skip: false\n  }\n}];\n"
+        },
+        "id": "7d72a78b-1f01-4912-a4ed-d7ecbeab25e6",
+        "name": "Score Candidates",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1904,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "content": "# X Social Momentum Scanner v7 - LLM Sentiment + Long/Short + Slippage\n\n## What's new in v7 (vs v6)\n- **Gemini 2.5 Flash sentiment gate** between scoring and paper trading.\n  Only top-scoring tradeable candidates (max 15/run) are sent to LLM.\n  Cost: ~$0.50/month or less.\n- **Long AND short paper trading** based on LLM verdict.\n- **Slippage model** applied at entry and exit: 0.3% (>$10B), 0.5% ($1B-$10B),\n  1% ($300M-$1B), 2% (<$300M).\n- **HTB risk flag** logged for shorts on stocks under $2B cap or with\n  squeeze chatter, so you can filter the leaderboard later.\n- **5th Sheets tab**: `llm_verdicts` logs every Gemini call (sentiment,\n  confidence, reasoning, sarcasm flag, mentions-selling flag) so you can\n  audit the LLM's accuracy.\n\n## Required env vars\n- `GETXAPI_KEY`     - https://www.getxapi.com/signup\n- `FMP_API_KEY`     - your existing FMP key\n- `GEMINI_API_KEY`  - https://aistudio.google.com/apikey (free tier exists)\n\n## Required Google Sheets setup\nCreate ONE Google Sheet with FIVE tabs (exact names):\n1. `candidates`     - every ranked candidate every run (now includes LLM verdict columns)\n2. `paper_trades`   - OPEN and CLOSE events (now includes side, slippageBps, borrowRiskFlag)\n3. `analyst_alpha`  - per-handle leaderboard (now includes long/short counts)\n4. `portfolio`      - equity curve (now includes longCount, shortCount, blockedByLLM)\n5. `llm_verdicts`   - every Gemini call's output for audit\n\n## Trade decision logic (v7)\nFor each top-scoring candidate, LLM returns sentiment + confidence + flags.\n\n- LONG opens if: sentiment=bullish, confidence>=0.6, NO sarcasm, NO mentions-selling,\n  zero pump flags, change% < noChasePct.\n- SHORT opens if: sentiment=bearish, confidence>=0.6, marketCap>=$500M (HTB safety),\n  price>=$5 (regulatory), change% > -10% (still has room to fall).\n- All other cases: block, log reason in 'blocked' diagnostics.\n\n## Important caveats on the short paper P&L\nThe engine models slippage but NOT borrow fees, buy-ins, or upticks. Real shorts\ncan cost 10-100%+ annualized on HTB names. Use `borrowRiskFlag` on closed\nshort trades to filter the analyst alpha leaderboard - any handle whose short\nalpha comes mostly from HTB-flagged trades is unlikely to be replicable live.\n\n## After 8-12 weeks\nOpen `analyst_alpha`. Need at least 30 trades per handle to draw conclusions.\nKeep handles with avgPctReturn > 0 after slippage. Drop the rest.\nCompare long-only vs short-only performance via `paper_trades.side` filter.\n\n## DO NOT auto-trade real money from this.\n",
+          "height": 360,
+          "width": 520
+        },
+        "id": "15f7b245-befb-40f1-b152-92d33da69dbe",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://financialmodelingprep.com/stable/company-screener",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "country",
+                "value": "US"
+              },
+              {
+                "name": "isActivelyTrading",
+                "value": "true"
+              },
+              {
+                "name": "apikey",
+                "value": "={{$env.FMP_API_KEY}}"
+              }
+            ]
+          },
+          "options": {
+            "response": {},
+            "timeout": 60000
+          }
+        },
+        "id": "ec76510b-3183-4d59-a80a-9627e7228a78",
+        "name": "FMP US Active Stock Universe",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{$json.skip}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notEqual",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "fed02d4c-3648-427c-ab5a-bd5f71938eb0",
+        "name": "If Not Skipped",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          3232,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "sheetsCandidates",
+          "options": {}
+        },
+        "id": "07f81f3a-15df-4b99-9251-e76ebb0dfd51",
+        "name": "Split Candidates",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "candidates",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "f9c7e6e0-e0c1-49c6-b0f4-7c67763ddd34",
+        "name": "Sheets: Candidates",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          3664,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "sheetsPaperTrades",
+          "options": {}
+        },
+        "id": "6d64acbf-7fd7-4a33-9bb3-402c364b9aa5",
+        "name": "Split Paper Trades",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          368
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "paper_trades",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "c8971e80-2feb-4b31-aece-b54068ca0332",
+        "name": "Sheets: Paper Trades",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          3664,
+          368
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "sheetsAnalystAlpha",
+          "options": {}
+        },
+        "id": "486e9c88-7b20-45d1-81fd-6a36988ed3c5",
+        "name": "Split Analyst Alpha",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "analyst_alpha",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "9fe1b7ca-53b1-4ac0-9e03-e40efc79cf47",
+        "name": "Sheets: Analyst Alpha",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          3664,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "sheetsPortfolio",
+          "options": {}
+        },
+        "id": "0f19d6ec-deaf-45e9-83d7-e66c5ed9e6ca",
+        "name": "Split Portfolio",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          688
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "portfolio",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "3244c9e3-db6c-40cb-bd50-434026f88c2c",
+        "name": "Sheets: Portfolio",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          3664,
+          688
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// v7 - Build one prompt item per candidate to send to Gemini.\n// Cost: only top candidates that survived to \"WATCH FOR TRIGGER\" or better.\n\nconst scoreOut = $items(\"Score Candidates\")[0]?.json || {};\nif (scoreOut.skip) {\n  return [{ json: { skip: true, passthrough: true, asOf: new Date().toISOString() } }];\n}\n\nconst ranked = scoreOut.ranked || [];\nconst reviewSet = new Set(scoreOut.llmReviewSymbols || []);\n\nconst out = [];\nfor (const r of ranked) {\n  if (!reviewSet.has(r.symbol)) continue;\n\n  // Use up to 5 sample posts for context\n  const samples = (r.samplePosts || []).slice(0, 5);\n  const sampleText = samples\n    .map((p, i) => `[${i+1}] @${p.author}${p.trusted ? \" (trusted)\" : \"\"}: ${p.text}`)\n    .join(\"\\n\");\n\n  const prompt = `You are a financial-sentiment classifier. Read tweets about a single stock and decide whether the OVERALL sentiment in the tweets is BULLISH (the authors expect the stock to go up), BEARISH (down), or NEUTRAL/UNCLEAR.\n\nStock: $${r.symbol}\nCurrent price: ${r.price ?? \"unknown\"}\nChange today: ${r.changePct ?? \"unknown\"}%\nHas confirmed news: ${r.hasRealNews}\nTopic categories detected: ${r.whyXIsTalking}\n\nTweets:\n${sampleText}\n\nCritical rules:\n- If the tweets describe SELLING calls, taking profit, closing positions, calling a top, or naming a \"fake breakout\", treat as BEARISH or NEUTRAL even if positive words appear.\n- If sarcasm or reversal language is used (e.g. \"great earnings... NOT\", \"to the moon /s\"), treat as BEARISH or NEUTRAL.\n- If tweets describe the analyst SHORTING the stock, treat as BEARISH.\n- If most tweets are just announcing news without taking a stance, treat as NEUTRAL.\n\nRespond with ONLY a JSON object, no markdown, no commentary:\n{\"sentiment\":\"bullish|bearish|neutral\",\"confidence\":0.0-1.0,\"reasoning\":\"one short sentence\",\"contains_sarcasm_or_reversal\":true|false,\"mentions_selling_or_closing\":true|false}`;\n\n  out.push({\n    json: {\n      symbol: r.symbol,\n      llmRequestBody: {\n        contents: [{ parts: [{ text: prompt }] }],\n        generationConfig: {\n          temperature: 0.1,\n          maxOutputTokens: 200,\n          responseMimeType: \"application/json\"\n        }\n      }\n    }\n  });\n}\n\nif (!out.length) {\n  // No candidates worth reviewing. Pass through with empty verdicts.\n  return [{ json: { skip_llm: true, passthrough: true, asOf: new Date().toISOString() } }];\n}\nreturn out;\n"
+        },
+        "id": "bcaeaaa7-dcf6-45fe-b70f-2256bda0410c",
+        "name": "Build LLM Prompts",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2128,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "x-goog-api-key",
+                "value": "={{$env.GEMINI_API_KEY}}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{$json.llmRequestBody}}",
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 5,
+                "batchInterval": 200
+              }
+            },
+            "response": {},
+            "timeout": 20000
+          }
+        },
+        "id": "48a12474-73fa-4a47-9f38-c541059f351d",
+        "name": "Gemini Sentiment",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2560,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// v7 - Merge Gemini responses with their source symbols by index.\n// n8n HTTP node returns response body only; we pair it with the upstream prompt items.\nconst promptItems = $items(\"Build LLM Prompts\").map(i => i.json);\nconst respItems = $input.all().map(i => i.json);\n\nif (promptItems.length === 1 && (promptItems[0].skip_llm || promptItems[0].passthrough)) {\n  return [{ json: { skip_llm: true, passthrough: true } }];\n}\n\nconst out = [];\nconst n = Math.min(promptItems.length, respItems.length);\nfor (let i = 0; i < n; i++) {\n  out.push({\n    json: {\n      symbol: promptItems[i].symbol,\n      body: respItems[i]\n    }\n  });\n}\nreturn out;\n"
+        },
+        "id": "2900c5eb-2232-44cc-b2c4-96d2c9f2d513",
+        "name": "Merge LLM Verdicts",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2784,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// v7 - Paper trading with LLM sentiment gate, slippage, and short selling.\nconst scoreOut = $items(\"Score Candidates\")[0]?.json || {};\n\nif (scoreOut.skip) {\n  return [{ json: {\n    skip: true,\n    reason: scoreOut.reason || \"Upstream skipped\",\n    sheetsCandidates: [], sheetsPaperTrades: [],\n    sheetsAnalystAlpha: [], sheetsPortfolio: [],\n    sheetsLLMVerdicts: []\n  }}];\n}\n\nconst config = scoreOut.config || {};\nconst thresholds = config.thresholds || {};\nconst paperCfg = config.paperTrading || { enabled: false };\nconst ranked = scoreOut.ranked || [];\nconst quoteMap = scoreOut.quoteMap || {};\n\n// ---- Collect LLM verdicts from upstream Gemini HTTP node ----\n// Each Gemini response item has shape:\n//   { symbol, body: { candidates: [{ content: { parts: [{ text: \"<json>\" }] } }] } }\n// or if skip_llm: just passes through.\nconst llmItems = $items(\"Merge LLM Verdicts\").map(i => i.json);\nconst verdicts = {}; // symbol -> verdict object\n\nfor (const item of llmItems) {\n  // Skip the pass-through case\n  if (item.skip_llm || item.passthrough) continue;\n  const sym = item.symbol;\n  if (!sym) continue;\n  const body = item.body || item;\n  // Gemini response path\n  let rawText = \"\";\n  try {\n    rawText = body?.candidates?.[0]?.content?.parts?.[0]?.text || \"\";\n  } catch (e) {}\n  if (!rawText) continue;\n  // Strip markdown fences if Gemini added them\n  rawText = rawText.replace(/^```(?:json)?\\s*/i, \"\").replace(/```\\s*$/, \"\").trim();\n  try {\n    const v = JSON.parse(rawText);\n    verdicts[sym] = {\n      sentiment: String(v.sentiment || \"neutral\").toLowerCase(),\n      confidence: Number(v.confidence) || 0,\n      reasoning: String(v.reasoning || \"\").slice(0, 300),\n      sarcasm: !!v.contains_sarcasm_or_reversal,\n      mentionsSelling: !!v.mentions_selling_or_closing\n    };\n  } catch (e) {\n    // Failed JSON parse - treat as neutral/unclear, do not trade\n    verdicts[sym] = { sentiment: \"neutral\", confidence: 0, reasoning: \"LLM parse failed\", sarcasm: false, mentionsSelling: false };\n  }\n}\n\n// ---- Portfolio + attribution state ----\nconst staticData = $getWorkflowStaticData(\"global\");\nstaticData.paperPortfolio = staticData.paperPortfolio || {\n  cash: paperCfg.startingCapital || 100000,\n  equity: paperCfg.startingCapital || 100000,\n  openPositions: [],\n  closedTrades: [],\n  history: []\n};\nstaticData.analystAttribution = staticData.analystAttribution || {};\nconst portfolio = staticData.paperPortfolio;\nconst attribution = staticData.analystAttribution;\n\nfunction toNum(v) {\n  if (v === null || v === undefined) return null;\n  const n = Number(String(v).replace(/[,%$]/g, \"\"));\n  return Number.isFinite(n) ? n : null;\n}\n\n// ---- SLIPPAGE MODEL ----\n// Applied to entry and exit fill prices. Long entries fill ABOVE quote,\n// long exits fill BELOW quote. Shorts: opposite.\nfunction slippageBps(marketCap) {\n  if (!marketCap) return 100; // unknown cap -> assume small-cap risk\n  if (marketCap >= 10e9) return 30;   // 0.3% large cap\n  if (marketCap >= 1e9)  return 50;   // 0.5% mid cap\n  if (marketCap >= 300e6) return 100; // 1% small cap\n  return 200;                          // 2% micro cap\n}\nfunction applyEntrySlippage(quotePrice, marketCap, side) {\n  const bps = slippageBps(marketCap);\n  // LONG: pay UP (price + slip), SHORT: receive LESS (price - slip)\n  const factor = side === \"LONG\" ? (1 + bps/10000) : (1 - bps/10000);\n  return quotePrice * factor;\n}\nfunction applyExitSlippage(quotePrice, marketCap, side) {\n  const bps = slippageBps(marketCap);\n  // LONG exit: receive LESS, SHORT cover: pay MORE\n  const factor = side === \"LONG\" ? (1 - bps/10000) : (1 + bps/10000);\n  return quotePrice * factor;\n}\n\n// ---- MARK-TO-MARKET + EXIT CHECKS for open positions ----\nconst now = new Date();\nconst stillOpen = [];\nconst justClosed = [];\n\nfor (const pos of portfolio.openPositions) {\n  const q = quoteMap[pos.symbol];\n  const quotePrice = q ? toNum(q.price ?? q.close ?? q.previousClose) : null;\n  if (!quotePrice) { stillOpen.push(pos); continue; }\n\n  pos.currentPrice = quotePrice;\n  pos.daysHeld = Math.max(0, Math.floor((now - new Date(pos.entryAt)) / (24*60*60*1000)));\n\n  if (pos.side === \"LONG\") {\n    pos.highestPrice = Math.max(pos.highestPrice || pos.entryPrice, quotePrice);\n    pos.lowestPrice  = Math.min(pos.lowestPrice  || pos.entryPrice, quotePrice);\n    pos.unrealizedPct = Number((((quotePrice - pos.entryPrice) / pos.entryPrice) * 100).toFixed(2));\n    pos.unrealizedPnL = Number(((quotePrice - pos.entryPrice) * pos.shares).toFixed(2));\n\n    const gainPct = (quotePrice - pos.entryPrice) / pos.entryPrice;\n    if (gainPct >= paperCfg.trailingStopAfterPct && !pos.trailingActive) pos.trailingActive = true;\n    if (pos.trailingActive) {\n      const newTrail = pos.highestPrice * (1 - paperCfg.trailingDistancePct);\n      pos.trailingStop = Math.max(pos.trailingStop || 0, newTrail);\n    }\n\n    let exitReason = null;\n    if (quotePrice <= pos.stopPrice) exitReason = \"STOP_LOSS\";\n    else if (quotePrice >= pos.targetPrice) exitReason = \"TAKE_PROFIT\";\n    else if (pos.trailingActive && quotePrice <= pos.trailingStop) exitReason = \"TRAILING_STOP\";\n    else if (pos.daysHeld >= paperCfg.maxHoldDays) exitReason = \"TIME_EXIT\";\n\n    if (exitReason) {\n      const exitFill = applyExitSlippage(quotePrice, pos.marketCap, \"LONG\");\n      const proceeds = exitFill * pos.shares;\n      portfolio.cash += proceeds;\n      pos.exitPrice = exitFill;\n      pos.exitAt = now.toISOString();\n      pos.exitReason = exitReason;\n      pos.realizedPct = Number((((exitFill - pos.entryPrice) / pos.entryPrice) * 100).toFixed(2));\n      pos.realizedPnL = Number(((exitFill - pos.entryPrice) * pos.shares).toFixed(2));\n      portfolio.closedTrades.push(pos);\n      justClosed.push(pos);\n      continue;\n    }\n  } else {\n    // SHORT position\n    pos.highestPrice = Math.max(pos.highestPrice || pos.entryPrice, quotePrice);\n    pos.lowestPrice  = Math.min(pos.lowestPrice  || pos.entryPrice, quotePrice);\n    // For shorts: profit when price falls\n    pos.unrealizedPct = Number((((pos.entryPrice - quotePrice) / pos.entryPrice) * 100).toFixed(2));\n    pos.unrealizedPnL = Number(((pos.entryPrice - quotePrice) * pos.shares).toFixed(2));\n\n    // Trailing for shorts: as price falls, lower the buy-back trigger\n    const gainPct = (pos.entryPrice - quotePrice) / pos.entryPrice;\n    if (gainPct >= paperCfg.trailingStopAfterPct && !pos.trailingActive) pos.trailingActive = true;\n    if (pos.trailingActive) {\n      const newTrail = pos.lowestPrice * (1 + paperCfg.trailingDistancePct);\n      pos.trailingStop = Math.min(pos.trailingStop || Infinity, newTrail);\n    }\n\n    let exitReason = null;\n    if (quotePrice >= pos.stopPrice) exitReason = \"STOP_LOSS\";          // short stop = price above entry\n    else if (quotePrice <= pos.targetPrice) exitReason = \"TAKE_PROFIT\"; // short target = price below entry\n    else if (pos.trailingActive && quotePrice >= pos.trailingStop) exitReason = \"TRAILING_STOP\";\n    else if (pos.daysHeld >= paperCfg.maxHoldDays) exitReason = \"TIME_EXIT\";\n\n    if (exitReason) {\n      const coverFill = applyExitSlippage(quotePrice, pos.marketCap, \"SHORT\");\n      // To close a short: pay (coverCost - entryProceeds) = realized P&L\n      const coverCost = coverFill * pos.shares;\n      const realizedShortPnL = (pos.entryProceeds || (pos.entryPrice * pos.shares)) - coverCost;\n      portfolio.cash += realizedShortPnL;\n      pos.exitPrice = coverFill;\n      pos.exitAt = now.toISOString();\n      pos.exitReason = exitReason;\n      pos.realizedPct = Number((((pos.entryPrice - coverFill) / pos.entryPrice) * 100).toFixed(2));\n      pos.realizedPnL = Number(((pos.entryPrice - coverFill) * pos.shares).toFixed(2));\n      portfolio.closedTrades.push(pos);\n      justClosed.push(pos);\n      continue;\n    }\n  }\n\n  stillOpen.push(pos);\n}\n\n// Update attribution from closed trades\nfor (const pos of justClosed) {\n  for (const handle of (pos.sourceHandles || [])) {\n    attribution[handle] = attribution[handle] || { trades: 0, wins: 0, losses: 0, totalPnL: 0, totalPctReturn: 0, longs: 0, shorts: 0 };\n    attribution[handle].trades += 1;\n    attribution[handle].totalPnL += pos.realizedPnL;\n    attribution[handle].totalPctReturn += pos.realizedPct;\n    if (pos.realizedPnL > 0) attribution[handle].wins += 1; else attribution[handle].losses += 1;\n    if (pos.side === \"LONG\") attribution[handle].longs += 1; else attribution[handle].shorts += 1;\n  }\n}\n\nportfolio.openPositions = stillOpen;\n\n// ---- OPEN NEW POSITIONS based on LLM verdicts ----\nconst opened = [];\nconst blocked = []; // for logging when LLM blocked a trade\n\nif (paperCfg.enabled) {\n  const openSymbols = new Set(portfolio.openPositions.map(p => p.symbol));\n\n  for (const r of ranked) {\n    if (portfolio.openPositions.length >= paperCfg.maxOpenPositions) break;\n    if (![\"ACTIONABLE WATCH\",\"WATCH FOR TRIGGER\"].includes(r.decision)) continue;\n    if (!r.price) continue;\n    if (openSymbols.has(r.symbol)) continue;\n\n    const verdict = verdicts[r.symbol];\n    if (!verdict) {\n      blocked.push({ symbol: r.symbol, reason: \"no_llm_verdict\", decision: r.decision });\n      continue;\n    }\n\n    // Decide side\n    let side = null;\n    if (verdict.sentiment === \"bullish\" && verdict.confidence >= 0.6 && !verdict.sarcasm && !verdict.mentionsSelling) {\n      // Standard long gate\n      if (r.pumpFlags.length >= 1) {\n        blocked.push({ symbol: r.symbol, reason: \"long_blocked_by_pumpflag\", verdict, decision: r.decision });\n        continue;\n      }\n      if (r.changePct !== null && r.changePct >= (thresholds.noChasePct || 12)) {\n        blocked.push({ symbol: r.symbol, reason: \"long_blocked_no_chase\", verdict, decision: r.decision });\n        continue;\n      }\n      side = \"LONG\";\n    } else if (verdict.sentiment === \"bearish\" && verdict.confidence >= 0.6) {\n      // Short gate - we want bearish on a stock that's UP or recently strong (otherwise no juice)\n      // Block shorts on very small caps (HTB risk too high)\n      if (r.marketCap && r.marketCap < 500e6) {\n        blocked.push({ symbol: r.symbol, reason: \"short_blocked_microcap_htb\", verdict, decision: r.decision });\n        continue;\n      }\n      // Block if stock is already DOWN heavily today (no edge left)\n      if (r.changePct !== null && r.changePct <= -10) {\n        blocked.push({ symbol: r.symbol, reason: \"short_blocked_already_down\", verdict, decision: r.decision });\n        continue;\n      }\n      // Block on price < $5 (real brokers often won't short)\n      if (r.price < 5) {\n        blocked.push({ symbol: r.symbol, reason: \"short_blocked_under_5\", verdict, decision: r.decision });\n        continue;\n      }\n      side = \"SHORT\";\n    } else {\n      blocked.push({ symbol: r.symbol, reason: `llm_${verdict.sentiment}_conf_${verdict.confidence.toFixed(2)}`, verdict, decision: r.decision });\n      continue;\n    }\n\n    // Compute equity and position size\n    const openMTM = portfolio.openPositions.reduce((sum, p) => {\n      const positionValue = (p.currentPrice || p.entryPrice) * p.shares;\n      // LONG: value of shares held. SHORT: unrealized P&L = entryProceeds - currentLiability.\n      return sum + (p.side === \"LONG\" ? positionValue : (p.entryProceeds - positionValue));\n    }, 0);\n    const equity = portfolio.cash + openMTM;\n    const positionDollars = equity * paperCfg.maxPositionPct;\n    if (positionDollars > portfolio.cash) continue;\n\n    // Apply entry slippage\n    const entryFill = applyEntrySlippage(r.price, r.marketCap, side);\n    const shares = Math.floor(positionDollars / entryFill);\n    if (shares < 1) continue;\n\n    if (side === \"LONG\") {\n      const cost = shares * entryFill;\n      portfolio.cash -= cost;\n      portfolio.openPositions.push({\n        side: \"LONG\",\n        symbol: r.symbol,\n        entryAt: now.toISOString(),\n        entryQuotePrice: r.price,\n        entryPrice: Number(entryFill.toFixed(4)),\n        slippageBps: slippageBps(r.marketCap),\n        shares, cost: Number(cost.toFixed(2)),\n        stopPrice: Number((entryFill * (1 - paperCfg.stopLossPct)).toFixed(4)),\n        targetPrice: Number((entryFill * (1 + paperCfg.takeProfitPct)).toFixed(4)),\n        currentPrice: r.price, highestPrice: r.price, lowestPrice: r.price,\n        unrealizedPct: 0, unrealizedPnL: 0, daysHeld: 0,\n        trailingActive: false, trailingStop: null,\n        marketCap: r.marketCap,\n        sourceHandles: r.trustedMentionAuthors || [],\n        sourceDecision: r.decision, sourceScore: r.totalScore, sourceReasons: r.whyXIsTalking,\n        hasRealNews: r.hasRealNews,\n        llmSentiment: verdict.sentiment, llmConfidence: verdict.confidence, llmReasoning: verdict.reasoning,\n        borrowRiskFlag: false\n      });\n      opened.push(portfolio.openPositions[portfolio.openPositions.length - 1]);\n    } else {\n      // SHORT: track entryProceeds as the cash we owe back when we cover.\n      // We do NOT modify portfolio.cash on open: the proceeds from short sale\n      // exactly offset the borrow liability for accounting purposes.\n      // P&L is realized only when we cover.\n      const entryProceeds = shares * entryFill;\n      const htbRisk = (r.marketCap && r.marketCap < 2e9) || r.pumpFlags.some(f => f.includes(\"squeeze\"));\n      portfolio.openPositions.push({\n        side: \"SHORT\",\n        symbol: r.symbol,\n        entryAt: now.toISOString(),\n        entryQuotePrice: r.price,\n        entryPrice: Number(entryFill.toFixed(4)),\n        slippageBps: slippageBps(r.marketCap),\n        shares,\n        entryProceeds: Number(entryProceeds.toFixed(2)),\n        // For shorts: stop ABOVE entry (we lose if price rises), target BELOW\n        stopPrice: Number((entryFill * (1 + paperCfg.stopLossPct)).toFixed(4)),\n        targetPrice: Number((entryFill * (1 - paperCfg.takeProfitPct)).toFixed(4)),\n        currentPrice: r.price, highestPrice: r.price, lowestPrice: r.price,\n        unrealizedPct: 0, unrealizedPnL: 0, daysHeld: 0,\n        trailingActive: false, trailingStop: null,\n        marketCap: r.marketCap,\n        sourceHandles: r.trustedMentionAuthors || [],\n        sourceDecision: r.decision, sourceScore: r.totalScore, sourceReasons: r.whyXIsTalking,\n        hasRealNews: r.hasRealNews,\n        llmSentiment: verdict.sentiment, llmConfidence: verdict.confidence, llmReasoning: verdict.reasoning,\n        borrowRiskFlag: htbRisk\n      });\n      opened.push(portfolio.openPositions[portfolio.openPositions.length - 1]);\n    }\n    openSymbols.add(r.symbol);\n  }\n}\n\n// Recompute equity\nconst openMTM = portfolio.openPositions.reduce((sum, p) => {\n  const positionValue = (p.currentPrice || p.entryPrice) * p.shares;\n  if (p.side === \"LONG\") return sum + positionValue;\n  // SHORT unrealized P&L = entryProceeds - currentLiability\n  return sum + (p.entryProceeds - positionValue);\n}, 0);\nportfolio.equity = Number((portfolio.cash + openMTM).toFixed(2));\n\nportfolio.history.push({\n  asOf: now.toISOString(),\n  equity: portfolio.equity,\n  cash: Number(portfolio.cash.toFixed(2)),\n  openCount: portfolio.openPositions.length,\n  openedThisRun: opened.length,\n  closedThisRun: justClosed.length,\n  blockedByLLM: blocked.length\n});\nportfolio.history = portfolio.history.slice(-2000);\nportfolio.closedTrades = portfolio.closedTrades.slice(-500);\n\n// ---- SHEETS ROWS ----\nconst runStamp = now.toISOString();\n\nconst sheetsCandidates = ranked.map(r => {\n  const v = verdicts[r.symbol] || {};\n  return {\n    asOf: runStamp, rank: r.rank, ticker: r.symbol,\n    totalScore: r.totalScore, socialScore: r.socialScore,\n    decision: r.decision, whyXIsTalking: r.whyXIsTalking,\n    mentionCount: r.mentionCount, uniqueAuthorCount: r.uniqueAuthorCount,\n    trustedMentions: r.trustedMentions,\n    trustedAuthors: (r.trustedMentionAuthors || []).join(\"; \"),\n    price: r.price, changePct: r.changePct, rvol: r.rvol, marketCap: r.marketCap,\n    hasRealNews: r.hasRealNews, pumpFlags: r.pumpFlags.join(\"; \"),\n    llmSentiment: v.sentiment || \"\", llmConfidence: v.confidence || \"\", llmReasoning: v.reasoning || \"\",\n    llmSarcasm: v.sarcasm || false, llmMentionsSelling: v.mentionsSelling || false,\n    newsTitle1: r.latestNews?.[0]?.title || \"\", newsUrl1: r.latestNews?.[0]?.url || \"\",\n    samplePost1: r.samplePosts?.[0]?.text || \"\"\n  };\n});\n\nconst formatTradeRow = (p, eventType) => ({\n  asOf: runStamp, eventType,\n  side: p.side, symbol: p.symbol,\n  entryAt: p.entryAt, entryQuotePrice: p.entryQuotePrice, entryPrice: p.entryPrice,\n  slippageBps: p.slippageBps, shares: p.shares,\n  stopPrice: p.stopPrice, targetPrice: p.targetPrice,\n  exitAt: p.exitAt || \"\", exitPrice: p.exitPrice || \"\",\n  exitReason: p.exitReason || \"\",\n  realizedPct: p.realizedPct ?? \"\", realizedPnL: p.realizedPnL ?? \"\",\n  daysHeld: p.daysHeld || 0,\n  borrowRiskFlag: p.borrowRiskFlag || false,\n  marketCap: p.marketCap,\n  sourceHandles: (p.sourceHandles || []).join(\"; \"),\n  sourceDecision: p.sourceDecision, sourceScore: p.sourceScore, sourceReasons: p.sourceReasons,\n  hasRealNews: p.hasRealNews,\n  llmSentiment: p.llmSentiment, llmConfidence: p.llmConfidence, llmReasoning: p.llmReasoning\n});\nconst sheetsPaperTrades = [\n  ...opened.map(p => formatTradeRow(p, \"OPEN\")),\n  ...justClosed.map(p => formatTradeRow(p, \"CLOSE\"))\n];\n\nconst sheetsAnalystAlpha = Object.entries(attribution).map(([handle, s]) => ({\n  asOf: runStamp, handle,\n  trades: s.trades, wins: s.wins, losses: s.losses,\n  longs: s.longs || 0, shorts: s.shorts || 0,\n  winRate: s.trades ? Number(((s.wins / s.trades) * 100).toFixed(1)) : 0,\n  avgPctReturn: s.trades ? Number((s.totalPctReturn / s.trades).toFixed(2)) : 0,\n  totalPnL: Number(s.totalPnL.toFixed(2))\n})).sort((a,b) => b.avgPctReturn - a.avgPctReturn);\n\nconst sheetsPortfolio = [{\n  asOf: runStamp,\n  equity: portfolio.equity, cash: Number(portfolio.cash.toFixed(2)),\n  openCount: portfolio.openPositions.length,\n  longCount: portfolio.openPositions.filter(p => p.side === \"LONG\").length,\n  shortCount: portfolio.openPositions.filter(p => p.side === \"SHORT\").length,\n  openedThisRun: opened.length, closedThisRun: justClosed.length,\n  blockedByLLM: blocked.length,\n  totalClosedTrades: portfolio.closedTrades.length,\n  startingCapital: paperCfg.startingCapital,\n  totalReturnPct: Number((((portfolio.equity - paperCfg.startingCapital) / paperCfg.startingCapital) * 100).toFixed(2))\n}];\n\nconst sheetsLLMVerdicts = Object.entries(verdicts).map(([sym, v]) => ({\n  asOf: runStamp, symbol: sym,\n  sentiment: v.sentiment, confidence: v.confidence,\n  reasoning: v.reasoning, sarcasm: v.sarcasm,\n  mentionsSelling: v.mentionsSelling\n}));\n\nreturn [{\n  json: {\n    asOf: runStamp,\n    system: \"X Social Momentum Scanner v7\",\n    rankedCandidates: ranked,\n    verdicts, blocked,\n    paperPortfolio: {\n      cash: portfolio.cash, equity: portfolio.equity,\n      openCount: portfolio.openPositions.length,\n      openPositions: portfolio.openPositions,\n      openedThisRun: opened, closedThisRun: justClosed\n    },\n    analystAttribution: attribution,\n    sheetsCandidates, sheetsPaperTrades,\n    sheetsAnalystAlpha, sheetsPortfolio, sheetsLLMVerdicts,\n    skip: false\n  }\n}];\n"
+        },
+        "id": "01297011-942e-408d-9263-f081c91cb85a",
+        "name": "Paper Trade + Build Sheets",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3008,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "sheetsLLMVerdicts",
+          "options": {}
+        },
+        "id": "1d079b85-359a-444f-8e27-00911b3d988f",
+        "name": "Split LLM Verdicts",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          3440,
+          848
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "llm_verdicts",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "a5639046-b31f-40b0-ace3-667d68ba2398",
+        "name": "Sheets: LLM Verdicts",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          3664,
+          848
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{$json.skip}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notEqual",
+                  "singleValue": true
+                }
+              },
+              {
+                "leftValue": "={{!!$json.q}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equal",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "f13dff0e-f768-4c9b-9c50-b20a5ce81aaa",
+        "name": "If X Query Present",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          592,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{$json.skip}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notEqual",
+                  "singleValue": true
+                }
+              },
+              {
+                "leftValue": "={{!!$json.symbols_csv}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equal",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "e0f7f8df-0088-440c-bf53-0cfe0c7ee268",
+        "name": "If Symbols Found",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1248,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{!!$json.llmRequestBody}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equal",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "7f6925a8-268a-415d-a55b-3239bb241015",
+        "name": "If LLM Request Present",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2352,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "content": "# v7.1 fixes\n\n- Fixed FMP Stock News node reference.\n- Added gate before GetXAPI so off-hours/empty runs do not call X.\n- Added gate before FMP quote/news so empty symbol lists stop cleanly.\n- Added Gemini bypass gate for no-LLM-candidate runs.\n- Fixed Gemini JSON body to send an object, not a string.\n- Wired Google Sheets nodes to the created tracker spreadsheet.\n\nTracker Sheet ID:\n1l86lWcxUytmDdZaTMgT1PH30gPmwQRChCFLTKKP8i7w",
+          "height": 300,
+          "width": 420
+        },
+        "id": "9eefda3e-5c06-4a96-925a-a1ce714f9478",
+        "name": "v7.1 Fixes Note",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          1664,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "FMP US Active Stock Universe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger - Every 30m US Market": {
+        "main": [
+          [
+            {
+              "node": "FMP US Active Stock Universe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FMP US Active Stock Universe": {
+        "main": [
+          [
+            {
+              "node": "Build GetXAPI Queries",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build GetXAPI Queries": {
+        "main": [
+          [
+            {
+              "node": "If X Query Present",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GetXAPI Search": {
+        "main": [
+          [
+            {
+              "node": "Parse GetXAPI Responses",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse GetXAPI Responses": {
+        "main": [
+          [
+            {
+              "node": "If Symbols Found",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FMP Batch Quote": {
+        "main": [
+          [
+            {
+              "node": "FMP Stock News",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FMP Stock News": {
+        "main": [
+          [
+            {
+              "node": "Score Candidates",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If Not Skipped": {
+        "main": [
+          [
+            {
+              "node": "Split Candidates",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split Paper Trades",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split Analyst Alpha",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split Portfolio",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split LLM Verdicts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Candidates": {
+        "main": [
+          [
+            {
+              "node": "Sheets: Candidates",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Paper Trades": {
+        "main": [
+          [
+            {
+              "node": "Sheets: Paper Trades",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Analyst Alpha": {
+        "main": [
+          [
+            {
+              "node": "Sheets: Analyst Alpha",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Portfolio": {
+        "main": [
+          [
+            {
+              "node": "Sheets: Portfolio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Score Candidates": {
+        "main": [
+          [
+            {
+              "node": "Build LLM Prompts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build LLM Prompts": {
+        "main": [
+          [
+            {
+              "node": "If LLM Request Present",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gemini Sentiment": {
+        "main": [
+          [
+            {
+              "node": "Merge LLM Verdicts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge LLM Verdicts": {
+        "main": [
+          [
+            {
+              "node": "Paper Trade + Build Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Paper Trade + Build Sheets": {
+        "main": [
+          [
+            {
+              "node": "If Not Skipped",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split LLM Verdicts": {
+        "main": [
+          [
+            {
+              "node": "Sheets: LLM Verdicts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If X Query Present": {
+        "main": [
+          [
+            {
+              "node": "GetXAPI Search",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If Symbols Found": {
+        "main": [
+          [
+            {
+              "node": "FMP Batch Quote",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If LLM Request Present": {
+        "main": [
+          [
+            {
+              "node": "Gemini Sentiment",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Merge LLM Verdicts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "1f1634d1-fe99-4091-b530-ad5401161538",
+    "activeVersionId": null,
+    "versionCounter": 1,
+    "triggerCount": 0,
+    "tags": [
+      {
+        "updatedAt": "2026-05-27T20:07:12.407Z",
+        "createdAt": "2026-05-27T20:07:12.407Z",
+        "id": "3WyV3PcfLj50Q8QJ",
+        "name": "fmp"
+      },
+      {
+        "updatedAt": "2026-05-27T20:07:12.399Z",
+        "createdAt": "2026-05-27T20:07:12.399Z",
+        "id": "RgEAotjxslmcLnte",
+        "name": "trading"
+      },
+      {
+        "updatedAt": "2026-05-27T20:07:12.411Z",
+        "createdAt": "2026-05-27T20:07:12.411Z",
+        "id": "ddv2gad7N2FSk1J5",
+        "name": "x-social"
+      },
+      {
+        "updatedAt": "2026-05-27T20:07:12.410Z",
+        "createdAt": "2026-05-27T20:07:12.410Z",
+        "id": "kkpIp7jO3IHlr250",
+        "name": "scanner"
+      }
+    ],
+    "shared": [
+      {
+        "updatedAt": "2026-05-28T16:33:47.817Z",
+        "createdAt": "2026-05-28T16:33:47.817Z",
+        "role": "workflow:owner",
+        "workflowId": "4hLGZX6FojpVDXOm",
+        "projectId": "QVxTEQGud5OqdeeN",
+        "project": {
+          "updatedAt": "2026-01-19T14:29:39.753Z",
+          "createdAt": "2026-01-19T14:27:19.906Z",
+          "id": "QVxTEQGud5OqdeeN",
+          "name": "Sushil Kulkarni <ksushils@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null
+        }
+      }
+    ]
+  }
+]

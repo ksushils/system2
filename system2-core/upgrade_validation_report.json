@@ -1,0 +1,340 @@
+{
+  "validation_date": "2026-06-08",
+  "upgrades_tested": [
+    {
+      "upgrade": 1,
+      "name": "3-Category Scoring Engine",
+      "status": "TESTED",
+      "label_distribution": {
+        "WATCHLIST ONLY": 2,
+        "WEAK": 38
+      },
+      "finalist_count": 15,
+      "watchlist_count": 25,
+      "top5_breakdown": [
+        {
+          "symbol": "COO",
+          "core_setup_score": 86,
+          "confirmation_score": 28,
+          "risk_score": 10,
+          "trade_quality_score": 49,
+          "trade_quality_label": "WATCHLIST ONLY",
+          "data_quality_score": 37,
+          "core_breakdown": {
+            "trend_score": 25,
+            "rs_score": 20,
+            "volume_score": 20,
+            "setup_quality_score": 15,
+            "rr_score": 6
+          },
+          "confirmation_breakdown": {
+            "options_conf": 2,
+            "chronos_conf": 18,
+            "seasonal_conf": 5,
+            "dark_pool_conf": 0,
+            "x_signal_conf": 0,
+            "analyst_conf": 3
+          },
+          "risk_breakdown": {
+            "earnings_risk": 0,
+            "forecast_risk": 0,
+            "regime_risk": 0,
+            "extension_risk": 5,
+            "options_risk": 5,
+            "tape_risk": 0,
+            "council_risk": 0
+          }
+        },
+        {
+          "symbol": "UAL",
+          "core_setup_score": 86,
+          "confirmation_score": 30,
+          "risk_score": 30,
+          "trade_quality_score": 46,
+          "trade_quality_label": "WATCHLIST ONLY",
+          "data_quality_score": 29,
+          "core_breakdown": {
+            "trend_score": 25,
+            "rs_score": 20,
+            "volume_score": 20,
+            "setup_quality_score": 15,
+            "rr_score": 6
+          },
+          "confirmation_breakdown": {
+            "options_conf": 22,
+            "chronos_conf": 0,
+            "seasonal_conf": 5,
+            "dark_pool_conf": 0,
+            "x_signal_conf": 0,
+            "analyst_conf": 3
+          },
+          "risk_breakdown": {
+            "earnings_risk": 0,
+            "forecast_risk": 25,
+            "regime_risk": 0,
+            "extension_risk": 5,
+            "options_risk": 0,
+            "tape_risk": 0,
+            "council_risk": 0
+          }
+        },
+        {
+          "symbol": "HIG",
+          "core_setup_score": 81,
+          "confirmation_score": 28,
+          "risk_score": 28,
+          "trade_quality_score": 43,
+          "trade_quality_label": "WEAK",
+          "data_quality_score": 37,
+          "core_breakdown": {
+            "trend_score": 25,
+            "rs_score": 20,
+            "volume_score": 15,
+            "setup_quality_score": 15,
+            "rr_score": 6
+          },
+          "confirmation_breakdown": {
+            "options_conf": 18,
+            "chronos_conf": 2,
+            "seasonal_conf": 5,
+            "dark_pool_conf": 0,
+            "x_signal_conf": 0,
+            "analyst_conf": 3
+          },
+          "risk_breakdown": {
+            "earnings_risk": 0,
+            "forecast_risk": 23,
+            "regime_risk": 0,
+            "extension_risk": 5,
+            "options_risk": 0,
+            "tape_risk": 0,
+            "council_risk": 0
+          }
+        },
+        {
+          "symbol": "SYY",
+          "core_setup_score": 91,
+          "confirmation_score": 10,
+          "risk_score": 35,
+          "trade_quality_score": 42,
+          "trade_quality_label": "WEAK",
+          "data_quality_score": 37,
+          "core_breakdown": {
+            "trend_score": 25,
+            "rs_score": 20,
+            "volume_score": 20,
+            "setup_quality_score": 20,
+            "rr_score": 6
+          },
+          "confirmation_breakdown": {
+            "options_conf": 2,
+            "chronos_conf": 0,
+            "seasonal_conf": 5,
+            "dark_pool_conf": 0,
+            "x_signal_conf": 0,
+            "analyst_conf": 3
+          },
+          "risk_breakdown": {
+            "earnings_risk": 0,
+            "forecast_risk": 25,
+            "regime_risk": 0,
+            "extension_risk": 5,
+            "options_risk": 5,
+            "tape_risk": 0,
+            "council_risk": 0
+          }
+        },
+        {
+          "symbol": "FOX",
+          "core_setup_score": 70,
+          "confirmation_score": 31,
+          "risk_score": 28,
+          "trade_quality_score": 39,
+          "trade_quality_label": "WEAK",
+          "data_quality_score": 37,
+          "core_breakdown": {
+            "trend_score": 25,
+            "rs_score": 20,
+            "volume_score": 15,
+            "setup_quality_score": 8,
+            "rr_score": 2
+          },
+          "confirmation_breakdown": {
+            "options_conf": 18,
+            "chronos_conf": 5,
+            "seasonal_conf": 5,
+            "dark_pool_conf": 0,
+            "x_signal_conf": 0,
+            "analyst_conf": 3
+          },
+          "risk_breakdown": {
+            "earnings_risk": 0,
+            "forecast_risk": 23,
+            "regime_risk": 0,
+            "extension_risk": 5,
+            "options_risk": 0,
+            "tape_risk": 0,
+            "council_risk": 0
+          }
+        }
+      ],
+      "old_confluence_range": [
+        20,
+        49
+      ],
+      "new_trade_quality_range": [
+        20,
+        49
+      ],
+      "correlation_old_new": "strong"
+    },
+    {
+      "upgrade": 2,
+      "name": "Entry Quality Score",
+      "status": "CODE_ONLY",
+      "note": "Entry quality is computed at monitor runtime (hourly) based on live price, tape, staleness, and pre-market status. Cannot validate statically against historical data. Code added to runPaperMonitor() in scoring-endpoints.cjs."
+    },
+    {
+      "upgrade": 3,
+      "name": "No-Trade-Today Threshold",
+      "status": "TESTED",
+      "quality_ideas_count": 0,
+      "watchlist_count": 0,
+      "no_trade_day_would_trigger": true,
+      "low_idea_day_would_trigger": false
+    },
+    {
+      "upgrade": 4,
+      "name": "Portfolio Correlation Control",
+      "status": "TESTED",
+      "industry_clusters_detected": 0,
+      "cluster_details": []
+    },
+    {
+      "upgrade": 5,
+      "name": "Bear Case Box",
+      "status": "TESTED",
+      "sample_bear_cases": [
+        {
+          "symbol": "COO",
+          "bear_case_count": 2,
+          "bear_cases": [
+            {
+              "severity": "medium",
+              "text": "Stock extended, only 0.0% from 52-week high"
+            },
+            {
+              "severity": "medium",
+              "text": "Earnings in 0 days \u2014 event risk"
+            }
+          ]
+        },
+        {
+          "symbol": "UAL",
+          "bear_case_count": 3,
+          "bear_cases": [
+            {
+              "severity": "high",
+              "text": "AI forecast predicts downward price movement (STRONG_DOWN)"
+            },
+            {
+              "severity": "medium",
+              "text": "Stock extended, only 0.0% from 52-week high"
+            },
+            {
+              "severity": "medium",
+              "text": "Earnings in 0 days \u2014 event risk"
+            }
+          ]
+        },
+        {
+          "symbol": "HIG",
+          "bear_case_count": 2,
+          "bear_cases": [
+            {
+              "severity": "medium",
+              "text": "Stock extended, only 0.0% from 52-week high"
+            },
+            {
+              "severity": "medium",
+              "text": "Earnings in 0 days \u2014 event risk"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "upgrade": 6,
+      "name": "Data Quality Score",
+      "status": "TESTED",
+      "min_data_quality": 29,
+      "max_data_quality": 37,
+      "avg_data_quality": 33.6,
+      "samples": [
+        {
+          "symbol": "COO",
+          "score": 37,
+          "label": "POOR"
+        },
+        {
+          "symbol": "UAL",
+          "score": 29,
+          "label": "POOR"
+        },
+        {
+          "symbol": "HIG",
+          "score": 37,
+          "label": "POOR"
+        },
+        {
+          "symbol": "SYY",
+          "score": 37,
+          "label": "POOR"
+        },
+        {
+          "symbol": "FOX",
+          "score": 37,
+          "label": "POOR"
+        }
+      ]
+    },
+    {
+      "upgrade": 7,
+      "name": "FMP News + Analyst Signals",
+      "status": "CODE_ONLY",
+      "note": "Module fmp_news_analyst_signals.py built. Requires live FMP API calls to validate. Endpoints: /stable/stock-news, /stable/upgrades-downgrades, /stable/earnings-surprises. Not run against historical data in this validation."
+    },
+    {
+      "upgrade": 8,
+      "name": "Trade Expiry / Auto-Timeout",
+      "status": "CODE_ONLY",
+      "note": "Expiry logic added to /api/score/run in step3_scoring-endpoints.cjs. Rules: (1) not triggered 3d -> EXPIRED, (2) stalled 7d + <0.3R -> review_required, (3) partial winner reversal flag, (4) max hold 12d -> EXPIRED. Validated by daily scorer runs, not static data."
+    },
+    {
+      "upgrade": 9,
+      "name": "Morning Command Centre",
+      "status": "CODE_ONLY",
+      "note": "Dashboard HTML updated with command centre panel above finalist cards. Shows: regime, VIX, idea counts by quality label, cluster warnings, top idea. renderCommandCentre() added to system2-terminal.html."
+    },
+    {
+      "upgrade": 10,
+      "name": "Simple/Pro Mode Toggle",
+      "status": "CODE_ONLY",
+      "note": "Toggle button added to dashboard header. Simple mode shows: ticker, status, entry zone, stop, target, risk, top 3 risks, price check + AI decision buttons. Pro mode shows all scores, council verdicts, bear case, data quality, etc. Trade card wrapper injects pro-only content conditionally."
+    }
+  ],
+  "findings": [
+    "Upgrade 3: No-trade-today WOULD trigger for this dataset (0 ideas >= 65). Telegram alert logic is wired in log_phase_b_baseline_ideas.py.",
+    "Upgrade 4: No industry concentration clusters of 3+ detected in current finalists.",
+    "Upgrade 5: Bear case points generated for all ideas. Council SKIP verdicts, forecast DOWN, options CAUTION, and tape BEARISH are surfaced as high-severity warnings.",
+    "Upgrade 6: Data quality scores range 29-37 (avg 33.6). Low scores reflect missing pre-market checks, tape signals, and insider data for many tickers."
+  ],
+  "recommendations": [],
+  "summary": {
+    "total_upgrades": 10,
+    "tested_against_data": 5,
+    "code_only_pending_live_validation": 5,
+    "critical_findings": 4,
+    "recommendations": 0
+  }
+}

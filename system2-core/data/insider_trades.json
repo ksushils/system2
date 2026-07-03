@@ -1,0 +1,910 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T00:45:08.428915+00:00",
+  "source": "openinsider_sec_form4",
+  "total_tickers": 100,
+  "cluster_buys": 25,
+  "strong_signals": 47,
+  "tickers": {
+    "STRR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 513018.0,
+      "unique_insiders": 5,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "PRTA": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1957820.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "LSF": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 350104.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "PICS": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1669889.0,
+      "unique_insiders": 3,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "INR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1386320.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "OXM": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 92250.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "QTRX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 9695.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BGDE": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 64983.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "HTLD": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 31380.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BSBR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1362815.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MBC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 696390.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "PEB": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1377800.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "HYNE": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 26015.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "EML": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 175623.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "EVTC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 427999.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ACLOX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 150000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "AAT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 972900.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GPUS": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 58799.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CMND": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 330335.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "APMC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 5299120.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "DLHC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 51299.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "YYGH": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 330335.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NEOV": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 133626.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NIXX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 8600.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CTSH": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 209768.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "WOK": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1269322.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CBKM": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 11320.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "RDGT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 98862.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "FDBC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 0.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "NONE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "IRIX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 10305.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SMMT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 103616650.0,
+      "unique_insiders": 3,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "DBGI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 747812.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "COSM": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 205000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "KRNY": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 96541.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MSA": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 71093.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "FRST": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 107764.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "RCG": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 24198.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "TPL": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 3899.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BOSC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 4290.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 79480.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SRI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 75000.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MZTI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 98109.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "TMCI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 488079.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "OWLS": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 13412.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NRDY": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 449765.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CLIK": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 153890.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ESEA": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 33590.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GOTU": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 447000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "PATK": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 8385.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NMM": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 755438.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ENOV": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 45220.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CRCW": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 0.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "NONE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BETR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 125351.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NUVB": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 118250.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ARTV": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 7650148.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MOBI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 63969.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "STI": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 643965.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "AII": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 2301242.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "STEP": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 5022072.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "VIA": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 367500.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MBBC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 105104.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "RYAN": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 4463649.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "HRZN": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 655804.0,
+      "unique_insiders": 6,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GUTS": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 107819.0,
+      "unique_insiders": 4,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GLP": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1727100.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "STTK": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 250000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BKKT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 2170800.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "EU": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 64000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SGHT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 68794.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GSBD": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 18116.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ECL": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1999500.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "OUT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 127245.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "FERLX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 240000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "APCX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 103781.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "YEXT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 498218.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "PETV": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 0.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "NONE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ACOG": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 242288.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "GRNT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 70190.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "FBIN": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 12994720.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "VIRC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 7884.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "TCBS": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 345000.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "LEE": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1430425.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "ADTX": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 147647.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CLST": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 99893.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "NWFL": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 14610.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BRC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1000025.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "HFRO": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 2041972.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MXF": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 2933213.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MSIF": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 100009.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "MTDR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 410940.0,
+      "unique_insiders": 5,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BZUN": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 370220.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "RCEL": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 188586.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "INM": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 391555.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BLND": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 2303726.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "CZR": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 221129.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "MODERATE",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "USPH": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 48777.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "LOGC": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 1250510.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SMRT": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 152331.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "SMBK": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 257700.0,
+      "unique_insiders": 2,
+      "is_cluster": true,
+      "insider_buy_signal": "STRONG",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    },
+    "BRO": {
+      "insider_buy_count": 1,
+      "insider_buy_value": 49923.0,
+      "unique_insiders": 1,
+      "is_cluster": false,
+      "insider_buy_signal": "WEAK",
+      "buyers": [],
+      "most_recent_date": "2026-06-15"
+    }
+  }
+}

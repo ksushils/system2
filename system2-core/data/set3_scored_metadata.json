@@ -1,0 +1,21 @@
+{
+  "stage": "SET3_CATALYST_SCORER",
+  "createdAt": "2026-06-12T11:16:32.400485+00:00",
+  "run_id": "20260612T105425Z-974f2468",
+  "input_count": 30,
+  "ok_count": 21,
+  "bias_distribution": {
+    "BULLISH": 7,
+    "BEARISH": 1,
+    "NEUTRAL": 22
+  },
+  "reject_reason_counts": {
+    "bearish_catalyst": 1,
+    "price_out_of_range": 5,
+    "volume_too_low": 4
+  },
+  "fmp_errors": [],
+  "staged_preview": true,
+  "_system2_run_id": "20260612T105425Z-974f2468",
+  "_system2_generated_at": "2026-06-12T11:16:32.421224+00:00"
+}

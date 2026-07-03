@@ -1,0 +1,229 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T00:50:02.277205+00:00",
+  "count": 11,
+  "candidates": [
+    {
+      "ticker": "META",
+      "symbol": "META",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 2,
+      "congress_politician_count": 2,
+      "congress_total_amount": 40501.0,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "John McGuire",
+        "Michael T. McCaul"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "symbol": "JPM",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 3,
+      "congress_politician_count": 2,
+      "congress_total_amount": 48501.5,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "Rohit Khanna",
+        "William R. Keating"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "symbol": "MSFT",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "3 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 4,
+      "congress_politician_count": 3,
+      "congress_total_amount": 1232502.0,
+      "congress_signal": "STRONG",
+      "politicians": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer",
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "symbol": "AMD",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 5,
+      "congress_politician_count": 2,
+      "congress_total_amount": 40002.5,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "STE",
+      "symbol": "STE",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 5,
+      "congress_politician_count": 2,
+      "congress_total_amount": 40002.5,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "April McClain Delaney",
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "FN",
+      "symbol": "FN",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 2,
+      "congress_politician_count": 2,
+      "congress_total_amount": 16001.0,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "T",
+      "symbol": "T",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 3,
+      "congress_politician_count": 2,
+      "congress_total_amount": 115501.5,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "David J. Taylor",
+        "Tim Moore"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "PG",
+      "symbol": "PG",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 2,
+      "congress_politician_count": 2,
+      "congress_total_amount": 16001.0,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "David J. Taylor",
+        "Lloyd Doggett"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "symbol": "AAPL",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 2,
+      "congress_politician_count": 2,
+      "congress_total_amount": 16001.0,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "Cleo Fields",
+        "Ed Case"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "V",
+      "symbol": "V",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "3 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 3,
+      "congress_politician_count": 3,
+      "congress_total_amount": 48501.5,
+      "congress_signal": "STRONG",
+      "politicians": [
+        "David J. Taylor",
+        "Michael T. McCaul",
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "symbol": "MA",
+      "source": "congress_discovery",
+      "sub_type": "congressional_buy",
+      "catalyst_summary": "2 politician(s) bought",
+      "bypass_technical": true,
+      "bypass_reason": "congressional_cluster",
+      "congress_buy_count": 3,
+      "congress_politician_count": 2,
+      "congress_total_amount": 73001.5,
+      "congress_signal": "MODERATE",
+      "politicians": [
+        "Michael T. McCaul",
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ]
+    }
+  ]
+}

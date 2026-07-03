@@ -1,0 +1,29 @@
+{
+  "stage": "CatalystDiscovery",
+  "createdAt": "2026-06-14T20:43:46.043164+00:00",
+  "lookbackHours": 72,
+  "universeCount": 1500,
+  "rawCatalystCounts": {
+    "earnings": 0,
+    "analyst": 76,
+    "insider": 0,
+    "corporate": 2,
+    "fda": 4
+  },
+  "dedupedCatalystCount": 30,
+  "candidatePoolCount": 1500,
+  "bypassCandidateCount": 0,
+  "fmpCallCount": 19,
+  "fmpCallsByType": {
+    "earnings": 1,
+    "analyst": 3,
+    "insider": 3,
+    "corporate": 6,
+    "fda": 6
+  },
+  "fmpErrorCount": 0,
+  "fmpErrorsByType": {},
+  "runtimeSeconds": 11.62,
+  "rideAlongOnly": true,
+  "selectionLogicChanged": false
+}

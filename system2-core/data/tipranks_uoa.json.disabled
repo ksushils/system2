@@ -1,0 +1,16 @@
+{
+  "scraped_at": "2026-06-09T10:43:40.163695+00:00",
+  "source": "tipranks",
+  "options_flow_source": "tipranks",
+  "url": "https://www.tipranks.com/options/unusual-activity-stocks",
+  "raw_rows_extracted": 0,
+  "candidates_count": 0,
+  "candidates": [],
+  "tipranks_scrape_failed": true,
+  "filters": {
+    "sentiment": "Bullish",
+    "option_type": "Call",
+    "min_vol_oi_ratio": 2.0,
+    "min_open_interest": 100
+  }
+}

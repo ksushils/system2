@@ -1,0 +1,631 @@
+{
+  "date": "2026-06-15",
+  "updated_at": "2026-06-15T13:30:43.119639+00:00",
+  "apewisdom": {
+    "SPY": {
+      "rank": 1,
+      "mentions": 251
+    },
+    "MU": {
+      "rank": 2,
+      "mentions": 185
+    },
+    "SPCX": {
+      "rank": 3,
+      "mentions": 161
+    },
+    "MSFT": {
+      "rank": 4,
+      "mentions": 156
+    },
+    "QQQ": {
+      "rank": 5,
+      "mentions": 101
+    },
+    "SNDK": {
+      "rank": 6,
+      "mentions": 82
+    },
+    "NVDA": {
+      "rank": 7,
+      "mentions": 69
+    },
+    "RKLB": {
+      "rank": 8,
+      "mentions": 50
+    },
+    "VOO": {
+      "rank": 9,
+      "mentions": 45
+    },
+    "DTE": {
+      "rank": 10,
+      "mentions": 44
+    },
+    "ASTS": {
+      "rank": 11,
+      "mentions": 44
+    },
+    "TSLA": {
+      "rank": 12,
+      "mentions": 30
+    },
+    "META": {
+      "rank": 13,
+      "mentions": 28
+    },
+    "NBIS": {
+      "rank": 14,
+      "mentions": 28
+    },
+    "ES": {
+      "rank": 15,
+      "mentions": 26
+    },
+    "AMD": {
+      "rank": 16,
+      "mentions": 25
+    },
+    "USO": {
+      "rank": 17,
+      "mentions": 24
+    },
+    "IT": {
+      "rank": 18,
+      "mentions": 23
+    },
+    "MRVL": {
+      "rank": 19,
+      "mentions": 23
+    },
+    "EU": {
+      "rank": 20,
+      "mentions": 23
+    },
+    "CTM": {
+      "rank": 21,
+      "mentions": 22
+    },
+    "NOW": {
+      "rank": 22,
+      "mentions": 21
+    },
+    "YOU": {
+      "rank": 23,
+      "mentions": 21
+    },
+    "SOXL": {
+      "rank": 24,
+      "mentions": 20
+    },
+    "VTI": {
+      "rank": 25,
+      "mentions": 20
+    },
+    "HOOD": {
+      "rank": 26,
+      "mentions": 20
+    },
+    "AM": {
+      "rank": 27,
+      "mentions": 19
+    },
+    "LFVN": {
+      "rank": 28,
+      "mentions": 19
+    },
+    "ADBE": {
+      "rank": 29,
+      "mentions": 17
+    },
+    "AVGO": {
+      "rank": 30,
+      "mentions": 17
+    },
+    "BB": {
+      "rank": 31,
+      "mentions": 17
+    },
+    "LUNR": {
+      "rank": 32,
+      "mentions": 17
+    },
+    "AAPL": {
+      "rank": 33,
+      "mentions": 16
+    },
+    "GOOG": {
+      "rank": 34,
+      "mentions": 16
+    },
+    "OPEN": {
+      "rank": 35,
+      "mentions": 16
+    },
+    "RDDT": {
+      "rank": 36,
+      "mentions": 16
+    },
+    "DC": {
+      "rank": 37,
+      "mentions": 14
+    },
+    "DJT": {
+      "rank": 38,
+      "mentions": 14
+    },
+    "JUST": {
+      "rank": 39,
+      "mentions": 12
+    },
+    "VT": {
+      "rank": 40,
+      "mentions": 12
+    },
+    "IQ": {
+      "rank": 41,
+      "mentions": 11
+    },
+    "SGOV": {
+      "rank": 42,
+      "mentions": 11
+    },
+    "PR": {
+      "rank": 43,
+      "mentions": 11
+    },
+    "AMZN": {
+      "rank": 44,
+      "mentions": 10
+    },
+    "ON": {
+      "rank": 45,
+      "mentions": 10
+    },
+    "WTI": {
+      "rank": 46,
+      "mentions": 10
+    },
+    "UAE": {
+      "rank": 47,
+      "mentions": 10
+    },
+    "SMH": {
+      "rank": 48,
+      "mentions": 10
+    },
+    "UP": {
+      "rank": 49,
+      "mentions": 10
+    },
+    "API": {
+      "rank": 50,
+      "mentions": 10
+    },
+    "ROKU": {
+      "rank": 51,
+      "mentions": 9
+    },
+    "NOK": {
+      "rank": 52,
+      "mentions": 9
+    },
+    "SCHD": {
+      "rank": 53,
+      "mentions": 9
+    },
+    "FOR": {
+      "rank": 54,
+      "mentions": 9
+    },
+    "PL": {
+      "rank": 55,
+      "mentions": 9
+    },
+    "LINK": {
+      "rank": 56,
+      "mentions": 9
+    },
+    "INTC": {
+      "rank": 57,
+      "mentions": 8
+    },
+    "WH": {
+      "rank": 58,
+      "mentions": 8
+    },
+    "OR": {
+      "rank": 59,
+      "mentions": 8
+    },
+    "ET": {
+      "rank": 60,
+      "mentions": 8
+    },
+    "PLTR": {
+      "rank": 61,
+      "mentions": 8
+    },
+    "VXUS": {
+      "rank": 62,
+      "mentions": 8
+    },
+    "IWM": {
+      "rank": 63,
+      "mentions": 8
+    },
+    "ASML": {
+      "rank": 64,
+      "mentions": 7
+    },
+    "VC": {
+      "rank": 65,
+      "mentions": 7
+    },
+    "PS": {
+      "rank": 66,
+      "mentions": 7
+    },
+    "DOCU": {
+      "rank": 67,
+      "mentions": 7
+    },
+    "CC": {
+      "rank": 68,
+      "mentions": 7
+    },
+    "HBM": {
+      "rank": 69,
+      "mentions": 7
+    },
+    "SOXS": {
+      "rank": 70,
+      "mentions": 7
+    },
+    "BBC": {
+      "rank": 71,
+      "mentions": 7
+    },
+    "TIL": {
+      "rank": 72,
+      "mentions": 7
+    },
+    "ARR": {
+      "rank": 73,
+      "mentions": 7
+    },
+    "GOOGL": {
+      "rank": 74,
+      "mentions": 7
+    },
+    "SMA": {
+      "rank": 75,
+      "mentions": 7
+    },
+    "ALL": {
+      "rank": 76,
+      "mentions": 6
+    },
+    "SO": {
+      "rank": 77,
+      "mentions": 6
+    },
+    "BE": {
+      "rank": 78,
+      "mentions": 6
+    },
+    "TQQQ": {
+      "rank": 79,
+      "mentions": 6
+    },
+    "SPMO": {
+      "rank": 80,
+      "mentions": 6
+    },
+    "MSTR": {
+      "rank": 81,
+      "mentions": 6
+    },
+    "IREN": {
+      "rank": 82,
+      "mentions": 6
+    },
+    "APLD": {
+      "rank": 83,
+      "mentions": 6
+    },
+    "ARM": {
+      "rank": 84,
+      "mentions": 6
+    },
+    "CRWV": {
+      "rank": 85,
+      "mentions": 6
+    },
+    "ORCL": {
+      "rank": 86,
+      "mentions": 5
+    },
+    "AMAT": {
+      "rank": 87,
+      "mentions": 5
+    },
+    "MSCI": {
+      "rank": 88,
+      "mentions": 5
+    },
+    "MS": {
+      "rank": 89,
+      "mentions": 5
+    },
+    "UI": {
+      "rank": 90,
+      "mentions": 5
+    },
+    "TDS": {
+      "rank": 91,
+      "mentions": 5
+    },
+    "SOXX": {
+      "rank": 92,
+      "mentions": 5
+    },
+    "GLD": {
+      "rank": 93,
+      "mentions": 5
+    },
+    "SOFI": {
+      "rank": 94,
+      "mentions": 5
+    },
+    "RDW": {
+      "rank": 95,
+      "mentions": 5
+    },
+    "POET": {
+      "rank": 96,
+      "mentions": 5
+    },
+    "LOT": {
+      "rank": 97,
+      "mentions": 5
+    },
+    "OS": {
+      "rank": 98,
+      "mentions": 5
+    },
+    "MA": {
+      "rank": 99,
+      "mentions": 4
+    },
+    "TSM": {
+      "rank": 100,
+      "mentions": 4
+    }
+  },
+  "stocktwits": {
+    "ADM": {
+      "bull_pct": 30.0,
+      "message_count": 30
+    },
+    "ALMS": {
+      "bull_pct": 30.0,
+      "message_count": 30
+    },
+    "AVT": {
+      "bull_pct": 40.0,
+      "message_count": 30
+    },
+    "EIX": {
+      "bull_pct": 16.7,
+      "message_count": 30
+    },
+    "FHB": {
+      "bull_pct": 10.0,
+      "message_count": 30
+    },
+    "OVV": {
+      "bull_pct": 26.7,
+      "message_count": 30
+    },
+    "VLY": {
+      "bull_pct": 3.3,
+      "message_count": 30
+    },
+    "AUB": {
+      "bull_pct": 20.0,
+      "message_count": 30
+    },
+    "BGC": {
+      "bull_pct": 43.3,
+      "message_count": 30
+    },
+    "BNS": {
+      "bull_pct": 10.0,
+      "message_count": 30
+    },
+    "CMBT": {
+      "bull_pct": 46.7,
+      "message_count": 30
+    },
+    "CXW": {
+      "bull_pct": 30.0,
+      "message_count": 30
+    },
+    "FRO": {
+      "bull_pct": 10.0,
+      "message_count": 30
+    },
+    "HPQ": {
+      "bull_pct": 43.3,
+      "message_count": 30
+    },
+    "LION": {
+      "bull_pct": 33.3,
+      "message_count": 30
+    },
+    "ONB": {
+      "bull_pct": 10.0,
+      "message_count": 30
+    },
+    "SBLK": {
+      "bull_pct": 51.7,
+      "message_count": 29
+    },
+    "WT": {
+      "bull_pct": 26.7,
+      "message_count": 30
+    },
+    "A": {
+      "bull_pct": 16.7,
+      "message_count": 30
+    },
+    "ARCC": {
+      "bull_pct": 43.3,
+      "message_count": 30
+    },
+    "MUFG": {
+      "bull_pct": 13.3,
+      "message_count": 30
+    },
+    "BANC": {
+      "bull_pct": 0.0,
+      "message_count": 30
+    },
+    "BYD": {
+      "bull_pct": 23.3,
+      "message_count": 30
+    },
+    "EA": {
+      "bull_pct": 10.0,
+      "message_count": 30
+    },
+    "TXN": {
+      "bull_pct": 20.0,
+      "message_count": 30
+    },
+    "DAN": {
+      "bull_pct": 23.3,
+      "message_count": 30
+    },
+    "BNL": {
+      "bull_pct": 17.2,
+      "message_count": 29
+    },
+    "VSNT": {
+      "bull_pct": 30.0,
+      "message_count": 30
+    },
+    "D": {
+      "bull_pct": 36.7,
+      "message_count": 30
+    }
+  },
+  "barchart_uoa": {},
+  "openinsider": {
+    "last_checked_at": "2026-06-15T13:30:43.119655+00:00",
+    "known_tickers": [
+      "AAT",
+      "ACLOX",
+      "ACOG",
+      "ADTX",
+      "AII",
+      "APCX",
+      "APMC",
+      "ARTV",
+      "BETR",
+      "BGDE",
+      "BKKT",
+      "BLND",
+      "BOSC",
+      "BRC",
+      "BRO",
+      "BSBR",
+      "BZUN",
+      "CBKM",
+      "CLIK",
+      "CLST",
+      "CMND",
+      "COSM",
+      "CRCW",
+      "CTSH",
+      "CZR",
+      "DBGI",
+      "DLHC",
+      "ECL",
+      "EML",
+      "ENOV",
+      "ESEA",
+      "EU",
+      "EVTC",
+      "FBIN",
+      "FDBC",
+      "FERLX",
+      "FRST",
+      "GLP",
+      "GOTU",
+      "GPUS",
+      "GRNT",
+      "GSBD",
+      "GUTS",
+      "HFRO",
+      "HRZN",
+      "HTLD",
+      "HYNE",
+      "INM",
+      "INR",
+      "IRIX",
+      "KRNY",
+      "LEE",
+      "LOGC",
+      "LSF",
+      "MBBC",
+      "MBC",
+      "MOBI",
+      "MSA",
+      "MSIF",
+      "MTDR",
+      "MXF",
+      "MZTI",
+      "NEOV",
+      "NIXX",
+      "NMM",
+      "NRDY",
+      "NUVB",
+      "NWFL",
+      "OUT",
+      "OWLS",
+      "OXM",
+      "PATK",
+      "PEB",
+      "PETV",
+      "PICS",
+      "PRTA",
+      "QTRX",
+      "RCEL",
+      "RCG",
+      "RDGT",
+      "RYAN",
+      "SGHT",
+      "SMBK",
+      "SMMT",
+      "SMRT",
+      "SR",
+      "SRI",
+      "STEP",
+      "STI",
+      "STRR",
+      "STTK",
+      "TCBS",
+      "TMCI",
+      "TPL",
+      "USPH",
+      "VIA",
+      "VIRC",
+      "WOK",
+      "YEXT",
+      "YYGH"
+    ]
+  },
+  "getxapi": {}
+}

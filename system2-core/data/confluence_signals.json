@@ -1,0 +1,694 @@
+{
+  "ok": true,
+  "generated_at": "2026-06-14T00:30:54.514Z",
+  "total_multi_source": 20,
+  "signals": [
+    {
+      "ticker": "ADM",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 61.5%",
+          "pct": 61.53,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 83.3",
+          "score": 83.3,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "ALMS",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 63.0%",
+          "pct": 62.95,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "AVT",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 62.1%",
+          "pct": 62.09,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "EIX",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 63.2%",
+          "pct": 63.16,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 83.3",
+          "score": 83.3,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "FHB",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 62.7%",
+          "pct": 62.69,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "OVV",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 62.6%",
+          "pct": 62.59,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "VLY",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 63.3%",
+          "pct": 63.27,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 5,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "AUB",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 57.0%",
+          "pct": 57.05,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "BGC",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 58.1%",
+          "pct": 58.06,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "BNS",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 51.1%",
+          "pct": 51.06,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 30.0",
+          "score": 30,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "CMBT",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 37.1%",
+          "pct": 37.09,
+          "signal": "WEAK"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "CXW",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 41.1%",
+          "pct": 41.08,
+          "signal": "WEAK"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "FRO",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 50.0%",
+          "pct": 49.97,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 75.0",
+          "score": 75,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "HPQ",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 59.2%",
+          "pct": 59.16,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 87.5",
+          "score": 87.5,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "LION",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 42.8%",
+          "pct": 42.84,
+          "signal": "WEAK"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 91.7",
+          "score": 91.7,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "ONB",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 48.8%",
+          "pct": 48.83,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "SBLK",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 46.6%",
+          "pct": 46.64,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 100.0",
+          "score": 100,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "WT",
+      "source_count": 3,
+      "sources": [
+        "FINRA dark pool",
+        "Social sentiment",
+        "Pipeline finalist"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 49.1%",
+          "pct": 49.14,
+          "signal": "MODERATE"
+        },
+        {
+          "source": "Social sentiment",
+          "detail": "STRONG_BULLISH score 88.9",
+          "score": 88.9,
+          "sentiment": "STRONG_BULLISH",
+          "sources_used": [
+            "stocktwits"
+          ]
+        },
+        {
+          "source": "Pipeline finalist",
+          "detail": "Stage 2 score -",
+          "confluence_score": null,
+          "readiness": null
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": true,
+      "pipeline_status": "stage2_top40"
+    },
+    {
+      "ticker": "A",
+      "source_count": 2,
+      "sources": [
+        "FINRA dark pool",
+        "Social discovery"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 60.2%",
+          "pct": 60.16,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Social discovery",
+          "detail": "StockTwits 100% bullish (30 messages)"
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": false,
+      "pipeline_status": "not_in_stage2"
+    },
+    {
+      "ticker": "ARCC",
+      "source_count": 2,
+      "sources": [
+        "FINRA dark pool",
+        "Options UOA"
+      ],
+      "details": [
+        {
+          "source": "FINRA dark pool",
+          "detail": "Dark-pool proxy 68.3%",
+          "pct": 68.32,
+          "signal": "STRONG"
+        },
+        {
+          "source": "Options UOA",
+          "detail": "barchart_uoa 52.78",
+          "provider": "barchart_uoa",
+          "vol_oi_ratio": 52.78
+        }
+      ],
+      "strength_score": 4,
+      "in_pipeline": false,
+      "pipeline_status": "not_in_stage2"
+    }
+  ],
+  "source_files": [
+    "finra",
+    "insider",
+    "social",
+    "socialDiscovery",
+    "barchart",
+    "news",
+    "stage2"
+  ]
+}

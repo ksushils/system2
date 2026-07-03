@@ -1,0 +1,222 @@
+{
+  "model_key_status": {
+    "ANTHROPIC_API_KEY": false,
+    "OPENAI_API_KEY": false,
+    "GEMINI_API_KEY": false
+  },
+  "results": [
+    {
+      "ticker": "SYY",
+      "raw_model_outputs": {
+        "claude": null,
+        "gpt": null,
+        "gemini": null
+      },
+      "parsed_model_outputs": [
+        {
+          "ticker": "SYY",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "claude_unavailable"
+          ],
+          "reason": "Claude API key not configured",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "claude"
+        },
+        {
+          "ticker": "SYY",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gpt"
+        },
+        {
+          "ticker": "SYY",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gemini"
+        }
+      ],
+      "merged_verdict": {
+        "ticker": "SYY",
+        "council_tier": "TIER3",
+        "size_multiplier": 0.5,
+        "yes_count": 3,
+        "avg_confidence": 50,
+        "upgrade_signals": [],
+        "all_red_flags": [
+          "claude_unavailable",
+          "parse_error"
+        ],
+        "council_claude": "CLEAR",
+        "council_gpt": "CLEAR",
+        "council_gemini": "CLEAR",
+        "council_claude_conf": 50,
+        "council_gpt_conf": 50,
+        "council_gemini_conf": 50,
+        "council_reasons": "Claude API key not configured | Model returned empty response | Model returned empty response",
+        "council_force_skip": false,
+        "remove_from_list": false,
+        "models_available": 0
+      }
+    },
+    {
+      "ticker": "FERG",
+      "raw_model_outputs": {
+        "claude": null,
+        "gpt": null,
+        "gemini": null
+      },
+      "parsed_model_outputs": [
+        {
+          "ticker": "FERG",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "claude_unavailable"
+          ],
+          "reason": "Claude API key not configured",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "claude"
+        },
+        {
+          "ticker": "FERG",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gpt"
+        },
+        {
+          "ticker": "FERG",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gemini"
+        }
+      ],
+      "merged_verdict": {
+        "ticker": "FERG",
+        "council_tier": "TIER3",
+        "size_multiplier": 0.5,
+        "yes_count": 3,
+        "avg_confidence": 50,
+        "upgrade_signals": [],
+        "all_red_flags": [
+          "claude_unavailable",
+          "parse_error"
+        ],
+        "council_claude": "CLEAR",
+        "council_gpt": "CLEAR",
+        "council_gemini": "CLEAR",
+        "council_claude_conf": 50,
+        "council_gpt_conf": 50,
+        "council_gemini_conf": 50,
+        "council_reasons": "Claude API key not configured | Model returned empty response | Model returned empty response",
+        "council_force_skip": false,
+        "remove_from_list": false,
+        "models_available": 0
+      }
+    },
+    {
+      "ticker": "RPRX",
+      "raw_model_outputs": {
+        "claude": null,
+        "gpt": null,
+        "gemini": null
+      },
+      "parsed_model_outputs": [
+        {
+          "ticker": "RPRX",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "claude_unavailable"
+          ],
+          "reason": "Claude API key not configured",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "claude"
+        },
+        {
+          "ticker": "RPRX",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gpt"
+        },
+        {
+          "ticker": "RPRX",
+          "verdict": "CLEAR",
+          "confidence": 50,
+          "upgrade_signals": [],
+          "red_flags": [
+            "parse_error"
+          ],
+          "reason": "Model returned empty response",
+          "force_skip": false,
+          "size_view": "full",
+          "_model": "gemini"
+        }
+      ],
+      "merged_verdict": {
+        "ticker": "RPRX",
+        "council_tier": "TIER3",
+        "size_multiplier": 0.5,
+        "yes_count": 3,
+        "avg_confidence": 50,
+        "upgrade_signals": [],
+        "all_red_flags": [
+          "claude_unavailable",
+          "parse_error"
+        ],
+        "council_claude": "CLEAR",
+        "council_gpt": "CLEAR",
+        "council_gemini": "CLEAR",
+        "council_claude_conf": 50,
+        "council_gpt_conf": 50,
+        "council_gemini_conf": 50,
+        "council_reasons": "Claude API key not configured | Model returned empty response | Model returned empty response",
+        "council_force_skip": false,
+        "remove_from_list": false,
+        "models_available": 0
+      }
+    }
+  ]
+}

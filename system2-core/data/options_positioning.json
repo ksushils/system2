@@ -1,0 +1,13 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T14:00:02.883033+00:00",
+  "dte": 4,
+  "expiry": "2026-06-19",
+  "active": false,
+  "reason": "DTE 4 > 3 - engine inactive",
+  "idea_count": 0,
+  "ideas": [],
+  "performance": {
+    "resolved": 0
+  }
+}

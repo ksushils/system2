@@ -1,0 +1,2451 @@
+{
+  "QSR": {
+    "last_price": 75.625,
+    "change_pct": 1.0354,
+    "day_high": 75.63,
+    "day_low": 74.53,
+    "volume": 366536,
+    "avg_volume": null,
+    "timestamp": 1781535490,
+    "updated_at": "2026-06-15T14:58:24.997487+00:00",
+    "entry_zone": [
+      71.96,
+      72.68
+    ],
+    "entry_zone_low": 71.96,
+    "entry_zone_high": 72.68,
+    "stop": 71.2264,
+    "target": 75.5872
+  },
+  "FOXA": {
+    "last_price": 53.695,
+    "change_pct": -18.45862,
+    "day_high": 58.4,
+    "day_low": 53.3,
+    "volume": 6224961,
+    "avg_volume": null,
+    "timestamp": 1781531874,
+    "updated_at": "2026-06-15T13:57:58.024832+00:00",
+    "entry_zone": [
+      66.21,
+      66.88
+    ],
+    "entry_zone_low": 66.21,
+    "entry_zone_high": 66.88,
+    "stop": 65.5424,
+    "target": 69.5552
+  },
+  "MRSH": {
+    "last_price": 166.82,
+    "change_pct": -1.10268,
+    "day_high": 167.9899,
+    "day_low": 166.26,
+    "volume": 604038,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:15:47.821271+00:00",
+    "entry_zone": [
+      163.8,
+      165.45
+    ],
+    "entry_zone_low": 163.8,
+    "entry_zone_high": 165.45,
+    "stop": 159.6268,
+    "target": 177.0964
+  },
+  "PPG": {
+    "last_price": 122.025,
+    "change_pct": 2.24987,
+    "day_high": 124.175,
+    "day_low": 121.97,
+    "volume": 368064,
+    "avg_volume": null,
+    "timestamp": 1781536526,
+    "updated_at": "2026-06-15T15:15:48.273035+00:00",
+    "entry_zone": [
+      112.67,
+      113.81
+    ],
+    "entry_zone_low": 112.67,
+    "entry_zone_high": 113.81,
+    "stop": 108.7925,
+    "target": 123.845
+  },
+  "DIS": {
+    "last_price": 102.005,
+    "change_pct": 1.96421,
+    "day_high": 102.19,
+    "day_low": 100.59,
+    "volume": 3449424,
+    "avg_volume": null,
+    "timestamp": 1781536541,
+    "updated_at": "2026-06-15T15:15:52.946583+00:00",
+    "entry_zone": [
+      98.75,
+      99.75
+    ],
+    "entry_zone_low": 98.75,
+    "entry_zone_high": 99.75,
+    "stop": 96.6643,
+    "target": 105.9214
+  },
+  "CCI": {
+    "last_price": 90.8,
+    "change_pct": -1.47569,
+    "day_high": 92.5,
+    "day_low": 90.355,
+    "volume": 239099.85318,
+    "avg_volume": null,
+    "timestamp": 1781531869,
+    "updated_at": "2026-06-15T13:57:58.977819+00:00",
+    "entry_zone": [
+      93.53,
+      94.47
+    ],
+    "entry_zone_low": 93.53,
+    "entry_zone_high": 94.47,
+    "stop": 90.9096,
+    "target": 101.5907
+  },
+  "SYY": {
+    "last_price": 79.115,
+    "change_pct": -0.09470893,
+    "day_high": 79.45,
+    "day_low": 78.34,
+    "volume": 1030716,
+    "avg_volume": null,
+    "timestamp": 1781536536,
+    "updated_at": "2026-06-15T15:15:52.479712+00:00",
+    "entry_zone": [
+      75.53,
+      76.29
+    ],
+    "entry_zone_low": 75.53,
+    "entry_zone_high": 76.29,
+    "stop": 73.5729,
+    "target": 81.7243
+  },
+  "MAR": {
+    "last_price": 402.902,
+    "change_pct": 0.08993077,
+    "day_high": 410.98,
+    "day_low": 402.45,
+    "volume": 296466.43457,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:15:48.778211+00:00",
+    "entry_zone": [
+      388.59,
+      392.5
+    ],
+    "entry_zone_low": 388.59,
+    "entry_zone_high": 392.5,
+    "stop": 379.1514,
+    "target": 419.2271
+  },
+  "COO": {
+    "last_price": 67.928,
+    "change_pct": 0.07071302,
+    "day_high": 68.59,
+    "day_low": 67.77,
+    "volume": 359079.82792,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:15:52.479774+00:00",
+    "entry_zone": [
+      66.68,
+      67.35
+    ],
+    "entry_zone_low": 66.68,
+    "entry_zone_high": 67.35,
+    "stop": 64.5225,
+    "target": 73.005
+  },
+  "AER": {
+    "last_price": 142.75,
+    "change_pct": 1.96429,
+    "day_high": 145.3,
+    "day_low": 142.72,
+    "volume": 391181,
+    "avg_volume": null,
+    "timestamp": 1781536534,
+    "updated_at": "2026-06-15T15:15:52.479739+00:00",
+    "entry_zone": [
+      135.54,
+      136.91
+    ],
+    "entry_zone_low": 135.54,
+    "entry_zone_high": 136.91,
+    "stop": 132.1336,
+    "target": 146.4629
+  },
+  "CI": {
+    "last_price": 294.615,
+    "change_pct": -1.13591,
+    "day_high": 298,
+    "day_low": 293.06,
+    "volume": 282306,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:15:53.449102+00:00",
+    "entry_zone": [
+      286.6,
+      289.48
+    ],
+    "entry_zone_low": 286.6,
+    "entry_zone_high": 289.48,
+    "stop": 278.3064,
+    "target": 311.8571
+  },
+  "AMCR": {
+    "last_price": 42.105,
+    "change_pct": 3.7069,
+    "day_high": 42.32,
+    "day_low": 41.48,
+    "volume": 357191,
+    "avg_volume": null,
+    "timestamp": 1781531868,
+    "updated_at": "2026-06-15T13:58:01.570712+00:00",
+    "entry_zone": [
+      37.76,
+      38.14
+    ],
+    "entry_zone_low": 37.76,
+    "entry_zone_high": 38.14,
+    "stop": 36.4279,
+    "target": 41.5643
+  },
+  "KVUE": {
+    "last_price": 18.2401,
+    "change_pct": 0.55182,
+    "day_high": 18.32,
+    "day_low": 18.08,
+    "volume": 2016603,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:15:53.988033+00:00",
+    "entry_zone": [
+      17.53,
+      17.71
+    ],
+    "entry_zone_low": 17.53,
+    "entry_zone_high": 17.71,
+    "stop": 17.1293,
+    "target": 18.8714
+  },
+  "UAL": {
+    "last_price": 121.5509,
+    "change_pct": 5.22065,
+    "day_high": 124.79,
+    "day_low": 118.564,
+    "volume": 3441673.65869,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:15:52.479758+00:00",
+    "entry_zone": [
+      104.67,
+      105.72
+    ],
+    "entry_zone_low": 104.67,
+    "entry_zone_high": 105.72,
+    "stop": 98.2029,
+    "target": 120.7543
+  },
+  "TRV": {
+    "last_price": 306.87,
+    "change_pct": 0.79157,
+    "day_high": 309.01,
+    "day_low": 299.1712,
+    "volume": 551019,
+    "avg_volume": null,
+    "timestamp": 1781536537,
+    "updated_at": "2026-06-15T15:15:51.637987+00:00",
+    "entry_zone": [
+      300.16,
+      303.17
+    ],
+    "entry_zone_low": 300.16,
+    "entry_zone_high": 303.17,
+    "stop": 293.8371,
+    "target": 321.8657
+  },
+  "SHW": {
+    "last_price": 323.5,
+    "change_pct": 1.95399,
+    "day_high": 327.33,
+    "day_low": 321.79,
+    "volume": 601214,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:15:54.466717+00:00",
+    "entry_zone": [
+      302.25,
+      305.29
+    ],
+    "entry_zone_low": 302.25,
+    "entry_zone_high": 305.29,
+    "stop": 293.2111,
+    "target": 329.4779
+  },
+  "VIK": {
+    "last_price": 94.195,
+    "change_pct": 2.1084,
+    "day_high": 96.54,
+    "day_low": 93.26,
+    "volume": 921951,
+    "avg_volume": null,
+    "timestamp": 1781536537,
+    "updated_at": "2026-06-15T15:15:53.988001+00:00",
+    "entry_zone": [
+      89.02,
+      89.92
+    ],
+    "entry_zone_low": 89.02,
+    "entry_zone_high": 89.92,
+    "stop": 85.2057,
+    "target": 99.3486
+  },
+  "AIG": {
+    "last_price": 75.39,
+    "change_pct": -0.46211,
+    "day_high": 75.46,
+    "day_low": 75.345,
+    "volume": 39045,
+    "avg_volume": null,
+    "timestamp": 1781530371,
+    "updated_at": "2026-06-15T13:33:04.903577+00:00",
+    "entry_zone": [
+      74.73,
+      75.48
+    ],
+    "entry_zone_low": 74.73,
+    "entry_zone_high": 75.48,
+    "stop": 72.8239,
+    "target": 80.7921
+  },
+  "RXO": {
+    "last_price": 27.97,
+    "change_pct": -1.34039,
+    "day_high": 28.9,
+    "day_low": 27.86,
+    "volume": 29276,
+    "avg_volume": null,
+    "timestamp": 1781530584,
+    "updated_at": "2026-06-15T13:36:39.137808+00:00",
+    "entry_zone": [
+      27.79,
+      28.07
+    ],
+    "entry_zone_low": 27.79,
+    "entry_zone_high": 28.07,
+    "stop": 25.7418,
+    "target": 32.7264
+  },
+  "DG": {
+    "last_price": 118.135,
+    "change_pct": 2.90505,
+    "day_high": 119.2,
+    "day_low": 115.935,
+    "volume": 942366,
+    "avg_volume": null,
+    "timestamp": 1781536534,
+    "updated_at": "2026-06-15T15:15:54.466753+00:00",
+    "entry_zone": [
+      105.78,
+      106.84
+    ],
+    "entry_zone_low": 105.78,
+    "entry_zone_high": 106.84,
+    "stop": 99.9439,
+    "target": 120.6471
+  },
+  "FRPT": {
+    "last_price": 55.17,
+    "change_pct": 4.76643,
+    "day_high": 55.37,
+    "day_low": 53.055,
+    "volume": 171229.94757,
+    "avg_volume": null,
+    "timestamp": 1781536540,
+    "updated_at": "2026-06-15T15:15:54.466771+00:00",
+    "entry_zone": [
+      50.9,
+      51.41
+    ],
+    "entry_zone_low": 50.9,
+    "entry_zone_high": 51.41,
+    "stop": 47.7532,
+    "target": 58.7236
+  },
+  "MOH": {
+    "last_price": 197.165,
+    "change_pct": -1.55532,
+    "day_high": 198.39,
+    "day_low": 195.25,
+    "volume": 26934,
+    "avg_volume": null,
+    "timestamp": 1781530372,
+    "updated_at": "2026-06-15T13:33:06.283046+00:00",
+    "entry_zone": [
+      196.53,
+      198.5
+    ],
+    "entry_zone_low": 196.53,
+    "entry_zone_high": 198.5,
+    "stop": 187.9607,
+    "target": 219.6086
+  },
+  "SHOO": {
+    "last_price": 45.6494,
+    "change_pct": -1.08472,
+    "day_high": 47.105,
+    "day_low": 45.61,
+    "volume": 104086.01491,
+    "avg_volume": null,
+    "timestamp": 1781536539,
+    "updated_at": "2026-06-15T15:15:54.466787+00:00",
+    "entry_zone": [
+      44.86,
+      45.31
+    ],
+    "entry_zone_low": 44.86,
+    "entry_zone_high": 45.31,
+    "stop": 43.0225,
+    "target": 49.885
+  },
+  "CRGY": {
+    "last_price": 11.245,
+    "change_pct": -2.89292,
+    "day_high": 11.295,
+    "day_low": 10.8024,
+    "volume": 1412582,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:15:54.904677+00:00",
+    "entry_zone": [
+      11.66,
+      11.77
+    ],
+    "entry_zone_low": 11.66,
+    "entry_zone_high": 11.77,
+    "stop": 11.0089,
+    "target": 13.3071
+  },
+  "SLG": {
+    "last_price": 51.38,
+    "change_pct": 0.44966,
+    "day_high": 52.16,
+    "day_low": 51.29,
+    "volume": 117593.43669,
+    "avg_volume": null,
+    "timestamp": 1781536524,
+    "updated_at": "2026-06-15T15:15:54.904707+00:00",
+    "entry_zone": [
+      48.49,
+      48.98
+    ],
+    "entry_zone_low": 48.49,
+    "entry_zone_high": 48.98,
+    "stop": 46.5479,
+    "target": 53.8443
+  },
+  "DOW": {
+    "last_price": 33.04,
+    "change_pct": -2.39291,
+    "day_high": 33.115,
+    "day_low": 31.91,
+    "volume": 5610677,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:15:54.904722+00:00",
+    "entry_zone": [
+      33.86,
+      34.2
+    ],
+    "entry_zone_low": 33.86,
+    "entry_zone_high": 34.2,
+    "stop": 32.3236,
+    "target": 37.9679
+  },
+  "AAPL": {
+    "last_price": 296.425,
+    "change_pct": 1.81878,
+    "day_high": 296.9,
+    "day_low": 291.7,
+    "volume": 12804047,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:15:55.575068+00:00",
+    "entry_zone": [
+      287.8,
+      290.69
+    ],
+    "entry_zone_low": 287.8,
+    "entry_zone_high": 290.69,
+    "stop": 276.165,
+    "target": 313.956
+  },
+  "SYK": {
+    "last_price": 309.205,
+    "change_pct": -0.95932,
+    "day_high": 312.305,
+    "day_low": 308.78,
+    "volume": 106567,
+    "avg_volume": null,
+    "timestamp": 1781531222,
+    "updated_at": "2026-06-15T13:47:21.674365+00:00",
+    "entry_zone": [
+      306.76,
+      309.85
+    ],
+    "entry_zone_low": 306.76,
+    "entry_zone_high": 309.85,
+    "stop": 297.5582,
+    "target": 334.4486
+  },
+  "RYAN": {
+    "last_price": 35.52,
+    "change_pct": -0.3367,
+    "day_high": 35.7075,
+    "day_low": 34.88,
+    "volume": 293624,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:15:56.170502+00:00",
+    "entry_zone": [
+      32.84,
+      33.17
+    ],
+    "entry_zone_low": 32.84,
+    "entry_zone_high": 33.17,
+    "stop": 30.8289,
+    "target": 37.8521
+  },
+  "BCE": {
+    "last_price": 24.31,
+    "change_pct": -1.13867,
+    "day_high": 24.49,
+    "day_low": 24.07,
+    "volume": 517238.88381,
+    "avg_volume": null,
+    "timestamp": 1781534864,
+    "updated_at": "2026-06-15T14:48:03.522324+00:00",
+    "entry_zone": [
+      24.31,
+      24.55
+    ],
+    "entry_zone_low": 24.31,
+    "entry_zone_high": 24.55,
+    "stop": 23.8409,
+    "target": 25.9832
+  },
+  "WEC": {
+    "last_price": 112.38,
+    "change_pct": -0.93442,
+    "day_high": 112.71,
+    "day_low": 112.11,
+    "volume": 38918,
+    "avg_volume": null,
+    "timestamp": 1781530352,
+    "updated_at": "2026-06-15T13:33:08.549420+00:00",
+    "entry_zone": [
+      111.81,
+      112.94
+    ],
+    "entry_zone_low": 111.81,
+    "entry_zone_high": 112.94,
+    "stop": 109.9296,
+    "target": 118.9609
+  },
+  "REG": {
+    "last_price": 79.5149,
+    "change_pct": -0.95304,
+    "day_high": 80.18,
+    "day_low": 79.34,
+    "volume": 297324.77385,
+    "avg_volume": null,
+    "timestamp": 1781536538,
+    "updated_at": "2026-06-15T15:15:56.170538+00:00",
+    "entry_zone": [
+      78.49,
+      79.28
+    ],
+    "entry_zone_low": 78.49,
+    "entry_zone_high": 79.28,
+    "stop": 77.5493,
+    "target": 82.7564
+  },
+  "OHI": {
+    "last_price": 45.35,
+    "change_pct": -0.91763,
+    "day_high": 45.83,
+    "day_low": 45.22,
+    "volume": 782829,
+    "avg_volume": null,
+    "timestamp": 1781536536,
+    "updated_at": "2026-06-15T15:15:56.735644+00:00",
+    "entry_zone": [
+      44.72,
+      45.17
+    ],
+    "entry_zone_low": 44.72,
+    "entry_zone_high": 45.17,
+    "stop": 43.5195,
+    "target": 48.4711
+  },
+  "AWK": {
+    "last_price": 124,
+    "change_pct": -1.82883,
+    "day_high": 124.835,
+    "day_low": 123.8,
+    "volume": 34531.07914,
+    "avg_volume": null,
+    "timestamp": 1781530370,
+    "updated_at": "2026-06-15T13:33:10.049850+00:00",
+    "entry_zone": [
+      123.9,
+      125.15
+    ],
+    "entry_zone_low": 123.9,
+    "entry_zone_high": 125.15,
+    "stop": 120.9988,
+    "target": 133.4525
+  },
+  "ROL": {
+    "last_price": 46.96,
+    "change_pct": -0.48739,
+    "day_high": 47.18,
+    "day_low": 46.96,
+    "volume": 28913,
+    "avg_volume": null,
+    "timestamp": 1781530363,
+    "updated_at": "2026-06-15T13:33:10.530903+00:00",
+    "entry_zone": [
+      46.96,
+      47.43
+    ],
+    "entry_zone_low": 46.96,
+    "entry_zone_high": 47.43,
+    "stop": 45.1993,
+    "target": 51.8914
+  },
+  "BRO": {
+    "last_price": 59.91,
+    "change_pct": -0.13336,
+    "day_high": 60.22,
+    "day_low": 59.34,
+    "volume": 718191,
+    "avg_volume": null,
+    "timestamp": 1781536531,
+    "updated_at": "2026-06-15T15:15:57.193893+00:00",
+    "entry_zone": [
+      58.54,
+      59.13
+    ],
+    "entry_zone_low": 58.54,
+    "entry_zone_high": 59.13,
+    "stop": 56.4161,
+    "target": 64.5579
+  },
+  "MCD": {
+    "last_price": 286.305,
+    "change_pct": 0.52491,
+    "day_high": 287.95,
+    "day_low": 283.6,
+    "volume": 1145803,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:15:57.652258+00:00",
+    "entry_zone": [
+      279.9,
+      282.71
+    ],
+    "entry_zone_low": 279.9,
+    "entry_zone_high": 282.71,
+    "stop": 275.4182,
+    "target": 297.3236
+  },
+  "TSEM": {
+    "last_price": 284.102,
+    "change_pct": 8.05644,
+    "day_high": 291.44,
+    "day_low": 275.77,
+    "volume": 1060461.0673,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:15:58.210250+00:00",
+    "entry_zone": [
+      231.16,
+      233.48
+    ],
+    "entry_zone_low": 231.16,
+    "entry_zone_high": 233.48,
+    "stop": 200.3839,
+    "target": 299.7021
+  },
+  "SEI": {
+    "last_price": 77.11,
+    "change_pct": 4.18862,
+    "day_high": 78.2737,
+    "day_low": 75.81,
+    "volume": 541291,
+    "avg_volume": null,
+    "timestamp": 1781536534,
+    "updated_at": "2026-06-15T15:15:58.210281+00:00",
+    "entry_zone": [
+      67.55,
+      68.23
+    ],
+    "entry_zone_low": 67.55,
+    "entry_zone_high": 68.23,
+    "stop": 60.9936,
+    "target": 82.7029
+  },
+  "CAVA": {
+    "last_price": 90.73,
+    "change_pct": -0.28575,
+    "day_high": 91.6299,
+    "day_low": 88.05,
+    "volume": 1701086,
+    "avg_volume": null,
+    "timestamp": 1781536540,
+    "updated_at": "2026-06-15T15:15:58.210305+00:00",
+    "entry_zone": [
+      80.72,
+      81.53
+    ],
+    "entry_zone_low": 80.72,
+    "entry_zone_high": 81.53,
+    "stop": 75.6657,
+    "target": 93.2736
+  },
+  "T": {
+    "last_price": 23.375,
+    "change_pct": -0.86938,
+    "day_high": 23.51,
+    "day_low": 23.17,
+    "volume": 10568689,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:15:58.210325+00:00",
+    "entry_zone": [
+      22.96,
+      23.19
+    ],
+    "entry_zone_low": 22.96,
+    "entry_zone_high": 23.19,
+    "stop": 22.3057,
+    "target": 24.9736
+  },
+  "ITUB": {
+    "last_price": 8.145,
+    "change_pct": 1.93992,
+    "day_high": 8.215,
+    "day_low": 8.125,
+    "volume": 2373292,
+    "avg_volume": null,
+    "timestamp": 1781531862,
+    "updated_at": "2026-06-15T13:58:08.351457+00:00",
+    "entry_zone": [
+      7.53,
+      7.61
+    ],
+    "entry_zone_low": 7.53,
+    "entry_zone_high": 7.61,
+    "stop": 7.3507,
+    "target": 8.1286
+  },
+  "CAR": {
+    "last_price": 185.86,
+    "change_pct": -0.67336,
+    "day_high": 187.38,
+    "day_low": 185.85,
+    "volume": 11962,
+    "avg_volume": null,
+    "timestamp": 1781530351,
+    "updated_at": "2026-06-15T13:33:12.463566+00:00",
+    "entry_zone": [
+      184.97,
+      186.83
+    ],
+    "entry_zone_low": 184.97,
+    "entry_zone_high": 186.83,
+    "stop": 170.7339,
+    "target": 219.0221
+  },
+  "CXW": {
+    "last_price": 26.87,
+    "change_pct": -0.84871,
+    "day_high": 26.915,
+    "day_low": 26.5685,
+    "volume": 17504,
+    "avg_volume": null,
+    "timestamp": 1781530360,
+    "updated_at": "2026-06-15T13:33:29.614453+00:00",
+    "entry_zone": [
+      26.73,
+      26.99
+    ],
+    "entry_zone_low": 26.73,
+    "entry_zone_high": 26.99,
+    "stop": 25.5057,
+    "target": 29.9736
+  },
+  "BVN": {
+    "last_price": 34.68,
+    "change_pct": 3.7702,
+    "day_high": 35.7,
+    "day_low": 34.32,
+    "volume": 479315,
+    "avg_volume": null,
+    "timestamp": 1781536522,
+    "updated_at": "2026-06-15T15:15:58.700455+00:00",
+    "entry_zone": [
+      30.38,
+      30.68
+    ],
+    "entry_zone_low": 30.38,
+    "entry_zone_high": 30.68,
+    "stop": 27.9079,
+    "target": 36.2393
+  },
+  "ATO": {
+    "last_price": 168.965,
+    "change_pct": -0.58543,
+    "day_high": 168.965,
+    "day_low": 168.965,
+    "volume": 8595.56016,
+    "avg_volume": null,
+    "timestamp": 1781530277,
+    "updated_at": "2026-06-15T13:33:29.614747+00:00",
+    "entry_zone": [
+      168.26,
+      169.96
+    ],
+    "entry_zone_low": 168.26,
+    "entry_zone_high": 169.96,
+    "stop": 165.3732,
+    "target": 179.1336
+  },
+  "RDN": {
+    "last_price": 34.57,
+    "change_pct": -0.25967,
+    "day_high": 34.58,
+    "day_low": 34.21,
+    "volume": 6931,
+    "avg_volume": null,
+    "timestamp": 1781530203,
+    "updated_at": "2026-06-15T13:33:14.289116+00:00",
+    "entry_zone": [
+      34.4,
+      34.75
+    ],
+    "entry_zone_low": 34.4,
+    "entry_zone_high": 34.75,
+    "stop": 33.3529,
+    "target": 37.5443
+  },
+  "BRUN": {
+    "last_price": 34.75,
+    "change_pct": 12.3868,
+    "day_high": 35.45,
+    "day_low": 31.58,
+    "volume": 663667,
+    "avg_volume": null,
+    "timestamp": 1781536540,
+    "updated_at": "2026-06-15T15:15:58.700490+00:00",
+    "entry_zone": [
+      29.65,
+      29.95
+    ],
+    "entry_zone_low": 29.65,
+    "entry_zone_high": 29.95,
+    "stop": 22.3932,
+    "target": 45.0636
+  },
+  "MAT": {
+    "last_price": 14.7211,
+    "change_pct": 0.48532,
+    "day_high": 14.9,
+    "day_low": 14.64,
+    "volume": 952023.7688,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:15:58.700506+00:00",
+    "entry_zone": [
+      14.54,
+      14.69
+    ],
+    "entry_zone_low": 14.54,
+    "entry_zone_high": 14.69,
+    "stop": 14.0354,
+    "target": 15.9993
+  },
+  "SFM": {
+    "last_price": 85.895,
+    "change_pct": -0.50388,
+    "day_high": 86.13,
+    "day_low": 82.88,
+    "volume": 198979,
+    "avg_volume": null,
+    "timestamp": 1781532300,
+    "updated_at": "2026-06-15T14:05:21.506077+00:00",
+    "entry_zone": [
+      85.89,
+      86.76
+    ],
+    "entry_zone_low": 85.89,
+    "entry_zone_high": 86.76,
+    "stop": 81.1114,
+    "target": 98.0571
+  },
+  "VZ": {
+    "last_price": 47.4375,
+    "change_pct": -1.39784,
+    "day_high": 47.745,
+    "day_low": 47.23,
+    "volume": 5079230,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:15:59.140019+00:00",
+    "entry_zone": [
+      46.46,
+      46.92
+    ],
+    "entry_zone_low": 46.46,
+    "entry_zone_high": 46.92,
+    "stop": 45.2846,
+    "target": 50.2057
+  },
+  "MKC": {
+    "last_price": 47.935,
+    "change_pct": -2.07354,
+    "day_high": 48.935,
+    "day_low": 47.91,
+    "volume": 687017,
+    "avg_volume": null,
+    "timestamp": 1781536540,
+    "updated_at": "2026-06-15T15:15:59.741425+00:00",
+    "entry_zone": [
+      49.18,
+      49.68
+    ],
+    "entry_zone_low": 49.18,
+    "entry_zone_high": 49.68,
+    "stop": 47.5961,
+    "target": 53.8479
+  },
+  "ODFL": {
+    "last_price": 235.52,
+    "change_pct": -4.16277,
+    "day_high": 244.39,
+    "day_low": 235.11,
+    "volume": 327027,
+    "avg_volume": null,
+    "timestamp": 1781534033,
+    "updated_at": "2026-06-15T14:34:10.195727+00:00",
+    "entry_zone": [
+      233.56,
+      235.9
+    ],
+    "entry_zone_low": 233.56,
+    "entry_zone_high": 235.9,
+    "stop": 221.9654,
+    "target": 263.7993
+  },
+  "EXPD": {
+    "last_price": 164.265,
+    "change_pct": -1.4134,
+    "day_high": 166.255,
+    "day_low": 163.98,
+    "volume": 20391,
+    "avg_volume": null,
+    "timestamp": 1781530579,
+    "updated_at": "2026-06-15T13:36:46.348361+00:00",
+    "entry_zone": [
+      163.02,
+      164.66
+    ],
+    "entry_zone_low": 163.02,
+    "entry_zone_high": 164.66,
+    "stop": 159.6039,
+    "target": 174.7721
+  },
+  "BTI": {
+    "last_price": 61.95,
+    "change_pct": -0.59371,
+    "day_high": 62.4,
+    "day_low": 61.9,
+    "volume": 1435933,
+    "avg_volume": null,
+    "timestamp": 1781536537,
+    "updated_at": "2026-06-15T15:16:00.497278+00:00",
+    "entry_zone": [
+      60.51,
+      61.12
+    ],
+    "entry_zone_low": 60.51,
+    "entry_zone_high": 61.12,
+    "stop": 59.0468,
+    "target": 65.2664
+  },
+  "PTON": {
+    "last_price": 5.565,
+    "change_pct": 0.27027,
+    "day_high": 5.705,
+    "day_low": 5.56,
+    "volume": 1043172,
+    "avg_volume": null,
+    "timestamp": 1781532523,
+    "updated_at": "2026-06-15T14:08:58.850400+00:00",
+    "entry_zone": [
+      5.54,
+      5.59
+    ],
+    "entry_zone_low": 5.54,
+    "entry_zone_high": 5.59,
+    "stop": 5.0754,
+    "target": 6.6343
+  },
+  "FSM": {
+    "last_price": 9.575,
+    "change_pct": 7.22284,
+    "day_high": 9.7,
+    "day_low": 9.51,
+    "volume": 1240420,
+    "avg_volume": null,
+    "timestamp": 1781531875,
+    "updated_at": "2026-06-15T13:58:11.782757+00:00",
+    "entry_zone": [
+      8.12,
+      8.2
+    ],
+    "entry_zone_low": 8.12,
+    "entry_zone_high": 8.2,
+    "stop": 7.5686,
+    "target": 9.4779
+  },
+  "KLAR": {
+    "last_price": 17.37,
+    "change_pct": 7.02403,
+    "day_high": 17.385,
+    "day_low": 16.7,
+    "volume": 2603403,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:00.974531+00:00",
+    "entry_zone": [
+      15.61,
+      15.77
+    ],
+    "entry_zone_low": 15.61,
+    "entry_zone_high": 15.77,
+    "stop": 14.39,
+    "target": 18.53
+  },
+  "HST": {
+    "last_price": 24.8839,
+    "change_pct": -0.02450783,
+    "day_high": 25.215,
+    "day_low": 24.86,
+    "volume": 1647087.23834,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:00.974564+00:00",
+    "entry_zone": [
+      24.15,
+      24.39
+    ],
+    "entry_zone_low": 24.15,
+    "entry_zone_high": 24.39,
+    "stop": 23.5517,
+    "target": 26.0621
+  },
+  "TW": {
+    "last_price": 101.376,
+    "change_pct": 0.18381,
+    "day_high": 101.81,
+    "day_low": 100.6,
+    "volume": 191870.43562,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:16:01.751923+00:00",
+    "entry_zone": [
+      99.2,
+      100.2
+    ],
+    "entry_zone_low": 99.2,
+    "entry_zone_high": 100.2,
+    "stop": 95.4148,
+    "target": 109.7794
+  },
+  "EGO": {
+    "last_price": 33.59,
+    "change_pct": 9.55643,
+    "day_high": 33.84,
+    "day_low": 32.505,
+    "volume": 732422,
+    "avg_volume": null,
+    "timestamp": 1781531875,
+    "updated_at": "2026-06-15T13:58:12.243176+00:00",
+    "entry_zone": [
+      28.2,
+      28.48
+    ],
+    "entry_zone_low": 28.2,
+    "entry_zone_high": 28.48,
+    "stop": 26.1743,
+    "target": 33.0914
+  },
+  "FRSH": {
+    "last_price": 9.405,
+    "change_pct": -0.4235,
+    "day_high": 9.465,
+    "day_low": 9.38,
+    "volume": 231983,
+    "avg_volume": null,
+    "timestamp": 1781530375,
+    "updated_at": "2026-06-15T13:33:29.613527+00:00",
+    "entry_zone": [
+      9.32,
+      9.42
+    ],
+    "entry_zone_low": 9.32,
+    "entry_zone_high": 9.42,
+    "stop": 8.6936,
+    "target": 10.868
+  },
+  "AQN": {
+    "last_price": 5.975,
+    "change_pct": 0.58923,
+    "day_high": 5.98,
+    "day_low": 5.91,
+    "volume": 841297,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:02.643525+00:00",
+    "entry_zone": [
+      5.83,
+      5.88
+    ],
+    "entry_zone_low": 5.83,
+    "entry_zone_high": 5.88,
+    "stop": 5.7136,
+    "target": 6.2279
+  },
+  "UDR": {
+    "last_price": 39.12,
+    "change_pct": -0.71066,
+    "day_high": 39.37,
+    "day_low": 39.09,
+    "volume": 67515,
+    "avg_volume": null,
+    "timestamp": 1781530367,
+    "updated_at": "2026-06-15T13:33:19.546404+00:00",
+    "entry_zone": [
+      38.79,
+      39.18
+    ],
+    "entry_zone_low": 38.79,
+    "entry_zone_high": 39.18,
+    "stop": 38.0375,
+    "target": 41.48
+  },
+  "LUMN": {
+    "last_price": 8.385,
+    "change_pct": -1.23558,
+    "day_high": 8.87,
+    "day_low": 8.355,
+    "volume": 2270799,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:03.183666+00:00",
+    "entry_zone": [
+      8.18,
+      8.26
+    ],
+    "entry_zone_low": 8.18,
+    "entry_zone_high": 8.26,
+    "stop": 7.2777,
+    "target": 10.2396
+  },
+  "SOC": {
+    "last_price": 10.78,
+    "change_pct": -0.91912,
+    "day_high": 10.89,
+    "day_low": 10.35,
+    "volume": 953239,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:16:03.715354+00:00",
+    "entry_zone": [
+      11.81,
+      11.92
+    ],
+    "entry_zone_low": 11.81,
+    "entry_zone_high": 11.92,
+    "stop": 10.0243,
+    "target": 15.7264
+  },
+  "PUMP": {
+    "last_price": 15.28,
+    "change_pct": -1.48292,
+    "day_high": 15.31,
+    "day_low": 14.74,
+    "volume": 191364,
+    "avg_volume": null,
+    "timestamp": 1781531219,
+    "updated_at": "2026-06-15T13:47:30.280264+00:00",
+    "entry_zone": [
+      15.14,
+      15.29
+    ],
+    "entry_zone_low": 15.14,
+    "entry_zone_high": 15.29,
+    "stop": 13.8886,
+    "target": 18.0929
+  },
+  "ELAN": {
+    "last_price": 24.62,
+    "change_pct": 1.86181,
+    "day_high": 25.07,
+    "day_low": 24.38,
+    "volume": 740108,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:03.715395+00:00",
+    "entry_zone": [
+      22.59,
+      22.82
+    ],
+    "entry_zone_low": 22.59,
+    "entry_zone_high": 22.82,
+    "stop": 21.1443,
+    "target": 26.1714
+  },
+  "SMTC": {
+    "last_price": 170.71,
+    "change_pct": 2.39938,
+    "day_high": 177.35,
+    "day_low": 169.47,
+    "volume": 1053410.26263,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:04.918420+00:00",
+    "entry_zone": [
+      162.06,
+      163.69
+    ],
+    "entry_zone_low": 162.06,
+    "entry_zone_high": 163.69,
+    "stop": 140.0468,
+    "target": 210.9764
+  },
+  "BWA": {
+    "last_price": 74.88,
+    "change_pct": 0.49658,
+    "day_high": 76.5,
+    "day_low": 74.785,
+    "volume": 287359,
+    "avg_volume": null,
+    "timestamp": 1781532735,
+    "updated_at": "2026-06-15T14:12:40.378858+00:00",
+    "entry_zone": [
+      74.13,
+      74.88
+    ],
+    "entry_zone_low": 74.13,
+    "entry_zone_high": 74.88,
+    "stop": 69.2025,
+    "target": 86.235
+  },
+  "LMT": {
+    "last_price": 530.02002,
+    "change_pct": -1.90809,
+    "day_high": 535.555,
+    "day_low": 529.36,
+    "volume": 282194,
+    "avg_volume": null,
+    "timestamp": 1781535498,
+    "updated_at": "2026-06-15T14:58:40.728077+00:00",
+    "entry_zone": [
+      543.51,
+      548.98
+    ],
+    "entry_zone_low": 543.51,
+    "entry_zone_high": 548.98,
+    "stop": 531.8546,
+    "target": 583.2607
+  },
+  "GPC": {
+    "last_price": 105.005,
+    "change_pct": 1.20964,
+    "day_high": 105.48,
+    "day_low": 104.5,
+    "volume": 345073,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:16:04.918435+00:00",
+    "entry_zone": [
+      101.28,
+      102.3
+    ],
+    "entry_zone_low": 101.28,
+    "entry_zone_high": 102.3,
+    "stop": 98.5082,
+    "target": 109.8836
+  },
+  "PENG": {
+    "last_price": 63.81,
+    "change_pct": -0.49899,
+    "day_high": 67.72,
+    "day_low": 63.1099,
+    "volume": 186687,
+    "avg_volume": null,
+    "timestamp": 1781530588,
+    "updated_at": "2026-06-15T13:36:53.280538+00:00",
+    "entry_zone": [
+      63.66,
+      64.3
+    ],
+    "entry_zone_low": 63.66,
+    "entry_zone_high": 64.3,
+    "stop": 53.2964,
+    "target": 86.3071
+  },
+  "PPTA": {
+    "last_price": 25.85,
+    "change_pct": 7.30594,
+    "day_high": 26.87,
+    "day_low": 25.69,
+    "volume": 674072,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:16:05.377190+00:00",
+    "entry_zone": [
+      23.22,
+      23.45
+    ],
+    "entry_zone_low": 23.22,
+    "entry_zone_high": 23.45,
+    "stop": 20.7382,
+    "target": 28.8736
+  },
+  "AAON": {
+    "last_price": 132.634,
+    "change_pct": 4.28021,
+    "day_high": 134.895,
+    "day_low": 132.39,
+    "volume": 165126.41654,
+    "avg_volume": null,
+    "timestamp": 1781536534,
+    "updated_at": "2026-06-15T15:16:05.377225+00:00",
+    "entry_zone": [
+      127.5,
+      128.78
+    ],
+    "entry_zone_low": 127.5,
+    "entry_zone_high": 128.78,
+    "stop": 115.2768,
+    "target": 155.7864
+  },
+  "BMNR": {
+    "last_price": 17.265,
+    "change_pct": 7.16946,
+    "day_high": 17.56,
+    "day_low": 17.085,
+    "volume": 21309582,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:05.907389+00:00",
+    "entry_zone": [
+      16.36,
+      16.52
+    ],
+    "entry_zone_low": 16.36,
+    "entry_zone_high": 16.52,
+    "stop": 14.615,
+    "target": 20.33
+  },
+  "FLY": {
+    "last_price": 33.48,
+    "change_pct": 5.05177,
+    "day_high": 34.88,
+    "day_low": 32.98,
+    "volume": 3555231.83479,
+    "avg_volume": null,
+    "timestamp": 1781536541,
+    "updated_at": "2026-06-15T15:16:05.907432+00:00",
+    "entry_zone": [
+      39.04,
+      39.43
+    ],
+    "entry_zone_low": 39.04,
+    "entry_zone_high": 39.43,
+    "stop": 30.3743,
+    "target": 57.5414
+  },
+  "AG": {
+    "last_price": 18.99,
+    "change_pct": 7.62256,
+    "day_high": 19.56,
+    "day_low": 18.925,
+    "volume": 6275010,
+    "avg_volume": null,
+    "timestamp": 1781536544,
+    "updated_at": "2026-06-15T15:16:05.907448+00:00",
+    "entry_zone": [
+      16.74,
+      16.91
+    ],
+    "entry_zone_low": 16.74,
+    "entry_zone_high": 16.91,
+    "stop": 15.0939,
+    "target": 20.5421
+  },
+  "CGON": {
+    "last_price": 60.79,
+    "change_pct": 2.06515,
+    "day_high": 61.235,
+    "day_low": 59.885,
+    "volume": 115209,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:05.907461+00:00",
+    "entry_zone": [
+      57.02,
+      57.59
+    ],
+    "entry_zone_low": 57.02,
+    "entry_zone_high": 57.59,
+    "stop": 53.0214,
+    "target": 66.7271
+  },
+  "WULF": {
+    "last_price": 27.225,
+    "change_pct": 4.47045,
+    "day_high": 28.03,
+    "day_low": 27.03,
+    "volume": 9125473.48756,
+    "avg_volume": null,
+    "timestamp": 1781536543,
+    "updated_at": "2026-06-15T15:16:05.907470+00:00",
+    "entry_zone": [
+      25.09,
+      25.34
+    ],
+    "entry_zone_low": 25.09,
+    "entry_zone_high": 25.34,
+    "stop": 22.0568,
+    "target": 31.9214
+  },
+  "PK": {
+    "last_price": 14.415,
+    "change_pct": -0.58621,
+    "day_high": 14.7,
+    "day_low": 14.37,
+    "volume": 601658,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:05.907482+00:00",
+    "entry_zone": [
+      14.22,
+      14.36
+    ],
+    "entry_zone_low": 14.22,
+    "entry_zone_high": 14.36,
+    "stop": 13.6239,
+    "target": 15.8321
+  },
+  "VERA": {
+    "last_price": 34.63,
+    "change_pct": 1.07998,
+    "day_high": 35.29,
+    "day_low": 34.42,
+    "volume": 117815,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:06.453254+00:00",
+    "entry_zone": [
+      33.27,
+      33.61
+    ],
+    "entry_zone_low": 33.27,
+    "entry_zone_high": 33.61,
+    "stop": 30.1375,
+    "target": 40.555
+  },
+  "DAKT": {
+    "last_price": 20.49,
+    "change_pct": 0.93596,
+    "day_high": 20.74,
+    "day_low": 20.33,
+    "volume": 79195.48832,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:16:06.927782+00:00",
+    "entry_zone": [
+      20.7,
+      20.91
+    ],
+    "entry_zone_low": 20.7,
+    "entry_zone_high": 20.91,
+    "stop": 19.8645,
+    "target": 22.5828
+  },
+  "SIRI": {
+    "last_price": 27.955,
+    "change_pct": 1.58067,
+    "day_high": 28.11,
+    "day_low": 27.625,
+    "volume": 1284720,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:07.403247+00:00",
+    "entry_zone": [
+      27.31,
+      27.59
+    ],
+    "entry_zone_low": 27.31,
+    "entry_zone_high": 27.59,
+    "stop": 26.2105,
+    "target": 29.7972
+  },
+  "DDOG": {
+    "last_price": 232.79,
+    "change_pct": 1.25707,
+    "day_high": 236.77,
+    "day_low": 231.63,
+    "volume": 256709,
+    "avg_volume": null,
+    "timestamp": 1781530374,
+    "updated_at": "2026-06-15T13:33:26.491621+00:00",
+    "entry_zone": [
+      231.9,
+      234.23
+    ],
+    "entry_zone_low": 231.9,
+    "entry_zone_high": 234.23,
+    "stop": 222.528,
+    "target": 252.9792
+  },
+  "RIOT": {
+    "last_price": 27.375,
+    "change_pct": 2.87486,
+    "day_high": 28.47,
+    "day_low": 27.34,
+    "volume": 3677567,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:07.875507+00:00",
+    "entry_zone": [
+      25.88,
+      26.14
+    ],
+    "entry_zone_low": 25.88,
+    "entry_zone_high": 26.14,
+    "stop": 23.0286,
+    "target": 32.3629
+  },
+  "CMC": {
+    "last_price": 77.77,
+    "change_pct": 0.01286008,
+    "day_high": 79.91,
+    "day_low": 77.55,
+    "volume": 101037,
+    "avg_volume": null,
+    "timestamp": 1781534032,
+    "updated_at": "2026-06-15T14:34:17.227783+00:00",
+    "entry_zone": [
+      77.0,
+      77.78
+    ],
+    "entry_zone_low": 77.0,
+    "entry_zone_high": 77.78,
+    "stop": 74.0214,
+    "target": 85.2971
+  },
+  "CSTM": {
+    "last_price": 34.74,
+    "change_pct": -2.41573,
+    "day_high": 36.7277,
+    "day_low": 34.72,
+    "volume": 501428,
+    "avg_volume": null,
+    "timestamp": 1781533394,
+    "updated_at": "2026-06-15T14:23:38.333795+00:00",
+    "entry_zone": [
+      34.39,
+      34.74
+    ],
+    "entry_zone_low": 34.39,
+    "entry_zone_high": 34.74,
+    "stop": 31.6168,
+    "target": 40.9864
+  },
+  "IVZ": {
+    "last_price": 29.325,
+    "change_pct": 1.40041,
+    "day_high": 29.815,
+    "day_low": 29.26,
+    "volume": 574272,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:16:07.875549+00:00",
+    "entry_zone": [
+      28.01,
+      28.29
+    ],
+    "entry_zone_low": 28.01,
+    "entry_zone_high": 28.29,
+    "stop": 26.9046,
+    "target": 31.0607
+  },
+  "MAIR": {
+    "last_price": 40.25,
+    "change_pct": 3.15223,
+    "day_high": 41.105,
+    "day_low": 40.06,
+    "volume": 46391,
+    "avg_volume": null,
+    "timestamp": 1781531225,
+    "updated_at": "2026-06-15T13:47:36.823112+00:00",
+    "entry_zone": [
+      39.91,
+      40.31
+    ],
+    "entry_zone_low": 39.91,
+    "entry_zone_high": 40.31,
+    "stop": 36.7764,
+    "target": 47.3771
+  },
+  "ST": {
+    "last_price": 51.69,
+    "change_pct": 2.55952,
+    "day_high": 52.7,
+    "day_low": 51.57,
+    "volume": 267877,
+    "avg_volume": null,
+    "timestamp": 1781536532,
+    "updated_at": "2026-06-15T15:16:07.875572+00:00",
+    "entry_zone": [
+      49.37,
+      49.87
+    ],
+    "entry_zone_low": 49.37,
+    "entry_zone_high": 49.87,
+    "stop": 46.5111,
+    "target": 56.5879
+  },
+  "CNK": {
+    "last_price": 32.85,
+    "change_pct": -2.81065,
+    "day_high": 33.21,
+    "day_low": 32.25,
+    "volume": 398229,
+    "avg_volume": null,
+    "timestamp": 1781536537,
+    "updated_at": "2026-06-15T15:16:07.875585+00:00",
+    "entry_zone": [
+      33.66,
+      34.0
+    ],
+    "entry_zone_low": 33.66,
+    "entry_zone_high": 34.0,
+    "stop": 32.1218,
+    "target": 37.7564
+  },
+  "VOD": {
+    "last_price": 15.04,
+    "change_pct": -3.15518,
+    "day_high": 15.16,
+    "day_low": 15.0201,
+    "volume": 428571,
+    "avg_volume": null,
+    "timestamp": 1781531868,
+    "updated_at": "2026-06-15T13:58:29.853765+00:00",
+    "entry_zone": [
+      15.38,
+      15.53
+    ],
+    "entry_zone_low": 15.38,
+    "entry_zone_high": 15.53,
+    "stop": 15.14,
+    "target": 16.31
+  },
+  "ARIS": {
+    "last_price": 17.58,
+    "change_pct": 10.63562,
+    "day_high": 18.17,
+    "day_low": 17.03,
+    "volume": 743270,
+    "avg_volume": null,
+    "timestamp": 1781536542,
+    "updated_at": "2026-06-15T15:16:08.533375+00:00",
+    "entry_zone": [
+      15.75,
+      15.9
+    ],
+    "entry_zone_low": 15.75,
+    "entry_zone_high": 15.9,
+    "stop": 14.3379,
+    "target": 19.0391
+  },
+  "WES": {
+    "last_price": 44.06,
+    "change_pct": -1.14427,
+    "day_high": 44.0625,
+    "day_low": 43.38,
+    "volume": 68223,
+    "avg_volume": null,
+    "timestamp": 1781531227,
+    "updated_at": "2026-06-15T13:47:45.962688+00:00",
+    "entry_zone": [
+      44.11,
+      44.55
+    ],
+    "entry_zone_low": 44.11,
+    "entry_zone_high": 44.55,
+    "stop": 42.8871,
+    "target": 47.8757
+  },
+  "VIRT": {
+    "last_price": 57.11,
+    "change_pct": -0.88511,
+    "day_high": 57.5,
+    "day_low": 55.95,
+    "volume": 20909,
+    "avg_volume": null,
+    "timestamp": 1781530313,
+    "updated_at": "2026-06-15T13:33:29.613489+00:00",
+    "entry_zone": [
+      56.76,
+      57.33
+    ],
+    "entry_zone_low": 56.76,
+    "entry_zone_high": 57.33,
+    "stop": 54.3982,
+    "target": 63.2086
+  },
+  "ATMU": {
+    "last_price": 51.065,
+    "change_pct": 2.54016,
+    "day_high": 51.73,
+    "day_low": 50.94,
+    "volume": 127369,
+    "avg_volume": null,
+    "timestamp": 1781536502,
+    "updated_at": "2026-06-15T15:16:09.490499+00:00",
+    "entry_zone": [
+      49.55,
+      50.05
+    ],
+    "entry_zone_low": 49.55,
+    "entry_zone_high": 50.05,
+    "stop": 47.5482,
+    "target": 55.0536
+  },
+  "IAG": {
+    "last_price": 18.16,
+    "change_pct": 9.06907,
+    "day_high": 18.47,
+    "day_low": 17.83,
+    "volume": 2629723,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:09.998729+00:00",
+    "entry_zone": [
+      16.5,
+      16.67
+    ],
+    "entry_zone_low": 16.5,
+    "entry_zone_high": 16.67,
+    "stop": 15.2648,
+    "target": 19.4804
+  },
+  "CB": {
+    "last_price": 324.93,
+    "change_pct": -0.97824,
+    "day_high": 325.29,
+    "day_low": 323.7,
+    "volume": 33977,
+    "avg_volume": null,
+    "timestamp": 1781530585,
+    "updated_at": "2026-06-15T13:37:04.482029+00:00",
+    "entry_zone": [
+      324.9,
+      328.16
+    ],
+    "entry_zone_low": 324.9,
+    "entry_zone_high": 328.16,
+    "stop": 318.0954,
+    "target": 348.3193
+  },
+  "PRIM": {
+    "last_price": 98.56,
+    "change_pct": -0.09123163,
+    "day_high": 103.1189,
+    "day_low": 98.3,
+    "volume": 156802,
+    "avg_volume": null,
+    "timestamp": 1781534232,
+    "updated_at": "2026-06-15T14:37:50.166435+00:00",
+    "entry_zone": [
+      97.58,
+      98.56
+    ],
+    "entry_zone_low": 97.58,
+    "entry_zone_high": 98.56,
+    "stop": 84.932,
+    "target": 125.8161
+  },
+  "AEVA": {
+    "last_price": 27.2,
+    "change_pct": 9.28084,
+    "day_high": 28.24,
+    "day_low": 26.4503,
+    "volume": 857446.57037,
+    "avg_volume": null,
+    "timestamp": 1781536536,
+    "updated_at": "2026-06-15T15:16:09.998772+00:00",
+    "entry_zone": [
+      24.87,
+      25.12
+    ],
+    "entry_zone_low": 24.87,
+    "entry_zone_high": 25.12,
+    "stop": 20.6318,
+    "target": 34.0964
+  },
+  "TMC": {
+    "last_price": 5.555,
+    "change_pct": 2.30203,
+    "day_high": 5.79,
+    "day_low": 5.55,
+    "volume": 777904.13336,
+    "avg_volume": null,
+    "timestamp": 1781531660,
+    "updated_at": "2026-06-15T13:54:50.265581+00:00",
+    "entry_zone": [
+      5.51,
+      5.57
+    ],
+    "entry_zone_low": 5.51,
+    "entry_zone_high": 5.57,
+    "stop": 4.8545,
+    "target": 6.9904
+  },
+  "ALC": {
+    "last_price": 66.765,
+    "change_pct": -0.12715,
+    "day_high": 68.02,
+    "day_low": 66.765,
+    "volume": 394338,
+    "avg_volume": null,
+    "timestamp": 1781536120,
+    "updated_at": "2026-06-15T15:09:11.129444+00:00",
+    "entry_zone": [
+      66.13,
+      66.8
+    ],
+    "entry_zone_low": 66.13,
+    "entry_zone_high": 66.8,
+    "stop": 64.7418,
+    "target": 70.9164
+  },
+  "SEM": {
+    "last_price": 16.645,
+    "change_pct": -0.12001,
+    "day_high": 16.649,
+    "day_low": 16.635,
+    "volume": 14246,
+    "avg_volume": null,
+    "timestamp": 1781530365,
+    "updated_at": "2026-06-15T13:33:29.613643+00:00",
+    "entry_zone": [
+      16.5,
+      16.66
+    ],
+    "entry_zone_low": 16.5,
+    "entry_zone_high": 16.66,
+    "stop": 16.5825,
+    "target": 16.83
+  },
+  "SBRA": {
+    "last_price": 18.65,
+    "change_pct": -0.42712,
+    "day_high": 18.68,
+    "day_low": 18.55,
+    "volume": 51907,
+    "avg_volume": null,
+    "timestamp": 1781530801,
+    "updated_at": "2026-06-15T13:40:35.253093+00:00",
+    "entry_zone": [
+      18.63,
+      18.81
+    ],
+    "entry_zone_low": 18.63,
+    "entry_zone_high": 18.81,
+    "stop": 17.9016,
+    "target": 20.6418
+  },
+  "WH": {
+    "last_price": 80.73,
+    "change_pct": 1.68787,
+    "day_high": 81.52,
+    "day_low": 79.96,
+    "volume": 456328,
+    "avg_volume": null,
+    "timestamp": 1781536534,
+    "updated_at": "2026-06-15T15:16:09.998798+00:00",
+    "entry_zone": [
+      78.22,
+      79.01
+    ],
+    "entry_zone_low": 78.22,
+    "entry_zone_high": 79.01,
+    "stop": 74.8882,
+    "target": 87.2536
+  },
+  "YUMC": {
+    "last_price": 44.575,
+    "change_pct": -0.12324,
+    "day_high": 44.98,
+    "day_low": 44.57,
+    "volume": 296004,
+    "avg_volume": null,
+    "timestamp": 1781533169,
+    "updated_at": "2026-06-15T14:20:10.389210+00:00",
+    "entry_zone": [
+      44.16,
+      44.6
+    ],
+    "entry_zone_low": 44.16,
+    "entry_zone_high": 44.6,
+    "stop": 43.2146,
+    "target": 47.3707
+  },
+  "PAYC": {
+    "last_price": 134.37,
+    "change_pct": -0.11151,
+    "day_high": 135.68,
+    "day_low": 133.74,
+    "volume": 13928,
+    "avg_volume": null,
+    "timestamp": 1781530354,
+    "updated_at": "2026-06-15T13:33:29.613713+00:00",
+    "entry_zone": [
+      133.27,
+      134.61
+    ],
+    "entry_zone_low": 133.27,
+    "entry_zone_high": 134.61,
+    "stop": 125.0207,
+    "target": 153.7886
+  },
+  "BGC": {
+    "last_price": 11.9293,
+    "change_pct": 0.6692,
+    "day_high": 12.09,
+    "day_low": 11.87,
+    "volume": 835742.37768,
+    "avg_volume": null,
+    "timestamp": 1781536540,
+    "updated_at": "2026-06-15T15:16:10.477936+00:00",
+    "entry_zone": [
+      11.74,
+      11.85
+    ],
+    "entry_zone_low": 11.74,
+    "entry_zone_high": 11.85,
+    "stop": 11.3375,
+    "target": 12.89
+  },
+  "LION": {
+    "last_price": 14.32,
+    "change_pct": 0.10475,
+    "day_high": 14.43,
+    "day_low": 14.32,
+    "volume": 57327,
+    "avg_volume": null,
+    "timestamp": 1781530579,
+    "updated_at": "2026-06-15T13:37:04.481810+00:00",
+    "entry_zone": [
+      14.18,
+      14.32
+    ],
+    "entry_zone_low": 14.18,
+    "entry_zone_high": 14.32,
+    "stop": 13.4564,
+    "target": 16.0471
+  },
+  "FRO": {
+    "last_price": 39.05,
+    "change_pct": -0.05119017,
+    "day_high": 39.81,
+    "day_low": 38.935,
+    "volume": 1897635,
+    "avg_volume": null,
+    "timestamp": 1781531221,
+    "updated_at": "2026-06-15T13:47:45.962590+00:00",
+    "entry_zone": [
+      38.69,
+      39.08
+    ],
+    "entry_zone_low": 38.69,
+    "entry_zone_high": 39.08,
+    "stop": 36.9896,
+    "target": 43.2607
+  },
+  "DD": {
+    "last_price": 48.945,
+    "change_pct": 1.41939,
+    "day_high": 49.56,
+    "day_low": 48.64,
+    "volume": 663226,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:16:10.918483+00:00",
+    "entry_zone": [
+      47.77,
+      48.25
+    ],
+    "entry_zone_low": 47.77,
+    "entry_zone_high": 48.25,
+    "stop": 45.9868,
+    "target": 52.7914
+  },
+  "AVT": {
+    "last_price": 91.9633,
+    "change_pct": 1.51595,
+    "day_high": 93.37,
+    "day_low": 91.395,
+    "volume": 176363.0785,
+    "avg_volume": null,
+    "timestamp": 1781536536,
+    "updated_at": "2026-06-15T15:16:11.390563+00:00",
+    "entry_zone": [
+      89.67,
+      90.57
+    ],
+    "entry_zone_low": 89.67,
+    "entry_zone_high": 90.57,
+    "stop": 85.1025,
+    "target": 101.505
+  },
+  "RIVN": {
+    "last_price": 16.675,
+    "change_pct": -0.50716,
+    "day_high": 17.09,
+    "day_low": 16.64,
+    "volume": 6436249,
+    "avg_volume": null,
+    "timestamp": 1781532951,
+    "updated_at": "2026-06-15T14:16:23.114285+00:00",
+    "entry_zone": [
+      16.59,
+      16.76
+    ],
+    "entry_zone_low": 16.59,
+    "entry_zone_high": 16.76,
+    "stop": 15.0071,
+    "target": 20.2657
+  },
+  "SBLK": {
+    "last_price": 27.035,
+    "change_pct": -0.42357,
+    "day_high": 27.365,
+    "day_low": 26.66,
+    "volume": 61790,
+    "avg_volume": null,
+    "timestamp": 1781530580,
+    "updated_at": "2026-06-15T13:37:04.481893+00:00",
+    "entry_zone": [
+      26.9,
+      27.17
+    ],
+    "entry_zone_low": 26.9,
+    "entry_zone_high": 27.17,
+    "stop": 25.9593,
+    "target": 29.5914
+  },
+  "HPQ": {
+    "last_price": 25.16,
+    "change_pct": -0.31696,
+    "day_high": 25.38,
+    "day_low": 25.12,
+    "volume": 555101,
+    "avg_volume": null,
+    "timestamp": 1781530370,
+    "updated_at": "2026-06-15T13:33:29.613840+00:00",
+    "entry_zone": [
+      24.99,
+      25.24
+    ],
+    "entry_zone_low": 24.99,
+    "entry_zone_high": 25.24,
+    "stop": 22.8475,
+    "target": 30.025
+  },
+  "ALMS": {
+    "last_price": 24.115,
+    "change_pct": -0.14493,
+    "day_high": 24.585,
+    "day_low": 24.02,
+    "volume": 89683,
+    "avg_volume": null,
+    "timestamp": 1781531002,
+    "updated_at": "2026-06-15T13:44:12.282028+00:00",
+    "entry_zone": [
+      23.92,
+      24.16
+    ],
+    "entry_zone_low": 23.92,
+    "entry_zone_high": 24.16,
+    "stop": 22.2218,
+    "target": 28.0364
+  },
+  "ELVN": {
+    "last_price": 46.04,
+    "change_pct": -0.1951,
+    "day_high": 46.9499,
+    "day_low": 45.6101,
+    "volume": 106632,
+    "avg_volume": null,
+    "timestamp": 1781530575,
+    "updated_at": "2026-06-15T13:37:04.481919+00:00",
+    "entry_zone": [
+      45.67,
+      46.13
+    ],
+    "entry_zone_low": 45.67,
+    "entry_zone_high": 46.13,
+    "stop": 41.7039,
+    "target": 54.9821
+  },
+  "MUFG": {
+    "last_price": 20.185,
+    "change_pct": 0.12401,
+    "day_high": 20.39,
+    "day_low": 20.145,
+    "volume": 503415,
+    "avg_volume": null,
+    "timestamp": 1781536536,
+    "updated_at": "2026-06-15T15:16:13.335295+00:00",
+    "entry_zone": [
+      19.96,
+      20.16
+    ],
+    "entry_zone_low": 19.96,
+    "entry_zone_high": 20.16,
+    "stop": 19.5911,
+    "target": 21.2979
+  },
+  "VSH": {
+    "last_price": 62.96,
+    "change_pct": 6.02897,
+    "day_high": 64.07,
+    "day_low": 60.585,
+    "volume": 2728848,
+    "avg_volume": null,
+    "timestamp": 1781536533,
+    "updated_at": "2026-06-15T15:16:12.702928+00:00",
+    "entry_zone": [
+      58.84,
+      59.43
+    ],
+    "entry_zone_low": 58.84,
+    "entry_zone_high": 59.43,
+    "stop": 49.6489,
+    "target": 78.9921
+  },
+  "XEL": {
+    "last_price": 78.625,
+    "change_pct": -0.75107,
+    "day_high": 78.63,
+    "day_low": 77.77,
+    "volume": 735576.53033,
+    "avg_volume": null,
+    "timestamp": 1781533396,
+    "updated_at": "2026-06-15T14:23:44.902064+00:00",
+    "entry_zone": [
+      78.44,
+      79.23
+    ],
+    "entry_zone_low": 78.44,
+    "entry_zone_high": 79.23,
+    "stop": 76.5943,
+    "target": 84.5014
+  },
+  "EIX": {
+    "last_price": 72.345,
+    "change_pct": -0.82934,
+    "day_high": 72.59,
+    "day_low": 71.96,
+    "volume": 49659,
+    "avg_volume": null,
+    "timestamp": 1781530320,
+    "updated_at": "2026-06-15T13:33:29.614636+00:00",
+    "entry_zone": [
+      72.22,
+      72.95
+    ],
+    "entry_zone_low": 72.22,
+    "entry_zone_high": 72.95,
+    "stop": 70.6861,
+    "target": 77.4779
+  },
+  "EA": {
+    "last_price": 203,
+    "change_pct": -0.13283,
+    "day_high": 203.16,
+    "day_low": 202.95,
+    "volume": 31673,
+    "avg_volume": null,
+    "timestamp": 1781530364,
+    "updated_at": "2026-06-15T13:33:29.614652+00:00",
+    "entry_zone": [
+      201.2,
+      203.22
+    ],
+    "entry_zone_low": 201.2,
+    "entry_zone_high": 203.22,
+    "stop": 201.7332,
+    "target": 206.2236
+  },
+  "ZS": {
+    "last_price": 128.6899,
+    "change_pct": -0.6409,
+    "day_high": 129.69,
+    "day_low": 127.66,
+    "volume": 207977,
+    "avg_volume": null,
+    "timestamp": 1781530371,
+    "updated_at": "2026-06-15T13:33:29.614017+00:00",
+    "entry_zone": [
+      128.25,
+      129.54
+    ],
+    "entry_zone_low": 128.25,
+    "entry_zone_high": 129.54,
+    "stop": 109.8439,
+    "target": 168.9321
+  },
+  "_updated_at": "2026-06-15T15:16:14.978513+00:00",
+  "EMBJ": {
+    "last_price": 61.24,
+    "change_pct": 5.95156,
+    "day_high": 62.48,
+    "day_low": 61.115,
+    "volume": 1007892,
+    "avg_volume": null,
+    "timestamp": 1781536545,
+    "updated_at": "2026-06-15T15:16:12.702975+00:00",
+    "entry_zone": [
+      57.24,
+      57.82
+    ],
+    "entry_zone_low": 57.24,
+    "entry_zone_high": 57.82,
+    "stop": 54.8811,
+    "target": 63.6979
+  },
+  "JNJ": {
+    "last_price": 236.4,
+    "change_pct": -1.85577,
+    "day_high": 239.5,
+    "day_low": 233.5801,
+    "volume": 1801065.1673,
+    "avg_volume": null,
+    "timestamp": 1781536535,
+    "updated_at": "2026-06-15T15:16:12.702998+00:00",
+    "entry_zone": [
+      238.44,
+      240.83
+    ],
+    "entry_zone_low": 238.44,
+    "entry_zone_high": 240.83,
+    "stop": 233.8886,
+    "target": 254.7429
+  },
+  "DAN": {
+    "last_price": 30.76,
+    "change_pct": -0.16228,
+    "day_high": 31.615,
+    "day_low": 30.72,
+    "volume": 204759,
+    "avg_volume": null,
+    "timestamp": 1781533811,
+    "updated_at": "2026-06-15T14:30:53.150846+00:00",
+    "entry_zone": [
+      30.49,
+      30.8
+    ],
+    "entry_zone_low": 30.49,
+    "entry_zone_high": 30.8,
+    "stop": 28.0132,
+    "target": 36.3736
+  },
+  "SBUX": {
+    "last_price": 102.77,
+    "change_pct": -0.26203,
+    "day_high": 103.5,
+    "day_low": 102.64,
+    "volume": 164924,
+    "avg_volume": null,
+    "timestamp": 1781530375,
+    "updated_at": "2026-06-15T13:33:29.614516+00:00",
+    "entry_zone": [
+      101.99,
+      103.02
+    ],
+    "entry_zone_low": 101.99,
+    "entry_zone_high": 103.02,
+    "stop": 98.8286,
+    "target": 111.4029
+  },
+  "BNL": {
+    "last_price": 21,
+    "change_pct": -0.37951,
+    "day_high": 21.05,
+    "day_low": 20.79,
+    "volume": 24250,
+    "avg_volume": null,
+    "timestamp": 1781530366,
+    "updated_at": "2026-06-15T13:33:29.614541+00:00",
+    "entry_zone": [
+      20.86,
+      21.07
+    ],
+    "entry_zone_low": 20.86,
+    "entry_zone_high": 21.07,
+    "stop": 20.4882,
+    "target": 22.2336
+  },
+  "BUD": {
+    "last_price": 82.73,
+    "change_pct": -0.2171,
+    "day_high": 82.92,
+    "day_low": 82.73,
+    "volume": 52677,
+    "avg_volume": null,
+    "timestamp": 1781530369,
+    "updated_at": "2026-06-15T13:33:29.614565+00:00",
+    "entry_zone": [
+      82.06,
+      82.89
+    ],
+    "entry_zone_low": 82.06,
+    "entry_zone_high": 82.89,
+    "stop": 80.5896,
+    "target": 87.4907
+  },
+  "BYD": {
+    "last_price": 87.43,
+    "change_pct": -0.03430139,
+    "day_high": 88.26,
+    "day_low": 87.43,
+    "volume": 35841,
+    "avg_volume": null,
+    "timestamp": 1781532304,
+    "updated_at": "2026-06-15T14:05:42.610529+00:00",
+    "entry_zone": [
+      86.58,
+      87.45
+    ],
+    "entry_zone_low": 86.58,
+    "entry_zone_high": 87.45,
+    "stop": 83.8843,
+    "target": 94.5814
+  },
+  "VSNT": {
+    "last_price": 40.275,
+    "change_pct": -0.62916,
+    "day_high": 40.445,
+    "day_low": 40.27,
+    "volume": 13047,
+    "avg_volume": null,
+    "timestamp": 1781530331,
+    "updated_at": "2026-06-15T13:33:29.614666+00:00",
+    "entry_zone": [
+      40.12,
+      40.52
+    ],
+    "entry_zone_low": 40.12,
+    "entry_zone_high": 40.52,
+    "stop": 38.6461,
+    "target": 44.2679
+  },
+  "HWM": {
+    "last_price": 270.665,
+    "change_pct": 2.26508,
+    "day_high": 272.7,
+    "day_low": 268.61,
+    "volume": 506225,
+    "avg_volume": null,
+    "timestamp": 1781536538,
+    "updated_at": "2026-06-15T15:16:13.798538+00:00",
+    "entry_zone": [
+      261.98,
+      264.61
+    ],
+    "entry_zone_low": 261.98,
+    "entry_zone_high": 264.61,
+    "stop": 251.8646,
+    "target": 290.1307
+  },
+  "WIX": {
+    "last_price": 46.5975,
+    "change_pct": 1.4975,
+    "day_high": 47.54,
+    "day_low": 45.74,
+    "volume": 444742.29792,
+    "avg_volume": null,
+    "timestamp": 1781536538,
+    "updated_at": "2026-06-15T15:16:14.513599+00:00",
+    "entry_zone": [
+      45.52,
+      45.98
+    ],
+    "entry_zone_low": 45.52,
+    "entry_zone_high": 45.98,
+    "stop": 39.7786,
+    "target": 58.3829
+  },
+  "DOCU": {
+    "last_price": 45.03,
+    "change_pct": 0,
+    "day_high": 45.55,
+    "day_low": 45.03,
+    "volume": 157263,
+    "avg_volume": null,
+    "timestamp": 1781530369,
+    "updated_at": "2026-06-15T13:33:29.614715+00:00",
+    "entry_zone": [
+      44.58,
+      45.03
+    ],
+    "entry_zone_low": 44.58,
+    "entry_zone_high": 45.03,
+    "stop": 40.8546,
+    "target": 53.3807
+  },
+  "RRC": {
+    "last_price": 38.275,
+    "change_pct": -0.81627,
+    "day_high": 38.28,
+    "day_low": 37.59,
+    "volume": 76875,
+    "avg_volume": null,
+    "timestamp": 1781530578,
+    "updated_at": "2026-06-15T13:37:04.482105+00:00",
+    "entry_zone": [
+      38.2,
+      38.58
+    ],
+    "entry_zone_low": 38.2,
+    "entry_zone_high": 38.58,
+    "stop": 36.9879,
+    "target": 41.7643
+  }
+}

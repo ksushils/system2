@@ -1,0 +1,8 @@
+{
+  "stage": "SOCIAL_SENTIMENT",
+  "createdAt": "2026-06-14T21:06:59.154967+00:00",
+  "candidateCount": 48,
+  "input": "stage5_combined_forecast_top40.json",
+  "output": "/root/system2-core/data/social_sentiment.json",
+  "paper_only": true
+}

@@ -1,0 +1,2669 @@
+[
+  {
+    "symbol": "ACAD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "ADEA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ADM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AEG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AEHR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AEO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "AIG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ALB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ALGM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ALK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ALL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ALLY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AMAT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AMBA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "AMD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AMGN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "AMKR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "AMRX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AMSC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AMT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "AMX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ANF",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AON",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "APLE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "APO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "ARM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AROC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ASB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ASML",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ASTS",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ATI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AUB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AVAV",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "AVT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AWHL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AXGN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "AZN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "BA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BAC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BAM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BANC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BBY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "BCS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BEKE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BEN",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "major_litigation",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BETA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "BG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BIRK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BJ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "BKH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "BNS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BRKH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "BROS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "BTDR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "C",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CAI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CAKE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CALY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CARG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "CASY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CAT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_3_per_Industrials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CB",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "news_catalyst_danger",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CBOE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CDW",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CFG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CGAU",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CGNX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CHD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CHTR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "CI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CLS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CLSK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CLX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Defensive",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "CMBT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CME",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "major_litigation",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CMPS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CNX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "COHU",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "COLB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CORT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CORZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CPNG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CRBG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CRDO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CROX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CRWV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CSX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "CUZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CVBF",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "CVS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "CZR",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "D",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DAKT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DAL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DBRG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "DD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DECK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "DGAC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DHT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DINO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DKNG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DOC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "DRI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EAT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "EC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ED",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EFX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Industrials",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "ELAN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ELS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ELV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "ELVN",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ENPH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "ENTG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EPAM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ERAS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "ESI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ETSY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "EVRG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EW",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EWTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EXR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EXTR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "EYE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FBP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FCX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FDX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FERG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Industrials",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "FHB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FITB",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "major_litigation",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FIVE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "FLEX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "FLG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FLR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FORM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "FOX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Communication Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "FRO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FTAI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_3_per_Industrials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "FULT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GAP",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GEHC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "GEO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "GFL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "GFS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "GIL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GLPI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GME",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "GNTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "GPGI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GPN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GTES",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "GTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "GXO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_3_per_Industrials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HDB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HIMS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "HIMX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "HOOD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "HPQ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HTFL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HUM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "HUN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HWC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "HXL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "IBKR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ICLR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "IDYA",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "IFF",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "IMNM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "INDV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ING",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "INGM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "INOD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "IP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "IRDM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "IREN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "IRM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "JBS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Defensive",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "KALV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "KEEL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "KEY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "KEYS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "KHC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Defensive",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "KLAC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "KNTK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Energy",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "KNX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Industrials",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "KO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "KRMN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "LASR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LAUR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "LBRT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LEGN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LEVI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LFST",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LFTO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "LGN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "LMND",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "LOW",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "LQDA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "LRCX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "LTH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "M",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MAR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MASI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MCHP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MDLN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MDLZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MFC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MFG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MIAX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MKSI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MMYT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MRVL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "MTB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MTCH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MTZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MU",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "MXL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "NAVN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "NBIS",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NDAQ",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "halt",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NET",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NNN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NTLA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NTR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NUE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NVCR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NVO",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NWG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NWS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Communication Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "NWSA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Communication Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "NXPI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "NXT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ODFL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_3_per_Industrials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "OHI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "OLLI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "ONB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "OR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Basic Materials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ORCL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ORLY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "OSCR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "OVV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PANW",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PAYIX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PAYP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PBR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PEB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PEG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "PENG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PENN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "PFG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "PFGC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Defensive",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "PGNY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PHM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "PICS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PII",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PINS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "PM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "PNFP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PNW",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PPG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PSKY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Communication Services",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "PVH",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "PWR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "PYPL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "QFIN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "QSR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "QXO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_3_per_Industrials",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "RCUS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "REAL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "REYN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "RHI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "RIVN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "RKLB",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ROIV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ROKU",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ROST",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "RPRX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "RSG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "RSI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "RVMD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "S",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "SAIL",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SAN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SATS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "SEDG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "SEI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SEM",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SHOO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SHW",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SIRI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SJM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SLS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SMFG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SMR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "SN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SNDK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SQM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "STAG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Real Estate",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "STM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "STNG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Energy",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "STX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "STZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "SUNB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SUZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "SWKS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "SYRE",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TECH",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TEM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "TER",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TEVA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TFC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TGT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "TGTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "THC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "TIGO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TKO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TMHC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TMUS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TNDM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TNGX",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "offering",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TNXP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TPR",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TRIP",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TRV",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "TSEM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TTI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TTMI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TVTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "TWST",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "TXN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "UAA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "UCTT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "UPST",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "URBN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "USB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "USFD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Defensive",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "VECO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VFC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Unknown",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "VICI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VIK",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VISN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VLY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VRNS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VRT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VRTX",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Healthcare",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VSAT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "VST",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "VSXY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "VTRS",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WAY",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WDC",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Technology",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WERN",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Industrials",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "WFRD",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "WIX",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-11",
+    "trading_days_ago": 1
+  },
+  {
+    "symbol": "WMG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Communication Services",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "WRB",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WSM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WT",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WTRG",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "WULF",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Financial Services",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "XPO",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "XYZ",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-09",
+    "trading_days_ago": 3
+  },
+  {
+    "symbol": "YETI",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40",
+    "rejection_date": "2026-06-12",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "YUM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "cluster_cap_2_per_Consumer Cyclical",
+    "rejection_date": "2026-06-08",
+    "trading_days_ago": 4
+  },
+  {
+    "symbol": "ZETA",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ZIM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ZM",
+    "rejection_stage": "stage7_correlation",
+    "rejection_reason": "contradiction_gate: combined_forecast_dir=STRONG_DOWN",
+    "rejection_date": "2026-06-14",
+    "trading_days_ago": 0
+  },
+  {
+    "symbol": "ZS",
+    "rejection_stage": "stage3_news",
+    "rejection_reason": "fraud_investigation",
+    "rejection_date": "2026-06-13",
+    "trading_days_ago": 0
+  }
+]

@@ -1,0 +1,115 @@
+{
+  "date": "2026-06-13",
+  "generated_at": "2026-06-13T15:19:06.618461+00:00",
+  "count": 5,
+  "confluence_required": 2,
+  "feedback_tuning_active": false,
+  "alerts": [
+    {
+      "ticker": "ADBE",
+      "first_seen_date": "2026-06-13",
+      "sources": [
+        "catalyst",
+        "social",
+        "congress"
+      ],
+      "signals": [
+        {
+          "source": "catalyst",
+          "summary": "Adobe price target lowered to $230 from $285 at BMO Capital; Adobe price target lowered to $240 from $280 at Piper Sandler; Adobe price target lowered to $190 from $220 at Goldman Sachs; Adobe price target lowered to $379 from $447 at Bernstein; Adobe price target lowered to $230 from $270 at Baird; Adobe price target lowered to $195 from $235 at KeyBanc; Ad",
+          "sub_type": "analyst"
+        },
+        {
+          "source": "social",
+          "summary": "StockTwits 91% bullish (30 messages)",
+          "sub_type": "social_momentum"
+        },
+        {
+          "source": "congress",
+          "summary": "2 politician(s) bought",
+          "sub_type": "congressional_buy"
+        }
+      ]
+    },
+    {
+      "ticker": "AEM",
+      "first_seen_date": "2026-06-13",
+      "sources": [
+        "social",
+        "danelfin"
+      ],
+      "signals": [
+        {
+          "source": "social",
+          "summary": "StockTwits 100% bullish (30 messages)",
+          "sub_type": "social_momentum"
+        },
+        {
+          "source": "danelfin",
+          "summary": "Danelfin AI 10.0/10, Low Risk 5.0/10",
+          "sub_type": null
+        }
+      ]
+    },
+    {
+      "ticker": "AGI",
+      "first_seen_date": "2026-06-13",
+      "sources": [
+        "social",
+        "danelfin"
+      ],
+      "signals": [
+        {
+          "source": "social",
+          "summary": "StockTwits 100% bullish (30 messages)",
+          "sub_type": "social_momentum"
+        },
+        {
+          "source": "danelfin",
+          "summary": "Danelfin AI 10.0/10, Low Risk 5.0/10",
+          "sub_type": null
+        }
+      ]
+    },
+    {
+      "ticker": "NMM",
+      "first_seen_date": "2026-06-13",
+      "sources": [
+        "insider",
+        "danelfin"
+      ],
+      "signals": [
+        {
+          "source": "insider",
+          "summary": "1 insider(s) bought $1,003,504",
+          "sub_type": "cluster_insider_buy"
+        },
+        {
+          "source": "danelfin",
+          "summary": "Danelfin AI 10.0/10, Low Risk 6.0/10",
+          "sub_type": null
+        }
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "first_seen_date": "2026-06-13",
+      "sources": [
+        "congress",
+        "danelfin"
+      ],
+      "signals": [
+        {
+          "source": "congress",
+          "summary": "2 politician(s) bought",
+          "sub_type": "congressional_buy"
+        },
+        {
+          "source": "danelfin",
+          "summary": "Danelfin AI 9.0/10, Low Risk 5.0/10",
+          "sub_type": null
+        }
+      ]
+    }
+  ]
+}

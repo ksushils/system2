@@ -1,0 +1,459 @@
+{
+  "computed_at": "2026-06-10T11:36:29.304349+00:00",
+  "era": "system2_v2",
+  "total_resolved": 10,
+  "slices": {
+    "rvol": {
+      "rvol_low": {
+        "name": "rvol_low",
+        "count": 4,
+        "avg_r": -0.675,
+        "win_rate": 25.0,
+        "std_r": 0.67
+      },
+      "rvol_mid": {
+        "name": "rvol_mid",
+        "count": 3,
+        "avg_r": 1.733,
+        "win_rate": 100.0,
+        "std_r": 1.365
+      },
+      "rvol_high": {
+        "name": "rvol_high",
+        "count": 3,
+        "avg_r": 2.033,
+        "win_rate": 100.0,
+        "std_r": 0.208
+      },
+      "rvol_extreme": {
+        "name": "rvol_extreme",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      }
+    },
+    "options": {
+      "options_strong_confirm": {
+        "name": "strong_confirm",
+        "count": 1,
+        "avg_r": 3.2,
+        "win_rate": 100.0,
+        "std_r": 0.0
+      },
+      "options_confirm": {
+        "name": "confirm",
+        "count": 4,
+        "avg_r": 1.9,
+        "win_rate": 100.0,
+        "std_r": 0.316
+      },
+      "options_neutral": {
+        "name": "neutral",
+        "count": 4,
+        "avg_r": -0.25,
+        "win_rate": 50.0,
+        "std_r": 0.759
+      },
+      "options_no_data": {
+        "name": "no_data",
+        "count": 1,
+        "avg_r": -1.2,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      }
+    },
+    "gemini": {
+      "gemini_tier1": {
+        "name": "gemini_tier1",
+        "count": 5,
+        "avg_r": 2.16,
+        "win_rate": 100.0,
+        "std_r": 0.643
+      },
+      "gemini_tier2": {
+        "name": "gemini_tier2",
+        "count": 1,
+        "avg_r": 0.5,
+        "win_rate": 100.0,
+        "std_r": 0.0
+      },
+      "gemini_skip": {
+        "name": "gemini_skip",
+        "count": 3,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.2
+      },
+      "gemini_abstain": {
+        "name": "gemini_abstain",
+        "count": 1,
+        "avg_r": 0.3,
+        "win_rate": 100.0,
+        "std_r": 0.0
+      }
+    },
+    "claude": {
+      "claude_tier1": {
+        "name": "claude_tier1",
+        "count": 3,
+        "avg_r": 2.4,
+        "win_rate": 100.0,
+        "std_r": 0.721
+      },
+      "claude_tier2": {
+        "name": "claude_tier2",
+        "count": 3,
+        "avg_r": 1.367,
+        "win_rate": 100.0,
+        "std_r": 0.808
+      },
+      "claude_skip": {
+        "name": "claude_skip",
+        "count": 1,
+        "avg_r": -0.8,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      },
+      "claude_abstain": {
+        "name": "claude_abstain",
+        "count": 3,
+        "avg_r": -0.633,
+        "win_rate": 33.3,
+        "std_r": 0.814
+      }
+    },
+    "kimi": {
+      "kimi_tier1": {
+        "name": "kimi_tier1",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      },
+      "kimi_tier2": {
+        "name": "kimi_tier2",
+        "count": 1,
+        "avg_r": 3.2,
+        "win_rate": 100.0,
+        "std_r": 0.0
+      },
+      "kimi_skip": {
+        "name": "kimi_skip",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      },
+      "kimi_abstain": {
+        "name": "kimi_abstain",
+        "count": 9,
+        "avg_r": 0.6,
+        "win_rate": 66.7,
+        "std_r": 1.366
+      }
+    },
+    "gpt4o": {
+      "gpt4o_tier1": {
+        "name": "gpt4o_tier1",
+        "count": 2,
+        "avg_r": 2.65,
+        "win_rate": 100.0,
+        "std_r": 0.778
+      },
+      "gpt4o_tier2": {
+        "name": "gpt4o_tier2",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      },
+      "gpt4o_skip": {
+        "name": "gpt4o_skip",
+        "count": 1,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      },
+      "gpt4o_abstain": {
+        "name": "gpt4o_abstain",
+        "count": 7,
+        "avg_r": 0.614,
+        "win_rate": 71.4,
+        "std_r": 1.298
+      }
+    },
+    "set": {
+      "set1": {
+        "name": "set1",
+        "count": 9,
+        "avg_r": 0.6,
+        "win_rate": 66.7,
+        "std_r": 1.366
+      },
+      "set2": {
+        "name": "set2",
+        "count": 1,
+        "avg_r": 3.2,
+        "win_rate": 100.0,
+        "std_r": 0.0
+      },
+      "multiset": {
+        "name": "multiset",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      }
+    },
+    "forecast": {
+      "forecast_agree": {
+        "name": "agree",
+        "count": 9,
+        "avg_r": 1.067,
+        "win_rate": 77.8,
+        "std_r": 1.465
+      },
+      "forecast_disagree": {
+        "name": "disagree",
+        "count": 1,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      },
+      "forecast_wide_cone": {
+        "name": "wide_cone",
+        "count": 0,
+        "avg_r": null,
+        "win_rate": null,
+        "std_r": null
+      },
+      "forecast_tight_cone": {
+        "name": "tight_cone",
+        "count": 10,
+        "avg_r": 0.86,
+        "win_rate": 70.0,
+        "std_r": 1.528
+      }
+    },
+    "confluence": {
+      "conf_45_60": {
+        "name": "45_60",
+        "count": 1,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      },
+      "conf_60_75": {
+        "name": "60_75",
+        "count": 7,
+        "avg_r": 0.614,
+        "win_rate": 71.4,
+        "std_r": 1.298
+      },
+      "conf_75_plus": {
+        "name": "75_plus",
+        "count": 2,
+        "avg_r": 2.65,
+        "win_rate": 100.0,
+        "std_r": 0.778
+      }
+    },
+    "families": {
+      "single_family": {
+        "name": "single",
+        "count": 1,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      },
+      "two_families": {
+        "name": "two",
+        "count": 7,
+        "avg_r": 0.614,
+        "win_rate": 71.4,
+        "std_r": 1.298
+      },
+      "three_plus_families": {
+        "name": "three_plus",
+        "count": 2,
+        "avg_r": 2.65,
+        "win_rate": 100.0,
+        "std_r": 0.778
+      }
+    },
+    "data_quality": {
+      "dq_good": {
+        "name": "good",
+        "count": 9,
+        "avg_r": 1.067,
+        "win_rate": 77.8,
+        "std_r": 1.465
+      },
+      "dq_poor": {
+        "name": "poor",
+        "count": 1,
+        "avg_r": -1.0,
+        "win_rate": 0.0,
+        "std_r": 0.0
+      }
+    },
+    "shadow": {
+      "gates": {
+        "avg_volume_below_1m": {
+          "count": 481,
+          "avg_return_pct": 0.56,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "avg_volume_below_1m, dollar_volume_below_20m": {
+          "count": 76,
+          "avg_return_pct": 0.32,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "dollar_volume_below_20m": {
+          "count": 21,
+          "avg_return_pct": 0.33,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "avg_volume_below_1m, earnings_blackout_next_5d": {
+          "count": 4,
+          "avg_return_pct": 0.29,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "earnings_blackout_next_5d": {
+          "count": 21,
+          "avg_return_pct": 0.71,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "fund_or_etf": {
+          "count": 2,
+          "avg_return_pct": 0.48,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "blocked_non_common_equity": {
+          "count": 2,
+          "avg_return_pct": 1.15,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "weak_setup_not_top40": {
+          "count": 2348,
+          "avg_return_pct": 0.24,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Healthcare": {
+          "count": 15,
+          "avg_return_pct": 1.21,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Financial Services": {
+          "count": 9,
+          "avg_return_pct": 0.33,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Industrials": {
+          "count": 11,
+          "avg_return_pct": 2.28,
+          "gate_effective": false,
+          "gate_review": true
+        },
+        "cluster_cap_2_per_Utilities": {
+          "count": 1,
+          "avg_return_pct": 0.13,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Consumer Defensive": {
+          "count": 7,
+          "avg_return_pct": 2.3,
+          "gate_effective": false,
+          "gate_review": true
+        },
+        "cluster_cap_2_per_Energy": {
+          "count": 3,
+          "avg_return_pct": -0.83,
+          "gate_effective": true,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Communication Services": {
+          "count": 4,
+          "avg_return_pct": -0.15,
+          "gate_effective": true,
+          "gate_review": false
+        },
+        "cluster_cap_2_per_Consumer Cyclical": {
+          "count": 7,
+          "avg_return_pct": 2.17,
+          "gate_effective": false,
+          "gate_review": true
+        },
+        "recent_shadow_rejection": {
+          "count": 24,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "dollar_volume_below_20m, earnings_blackout_next_5d": {
+          "count": 1,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "contradiction_gate: forecastDecision=REJECT with chronos_conviction<40": {
+          "count": 12,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "contradiction_gate: combined_forecast_dir=STRONG_DOWN": {
+          "count": 5,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "offering": {
+          "count": 1,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        },
+        "fraud_investigation": {
+          "count": 1,
+          "avg_return_pct": 0.0,
+          "gate_effective": false,
+          "gate_review": false
+        }
+      }
+    }
+  },
+  "review_flags": [
+    "Gate 'cluster_cap_2_per_Industrials' review: rejected avg +2.28% over 5d",
+    "Gate 'cluster_cap_2_per_Consumer Defensive' review: rejected avg +2.3% over 5d",
+    "Gate 'cluster_cap_2_per_Consumer Cyclical' review: rejected avg +2.17% over 5d"
+  ],
+  "best_signal": {
+    "category": "gemini",
+    "name": "gemini_tier1",
+    "count": 5,
+    "avg_r": 2.16,
+    "win_rate": 100.0,
+    "std_r": 0.643
+  },
+  "weakest_signal": {
+    "category": "kimi",
+    "name": "kimi_abstain",
+    "count": 9,
+    "avg_r": 0.6,
+    "win_rate": 66.7,
+    "std_r": 1.366
+  }
+}

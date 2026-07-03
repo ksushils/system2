@@ -1,0 +1,37 @@
+{
+  "snapshots": [
+    {
+      "week_ending": "2026-06-12",
+      "generated_at": "2026-06-12T19:22:42.180Z",
+      "resolved_total": 0,
+      "resolved_this_week": 0,
+      "win_rate_this_week": null,
+      "avg_r_this_week": null,
+      "cumulative_r": 0,
+      "trades_entered_this_week": 1,
+      "pace_vs_goal": "behind"
+    },
+    {
+      "week_ending": "2026-06-13",
+      "generated_at": "2026-06-13T13:39:02.579Z",
+      "resolved_total": 10,
+      "resolved_this_week": 0,
+      "win_rate_this_week": null,
+      "avg_r_this_week": null,
+      "cumulative_r": 1.11,
+      "trades_entered_this_week": 2,
+      "pace_vs_goal": "behind"
+    },
+    {
+      "week_ending": "2026-06-14",
+      "generated_at": "2026-06-14T12:00:02.099Z",
+      "resolved_total": 10,
+      "resolved_this_week": 0,
+      "win_rate_this_week": null,
+      "avg_r_this_week": null,
+      "cumulative_r": 1.11,
+      "trades_entered_this_week": 0,
+      "pace_vs_goal": "behind"
+    }
+  ]
+}

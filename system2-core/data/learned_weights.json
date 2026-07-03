@@ -1,0 +1,128 @@
+{
+  "mode": "DORMANT",
+  "reason": "Only 10 resolved trades. Need 30 to begin. Theory weights unchanged.",
+  "cap": 0.0,
+  "weights": {
+    "momentum": 25.0,
+    "positioning": 35.0,
+    "catalyst": 20.0,
+    "structural": 20.0,
+    "core_weight": 0.5,
+    "confirmation_weight": 0.3,
+    "risk_weight": 0.2
+  },
+  "theory_weights": {
+    "momentum": 25.0,
+    "positioning": 35.0,
+    "catalyst": 20.0,
+    "structural": 20.0,
+    "core_weight": 0.5,
+    "confirmation_weight": 0.3,
+    "risk_weight": 0.2
+  },
+  "adjustments_applied": false,
+  "total_resolved": 10,
+  "family_edge_analysis": {},
+  "generated_at": "2026-06-13T21:12:53.693288+00:00",
+  "ledger_count": 10,
+  "signal_edge_analysis": {
+    "rvol": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "proximity_52wk": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "adx": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "setup_type": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "pre_market_status": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "options_verdict": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 4 non-None observations (need 10)",
+      "non_none_count": 4,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "dark_pool_signal": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "insider_buy_signal": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "pead_score": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "social_sentiment": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "congress_signal": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "analyst_rec_direction": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "danelfin_aiscore": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 0 non-None observations (need 10)",
+      "non_none_count": 0,
+      "sample_with": 0,
+      "sample_without": 0
+    },
+    "regime": {
+      "status": "INSUFFICIENT_DATA",
+      "reason": "only 4 non-None observations (need 10)",
+      "non_none_count": 4,
+      "sample_with": 0,
+      "sample_without": 0
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "computed_at": "2026-06-10T13:42:29.891086+00:00",
+  "suggestions": [
+    {
+      "model": "gemini",
+      "issue": "SKIP not filtering losers",
+      "finding": "Gemini SKIP ideas avg 1.20R (should be negative)",
+      "suggestion": "Gemini is SKIPping winners. The model's bearish criteria may be too aggressive or misaligned with actual risk.",
+      "prompt_section_to_change": "SKIP criteria \u2014 what triggers avoidance"
+    },
+    {
+      "model": "claude",
+      "issue": "Too aggressive",
+      "finding": "FORCE_SKIP rate 60% \u2014 model skipping 60% of ideas",
+      "suggestion": "Soften Claude persona prompt. Reduce FORCE_SKIP trigger threshold. Reserve FORCE_SKIP for truly dangerous setups only.",
+      "prompt_section_to_change": "FORCE_SKIP criteria in persona definition"
+    },
+    {
+      "model": "claude",
+      "issue": "SKIP not filtering losers",
+      "finding": "Claude SKIP ideas avg 1.15R (should be negative)",
+      "suggestion": "Claude is SKIPping winners. The model's bearish criteria may be too aggressive or misaligned with actual risk.",
+      "prompt_section_to_change": "SKIP criteria \u2014 what triggers avoidance"
+    }
+  ]
+}

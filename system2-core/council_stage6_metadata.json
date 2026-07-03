@@ -1,0 +1,706 @@
+{
+  "stage": "COUNCIL_V2",
+  "createdAt": "2026-06-14T21:17:38.907910+00:00",
+  "inputCount": 50,
+  "outputCount": 50,
+  "round2Triggered": 0,
+  "councilGatesTrades": false,
+  "verdictDistribution": {
+    "TIER2": 21,
+    "SKIP": 22,
+    "TIER1": 1,
+    "TIER3": 5,
+    "FORCE_SKIP": 1
+  },
+  "totalTimeoutReached": true,
+  "details": [
+    {
+      "symbol": "EMBJ",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "CXW",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "gemini",
+        "claude",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "JNJ",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "RVMD",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "CB",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "claude",
+        "gpt4o",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "MCHP",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "D",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER1",
+      "models_used": [
+        "gemini",
+        "claude",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "AEG",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER3",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "DHT",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "DAN",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "ED",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BANC",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "SBUX",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "ZIM",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BNL",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "PNW",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BUD",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "claude",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "MUFG",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "claude",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "TEVA",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "GLPI",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER3",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BYD",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "APLE",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "VOD",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "INDV",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "MIAX",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER3",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "EIX",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "FORCE_SKIP",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "SNDK",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "gpt4o",
+        "claude",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BG",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "claude",
+        "gpt4o",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "EA",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "TWST",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER3",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "VSNT",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "claude",
+        "gpt4o",
+        "gemini"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "VTRS",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER3",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BAC",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gpt4o",
+        "gemini",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "BCS",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "TIER2",
+      "models_used": [
+        "gemini",
+        "gpt4o",
+        "claude"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "WRB",
+      "round": 1,
+      "quorum": "FULL",
+      "final_verdict": "SKIP",
+      "models_used": [
+        "claude",
+        "gemini",
+        "gpt4o"
+      ],
+      "models_abstained": [
+        "kimi"
+      ]
+    },
+    {
+      "symbol": "TXN",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "CDW",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "HWM",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "WIX",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "MFC",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "DOCU",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "CUZ",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "RRC",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "ZM",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "ATO",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "ZETA",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "WAY",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "EXR",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "EPAM",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    },
+    {
+      "symbol": "SWKS",
+      "round": 0,
+      "quorum": "NONE",
+      "final_verdict": "SKIP",
+      "models_used": [],
+      "models_abstained": [
+        "claude",
+        "kimi",
+        "gemini",
+        "gpt4o"
+      ]
+    }
+  ],
+  "paperOnly": true,
+  "_system2_run_id": "20260614T204315Z-d8d5fe58",
+  "_system2_generated_at": "2026-06-14T21:17:39.080970+00:00"
+}

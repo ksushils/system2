@@ -1,0 +1,307 @@
+{
+  "scraped_at": "2026-06-15T00:57:27.531662+00:00",
+  "source": "stockanalysis",
+  "count": 50,
+  "stocks": [
+    {
+      "symbol": "XOMA",
+      "company_name": "XOMA Royalty Corporation",
+      "short_percent_float": 0.966,
+      "market_cap": 524090000.00000006
+    },
+    {
+      "symbol": "BH",
+      "company_name": "Biglari Holdings Inc.",
+      "short_percent_float": 0.9596,
+      "market_cap": 1080000000.0
+    },
+    {
+      "symbol": "SBFM",
+      "company_name": "Sunshine Biopharma, Inc.",
+      "short_percent_float": 0.8983,
+      "market_cap": 3590000.0
+    },
+    {
+      "symbol": "FLWS",
+      "company_name": "1-800-FLOWERS.COM, Inc.",
+      "short_percent_float": 0.815,
+      "market_cap": 276910000.0
+    },
+    {
+      "symbol": "ASBP",
+      "company_name": "Aspire Biopharma Holdings, Inc.",
+      "short_percent_float": 0.7978,
+      "market_cap": 830650.0
+    },
+    {
+      "symbol": "ASTC",
+      "company_name": "Astrotech Corporation",
+      "short_percent_float": 0.7747,
+      "market_cap": 31870000.0
+    },
+    {
+      "symbol": "CETX",
+      "company_name": "Cemtrex, Inc.",
+      "short_percent_float": 0.7566,
+      "market_cap": 4250000.0
+    },
+    {
+      "symbol": "ATPC",
+      "company_name": "Agape ATP Corporation",
+      "short_percent_float": 0.725,
+      "market_cap": 2890000.0
+    },
+    {
+      "symbol": "SPRC",
+      "company_name": "SciSparc Ltd.",
+      "short_percent_float": 0.7092,
+      "market_cap": 4900000.0
+    },
+    {
+      "symbol": "SNGX",
+      "company_name": "Soligenix, Inc.",
+      "short_percent_float": 0.6674,
+      "market_cap": 4430000.0
+    },
+    {
+      "symbol": "GRPN",
+      "company_name": "Groupon, Inc.",
+      "short_percent_float": 0.6462,
+      "market_cap": 646110000.0
+    },
+    {
+      "symbol": "SPRY",
+      "company_name": "ARS Pharmaceuticals, Inc.",
+      "short_percent_float": 0.6006,
+      "market_cap": 969200000.0
+    },
+    {
+      "symbol": "NGNE",
+      "company_name": "Neurogene Inc.",
+      "short_percent_float": 0.5902,
+      "market_cap": 459840000.0
+    },
+    {
+      "symbol": "AIFA",
+      "company_name": "All In FutureTech Alliance Inc.",
+      "short_percent_float": 0.5588,
+      "market_cap": 15050000.0
+    },
+    {
+      "symbol": "LENZ",
+      "company_name": "LENZ Therapeutics, Inc.",
+      "short_percent_float": 0.5536,
+      "market_cap": 212270000.0
+    },
+    {
+      "symbol": "WGRX",
+      "company_name": "Wellgistics Health, Inc.",
+      "short_percent_float": 0.5459,
+      "market_cap": 8730000.0
+    },
+    {
+      "symbol": "FRMM",
+      "company_name": "Forum Markets, Incorporated",
+      "short_percent_float": 0.5454,
+      "market_cap": 77800000.0
+    },
+    {
+      "symbol": "YYGH",
+      "company_name": "YY Group Holding Limited",
+      "short_percent_float": 0.5373,
+      "market_cap": 509190.0
+    },
+    {
+      "symbol": "CHWY",
+      "company_name": "Chewy, Inc.",
+      "short_percent_float": 0.5131,
+      "market_cap": 7910000000.0
+    },
+    {
+      "symbol": "JACK",
+      "company_name": "Jack in the Box Inc.",
+      "short_percent_float": 0.5106,
+      "market_cap": 255010000.0
+    },
+    {
+      "symbol": "EDBL",
+      "company_name": "Edible Garden AG Incorporated",
+      "short_percent_float": 0.5097,
+      "market_cap": 402850.0
+    },
+    {
+      "symbol": "IOTR",
+      "company_name": "iOThree Limited",
+      "short_percent_float": 0.5006,
+      "market_cap": 8410000.0
+    },
+    {
+      "symbol": "NEXR",
+      "company_name": "Nexera Technologies Ltd",
+      "short_percent_float": 0.4966,
+      "market_cap": 1260000.0
+    },
+    {
+      "symbol": "VCIG",
+      "company_name": "VCI Global Limited",
+      "short_percent_float": 0.4948,
+      "market_cap": 10470000.0
+    },
+    {
+      "symbol": "ICCM",
+      "company_name": "IceCure Medical Ltd",
+      "short_percent_float": 0.4866,
+      "market_cap": 6470000.0
+    },
+    {
+      "symbol": "TNGX",
+      "company_name": "Tango Therapeutics, Inc.",
+      "short_percent_float": 0.4814,
+      "market_cap": 4480000000.0
+    },
+    {
+      "symbol": "SUGP",
+      "company_name": "SU Group Holdings Limited",
+      "short_percent_float": 0.4799,
+      "market_cap": 1380000.0
+    },
+    {
+      "symbol": "RMSG",
+      "company_name": "Real Messenger Corporation",
+      "short_percent_float": 0.4666,
+      "market_cap": 6670000.0
+    },
+    {
+      "symbol": "TSAT",
+      "company_name": "Telesat Corporation",
+      "short_percent_float": 0.445,
+      "market_cap": 3120000000.0
+    },
+    {
+      "symbol": "REPL",
+      "company_name": "Replimune Group, Inc.",
+      "short_percent_float": 0.4449,
+      "market_cap": 733240000.0
+    },
+    {
+      "symbol": "HTZ",
+      "company_name": "Hertz Global Holdings, Inc.",
+      "short_percent_float": 0.4445,
+      "market_cap": 1620000000.0
+    },
+    {
+      "symbol": "IBTA",
+      "company_name": "Ibotta, Inc.",
+      "short_percent_float": 0.4416,
+      "market_cap": 730370000.0
+    },
+    {
+      "symbol": "NIVF",
+      "company_name": "NewGenIvf Group Limited",
+      "short_percent_float": 0.4277,
+      "market_cap": 318900.0
+    },
+    {
+      "symbol": "SNYR",
+      "company_name": "Synergy CHC Corp.",
+      "short_percent_float": 0.4168,
+      "market_cap": 2920000.0
+    },
+    {
+      "symbol": "OLOX",
+      "company_name": "Olenox Industries Inc.",
+      "short_percent_float": 0.4123,
+      "market_cap": 6210000.0
+    },
+    {
+      "symbol": "RH",
+      "company_name": "RH",
+      "short_percent_float": 0.411,
+      "market_cap": 2890000000.0
+    },
+    {
+      "symbol": "INBX",
+      "company_name": "Inhibrx Biosciences, Inc.",
+      "short_percent_float": 0.4047,
+      "market_cap": 1350000000.0
+    },
+    {
+      "symbol": "ULCC",
+      "company_name": "Frontier Group Holdings, Inc.",
+      "short_percent_float": 0.4041,
+      "market_cap": 1440000000.0
+    },
+    {
+      "symbol": "BTDR",
+      "company_name": "Bitdeer Technologies Group",
+      "short_percent_float": 0.3985,
+      "market_cap": 4340000000.0
+    },
+    {
+      "symbol": "LFVN",
+      "company_name": "LifeVantage Corporation",
+      "short_percent_float": 0.3961,
+      "market_cap": 114170000.0
+    },
+    {
+      "symbol": "ABEO",
+      "company_name": "Abeona Therapeutics Inc.",
+      "short_percent_float": 0.3947,
+      "market_cap": 315180000.0
+    },
+    {
+      "symbol": "CAR",
+      "company_name": "Avis Budget Group, Inc.",
+      "short_percent_float": 0.3879,
+      "market_cap": 6610000000.0
+    },
+    {
+      "symbol": "SHPH",
+      "company_name": "Shuttle Pharmaceuticals Holdings, Inc.",
+      "short_percent_float": 0.3875,
+      "market_cap": 2290000.0
+    },
+    {
+      "symbol": "MNPR",
+      "company_name": "Monopar Therapeutics Inc.",
+      "short_percent_float": 0.3824,
+      "market_cap": 400390000.0
+    },
+    {
+      "symbol": "AI",
+      "company_name": "C3.ai, Inc.",
+      "short_percent_float": 0.3798,
+      "market_cap": 1580000000.0
+    },
+    {
+      "symbol": "SOUN",
+      "company_name": "SoundHound AI, Inc.",
+      "short_percent_float": 0.379,
+      "market_cap": 2990000000.0
+    },
+    {
+      "symbol": "PRFX",
+      "company_name": "PRF Technologies Ltd.",
+      "short_percent_float": 0.3758,
+      "market_cap": 1180000.0
+    },
+    {
+      "symbol": "SLXN",
+      "company_name": "Silexion Therapeutics Corp",
+      "short_percent_float": 0.3738,
+      "market_cap": 1310000.0
+    },
+    {
+      "symbol": "PLAY",
+      "company_name": "Dave & Buster's Entertainment, Inc.",
+      "short_percent_float": 0.3689,
+      "market_cap": 449180000.0
+    },
+    {
+      "symbol": "CRK",
+      "company_name": "Comstock Resources, Inc.",
+      "short_percent_float": 0.3655,
+      "market_cap": 3970000000.0
+    }
+  ]
+}

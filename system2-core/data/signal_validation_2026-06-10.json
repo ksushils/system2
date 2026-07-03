@@ -1,0 +1,457 @@
+{
+  "date": "2026-06-10",
+  "total_ideas": 105,
+  "results": {
+    "setup_score": [
+      {
+        "count": 33,
+        "win_rate": 36.4,
+        "avg_r": -0.1,
+        "median_r": -0.55,
+        "profit_factor": 0.81,
+        "best_r": 3.0,
+        "worst_r": -1.21,
+        "name": "setup_60_to_75"
+      },
+      {
+        "count": 30,
+        "win_rate": 50.0,
+        "avg_r": 0.14,
+        "median_r": -0.03,
+        "profit_factor": 1.55,
+        "best_r": 3.0,
+        "worst_r": -1.0,
+        "name": "setup_75_to_85"
+      },
+      {
+        "count": 19,
+        "win_rate": 47.4,
+        "avg_r": -0.23,
+        "median_r": -0.12,
+        "profit_factor": 0.58,
+        "best_r": 3.0,
+        "worst_r": -3.06,
+        "name": "setup_85_plus"
+      },
+      {
+        "count": 3,
+        "note": "insufficient sample (3 ideas)",
+        "name": "setup_under_60"
+      }
+    ],
+    "confluence_bands": [
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "confluence_40_55",
+        "min": 40
+      },
+      {
+        "count": 3,
+        "note": "insufficient sample (3 ideas)",
+        "name": "confluence_55_70",
+        "min": 55
+      },
+      {
+        "count": 30,
+        "win_rate": 60.0,
+        "avg_r": 0.25,
+        "median_r": 0.12,
+        "profit_factor": 2.79,
+        "best_r": 2.56,
+        "worst_r": -1.0,
+        "name": "confluence_70_plus",
+        "min": 70
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "confluence_under_40"
+      }
+    ],
+    "options_verdict": [
+      {
+        "count": 21,
+        "win_rate": 9.5,
+        "avg_r": 0.96,
+        "median_r": -1.0,
+        "profit_factor": 2.07,
+        "best_r": 34.89,
+        "worst_r": -1.0,
+        "name": "options_unknown"
+      },
+      {
+        "count": 10,
+        "win_rate": 40.0,
+        "avg_r": -0.28,
+        "median_r": -0.33,
+        "profit_factor": 0.59,
+        "best_r": 2.56,
+        "worst_r": -3.06,
+        "name": "options_caution"
+      },
+      {
+        "count": 34,
+        "win_rate": 32.4,
+        "avg_r": -0.2,
+        "median_r": -0.15,
+        "profit_factor": 0.54,
+        "best_r": 1.32,
+        "worst_r": -1.21,
+        "name": "options_confirm"
+      },
+      {
+        "count": 28,
+        "win_rate": 39.3,
+        "avg_r": -0.16,
+        "median_r": -0.52,
+        "profit_factor": 0.71,
+        "best_r": 3.0,
+        "worst_r": -1.09,
+        "name": "options_neutral"
+      },
+      {
+        "count": 1,
+        "note": "insufficient sample (1 ideas)",
+        "name": "options_no_data"
+      },
+      {
+        "count": 7,
+        "win_rate": 100.0,
+        "avg_r": 0.74,
+        "median_r": 0.65,
+        "profit_factor": 99.99,
+        "best_r": 2.09,
+        "worst_r": 0.2,
+        "name": "options_data_poor"
+      },
+      {
+        "count": 3,
+        "note": "insufficient sample (3 ideas)",
+        "name": "options_strong_confirm"
+      },
+      {
+        "count": 1,
+        "note": "insufficient sample (1 ideas)",
+        "name": "options_bullish_confirm"
+      }
+    ],
+    "rvol_band": [
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "rvol_under_2"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "rvol_2_to_4"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "rvol_4_to_7"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "rvol_7_plus"
+      },
+      {
+        "count": 105,
+        "win_rate": 36.2,
+        "avg_r": 0.13,
+        "median_r": -0.52,
+        "profit_factor": 1.25,
+        "best_r": 34.89,
+        "worst_r": -3.06,
+        "name": "rvol_unknown"
+      }
+    ],
+    "chronos_direction": [
+      {
+        "count": 49,
+        "win_rate": 20.4,
+        "avg_r": 0.15,
+        "median_r": -1.0,
+        "profit_factor": 1.18,
+        "best_r": 34.89,
+        "worst_r": -3.06,
+        "name": "chronos_unknown"
+      },
+      {
+        "count": 13,
+        "win_rate": 23.1,
+        "avg_r": -0.41,
+        "median_r": -0.75,
+        "profit_factor": 0.33,
+        "best_r": 1.26,
+        "worst_r": -1.0,
+        "name": "chronos_down"
+      },
+      {
+        "count": 8,
+        "win_rate": 37.5,
+        "avg_r": 0.04,
+        "median_r": -0.15,
+        "profit_factor": 1.08,
+        "best_r": 3.0,
+        "worst_r": -1.0,
+        "name": "chronos_up"
+      },
+      {
+        "count": 4,
+        "note": "insufficient sample (4 ideas)",
+        "name": "chronos_flat"
+      },
+      {
+        "count": 11,
+        "win_rate": 81.8,
+        "avg_r": 0.42,
+        "median_r": 0.24,
+        "profit_factor": 6.98,
+        "best_r": 2.09,
+        "worst_r": -0.63,
+        "name": "chronos_strong_down"
+      },
+      {
+        "count": 6,
+        "win_rate": 50.0,
+        "avg_r": 0.02,
+        "median_r": -0.04,
+        "profit_factor": 1.19,
+        "best_r": 0.68,
+        "worst_r": -0.52,
+        "name": "chronos_lean_up"
+      },
+      {
+        "count": 8,
+        "win_rate": 50.0,
+        "avg_r": 0.3,
+        "median_r": -0.01,
+        "profit_factor": 1.99,
+        "best_r": 2.56,
+        "worst_r": -1.0,
+        "name": "chronos_lean_down"
+      },
+      {
+        "count": 4,
+        "note": "insufficient sample (4 ideas)",
+        "name": "chronos_strong_up"
+      },
+      {
+        "count": 2,
+        "note": "insufficient sample (2 ideas)",
+        "name": "chronos_conflicted"
+      }
+    ],
+    "sector": [
+      {
+        "count": 12,
+        "win_rate": 50.0,
+        "avg_r": 2.99,
+        "median_r": -0.04,
+        "profit_factor": 15.18,
+        "best_r": 34.89,
+        "worst_r": -1.0,
+        "name": "Communication Services"
+      },
+      {
+        "count": 10,
+        "win_rate": 80.0,
+        "avg_r": 0.54,
+        "median_r": 0.55,
+        "profit_factor": 5.75,
+        "best_r": 1.82,
+        "worst_r": -1.0,
+        "name": "Consumer Defensive"
+      },
+      {
+        "count": 11,
+        "win_rate": 63.6,
+        "avg_r": 0.41,
+        "median_r": 0.39,
+        "profit_factor": 2.44,
+        "best_r": 3.0,
+        "worst_r": -1.0,
+        "name": "Industrials"
+      },
+      {
+        "count": 12,
+        "win_rate": 41.7,
+        "avg_r": 0.26,
+        "median_r": -0.65,
+        "profit_factor": 1.49,
+        "best_r": 3.0,
+        "worst_r": -1.0,
+        "name": "Real Estate"
+      },
+      {
+        "count": 12,
+        "win_rate": 41.7,
+        "avg_r": -0.18,
+        "median_r": -0.42,
+        "profit_factor": 0.65,
+        "best_r": 3.0,
+        "worst_r": -1.21,
+        "name": "Consumer Cyclical"
+      },
+      {
+        "count": 12,
+        "win_rate": 41.7,
+        "avg_r": -0.35,
+        "median_r": -1.0,
+        "profit_factor": 0.36,
+        "best_r": 0.71,
+        "worst_r": -1.0,
+        "name": "Healthcare"
+      },
+      {
+        "count": 5,
+        "win_rate": 20.0,
+        "avg_r": -0.39,
+        "median_r": -0.4,
+        "profit_factor": 0.25,
+        "best_r": 0.64,
+        "worst_r": -1.09,
+        "name": "Basic Materials"
+      },
+      {
+        "count": 12,
+        "win_rate": 8.3,
+        "avg_r": -0.74,
+        "median_r": -1.0,
+        "profit_factor": 0.02,
+        "best_r": 0.2,
+        "worst_r": -1.0,
+        "name": "Financial Services"
+      },
+      {
+        "count": 7,
+        "win_rate": 0.0,
+        "avg_r": -1.0,
+        "median_r": -1.0,
+        "profit_factor": 0.0,
+        "best_r": -1.0,
+        "worst_r": -1.0,
+        "name": "Utilities"
+      },
+      {
+        "count": 6,
+        "win_rate": 0.0,
+        "avg_r": -1.08,
+        "median_r": -1.0,
+        "profit_factor": 0.0,
+        "best_r": -0.1,
+        "worst_r": -3.06,
+        "name": "Technology"
+      },
+      {
+        "count": 2,
+        "note": "insufficient sample (2 ideas)",
+        "name": "Unknown"
+      },
+      {
+        "count": 4,
+        "note": "insufficient sample (4 ideas)",
+        "name": "Energy"
+      }
+    ],
+    "combined_setup_confluence": [
+      {
+        "count": 4,
+        "note": "insufficient sample (4 ideas)",
+        "name": "high_high"
+      },
+      {
+        "count": 1,
+        "note": "insufficient sample (1 ideas)",
+        "name": "high_low"
+      },
+      {
+        "count": 28,
+        "win_rate": 57.1,
+        "avg_r": 0.24,
+        "median_r": 0.05,
+        "profit_factor": 2.51,
+        "best_r": 2.56,
+        "worst_r": -1.0,
+        "name": "low_high"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "low_low"
+      }
+    ],
+    "days_held": [
+      {
+        "count": 64,
+        "win_rate": 35.9,
+        "avg_r": -0.13,
+        "median_r": -0.15,
+        "profit_factor": 0.71,
+        "best_r": 3.0,
+        "worst_r": -1.0,
+        "name": "held_1_2"
+      },
+      {
+        "count": 41,
+        "win_rate": 36.6,
+        "avg_r": 0.53,
+        "median_r": -1.0,
+        "profit_factor": 1.8,
+        "best_r": 34.89,
+        "worst_r": -3.06,
+        "name": "held_3_5"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "held_6_plus"
+      },
+      {
+        "count": 0,
+        "note": "insufficient sample (0 ideas)",
+        "name": "held_unknown"
+      }
+    ]
+  },
+  "insights": [
+    {
+      "type": "signal_edge",
+      "signal": "setup_score",
+      "finding": "setup_75_to_85 avg 0.14R vs setup_85_plus avg -0.23R",
+      "recommendation": "Favour setup_75_to_85 setups"
+    },
+    {
+      "type": "signal_edge",
+      "signal": "options_verdict",
+      "finding": "options_unknown avg 0.96R vs options_caution avg -0.28R",
+      "recommendation": "Favour options_unknown setups"
+    },
+    {
+      "type": "signal_edge",
+      "signal": "chronos_direction",
+      "finding": "chronos_strong_down avg 0.42R vs chronos_down avg -0.41R",
+      "recommendation": "Favour chronos_strong_down setups"
+    },
+    {
+      "type": "signal_edge",
+      "signal": "sector",
+      "finding": "Communication Services avg 2.99R vs Technology avg -1.08R",
+      "recommendation": "Favour Communication Services setups"
+    },
+    {
+      "type": "signal_edge",
+      "signal": "days_held",
+      "finding": "held_3_5 avg 0.53R vs held_1_2 avg -0.13R",
+      "recommendation": "Favour held_3_5 setups"
+    },
+    {
+      "type": "threshold",
+      "finding": "Confluence >= 70 averages positive R (0.25R, 30 ideas)",
+      "recommendation": "Consider raising confluence minimum to 70"
+    }
+  ]
+}

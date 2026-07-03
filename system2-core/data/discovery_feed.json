@@ -1,0 +1,2896 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T15:16:30.490449+00:00",
+  "last_cycle": "2026-06-15T15:16:30.490253+00:00",
+  "cycles_today": 21,
+  "alerts": [
+    {
+      "ticker": "TEST",
+      "sources": [
+        "apewisdom",
+        "barchart_uoa"
+      ],
+      "source_count": 2,
+      "total_score": 7,
+      "signals": [
+        {
+          "source": "apewisdom",
+          "detail": "Test rank spike",
+          "signal": "TEST",
+          "score": 3
+        },
+        {
+          "source": "barchart_uoa",
+          "detail": "Test UOA spike",
+          "signal": "TEST",
+          "score": 4
+        }
+      ],
+      "detected_at": "2026-06-13T15:44:19.650012+00:00",
+      "alert_type": "CONFLUENCE",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "test": true
+    }
+  ],
+  "quiet_log": [
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 953,
+          "detail": "Rank 999->46 (+953), 11 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223886+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 940,
+          "detail": "Rank 999->59 (+940), 9 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223905+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 934,
+          "detail": "Rank 999->65 (+934), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223909+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 923,
+          "detail": "Rank 999->76 (+923), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223911+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "FOX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "FOX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 921,
+          "detail": "Rank 999->78 (+921), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223913+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "SMCI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "SMCI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 919,
+          "detail": "Rank 999->80 (+919), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223916+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 908,
+          "detail": "Rank 999->91 (+908), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223918+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "PUMP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "PUMP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223920+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CLFD",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CLFD",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223923+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 900,
+          "detail": "Rank 999->99 (+900), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223925+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "ONDS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "ONDS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:16:30.223927+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 953,
+          "detail": "Rank 999->46 (+953), 11 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611025+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 934,
+          "detail": "Rank 999->65 (+934), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611048+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 923,
+          "detail": "Rank 999->76 (+923), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611053+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "FOX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "FOX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 921,
+          "detail": "Rank 999->78 (+921), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611056+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 920,
+          "detail": "Rank 999->79 (+920), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611060+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611064+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "PUMP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "PUMP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 906,
+          "detail": "Rank 999->93 (+906), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611067+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CLFD",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CLFD",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611070+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611073+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "ONDS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "ONDS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:04:28.611077+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 953,
+          "detail": "Rank 999->46 (+953), 11 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561805+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 934,
+          "detail": "Rank 999->65 (+934), 8 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561829+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 923,
+          "detail": "Rank 999->76 (+923), 7 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561835+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "FOX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "FOX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 921,
+          "detail": "Rank 999->78 (+921), 7 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561840+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 910,
+          "detail": "Rank 999->89 (+910), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561844+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561849+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "PUMP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "PUMP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 906,
+          "detail": "Rank 999->93 (+906), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561853+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CLFD",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CLFD",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561857+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561861+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "ONDS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "ONDS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T15:03:11.561887+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 953,
+          "detail": "Rank 999->46 (+953), 11 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051309+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 934,
+          "detail": "Rank 999->65 (+934), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051330+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 924,
+          "detail": "Rank 999->75 (+924), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051334+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "FOX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "FOX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 922,
+          "detail": "Rank 999->77 (+922), 7 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051338+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 910,
+          "detail": "Rank 999->89 (+910), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051341+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051344+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "PUMP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "PUMP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 906,
+          "detail": "Rank 999->93 (+906), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051347+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CLFD",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CLFD",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051350+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051353+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "ONDS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "ONDS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T15:01:05.051357+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 945,
+          "detail": "Rank 999->54 (+945), 10 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270893+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 935,
+          "detail": "Rank 999->64 (+935), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270914+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 916,
+          "detail": "Rank 999->83 (+916), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270920+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270924+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270927+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270932+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270936+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270940+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:49:05.270943+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 945,
+          "detail": "Rank 999->54 (+945), 10 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402631+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 935,
+          "detail": "Rank 999->64 (+935), 8 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402656+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 916,
+          "detail": "Rank 999->83 (+916), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402661+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402664+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402667+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402671+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402674+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402677+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:47:39.402680+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 945,
+          "detail": "Rank 999->54 (+945), 10 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144521+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 935,
+          "detail": "Rank 999->64 (+935), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144539+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 916,
+          "detail": "Rank 999->83 (+916), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144543+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 908,
+          "detail": "Rank 999->91 (+908), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144546+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144550+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144552+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 900,
+          "detail": "Rank 999->99 (+900), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144555+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:45:44.144558+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 936,
+          "detail": "Rank 999->63 (+936), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674719+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 915,
+          "detail": "Rank 999->84 (+915), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674743+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 914,
+          "detail": "Rank 999->85 (+914), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674748+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 907,
+          "detail": "Rank 999->92 (+907), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674751+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674754+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674756+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 900,
+          "detail": "Rank 999->99 (+900), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674759+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:33:42.674762+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 936,
+          "detail": "Rank 999->63 (+936), 8 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445251+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 915,
+          "detail": "Rank 999->84 (+915), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445268+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 914,
+          "detail": "Rank 999->85 (+914), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445272+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 907,
+          "detail": "Rank 999->92 (+907), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445275+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445277+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445280+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 900,
+          "detail": "Rank 999->99 (+900), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445282+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:32:19.445284+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 936,
+          "detail": "Rank 999->63 (+936), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323669+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 915,
+          "detail": "Rank 999->84 (+915), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323687+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "CXAI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "CXAI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 908,
+          "detail": "Rank 999->91 (+908), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323691+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "NFLX",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "NFLX",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323694+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IBM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IBM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323697+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "LDOS",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "LDOS",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323699+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 900,
+          "detail": "Rank 999->99 (+900), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323702+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "VRRM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "VRRM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:30:22.323705+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 939,
+          "detail": "Rank 999->60 (+939), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:18:22.443831+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 918,
+          "detail": "Rank 999->81 (+918), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:18:22.443852+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:18:22.443858+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:18:22.443881+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 939,
+          "detail": "Rank 999->60 (+939), 8 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:16:58.777186+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 918,
+          "detail": "Rank 999->81 (+918), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:16:58.777209+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:16:58.777215+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:16:58.777219+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 939,
+          "detail": "Rank 999->60 (+939), 8 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:15:02.075499+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "INTU",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "INTU",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:15:02.075517+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "XOM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "XOM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:15:02.075522+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:15:02.075525+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 919,
+          "detail": "Rank 999->80 (+919), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:03:01.474310+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:03:01.474334+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T14:03:01.474340+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 919,
+          "detail": "Rank 999->80 (+919), 6 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:01:38.299757+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:01:38.299774+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T14:01:38.299778+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "WDC",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "WDC",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 919,
+          "detail": "Rank 999->80 (+919), 6 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:59:41.874534+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:59:41.874559+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "GO",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "GO",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:59:41.874566+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "AGI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "AGI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:59:41.874570+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 907,
+          "detail": "Rank 999->92 (+907), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:47:38.332852+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "AGI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "AGI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:47:38.332893+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 907,
+          "detail": "Rank 999->92 (+907), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T13:46:15.378498+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "AGI",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "AGI",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 905,
+          "detail": "Rank 999->94 (+905), 5 mentions",
+          "score": 5,
+          "velocity_score": 0,
+          "mention_growth_pct": 0
+        }
+      ],
+      "detected_at": "2026-06-15T13:46:15.378519+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "JPM",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "JPM",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 909,
+          "detail": "Rank 999->90 (+909), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-15T13:44:18.304811+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "MSTR",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "MSTR",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 907,
+          "detail": "Rank 999->92 (+907), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689858+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "OG",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "OG",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 904,
+          "detail": "Rank 999->95 (+904), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689897+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "SMR",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "SMR",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 903,
+          "detail": "Rank 999->96 (+903), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689902+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "PR",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "PR",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 902,
+          "detail": "Rank 999->97 (+902), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689905+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "BP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "BP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 901,
+          "detail": "Rank 999->98 (+901), 4 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689908+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "IP",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "IP",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 4 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T16:16:18.689911+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    },
+    {
+      "ticker": "OG",
+      "sources": [
+        "apewisdom"
+      ],
+      "source_count": 1,
+      "total_score": 5,
+      "signals": [
+        {
+          "ticker": "OG",
+          "source": "apewisdom",
+          "signal": "REDDIT_RANK_SPIKE",
+          "delta": 899,
+          "detail": "Rank 999->100 (+899), 5 mentions",
+          "score": 5
+        }
+      ],
+      "detected_at": "2026-06-13T15:48:09.772565+00:00",
+      "vetted": false,
+      "action": "WATCH - pipeline will score tonight",
+      "alert_type": "SINGLE_SOURCE"
+    }
+  ],
+  "stats": {
+    "spikes_detected": 11,
+    "source_counts": {
+      "apewisdom": 11,
+      "barchart_uoa": 0,
+      "openinsider": 0,
+      "getxapi": 0,
+      "stocktwits": 0
+    },
+    "confluence_alerts_this_cycle": 0,
+    "new_alerts_this_cycle": 0,
+    "quiet_events_this_cycle": 11,
+    "stocks_added_to_universe": 0,
+    "outcomes_logged": 0,
+    "outcome_updates": 0,
+    "telegram": [],
+    "feedback": {
+      "active": false,
+      "trust_sources": [],
+      "raise_bar_sources": [],
+      "total_discovered": 6
+    }
+  },
+  "engine": {
+    "running": true,
+    "market_hours": true,
+    "interval_minutes": 15,
+    "paper_only": true,
+    "sources": {
+      "apewisdom": true,
+      "stocktwits": true,
+      "barchart_uoa": true,
+      "openinsider": true,
+      "getxapi": true
+    }
+  }
+}

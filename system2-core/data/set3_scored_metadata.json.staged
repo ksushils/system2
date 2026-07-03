@@ -1,0 +1,19 @@
+{
+  "stage": "SET3_CATALYST_SCORER",
+  "createdAt": "2026-06-10T14:31:01.580042+00:00",
+  "run_id": "20260610T143101Z-77697c6a",
+  "input_count": 50,
+  "ok_count": 37,
+  "bias_distribution": {
+    "BULLISH": 42,
+    "BEARISH": 6,
+    "NEUTRAL": 2
+  },
+  "reject_reason_counts": {
+    "bearish_catalyst": 6,
+    "price_out_of_range": 1,
+    "volume_too_low": 7
+  },
+  "fmp_errors": [],
+  "staged_preview": true
+}

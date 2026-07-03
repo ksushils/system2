@@ -1,0 +1,12 @@
+{
+  "stage": "FMP_NEWS_ANALYST",
+  "createdAt": "2026-06-09T09:10:07.518685+00:00",
+  "inputCount": 3,
+  "outputCount": 3,
+  "hard_rejects": 0,
+  "analyst_positive": 0,
+  "analyst_negative": 0,
+  "consistent_beaters": 0,
+  "errors": [],
+  "paperOnly": true
+}

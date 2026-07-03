@@ -1,0 +1,57 @@
+{
+  "stage": "B3",
+  "createdAt": "2026-06-06T16:38:46.028181+00:00",
+  "inputStage1Count": 646,
+  "blockedTickersRemoved": [],
+  "scoredTickerCount": 646,
+  "keptTopN": 40,
+  "config": {
+    "topN": 40,
+    "maxWorkers": 4
+  },
+  "fmpCalls": {
+    "batchQuoteCalls": 7,
+    "spyIntradayCalls": 1,
+    "sectorEtfIntradayCalls": 11,
+    "tickerIntradayCalls": 646,
+    "dailyAtrCallsTop40": 40,
+    "total": 705
+  },
+  "fmpErrorCount": 0,
+  "fmpErrorsSample": [],
+  "dailyAtrErrorCount": 0,
+  "dailyAtrErrorsSample": [],
+  "spyTodayReturnPct": -1.993,
+  "sectorReturnsPct": {
+    "Basic Materials": -1.45,
+    "Communication Services": -0.967,
+    "Consumer Cyclical": -2.168,
+    "Consumer Defensive": 1.054,
+    "Energy": -1.687,
+    "Financial Services": -0.172,
+    "Healthcare": -0.241,
+    "Industrials": -0.667,
+    "Real Estate": 0.88,
+    "Technology": -4.569,
+    "Utilities": 0.738
+  },
+  "scoreDistribution": {
+    "count_ok": 646,
+    "score_80_100": 32,
+    "score_70_79": 22,
+    "score_60_69": 38,
+    "score_50_59": 31,
+    "score_40_49": 36,
+    "score_below_40": 487,
+    "min": 0,
+    "median": 8.0,
+    "max": 96
+  },
+  "runtimeSeconds": 162.87,
+  "notes": [
+    "No artificial Stage 1 ranking cut was added.",
+    "STRC removed because it is a preferred stock, not common equity.",
+    "B3 is ranking/technical filtering only; no brokers, no AI council, no Chronos, no deployment.",
+    "5-minute candles are used for VWAP/RVOL/momentum scoring; daily ATR14 is fetched only for top-40 stop sizing."
+  ]
+}

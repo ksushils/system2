@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-06-15T14:00:02.885227+00:00",
+  "count": 1,
+  "ideas": [
+    {
+      "idea_key": "ELVN|EXPIRY_PUSH|3|46.13|40.0|2026-06-13",
+      "ticker": "ELVN",
+      "generated_at": "2026-06-13T16:36:05.347943+00:00",
+      "dte": 3,
+      "entry": 46.13,
+      "target": 40.0,
+      "stop": 50.0,
+      "r_r": 1.58,
+      "direction": "BEARISH",
+      "setup_type": "EXPIRY_PUSH",
+      "thesis": "Price $46.13 is 13.3% above max pain $40.00. PCR 1.20 is put-heavy. Downward expiry push toward $40.00; nearest put wall $40.00 is target/support.",
+      "price_at_expiry": null,
+      "actual_r": null,
+      "outcome": null
+    }
+  ]
+}

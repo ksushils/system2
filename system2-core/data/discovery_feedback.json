@@ -1,0 +1,44 @@
+{
+  "computed_at": "2026-06-13T19:34:46.553748+00:00",
+  "total_discovered": 6,
+  "discovered_to_finalist_pct": 0.0,
+  "finalist_win_rate": null,
+  "by_source": {
+    "catalyst": {
+      "discovered": 2,
+      "became_finalist": 0,
+      "conversion_pct": 0.0,
+      "resolved": 0,
+      "win_rate": null
+    },
+    "social": {
+      "discovered": 2,
+      "became_finalist": 0,
+      "conversion_pct": 0.0,
+      "resolved": 0,
+      "win_rate": null
+    },
+    "insider": {
+      "discovered": 1,
+      "became_finalist": 0,
+      "conversion_pct": 0.0,
+      "resolved": 0,
+      "win_rate": null
+    },
+    "congress": {
+      "discovered": 1,
+      "became_finalist": 0,
+      "conversion_pct": 0.0,
+      "resolved": 0,
+      "win_rate": null
+    }
+  },
+  "recommendation": {
+    "raise_bar_sources": [],
+    "trust_sources": [],
+    "message": "Feedback dormant \u2014 6/30 discovered. Need more data before tuning thresholds."
+  },
+  "best_source": "catalyst",
+  "best_conversion_pct": 0,
+  "tuning_active": false
+}

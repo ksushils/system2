@@ -1,0 +1,206 @@
+{
+  "ok": true,
+  "updated_records": 10,
+  "changes": [
+    {
+      "before": {
+        "ticker": "FROG",
+        "r_1d": -1.398,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "FROG",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 84.5152,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "SN",
+        "r_1d": -1.664,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "SN",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 121.0496,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "IVZ",
+        "r_1d": -1.607,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "IVZ",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 27.6066,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "BKR",
+        "r_1d": -3.24,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "BKR",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 64.8123,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "STM",
+        "r_1d": -6.151,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "STM",
+        "r_1d": -3.632,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 73.68,
+        "paper_exit_r": -3.632
+      }
+    },
+    {
+      "before": {
+        "ticker": "AXON",
+        "r_1d": -3.173,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "AXON",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 502.8478,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "SNAP",
+        "r_1d": -3.124,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "SNAP",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 5.9535,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "BWA",
+        "r_1d": -3.475,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "BWA",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 75.4894,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "NUE",
+        "r_1d": -1.677,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "NUE",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 257.054,
+        "paper_exit_r": -1.0
+      }
+    },
+    {
+      "before": {
+        "ticker": "VST",
+        "r_1d": -1.801,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": null,
+        "paper_exit_r": null
+      },
+      "after": {
+        "ticker": "VST",
+        "r_1d": -1.0,
+        "r_3d": null,
+        "r_10d": null,
+        "hit": "STOP",
+        "paper_exit_price": 150.6064,
+        "paper_exit_r": -1.0
+      }
+    }
+  ]
+}

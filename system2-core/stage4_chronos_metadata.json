@@ -1,0 +1,28 @@
+{
+  "stage": "C2",
+  "createdAt": "2026-06-06T17:15:16.587101+00:00",
+  "inputCount": 40,
+  "outputCount": 40,
+  "forecastUrl": "http://72.62.134.167:8000/forecast",
+  "lookbackDays": 60,
+  "fmpOhlcvCallCount": 40,
+  "fmpErrorCount": 0,
+  "fmpErrorsSample": [],
+  "forecastTickerCount": 40,
+  "missingOhlcv": [],
+  "forecastError": null,
+  "forecastErrors": [],
+  "modelVersions": {
+    "chronos2": "amazon/chronos-2",
+    "kronos": "NeoQuasar/Kronos-base"
+  },
+  "runtimeSeconds": 29.49,
+  "loggingOnly": true,
+  "selectionInfluence": "none",
+  "orderPreserved": true,
+  "notes": [
+    "Chronos fields are attached after Stage 2 for logging only.",
+    "No sorting, rejection, rank change, or risk sizing change occurs in this stage.",
+    "B4 still receives the same 40 names in the same order."
+  ]
+}

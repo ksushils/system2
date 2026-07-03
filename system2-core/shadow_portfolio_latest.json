@@ -1,0 +1,12 @@
+{
+  "table": "shadow_portfolio",
+  "db": "/root/system2-core/system2_shadow.db",
+  "inserted": 33,
+  "total_records": 389,
+  "reentry_blocked_symbols": 381,
+  "checked": 385,
+  "missed_move_alerts": 0,
+  "errors": 0,
+  "alert_results": [],
+  "paper_only": true
+}

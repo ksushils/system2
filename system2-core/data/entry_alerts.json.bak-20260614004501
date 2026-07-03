@@ -1,0 +1,725 @@
+{
+  "alerts": [
+    {
+      "id": "2026-06-13_ROL_1781393136",
+      "ticker": "ROL",
+      "strength": "MODERATE",
+      "price": 47.19,
+      "price_at_alert": 47.19,
+      "entry_zone": null,
+      "stop": 45.1993,
+      "target": 51.8914,
+      "reasons": [
+        "In entry zone ($46.96-$47.43)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483431+00:00"
+    },
+    {
+      "id": "2026-06-13_RDN_1781393136",
+      "ticker": "RDN",
+      "strength": "MODERATE",
+      "price": 34.66,
+      "price_at_alert": 34.66,
+      "entry_zone": null,
+      "stop": 33.3529,
+      "target": 37.5443,
+      "reasons": [
+        "In entry zone ($34.40-$34.75)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483542+00:00"
+    },
+    {
+      "id": "2026-06-13_MAT_1781393136",
+      "ticker": "MAT",
+      "strength": "MODERATE",
+      "price": 14.65,
+      "price_at_alert": 14.65,
+      "entry_zone": null,
+      "stop": 14.0354,
+      "target": 15.9993,
+      "reasons": [
+        "In entry zone ($14.54-$14.69)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483563+00:00"
+    },
+    {
+      "id": "2026-06-13_SFM_1781393136",
+      "ticker": "SFM",
+      "strength": "MODERATE",
+      "price": 86.33,
+      "price_at_alert": 86.33,
+      "entry_zone": null,
+      "stop": 81.1114,
+      "target": 98.0571,
+      "reasons": [
+        "In entry zone ($85.89-$86.76)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483574+00:00"
+    },
+    {
+      "id": "2026-06-13_PTON_1781393136",
+      "ticker": "PTON",
+      "strength": "MODERATE",
+      "price": 5.55,
+      "price_at_alert": 5.55,
+      "entry_zone": null,
+      "stop": 5.0754,
+      "target": 6.6343,
+      "reasons": [
+        "In entry zone ($5.54-$5.59)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483630+00:00"
+    },
+    {
+      "id": "2026-06-13_BWA_1781393136",
+      "ticker": "BWA",
+      "strength": "MODERATE",
+      "price": 74.51,
+      "price_at_alert": 74.51,
+      "entry_zone": null,
+      "stop": 69.2025,
+      "target": 86.235,
+      "reasons": [
+        "In entry zone ($74.13-$74.88)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "B_WATCH",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483751+00:00"
+    },
+    {
+      "id": "2026-06-13_PENG_1781393136",
+      "ticker": "PENG",
+      "strength": "MODERATE",
+      "price": 64.13,
+      "price_at_alert": 64.13,
+      "entry_zone": null,
+      "stop": 53.2964,
+      "target": 86.3071,
+      "reasons": [
+        "In entry zone ($63.66-$64.30)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "C_NEEDS_CONFIRMATION",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483781+00:00"
+    },
+    {
+      "id": "2026-06-13_BWA_1781393136",
+      "ticker": "BWA",
+      "strength": "MODERATE",
+      "price": 74.51,
+      "price_at_alert": 74.51,
+      "entry_zone": null,
+      "stop": 69.2025,
+      "target": 86.235,
+      "reasons": [
+        "In entry zone ($74.13-$74.88)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "B_WATCH",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483838+00:00"
+    },
+    {
+      "id": "2026-06-13_PENG_1781393136",
+      "ticker": "PENG",
+      "strength": "MODERATE",
+      "price": 64.13,
+      "price_at_alert": 64.13,
+      "entry_zone": null,
+      "stop": 53.2964,
+      "target": 86.3071,
+      "reasons": [
+        "In entry zone ($63.66-$64.30)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "C_NEEDS_CONFIRMATION",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483884+00:00"
+    },
+    {
+      "id": "2026-06-13_SIRI_1781393136",
+      "ticker": "SIRI",
+      "strength": "MODERATE",
+      "price": 27.52,
+      "price_at_alert": 27.52,
+      "entry_zone": null,
+      "stop": 26.2105,
+      "target": 29.7972,
+      "reasons": [
+        "In entry zone ($27.31-$27.59)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483977+00:00"
+    },
+    {
+      "id": "2026-06-13_BWA_1781393136",
+      "ticker": "BWA",
+      "strength": "MODERATE",
+      "price": 74.51,
+      "price_at_alert": 74.51,
+      "entry_zone": null,
+      "stop": 69.2025,
+      "target": 86.235,
+      "reasons": [
+        "In entry zone ($74.13-$74.88)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "B_WATCH",
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.483998+00:00"
+    },
+    {
+      "id": "2026-06-13_CMC_1781393136",
+      "ticker": "CMC",
+      "strength": "MODERATE",
+      "price": 77.76,
+      "price_at_alert": 77.76,
+      "entry_zone": null,
+      "stop": 74.0214,
+      "target": 85.2971,
+      "reasons": [
+        "In entry zone ($77.00-$77.78)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484020+00:00"
+    },
+    {
+      "id": "2026-06-13_CNK_1781393136",
+      "ticker": "CNK",
+      "strength": "MODERATE",
+      "price": 33.8,
+      "price_at_alert": 33.8,
+      "entry_zone": null,
+      "stop": 32.1218,
+      "target": 37.7564,
+      "reasons": [
+        "In entry zone ($33.66-$34.00)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484065+00:00"
+    },
+    {
+      "id": "2026-06-13_VOD_1781393136",
+      "ticker": "VOD",
+      "strength": "MODERATE",
+      "price": 15.53,
+      "price_at_alert": 15.53,
+      "entry_zone": null,
+      "stop": 15.1416,
+      "target": 16.3068,
+      "reasons": [
+        "In entry zone ($15.38-$15.53)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484077+00:00"
+    },
+    {
+      "id": "2026-06-13_ARIS_1781393136",
+      "ticker": "ARIS",
+      "strength": "MODERATE",
+      "price": 15.89,
+      "price_at_alert": 15.89,
+      "entry_zone": null,
+      "stop": 14.3379,
+      "target": 19.0391,
+      "reasons": [
+        "In entry zone ($15.75-$15.90)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484090+00:00"
+    },
+    {
+      "id": "2026-06-13_ATMU_1781393136",
+      "ticker": "ATMU",
+      "strength": "MODERATE",
+      "price": 49.8,
+      "price_at_alert": 49.8,
+      "entry_zone": null,
+      "stop": 47.5482,
+      "target": 55.0536,
+      "reasons": [
+        "In entry zone ($49.55-$50.05)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484119+00:00"
+    },
+    {
+      "id": "2026-06-13_IAG_1781393136",
+      "ticker": "IAG",
+      "strength": "MODERATE",
+      "price": 16.65,
+      "price_at_alert": 16.65,
+      "entry_zone": null,
+      "stop": 15.2648,
+      "target": 19.4804,
+      "reasons": [
+        "In entry zone ($16.50-$16.67)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484149+00:00"
+    },
+    {
+      "id": "2026-06-13_AEVA_1781393136",
+      "ticker": "AEVA",
+      "strength": "MODERATE",
+      "price": 24.89,
+      "price_at_alert": 24.89,
+      "entry_zone": null,
+      "stop": 20.6318,
+      "target": 34.0964,
+      "reasons": [
+        "In entry zone ($24.87-$25.12)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484230+00:00"
+    },
+    {
+      "id": "2026-06-13_SEM_1781393136",
+      "ticker": "SEM",
+      "strength": "MODERATE",
+      "price": 16.66,
+      "price_at_alert": 16.66,
+      "entry_zone": null,
+      "stop": 16.5825,
+      "target": 16.83,
+      "reasons": [
+        "In entry zone ($16.50-$16.66)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484260+00:00"
+    },
+    {
+      "id": "2026-06-13_SBRA_1781393136",
+      "ticker": "SBRA",
+      "strength": "MODERATE",
+      "price": 18.73,
+      "price_at_alert": 18.73,
+      "entry_zone": null,
+      "stop": 17.9016,
+      "target": 20.6418,
+      "reasons": [
+        "In entry zone ($18.63-$18.81)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484273+00:00"
+    },
+    {
+      "id": "2026-06-13_PAYC_1781393136",
+      "ticker": "PAYC",
+      "strength": "MODERATE",
+      "price": 134.52,
+      "price_at_alert": 134.52,
+      "entry_zone": null,
+      "stop": 125.0207,
+      "target": 153.7886,
+      "reasons": [
+        "In entry zone ($133.27-$134.61)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484310+00:00"
+    },
+    {
+      "id": "2026-06-13_ATMU_1781393136",
+      "ticker": "ATMU",
+      "strength": "MODERATE",
+      "price": 49.8,
+      "price_at_alert": 49.8,
+      "entry_zone": null,
+      "stop": 47.5482,
+      "target": 55.0536,
+      "reasons": [
+        "In entry zone ($49.55-$50.05)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484332+00:00"
+    },
+    {
+      "id": "2026-06-13_IAG_1781393136",
+      "ticker": "IAG",
+      "strength": "MODERATE",
+      "price": 16.65,
+      "price_at_alert": 16.65,
+      "entry_zone": null,
+      "stop": 15.2648,
+      "target": 19.4804,
+      "reasons": [
+        "In entry zone ($16.50-$16.67)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484360+00:00"
+    },
+    {
+      "id": "2026-06-13_AEVA_1781393136",
+      "ticker": "AEVA",
+      "strength": "MODERATE",
+      "price": 24.89,
+      "price_at_alert": 24.89,
+      "entry_zone": null,
+      "stop": 20.6318,
+      "target": 34.0964,
+      "reasons": [
+        "In entry zone ($24.87-$25.12)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484388+00:00"
+    },
+    {
+      "id": "2026-06-13_SEM_1781393136",
+      "ticker": "SEM",
+      "strength": "MODERATE",
+      "price": 16.66,
+      "price_at_alert": 16.66,
+      "entry_zone": null,
+      "stop": 16.5825,
+      "target": 16.83,
+      "reasons": [
+        "In entry zone ($16.50-$16.66)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484426+00:00"
+    },
+    {
+      "id": "2026-06-13_SBRA_1781393136",
+      "ticker": "SBRA",
+      "strength": "MODERATE",
+      "price": 18.73,
+      "price_at_alert": 18.73,
+      "entry_zone": null,
+      "stop": 17.9016,
+      "target": 20.6418,
+      "reasons": [
+        "In entry zone ($18.63-$18.81)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484438+00:00"
+    },
+    {
+      "id": "2026-06-13_PAYC_1781393136",
+      "ticker": "PAYC",
+      "strength": "MODERATE",
+      "price": 134.52,
+      "price_at_alert": 134.52,
+      "entry_zone": null,
+      "stop": 125.0207,
+      "target": 153.7886,
+      "reasons": [
+        "In entry zone ($133.27-$134.61)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484475+00:00"
+    },
+    {
+      "id": "2026-06-13_BGC_1781393136",
+      "ticker": "BGC",
+      "strength": "MODERATE",
+      "price": 11.85,
+      "price_at_alert": 11.85,
+      "entry_zone": null,
+      "stop": 11.3375,
+      "target": 12.89,
+      "reasons": [
+        "In entry zone ($11.74-$11.85)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484487+00:00"
+    },
+    {
+      "id": "2026-06-13_LION_1781393136",
+      "ticker": "LION",
+      "strength": "MODERATE",
+      "price": 14.32,
+      "price_at_alert": 14.32,
+      "entry_zone": null,
+      "stop": 13.4564,
+      "target": 16.0471,
+      "reasons": [
+        "In entry zone ($14.18-$14.32)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484500+00:00"
+    },
+    {
+      "id": "2026-06-13_FRO_1781393136",
+      "ticker": "FRO",
+      "strength": "MODERATE",
+      "price": 39.07,
+      "price_at_alert": 39.07,
+      "entry_zone": null,
+      "stop": 36.9896,
+      "target": 43.2607,
+      "reasons": [
+        "In entry zone ($38.69-$39.08)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484513+00:00"
+    },
+    {
+      "id": "2026-06-13_RIVN_1781393136",
+      "ticker": "RIVN",
+      "strength": "MODERATE",
+      "price": 16.76,
+      "price_at_alert": 16.76,
+      "entry_zone": null,
+      "stop": 15.0071,
+      "target": 20.2657,
+      "reasons": [
+        "In entry zone ($16.59-$16.76)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484542+00:00"
+    },
+    {
+      "id": "2026-06-13_SBLK_1781393136",
+      "ticker": "SBLK",
+      "strength": "MODERATE",
+      "price": 27.15,
+      "price_at_alert": 27.15,
+      "entry_zone": null,
+      "stop": 25.9593,
+      "target": 29.5914,
+      "reasons": [
+        "In entry zone ($26.90-$27.17)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484554+00:00"
+    },
+    {
+      "id": "2026-06-13_HPQ_1781393136",
+      "ticker": "HPQ",
+      "strength": "MODERATE",
+      "price": 25.24,
+      "price_at_alert": 25.24,
+      "entry_zone": null,
+      "stop": 22.8475,
+      "target": 30.025,
+      "reasons": [
+        "In entry zone ($24.99-$25.24)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484566+00:00"
+    },
+    {
+      "id": "2026-06-13_ALMS_1781393136",
+      "ticker": "ALMS",
+      "strength": "MODERATE",
+      "price": 24.15,
+      "price_at_alert": 24.15,
+      "entry_zone": null,
+      "stop": 22.2218,
+      "target": 28.0364,
+      "reasons": [
+        "In entry zone ($23.92-$24.16)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484579+00:00"
+    },
+    {
+      "id": "2026-06-13_ELVN_1781393136",
+      "ticker": "ELVN",
+      "strength": "MODERATE",
+      "price": 46.13,
+      "price_at_alert": 46.13,
+      "entry_zone": null,
+      "stop": 41.7039,
+      "target": 54.9821,
+      "reasons": [
+        "In entry zone ($45.67-$46.13)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484592+00:00"
+    },
+    {
+      "id": "2026-06-13_MUFG_1781393136",
+      "ticker": "MUFG",
+      "strength": "MODERATE",
+      "price": 20.16,
+      "price_at_alert": 20.16,
+      "entry_zone": null,
+      "stop": 19.5911,
+      "target": 21.2979,
+      "reasons": [
+        "In entry zone ($19.96-$20.16)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484604+00:00"
+    },
+    {
+      "id": "2026-06-13_VSH_1781393136",
+      "ticker": "VSH",
+      "strength": "MODERATE",
+      "price": 59.38,
+      "price_at_alert": 59.38,
+      "entry_zone": null,
+      "stop": 49.6489,
+      "target": 78.9921,
+      "reasons": [
+        "In entry zone ($58.84-$59.43)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484616+00:00"
+    },
+    {
+      "id": "2026-06-13_XEL_1781393136",
+      "ticker": "XEL",
+      "strength": "MODERATE",
+      "price": 79.22,
+      "price_at_alert": 79.22,
+      "entry_zone": null,
+      "stop": 76.5943,
+      "target": 84.5014,
+      "reasons": [
+        "In entry zone ($78.44-$79.23)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484628+00:00"
+    },
+    {
+      "id": "2026-06-13_EIX_1781393136",
+      "ticker": "EIX",
+      "strength": "MODERATE",
+      "price": 72.95,
+      "price_at_alert": 72.95,
+      "entry_zone": null,
+      "stop": 70.6861,
+      "target": 77.4779,
+      "reasons": [
+        "In entry zone ($72.22-$72.95)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484640+00:00"
+    },
+    {
+      "id": "2026-06-13_ZS_1781393136",
+      "ticker": "ZS",
+      "strength": "MODERATE",
+      "price": 129.52,
+      "price_at_alert": 129.52,
+      "entry_zone": null,
+      "stop": 109.8439,
+      "target": 168.9321,
+      "reasons": [
+        "In entry zone ($128.25-$129.54)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-13",
+      "alerted_at": "2026-06-13T23:25:36.484661+00:00"
+    }
+  ],
+  "last_cycle": "2026-06-13T23:30:22.455769+00:00"
+}

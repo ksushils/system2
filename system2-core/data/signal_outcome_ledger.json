@@ -1,0 +1,222 @@
+[
+  {
+    "ticker": "SCI",
+    "date": "2026-06-09",
+    "outcome_r": 2.446,
+    "won": true,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": "NEUTRAL",
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "VKTX",
+    "date": "2026-06-09",
+    "outcome_r": -1.0,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": "NEUTRAL",
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "BTDR",
+    "date": "2026-06-09",
+    "outcome_r": -1.0,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "ALHC",
+    "date": "2026-06-09",
+    "outcome_r": 2.216,
+    "won": true,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": "NEUTRAL",
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "TNGX",
+    "date": "2026-06-11",
+    "outcome_r": -1.508,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": "CAUTION"
+    }
+  },
+  {
+    "ticker": "SAIL",
+    "date": "2026-06-11",
+    "outcome_r": -1.265,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": "CAUTION"
+    }
+  },
+  {
+    "ticker": "AR",
+    "date": "2026-06-11",
+    "outcome_r": -1.042,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": "NEUTRAL",
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": "CAUTION"
+    }
+  },
+  {
+    "ticker": "SMCI",
+    "date": "2026-06-11",
+    "outcome_r": 1.889,
+    "won": true,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "RIOT",
+    "date": "2026-06-11",
+    "outcome_r": 2.511,
+    "won": true,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": null
+    }
+  },
+  {
+    "ticker": "NAVN",
+    "date": "2026-06-12",
+    "outcome_r": -2.138,
+    "won": false,
+    "signals": {
+      "rvol": null,
+      "proximity_52wk": null,
+      "adx": null,
+      "setup_type": null,
+      "pre_market_status": null,
+      "options_verdict": null,
+      "dark_pool_signal": null,
+      "insider_buy_signal": null,
+      "pead_score": null,
+      "social_sentiment": null,
+      "congress_signal": null,
+      "analyst_rec_direction": null,
+      "danelfin_aiscore": null,
+      "regime": "NORMAL"
+    }
+  }
+]

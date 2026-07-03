@@ -1,0 +1,66 @@
+{
+  "status": "complete",
+  "progress": 100,
+  "step": "Complete: 0 trades",
+  "trades_so_far": 0,
+  "params": {
+    "start_date": "2026-04-01",
+    "end_date": "2026-04-10",
+    "universe_size": 10,
+    "setup_threshold": 55.0,
+    "rvol_gate": 2.0,
+    "hold_days": 5,
+    "stop_atr": 1.5,
+    "target_atr": 3.0,
+    "regime_filter": null
+  },
+  "results": {
+    "ok": true,
+    "generated_at": "2026-06-12T23:59:11.470978+00:00",
+    "result_path": "/root/system2-core/data/backtest_results_20260612_235911.json",
+    "params": {
+      "start_date": "2026-04-01",
+      "end_date": "2026-04-10",
+      "universe_size": 10,
+      "setup_threshold": 55.0,
+      "rvol_gate": 2.0,
+      "hold_days": 5,
+      "stop_atr": 1.5,
+      "target_atr": 3.0,
+      "regime_filter": null
+    },
+    "trades": [],
+    "equity_curve": [],
+    "stats": {
+      "total_trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0.0,
+      "avg_r": 0.0,
+      "total_r": 0.0,
+      "profit_factor": 0.0,
+      "best_r": 0.0,
+      "worst_r": 0.0,
+      "avg_hold_days": 0.0,
+      "max_drawdown_r": 0.0,
+      "sharpe_estimate": 0.0,
+      "expectancy": 0.0
+    },
+    "by_regime": {
+      "NORMAL": {
+        "trades": 0,
+        "win_rate": 0.0,
+        "avg_r": 0.0,
+        "total_r": 0.0
+      }
+    },
+    "by_setup_type": {
+      "UNKNOWN": {
+        "trades": 0,
+        "win_rate": 0.0,
+        "avg_r": 0.0,
+        "total_r": 0.0
+      }
+    }
+  }
+}

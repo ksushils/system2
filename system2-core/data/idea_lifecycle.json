@@ -1,0 +1,1120 @@
+[
+  {
+    "idea_id": "ADBE_2026-06-13",
+    "ticker": "ADBE",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "catalyst",
+          "social",
+          "congress"
+        ],
+        "detail": "Adobe price target lowered to $230 from $285 at BMO Capital; Adobe price target lowered to $240 from $280 at Piper Sandler; Adobe price target lowered to $190 from $220 at Goldman Sachs; Adobe price target lowered to $379 from $447 at Bernstein; Adobe price target lowered to $230 from $270 at Baird; Adobe price target lowered to $195 from $235 at KeyBanc; Ad; StockTwits 91% bullish (30 messages); 2 politician(s) bought",
+        "signals": [
+          {
+            "source": "catalyst",
+            "summary": "Adobe price target lowered to $230 from $285 at BMO Capital; Adobe price target lowered to $240 from $280 at Piper Sandler; Adobe price target lowered to $190 from $220 at Goldman Sachs; Adobe price target lowered to $379 from $447 at Bernstein; Adobe price target lowered to $230 from $270 at Baird; Adobe price target lowered to $195 from $235 at KeyBanc; Ad",
+            "sub_type": "analyst"
+          },
+          {
+            "source": "social",
+            "summary": "StockTwits 91% bullish (30 messages)",
+            "sub_type": "social_momentum"
+          },
+          {
+            "source": "congress",
+            "summary": "2 politician(s) bought",
+            "sub_type": "congressional_buy"
+          }
+        ],
+        "confluence_required": 2,
+        "feedback_tuning_active": false,
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T15:19:06.616256+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "AEM_2026-06-13",
+    "ticker": "AEM",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "social",
+          "danelfin"
+        ],
+        "detail": "StockTwits 100% bullish (30 messages); Danelfin AI 10.0/10, Low Risk 5.0/10",
+        "signals": [
+          {
+            "source": "social",
+            "summary": "StockTwits 100% bullish (30 messages)",
+            "sub_type": "social_momentum"
+          },
+          {
+            "source": "danelfin",
+            "summary": "Danelfin AI 10.0/10, Low Risk 5.0/10",
+            "sub_type": null
+          }
+        ],
+        "confluence_required": 2,
+        "feedback_tuning_active": false,
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T15:19:06.616650+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "AGI_2026-06-13",
+    "ticker": "AGI",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "social",
+          "danelfin"
+        ],
+        "detail": "StockTwits 100% bullish (30 messages); Danelfin AI 10.0/10, Low Risk 5.0/10",
+        "signals": [
+          {
+            "source": "social",
+            "summary": "StockTwits 100% bullish (30 messages)",
+            "sub_type": "social_momentum"
+          },
+          {
+            "source": "danelfin",
+            "summary": "Danelfin AI 10.0/10, Low Risk 5.0/10",
+            "sub_type": null
+          }
+        ],
+        "confluence_required": 2,
+        "feedback_tuning_active": false,
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T15:19:06.617181+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "NMM_2026-06-13",
+    "ticker": "NMM",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "insider",
+          "danelfin"
+        ],
+        "detail": "1 insider(s) bought $1,003,504; Danelfin AI 10.0/10, Low Risk 6.0/10",
+        "signals": [
+          {
+            "source": "insider",
+            "summary": "1 insider(s) bought $1,003,504",
+            "sub_type": "cluster_insider_buy"
+          },
+          {
+            "source": "danelfin",
+            "summary": "Danelfin AI 10.0/10, Low Risk 6.0/10",
+            "sub_type": null
+          }
+        ],
+        "confluence_required": 2,
+        "feedback_tuning_active": false,
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T15:19:06.617619+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "NVDA_2026-06-13",
+    "ticker": "NVDA",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "congress",
+          "danelfin"
+        ],
+        "detail": "2 politician(s) bought; Danelfin AI 9.0/10, Low Risk 5.0/10",
+        "signals": [
+          {
+            "source": "congress",
+            "summary": "2 politician(s) bought",
+            "sub_type": "congressional_buy"
+          },
+          {
+            "source": "danelfin",
+            "summary": "Danelfin AI 9.0/10, Low Risk 5.0/10",
+            "sub_type": null
+          }
+        ],
+        "confluence_required": 2,
+        "feedback_tuning_active": false,
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T15:19:06.617943+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "CASY_2026-06-13",
+    "ticker": "CASY",
+    "first_seen_date": "2026-06-13",
+    "lifecycle": [
+      {
+        "source": "continuous_discovery",
+        "sources_agreeing": [
+          "catalyst"
+        ],
+        "stage": "DISCOVERED",
+        "timestamp": "2026-06-13T19:31:24.713669+00:00"
+      }
+    ],
+    "current_stage": "DISCOVERED",
+    "origin": "continuous_discovery",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "EMBJ_2026-06-14",
+    "ticker": "EMBJ",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.94,
+        "confluence_score": 54,
+        "trade_quality_score": 54,
+        "core_setup_score": 79,
+        "confirmation_score": 59,
+        "risk_score": 15,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 28,
+          "catalyst": 20,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 28,
+          "catalyst_raw": 26,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.353842+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 54,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:09.557000+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "CXW_2026-06-14",
+    "ticker": "CXW",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 75.36,
+        "confluence_score": 48,
+        "trade_quality_score": 48,
+        "core_setup_score": 74,
+        "confirmation_score": 54,
+        "risk_score": 28,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 26,
+          "catalyst": 17,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 26,
+          "catalyst_raw": 17,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.355662+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 48,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:09.810978+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "JNJ_2026-06-14",
+    "ticker": "JNJ",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.22,
+        "confluence_score": 48,
+        "trade_quality_score": 48,
+        "core_setup_score": 71,
+        "confirmation_score": 53,
+        "risk_score": 18,
+        "data_quality_score": 53,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 31,
+          "catalyst": 11,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 31,
+          "catalyst_raw": 11,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.356080+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 48,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:10.063201+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "CB_2026-06-14",
+    "ticker": "CB",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 69.57,
+        "confluence_score": 47,
+        "trade_quality_score": 47,
+        "core_setup_score": 71,
+        "confirmation_score": 43,
+        "risk_score": 5,
+        "data_quality_score": 36,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 14,
+          "catalyst": 18,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 14,
+          "catalyst_raw": 18,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.356424+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 47,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:10.274261+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "DAN_2026-06-14",
+    "ticker": "DAN",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 66.67,
+        "confluence_score": 46,
+        "trade_quality_score": 46,
+        "core_setup_score": 59,
+        "confirmation_score": 70,
+        "risk_score": 23,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 32,
+          "catalyst": 18,
+          "structural": 20,
+          "momentum_raw": 0,
+          "positioning_raw": 32,
+          "catalyst_raw": 18,
+          "structural_raw": 24,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.356808+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 46,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:10.471052+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "SBUX_2026-06-14",
+    "ticker": "SBUX",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 60.87,
+        "confluence_score": 45,
+        "trade_quality_score": 45,
+        "core_setup_score": 66,
+        "confirmation_score": 57,
+        "risk_score": 23,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 35,
+          "catalyst": 11,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 36,
+          "catalyst_raw": 11,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.357348+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "C_NEEDS_CONFIRMATION",
+        "trade_quality_score": 45,
+        "trade_quality_label": "WATCHLIST ONLY",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:10.691994+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "BNL_2026-06-14",
+    "ticker": "BNL",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.94,
+        "confluence_score": 44,
+        "trade_quality_score": 44,
+        "core_setup_score": 67,
+        "confirmation_score": 53,
+        "risk_score": 28,
+        "data_quality_score": 53,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 27,
+          "catalyst": 18,
+          "structural": 8,
+          "momentum_raw": 0,
+          "positioning_raw": 27,
+          "catalyst_raw": 18,
+          "structural_raw": 8,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.357827+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 44,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:10.892938+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "BUD_2026-06-14",
+    "ticker": "BUD",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 58.7,
+        "confluence_score": 43,
+        "trade_quality_score": 43,
+        "core_setup_score": 62,
+        "confirmation_score": 60,
+        "risk_score": 28,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 31,
+          "catalyst": 18,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 31,
+          "catalyst_raw": 18,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.358356+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 43,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:11.148354+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "MUFG_2026-06-14",
+    "ticker": "MUFG",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 72.46,
+        "confluence_score": 42,
+        "trade_quality_score": 42,
+        "core_setup_score": 71,
+        "confirmation_score": 47,
+        "risk_score": 36,
+        "data_quality_score": 53,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 33,
+          "catalyst": 3,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 33,
+          "catalyst_raw": 3,
+          "structural_raw": 11,
+          "families_firing": 2
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.358908+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 42,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:11.388415+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "BYD_2026-06-14",
+    "ticker": "BYD",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 68.12,
+        "confluence_score": 41,
+        "trade_quality_score": 41,
+        "core_setup_score": 67,
+        "confirmation_score": 43,
+        "risk_score": 28,
+        "data_quality_score": 53,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 27,
+          "catalyst": 8,
+          "structural": 8,
+          "momentum_raw": 0,
+          "positioning_raw": 27,
+          "catalyst_raw": 8,
+          "structural_raw": 8,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.359465+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 41,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:11.600287+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "VOD_2026-06-14",
+    "ticker": "VOD",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 57.25,
+        "confluence_score": 40,
+        "trade_quality_score": 40,
+        "core_setup_score": 61,
+        "confirmation_score": 48,
+        "risk_score": 23,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 22,
+          "catalyst": 18,
+          "structural": 8,
+          "momentum_raw": 0,
+          "positioning_raw": 22,
+          "catalyst_raw": 18,
+          "structural_raw": 8,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.360099+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 40,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:11.800762+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "EIX_2026-06-14",
+    "ticker": "EIX",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 73.91,
+        "confluence_score": 38,
+        "trade_quality_score": 38,
+        "core_setup_score": 67,
+        "confirmation_score": 40,
+        "risk_score": 38,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 12,
+          "catalyst": 20,
+          "structural": 8,
+          "momentum_raw": 0,
+          "positioning_raw": 12,
+          "catalyst_raw": 27,
+          "structural_raw": 8,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.361934+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 38,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.003690+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "EA_2026-06-14",
+    "ticker": "EA",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 71.01,
+        "confluence_score": 37,
+        "trade_quality_score": 37,
+        "core_setup_score": 67,
+        "confirmation_score": 29,
+        "risk_score": 28,
+        "data_quality_score": 53,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 12,
+          "catalyst": 6,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 12,
+          "catalyst_raw": 6,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.362516+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 37,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.196946+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "VSNT_2026-06-14",
+    "ticker": "VSNT",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.22,
+        "confluence_score": 36,
+        "trade_quality_score": 36,
+        "core_setup_score": 51,
+        "confirmation_score": 47,
+        "risk_score": 16,
+        "data_quality_score": 37,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 19,
+          "catalyst": 8,
+          "structural": 20,
+          "momentum_raw": 0,
+          "positioning_raw": 19,
+          "catalyst_raw": 8,
+          "structural_raw": 24,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.363090+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 36,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.390116+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "HWM_2026-06-14",
+    "ticker": "HWM",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 60.87,
+        "confluence_score": 35,
+        "trade_quality_score": 35,
+        "core_setup_score": 54,
+        "confirmation_score": 42,
+        "risk_score": 23,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 26,
+          "catalyst": 8,
+          "structural": 8,
+          "momentum_raw": 0,
+          "positioning_raw": 26,
+          "catalyst_raw": 8,
+          "structural_raw": 8,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.363693+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 35,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.605410+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "WIX_2026-06-14",
+    "ticker": "WIX",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.94,
+        "confluence_score": 35,
+        "trade_quality_score": 35,
+        "core_setup_score": 59,
+        "confirmation_score": 33,
+        "risk_score": 20,
+        "data_quality_score": 28,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 14,
+          "catalyst": 8,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 14,
+          "catalyst_raw": 8,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.364404+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 35,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.804045+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "DOCU_2026-06-14",
+    "ticker": "DOCU",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 62.32,
+        "confluence_score": 34,
+        "trade_quality_score": 34,
+        "core_setup_score": 42,
+        "confirmation_score": 62,
+        "risk_score": 30,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 33,
+          "catalyst": 18,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 33,
+          "catalyst_raw": 18,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.365061+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 34,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:12.999511+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "RRC_2026-06-14",
+    "ticker": "RRC",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 57.97,
+        "confluence_score": 34,
+        "trade_quality_score": 34,
+        "core_setup_score": 54,
+        "confirmation_score": 37,
+        "risk_score": 23,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 18,
+          "catalyst": 8,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 18,
+          "catalyst_raw": 8,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.365772+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 34,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:13.235107+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  },
+  {
+    "idea_id": "ATO_2026-06-14",
+    "ticker": "ATO",
+    "first_seen_date": "2026-06-14",
+    "lifecycle": [
+      {
+        "source": "scanner",
+        "setup_score": 65.22,
+        "confluence_score": 32,
+        "trade_quality_score": 32,
+        "core_setup_score": 47,
+        "confirmation_score": 43,
+        "risk_score": 21,
+        "data_quality_score": 45,
+        "family_scores": {
+          "momentum": 0,
+          "positioning": 24,
+          "catalyst": 8,
+          "structural": 11,
+          "momentum_raw": 0,
+          "positioning_raw": 24,
+          "catalyst_raw": 8,
+          "structural_raw": 11,
+          "families_firing": 3
+        },
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "SCORED",
+        "timestamp": "2026-06-14T21:17:39.366523+00:00"
+      },
+      {
+        "source": "scanner",
+        "tier": "D_PASS",
+        "trade_quality_score": 32,
+        "trade_quality_label": "WEAK",
+        "passed_gates": true,
+        "set": 1,
+        "multi_set_idea": false,
+        "stage": "FINALIST",
+        "timestamp": "2026-06-14T21:18:13.427381+00:00"
+      }
+    ],
+    "current_stage": "FINALIST",
+    "origin": "scanner",
+    "days_discovery_to_finalist": null,
+    "days_finalist_to_entry": null,
+    "final_outcome_r": null
+  }
+]

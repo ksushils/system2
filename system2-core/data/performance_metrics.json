@@ -1,0 +1,122 @@
+{
+  "generated_at": "2026-06-14T11:41:19.179751+00:00",
+  "trade_count": 10,
+  "win_rate": 40.0,
+  "avg_r": 0.111,
+  "total_r": 1.11,
+  "profit_factor": 1.14,
+  "expectancy": 0.111,
+  "avg_win": 2.266,
+  "avg_loss": -1.325,
+  "avg_hold_days": 2.1,
+  "sharpe_per_trade": 0.059,
+  "sharpe_annual": 0.41,
+  "sortino": 1.76,
+  "calmar": 0.29,
+  "max_drawdown_r": 3.81,
+  "max_win_streak": 2,
+  "max_loss_streak": 3,
+  "best_trade": 2.51,
+  "worst_trade": -2.14,
+  "equity_curve": [
+    {
+      "date": "2026-06-09",
+      "ticker": "SCI",
+      "cumulative_r": 2.45
+    },
+    {
+      "date": "2026-06-09",
+      "ticker": "VKTX",
+      "cumulative_r": 1.45
+    },
+    {
+      "date": "2026-06-09",
+      "ticker": "BTDR",
+      "cumulative_r": 0.45
+    },
+    {
+      "date": "2026-06-09",
+      "ticker": "ALHC",
+      "cumulative_r": 2.66
+    },
+    {
+      "date": "2026-06-11",
+      "ticker": "TNGX",
+      "cumulative_r": 1.15
+    },
+    {
+      "date": "2026-06-11",
+      "ticker": "SAIL",
+      "cumulative_r": -0.11
+    },
+    {
+      "date": "2026-06-11",
+      "ticker": "AR",
+      "cumulative_r": -1.15
+    },
+    {
+      "date": "2026-06-11",
+      "ticker": "SMCI",
+      "cumulative_r": 0.74
+    },
+    {
+      "date": "2026-06-11",
+      "ticker": "RIOT",
+      "cumulative_r": 3.25
+    },
+    {
+      "date": "2026-06-12",
+      "ticker": "NAVN",
+      "cumulative_r": 1.11
+    }
+  ],
+  "by_regime": {
+    "UNKNOWN": {
+      "trades": 6,
+      "win_rate": 66.7,
+      "avg_r": 1.177,
+      "total_r": 7.06
+    },
+    "CAUTION": {
+      "trades": 3,
+      "win_rate": 0.0,
+      "avg_r": -1.272,
+      "total_r": -3.81
+    },
+    "NORMAL": {
+      "trades": 1,
+      "win_rate": 0.0,
+      "avg_r": -2.138,
+      "total_r": -2.14
+    }
+  },
+  "by_setup_type": {
+    "MOMENTUM": {
+      "trades": 7,
+      "win_rate": 57.1,
+      "avg_r": 0.86
+    },
+    "CATALYST": {
+      "trades": 3,
+      "win_rate": 0.0,
+      "avg_r": -1.637
+    }
+  },
+  "rating_flags": [
+    [
+      "Sharpe",
+      "BELOW_BAR"
+    ],
+    [
+      "ProfitFactor",
+      "BELOW_BAR"
+    ]
+  ],
+  "benchmarks": {
+    "sharpe_target": 1.5,
+    "profit_factor_target": 1.3,
+    "win_rate_target": 50,
+    "note": "Institutional bar: Sharpe>2.0",
+    "risk_free_rate": 0.04
+  }
+}

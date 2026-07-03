@@ -1,0 +1,2285 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T00:50:02.277505+00:00",
+  "source": "congress_public_disclosures",
+  "total_tickers": 104,
+  "cluster_buys": 38,
+  "bipartisan_buys": 0,
+  "tickers": {
+    "KHC": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gary C Peters",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gary C Peters"
+      ],
+      "chambers": [
+        "senate"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "META": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "John McGuire",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Michael T. McCaul",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "John McGuire",
+        "Michael T. McCaul"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "US": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "JPM": {
+      "congress_buy_count": 3,
+      "congress_total_value": 48501.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "William R. Keating",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna",
+        "William R. Keating"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "GOOGL": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SFTBF": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "COO": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "TCBI": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "TSLA": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "TEL": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "PWP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "LGND": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "INDB": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "HQY": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "FBK": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "DASH": {
+      "congress_buy_count": 4,
+      "congress_total_value": 32002.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "CIEN": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BSX": {
+      "congress_buy_count": 3,
+      "congress_total_value": 24001.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "ARQT": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "BEP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "IBM": {
+      "congress_buy_count": 1,
+      "congress_total_value": 32500.5,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "LPLA": {
+      "congress_buy_count": 5,
+      "congress_total_value": 40002.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "DDOG": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "TOELF": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "NOVT": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "DCO": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CSW": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "VRSK": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "TTD": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CPB": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "MSFT": {
+      "congress_buy_count": 4,
+      "congress_total_value": 1232502.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer",
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "EA": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "DPZ": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CRWD": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CAG": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "APP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "AMD": {
+      "congress_buy_count": 5,
+      "congress_total_value": 40002.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "PCVX": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "STE": {
+      "congress_buy_count": 5,
+      "congress_total_value": 40002.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney",
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "QCOM": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "ST": {
+      "congress_buy_count": 4,
+      "congress_total_value": 32002.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BIIB": {
+      "congress_buy_count": 3,
+      "congress_total_value": 91001.5,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "W": {
+      "congress_buy_count": 3,
+      "congress_total_value": 24001.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "VLTO": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "THLEF": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SARO": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "GIL": {
+      "congress_buy_count": 5,
+      "congress_total_value": 40002.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "FSV": {
+      "congress_buy_count": 4,
+      "congress_total_value": 32002.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BBIO": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BNPQF": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "RVTY": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "FN": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros",
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "T": {
+      "congress_buy_count": 3,
+      "congress_total_value": 115501.5,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Tim Moore",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor",
+        "Tim Moore"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "FMAO": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Robert E. Latta",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Robert E. Latta"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "HUBB": {
+      "congress_buy_count": 5,
+      "congress_total_value": 64502.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "MLM": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CHRW": {
+      "congress_buy_count": 3,
+      "congress_total_value": 24001.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "TDG": {
+      "congress_buy_count": 9,
+      "congress_total_value": 96504.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "ENTG": {
+      "congress_buy_count": 3,
+      "congress_total_value": 24001.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BWXT": {
+      "congress_buy_count": 4,
+      "congress_total_value": 81002.0,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "PKG": {
+      "congress_buy_count": 3,
+      "congress_total_value": 24001.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "MKL": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "PG": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Lloyd Doggett",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor",
+        "Lloyd Doggett"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "LITE": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "MU": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "ADI": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "PANW": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "AAPL": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "Cleo Fields",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Ed Case",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Cleo Fields",
+        "Ed Case"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "SNDK": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "TWLO": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "ARLP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Virginia Foxx",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Virginia Foxx"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "PH": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "MEDP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "HD": {
+      "congress_buy_count": 2,
+      "congress_total_value": 16001.0,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "SPG": {
+      "congress_buy_count": 1,
+      "congress_total_value": 32500.5,
+      "politicians": [
+        {
+          "name": "Jonathan Jackson",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Jonathan Jackson"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "RYCEY": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Tim Moore",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Tim Moore"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "IHG": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Tim Moore",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Tim Moore"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "GS": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Josh Gottheimer",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Josh Gottheimer"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "USTBILL": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "William R. Keating",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "William R. Keating"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "GLDM": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "VPL": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "XLE": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SDY": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SPYV": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SPYG": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SHLD": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Charles J. \"Chuck\" Fleischmann",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Charles J. \"Chuck\" Fleischmann"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "BAC": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "INTC": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "V": {
+      "congress_buy_count": 3,
+      "congress_total_value": 48501.5,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Michael T. McCaul",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor",
+        "Michael T. McCaul",
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "MA": {
+      "congress_buy_count": 3,
+      "congress_total_value": 73001.5,
+      "politicians": [
+        {
+          "name": "Michael T. McCaul",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        },
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Michael T. McCaul",
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "BRK.B": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Rohit Khanna",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Rohit Khanna"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "PEP": {
+      "congress_buy_count": 1,
+      "congress_total_value": 32500.5,
+      "politicians": [
+        {
+          "name": "Gary C Peters",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gary C Peters"
+      ],
+      "chambers": [
+        "senate"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "AESI": {
+      "congress_buy_count": 1,
+      "congress_total_value": 15000000.5,
+      "politicians": [
+        {
+          "name": "Chip Roy",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Chip Roy"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "CARR": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "URI": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SNEJF": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "UNH": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "AMZN": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Gilbert Cisneros",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Gilbert Cisneros"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SHW": {
+      "congress_buy_count": 2,
+      "congress_total_value": 40501.0,
+      "politicians": [
+        {
+          "name": "Maria Elvira Salazar",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Maria Elvira Salazar"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "PGR": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "David J. Taylor",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "David J. Taylor"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "NDAQ": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "April McClain Delaney",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "April McClain Delaney"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SPY": {
+      "congress_buy_count": 1,
+      "congress_total_value": 32500.5,
+      "politicians": [
+        {
+          "name": "Michael T. McCaul",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Michael T. McCaul"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    },
+    "SPGI": {
+      "congress_buy_count": 2,
+      "congress_total_value": 65001.0,
+      "politicians": [
+        {
+          "name": "Michael T. McCaul",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Michael T. McCaul"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "MODERATE",
+      "is_cluster": true,
+      "is_bipartisan": false
+    },
+    "PTA": {
+      "congress_buy_count": 1,
+      "congress_total_value": 8000.5,
+      "politicians": [
+        {
+          "name": "Debbie Dingell",
+          "chamber": "",
+          "value": 0,
+          "date": ""
+        }
+      ],
+      "politician_names": [
+        "Debbie Dingell"
+      ],
+      "chambers": [
+        "house"
+      ],
+      "congress_signal": "WEAK",
+      "is_cluster": false,
+      "is_bipartisan": false
+    }
+  }
+}

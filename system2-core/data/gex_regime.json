@@ -1,0 +1,39 @@
+{
+  "date": "2026-06-15",
+  "spy": {
+    "net_gex": 0.0,
+    "gamma_flip": 0.0,
+    "put_wall": 0.0,
+    "call_wall": 0.0,
+    "volatility_regime": "NEUTRAL",
+    "data_source": "vix_fallback"
+  },
+  "qqq": {
+    "net_gex": 0.0,
+    "gamma_flip": 0.0,
+    "put_wall": 0.0,
+    "call_wall": 0.0,
+    "volatility_regime": "NEUTRAL",
+    "data_source": "vix_fallback"
+  },
+  "SPY": {
+    "net_gex": 0.0,
+    "gamma_flip": 0.0,
+    "put_wall": 0.0,
+    "call_wall": 0.0,
+    "volatility_regime": "NEUTRAL",
+    "data_source": "vix_fallback"
+  },
+  "QQQ": {
+    "net_gex": 0.0,
+    "gamma_flip": 0.0,
+    "put_wall": 0.0,
+    "call_wall": 0.0,
+    "volatility_regime": "NEUTRAL",
+    "data_source": "vix_fallback"
+  },
+  "market_gex_regime": "NEUTRAL",
+  "regime_source": "vix_fallback",
+  "vix_value": 17.68,
+  "regime_note": "SPY fetch failed; QQQ fetch failed; using VIX fallback"
+}

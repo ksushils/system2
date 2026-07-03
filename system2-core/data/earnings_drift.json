@@ -1,0 +1,518 @@
+{
+  "date": "2026-06-15",
+  "generated_at": "2026-06-15T01:06:51.283580+00:00",
+  "ticker_count": 47,
+  "in_drift_window": 1,
+  "endpoints": {
+    "surprise": "earnings-calendar",
+    "revision": "analyst-estimates?period=quarterly"
+  },
+  "tickers": {
+    "CXW": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.425,
+        "prior_estimate": 0.535,
+        "revision_pct": -20.56,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "EIX": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.67038,
+        "prior_estimate": 1.43659,
+        "revision_pct": 16.27,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "MUFG": {
+      "earnings_surprise": {
+        "actual_eps": 0.3283,
+        "estimate_eps": 0.2,
+        "surprise_pct": 64.15,
+        "report_date": "2026-05-21",
+        "days_since_earnings": 25,
+        "is_beat": true,
+        "in_drift_window": false,
+        "source": "fmp_earnings_calendar"
+      },
+      "estimate_revision": {
+        "recent_estimate": 66.11521,
+        "prior_estimate": 68.83898,
+        "revision_pct": -3.96,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BANC": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.62704,
+        "prior_estimate": 0.62001,
+        "revision_pct": 1.13,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "CB": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 7.99248,
+        "prior_estimate": 8.00475,
+        "revision_pct": -0.15,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BYD": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 2.06227,
+        "prior_estimate": 2.31451,
+        "revision_pct": -10.9,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "EA": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.54921,
+        "prior_estimate": 2.07064,
+        "revision_pct": -73.48,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "TXN": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 2.41894,
+        "prior_estimate": 2.64741,
+        "revision_pct": -8.63,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "DAN": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.73,
+        "prior_estimate": 0.97,
+        "revision_pct": -24.74,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "WIX": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.94947,
+        "prior_estimate": 2.72438,
+        "revision_pct": -28.44,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "VSNT": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 3.4661,
+        "prior_estimate": 2.7697,
+        "revision_pct": 25.14,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "D": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.15595,
+        "prior_estimate": 1.02,
+        "revision_pct": 13.33,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "APLE": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.125,
+        "prior_estimate": 0.27,
+        "revision_pct": -53.7,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "ATO": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 3.12237,
+        "prior_estimate": 4.63364,
+        "revision_pct": -32.62,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "JNJ": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 3.04432,
+        "prior_estimate": 3.30204,
+        "revision_pct": -7.8,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "MCHP": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.0455,
+        "prior_estimate": 1.1383,
+        "revision_pct": -8.15,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "ZM": {
+      "earnings_surprise": {
+        "actual_eps": 1.55,
+        "estimate_eps": 1.42,
+        "surprise_pct": 9.15,
+        "report_date": "2026-05-21",
+        "days_since_earnings": 25,
+        "is_beat": true,
+        "in_drift_window": false,
+        "source": "fmp_earnings_calendar"
+      },
+      "estimate_revision": {
+        "recent_estimate": 1.60532,
+        "prior_estimate": 1.64866,
+        "revision_pct": -2.63,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "TEVA": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.62112,
+        "prior_estimate": 0.70755,
+        "revision_pct": -12.22,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "VTRS": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.60025,
+        "prior_estimate": 0.639,
+        "revision_pct": -6.06,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "SNDK": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 54.5375,
+        "prior_estimate": 53.4975,
+        "revision_pct": 1.94,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "EPAM": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 3.26501,
+        "prior_estimate": 3.74376,
+        "revision_pct": -12.79,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "WRB": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.315,
+        "prior_estimate": 1.2661,
+        "revision_pct": 3.86,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "WAY": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.58,
+        "prior_estimate": 0.59,
+        "revision_pct": -1.69,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "DOCU": {
+      "earnings_surprise": {
+        "actual_eps": 1.09,
+        "estimate_eps": 0.994,
+        "surprise_pct": 9.66,
+        "report_date": "2026-06-04",
+        "days_since_earnings": 11,
+        "is_beat": true,
+        "in_drift_window": true,
+        "source": "fmp_earnings_calendar"
+      },
+      "estimate_revision": {
+        "recent_estimate": 1.34259,
+        "prior_estimate": 1.40233,
+        "revision_pct": -4.26,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BAC": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.35767,
+        "prior_estimate": 1.48556,
+        "revision_pct": -8.61,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "AEG": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.2593,
+        "prior_estimate": 0.41777,
+        "revision_pct": -37.93,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "CDW": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 2.55054,
+        "prior_estimate": 3.3185,
+        "revision_pct": -23.14,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "DHT": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.5354,
+        "prior_estimate": 0.5463,
+        "revision_pct": -2.0,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "PNW": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.36801,
+        "prior_estimate": 2.32911,
+        "revision_pct": -84.2,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "MFC": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.28434,
+        "prior_estimate": 1.34585,
+        "revision_pct": -4.57,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "SWKS": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.63973,
+        "prior_estimate": 1.61941,
+        "revision_pct": 1.25,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "TWST": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": -0.21,
+        "prior_estimate": -0.19,
+        "revision_pct": -10.53,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "SBUX": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.92406,
+        "prior_estimate": 0.79442,
+        "revision_pct": 16.32,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BCS": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.61582,
+        "prior_estimate": 0.52603,
+        "revision_pct": 17.07,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "ZETA": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.18833,
+        "prior_estimate": 0.24125,
+        "revision_pct": -21.94,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "HWM": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.84323,
+        "prior_estimate": 1.92376,
+        "revision_pct": -4.19,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "EXR": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.21738,
+        "prior_estimate": 1.33616,
+        "revision_pct": -8.89,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "ZIM": {
+      "earnings_surprise": {
+        "actual_eps": -0.72,
+        "estimate_eps": -0.63453,
+        "surprise_pct": -13.47,
+        "report_date": "2026-05-20",
+        "days_since_earnings": 26,
+        "is_beat": false,
+        "in_drift_window": false,
+        "source": "fmp_earnings_calendar"
+      },
+      "estimate_revision": {
+        "recent_estimate": 0.1,
+        "prior_estimate": -0.1639,
+        "revision_pct": 161.01,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "MIAX": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.48,
+        "prior_estimate": 0.48,
+        "revision_pct": 0.0,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BUD": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.14,
+        "prior_estimate": 1.16527,
+        "revision_pct": -2.17,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "GLPI": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.88806,
+        "prior_estimate": 0.88949,
+        "revision_pct": -0.16,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "ED": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 1.0519,
+        "prior_estimate": -0.1522,
+        "revision_pct": 791.13,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "INDV": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.96,
+        "prior_estimate": 1.14,
+        "revision_pct": -15.79,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "RRC": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 2.6689,
+        "prior_estimate": 2.2994,
+        "revision_pct": 16.07,
+        "direction": "RISING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "BG": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 2.60734,
+        "prior_estimate": 2.62123,
+        "revision_pct": -0.53,
+        "direction": "STABLE",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "RVMD": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": -1.63,
+        "prior_estimate": -1.59,
+        "revision_pct": -2.52,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    },
+    "VOD": {
+      "earnings_surprise": null,
+      "estimate_revision": {
+        "recent_estimate": 0.0,
+        "prior_estimate": 0.42006,
+        "revision_pct": -100.0,
+        "direction": "FALLING",
+        "source": "fmp_analyst_estimates_quarterly"
+      }
+    }
+  }
+}

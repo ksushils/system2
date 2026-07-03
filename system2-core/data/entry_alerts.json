@@ -1,0 +1,3592 @@
+{
+  "alerts": [
+    {
+      "id": "2026-06-15_ALC_1781536150",
+      "ticker": "ALC",
+      "strength": "MODERATE",
+      "price": 66.765,
+      "price_at_alert": 66.765,
+      "entry_zone": [
+        66.13,
+        66.8
+      ],
+      "entry_zone_low": 66.13,
+      "entry_zone_high": 66.8,
+      "stop": 64.7418,
+      "target": 70.9164,
+      "reasons": [
+        "In entry zone ($66.13-$66.80)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T15:09:10.223914+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 67.96,
+          "or_low": 67.27,
+          "current": 66.86,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 67.79,
+          "current": 66.86,
+          "held_pct": -1.37,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 67.22,
+          "current": 66.86,
+          "pct_from_vwap": -0.54,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -1.37,
+          "spy_move_pct": 0.38,
+          "intraday_rs": -1.75,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_BCE_1781534884",
+      "ticker": "BCE",
+      "strength": "GOOD",
+      "price": 24.31,
+      "price_at_alert": 24.31,
+      "entry_zone": [
+        24.31,
+        24.55
+      ],
+      "entry_zone_low": 24.31,
+      "entry_zone_high": 24.55,
+      "stop": 23.8409,
+      "target": 25.9832,
+      "reasons": [
+        "In entry zone ($24.31-$24.55)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution",
+        "\u2705 Above VWAP ($24.19)"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:48:04.349343+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 24.49,
+          "or_low": 24.07,
+          "current": 24.3,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 24.49,
+          "current": 24.3,
+          "held_pct": -0.76,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 24.19,
+          "current": 24.3,
+          "pct_from_vwap": 0.48,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.76,
+          "spy_move_pct": 0.23,
+          "intraday_rs": -0.98,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_PRIM_1781534267",
+      "ticker": "PRIM",
+      "strength": "MODERATE",
+      "price": 98.56,
+      "price_at_alert": 98.56,
+      "entry_zone": [
+        97.58,
+        98.56
+      ],
+      "entry_zone_low": 97.58,
+      "entry_zone_high": 98.56,
+      "stop": 84.932,
+      "target": 125.8161,
+      "reasons": [
+        "In entry zone ($97.58-$98.56)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:37:47.938338+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 102.95,
+          "or_low": 100.66,
+          "current": 98.97,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 102.0,
+          "current": 98.97,
+          "held_pct": -2.97,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 100.86,
+          "current": 98.97,
+          "pct_from_vwap": -1.87,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -2.97,
+          "spy_move_pct": 0.21,
+          "intraday_rs": -3.17,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_ODFL_1781534050",
+      "ticker": "ODFL",
+      "strength": "MODERATE",
+      "price": 235.52,
+      "price_at_alert": 235.52,
+      "entry_zone": [
+        233.56,
+        235.9
+      ],
+      "entry_zone_low": 233.56,
+      "entry_zone_high": 235.9,
+      "stop": 221.9654,
+      "target": 263.7993,
+      "reasons": [
+        "In entry zone ($233.56-$235.90)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:34:10.742896+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 244.39,
+          "or_low": 237.4,
+          "current": 235.9,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 243.39,
+          "current": 235.9,
+          "held_pct": -3.08,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 239.22,
+          "current": 235.9,
+          "pct_from_vwap": -1.39,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -3.08,
+          "spy_move_pct": 0.19,
+          "intraday_rs": -3.27,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_CMC_1781534057",
+      "ticker": "CMC",
+      "strength": "MODERATE",
+      "price": 77.77,
+      "price_at_alert": 77.77,
+      "entry_zone": [
+        77.0,
+        77.78
+      ],
+      "entry_zone_low": 77.0,
+      "entry_zone_high": 77.78,
+      "stop": 74.0214,
+      "target": 85.2971,
+      "reasons": [
+        "In entry zone ($77.00-$77.78)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:34:17.678242+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 79.91,
+          "or_low": 78.56,
+          "current": 77.81,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 79.63,
+          "current": 77.81,
+          "held_pct": -2.29,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 78.73,
+          "current": 77.81,
+          "pct_from_vwap": -1.17,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -2.29,
+          "spy_move_pct": 0.19,
+          "intraday_rs": -2.48,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_DAN_1781533853",
+      "ticker": "DAN",
+      "strength": "MODERATE",
+      "price": 30.76,
+      "price_at_alert": 30.76,
+      "entry_zone": [
+        30.49,
+        30.8
+      ],
+      "entry_zone_low": 30.49,
+      "entry_zone_high": 30.8,
+      "stop": 28.0132,
+      "target": 36.3736,
+      "reasons": [
+        "In entry zone ($30.49-$30.80)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:30:53.611780+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 31.62,
+          "or_low": 31.05,
+          "current": 30.75,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 31.6,
+          "current": 30.75,
+          "held_pct": -2.69,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 31.1,
+          "current": 30.75,
+          "pct_from_vwap": -1.13,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -2.69,
+          "spy_move_pct": 0.24,
+          "intraday_rs": -2.93,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "MORNING",
+          "weight": 0.9,
+          "note": "Morning trend"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "MORNING"
+    },
+    {
+      "id": "2026-06-15_CSTM_1781533418",
+      "ticker": "CSTM",
+      "strength": "MODERATE",
+      "price": 34.74,
+      "price_at_alert": 34.74,
+      "entry_zone": [
+        34.39,
+        34.74
+      ],
+      "entry_zone_low": 34.39,
+      "entry_zone_high": 34.74,
+      "stop": 31.6168,
+      "target": 40.9864,
+      "reasons": [
+        "In entry zone ($34.39-$34.74)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:23:38.802782+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 36.89,
+          "or_low": 35.15,
+          "current": 34.81,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 36.73,
+          "current": 34.81,
+          "held_pct": -5.23,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 35.29,
+          "current": 34.81,
+          "pct_from_vwap": -1.37,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -5.23,
+          "spy_move_pct": 0.17,
+          "intraday_rs": -5.39,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_XEL_1781533425",
+      "ticker": "XEL",
+      "strength": "GOOD",
+      "price": 78.625,
+      "price_at_alert": 78.625,
+      "entry_zone": [
+        78.44,
+        79.23
+      ],
+      "entry_zone_low": 78.44,
+      "entry_zone_high": 79.23,
+      "stop": 76.5943,
+      "target": 84.5014,
+      "reasons": [
+        "In entry zone ($78.44-$79.23)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Broke opening range high",
+        "\u2705 Pre-market gap held",
+        "\u2705 Above VWAP ($78.23)"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:23:45.384983+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 78.35,
+          "or_low": 77.77,
+          "current": 78.61,
+          "broke_high": true,
+          "broke_low": false,
+          "in_range": false,
+          "status": "BREAKOUT"
+        },
+        "gap": {
+          "session_open": 78.34,
+          "current": 78.61,
+          "held_pct": 0.34,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 78.23,
+          "current": 78.61,
+          "pct_from_vwap": 0.49,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.34,
+          "spy_move_pct": 0.17,
+          "intraday_rs": 0.18,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_YUMC_1781533208",
+      "ticker": "YUMC",
+      "strength": "GOOD",
+      "price": 44.575,
+      "price_at_alert": 44.575,
+      "entry_zone": [
+        44.16,
+        44.6
+      ],
+      "entry_zone_low": 44.16,
+      "entry_zone_high": 44.6,
+      "stop": 43.2146,
+      "target": 47.3707,
+      "reasons": [
+        "In entry zone ($44.16-$44.60)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:20:08.523556+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 44.98,
+          "or_low": 44.6,
+          "current": 44.6,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 44.71,
+          "current": 44.6,
+          "held_pct": -0.25,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 44.8,
+          "current": 44.6,
+          "pct_from_vwap": -0.45,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.25,
+          "spy_move_pct": 0.14,
+          "intraday_rs": -0.38,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_RIVN_1781532983",
+      "ticker": "RIVN",
+      "strength": "MODERATE",
+      "price": 16.675,
+      "price_at_alert": 16.675,
+      "entry_zone": [
+        16.59,
+        16.76
+      ],
+      "entry_zone_low": 16.59,
+      "entry_zone_high": 16.76,
+      "stop": 15.0071,
+      "target": 20.2657,
+      "reasons": [
+        "In entry zone ($16.59-$16.76)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:16:23.614509+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 17.09,
+          "or_low": 16.75,
+          "current": 16.71,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 17.03,
+          "current": 16.71,
+          "held_pct": -1.85,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 16.92,
+          "current": 16.71,
+          "pct_from_vwap": -1.18,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -1.85,
+          "spy_move_pct": 0.14,
+          "intraday_rs": -1.99,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_BWA_1781532756",
+      "ticker": "BWA",
+      "strength": "MODERATE",
+      "price": 74.88,
+      "price_at_alert": 74.88,
+      "entry_zone": [
+        74.13,
+        74.88
+      ],
+      "entry_zone_low": 74.13,
+      "entry_zone_high": 74.88,
+      "stop": 69.2025,
+      "target": 86.235,
+      "reasons": [
+        "In entry zone ($74.13-$74.88)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": "B_WATCH",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:12:36.382113+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 76.49,
+          "or_low": 75.29,
+          "current": 74.84,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 76.03,
+          "current": 74.84,
+          "held_pct": -1.57,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 75.63,
+          "current": 74.84,
+          "pct_from_vwap": -1.04,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -1.57,
+          "spy_move_pct": 0.19,
+          "intraday_rs": -1.75,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_PTON_1781532539",
+      "ticker": "PTON",
+      "strength": "MODERATE",
+      "price": 5.565,
+      "price_at_alert": 5.565,
+      "entry_zone": [
+        5.54,
+        5.59
+      ],
+      "entry_zone_low": 5.54,
+      "entry_zone_high": 5.59,
+      "stop": 5.0754,
+      "target": 6.6343,
+      "reasons": [
+        "In entry zone ($5.54-$5.59)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:08:59.314910+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 5.7,
+          "or_low": 5.59,
+          "current": 5.57,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 5.68,
+          "current": 5.57,
+          "held_pct": -1.94,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 5.62,
+          "current": 5.57,
+          "pct_from_vwap": -0.91,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -1.94,
+          "spy_move_pct": 0.23,
+          "intraday_rs": -2.17,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SFM_1781532322",
+      "ticker": "SFM",
+      "strength": "GOOD",
+      "price": 85.895,
+      "price_at_alert": 85.895,
+      "entry_zone": [
+        85.89,
+        86.76
+      ],
+      "entry_zone_low": 85.89,
+      "entry_zone_high": 86.76,
+      "stop": 81.1114,
+      "target": 98.0571,
+      "reasons": [
+        "In entry zone ($85.89-$86.76)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Broke opening range high",
+        "\u2705 Pre-market gap held",
+        "\u2705 Above VWAP ($83.91)",
+        "\u2705 Outperforming SPY (+0.6%)"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:05:22.925494+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 85.38,
+          "or_low": 82.88,
+          "current": 85.68,
+          "broke_high": true,
+          "broke_low": false,
+          "in_range": false,
+          "status": "BREAKOUT"
+        },
+        "gap": {
+          "session_open": 85.0,
+          "current": 85.68,
+          "held_pct": 0.8,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 83.91,
+          "current": 85.68,
+          "pct_from_vwap": 2.11,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.8,
+          "spy_move_pct": 0.19,
+          "intraday_rs": 0.6,
+          "outperforming": true
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_BYD_1781532343",
+      "ticker": "BYD",
+      "strength": "GOOD",
+      "price": 87.43,
+      "price_at_alert": 87.43,
+      "entry_zone": [
+        86.58,
+        87.45
+      ],
+      "entry_zone_low": 86.58,
+      "entry_zone_high": 87.45,
+      "stop": 83.8843,
+      "target": 94.5814,
+      "reasons": [
+        "In entry zone ($86.58-$87.45)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T14:05:43.046046+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 88.26,
+          "or_low": 87.59,
+          "current": 87.45,
+          "broke_high": false,
+          "broke_low": true,
+          "in_range": false,
+          "status": "BREAKDOWN"
+        },
+        "gap": {
+          "session_open": 87.78,
+          "current": 87.45,
+          "held_pct": -0.38,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 87.83,
+          "current": 87.45,
+          "pct_from_vwap": -0.43,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.38,
+          "spy_move_pct": 0.19,
+          "intraday_rs": -0.57,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_TMC_1781531687",
+      "ticker": "TMC",
+      "strength": "MODERATE",
+      "price": 5.555,
+      "price_at_alert": 5.555,
+      "entry_zone": [
+        5.51,
+        5.57
+      ],
+      "entry_zone_low": 5.51,
+      "entry_zone_high": 5.57,
+      "stop": 4.8545,
+      "target": 6.9904,
+      "reasons": [
+        "In entry zone ($5.51-$5.57)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u26a0\ufe0f Gap faded \u2014 caution"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:54:47.919165+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 5.79,
+          "or_low": 5.6,
+          "current": 5.64,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 5.75,
+          "current": 5.64,
+          "held_pct": -1.94,
+          "gap_held": false,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 5.68,
+          "current": 5.64,
+          "pct_from_vwap": -0.68,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -1.94,
+          "spy_move_pct": 0.27,
+          "intraday_rs": -2.21,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SYK_1781531242",
+      "ticker": "SYK",
+      "strength": "GOOD",
+      "price": 309.205,
+      "price_at_alert": 309.205,
+      "entry_zone": [
+        306.76,
+        309.85
+      ],
+      "entry_zone_low": 306.76,
+      "entry_zone_high": 309.85,
+      "stop": 297.5582,
+      "target": 334.4486,
+      "reasons": [
+        "In entry zone ($306.76-$309.85)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:47:22.216564+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 312.31,
+          "or_low": 308.78,
+          "current": 310.24,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 310.19,
+          "current": 310.24,
+          "held_pct": 0.02,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 310.44,
+          "current": 310.24,
+          "pct_from_vwap": -0.07,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.02,
+          "spy_move_pct": 0.11,
+          "intraday_rs": -0.1,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_PUMP_1781531251",
+      "ticker": "PUMP",
+      "strength": "GOOD",
+      "price": 15.28,
+      "price_at_alert": 15.28,
+      "entry_zone": [
+        15.14,
+        15.29
+      ],
+      "entry_zone_low": 15.14,
+      "entry_zone_high": 15.29,
+      "stop": 13.8886,
+      "target": 18.0929,
+      "reasons": [
+        "In entry zone ($15.14-$15.29)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held",
+        "\u2705 Above VWAP ($14.98)"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:47:31.042357+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 15.1,
+          "or_low": 14.74,
+          "current": 15.04,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 15.01,
+          "current": 15.04,
+          "held_pct": 0.2,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 14.98,
+          "current": 15.04,
+          "pct_from_vwap": 0.38,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.2,
+          "spy_move_pct": 0.11,
+          "intraday_rs": 0.09,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_MAIR_1781531257",
+      "ticker": "MAIR",
+      "strength": "GOOD",
+      "price": 40.25,
+      "price_at_alert": 40.25,
+      "entry_zone": [
+        39.91,
+        40.31
+      ],
+      "entry_zone_low": 39.91,
+      "entry_zone_high": 40.31,
+      "stop": 36.7764,
+      "target": 47.3771,
+      "reasons": [
+        "In entry zone ($39.91-$40.31)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:47:37.279532+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 41.1,
+          "or_low": 40.06,
+          "current": 40.31,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 40.41,
+          "current": 40.31,
+          "held_pct": -0.25,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 40.69,
+          "current": 40.31,
+          "pct_from_vwap": -0.93,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.25,
+          "spy_move_pct": 0.11,
+          "intraday_rs": -0.36,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_WES_1781531258",
+      "ticker": "WES",
+      "strength": "GOOD",
+      "price": 44.06,
+      "price_at_alert": 44.06,
+      "entry_zone": [
+        43.79,
+        44.23
+      ],
+      "entry_zone_low": 43.79,
+      "entry_zone_high": 44.23,
+      "stop": 42.5871,
+      "target": 47.5309,
+      "reasons": [
+        "In entry zone ($43.79-$44.23)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Pre-market gap held",
+        "\u2705 Above VWAP ($43.65)"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:47:38.661355+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 43.88,
+          "or_low": 43.38,
+          "current": 43.77,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": {
+          "session_open": 43.52,
+          "current": 43.77,
+          "held_pct": 0.58,
+          "gap_held": true,
+          "gap_extending": false,
+          "premarket_status": null
+        },
+        "vwap": {
+          "vwap": 43.65,
+          "current": 43.77,
+          "pct_from_vwap": 0.28,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.58,
+          "spy_move_pct": 0.11,
+          "intraday_rs": 0.47,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_FRO_1781531265",
+      "ticker": "FRO",
+      "strength": "MODERATE",
+      "price": 39.05,
+      "price_at_alert": 39.05,
+      "entry_zone": [
+        38.69,
+        39.08
+      ],
+      "entry_zone_low": 38.69,
+      "entry_zone_high": 39.08,
+      "stop": 36.9896,
+      "target": 43.2607,
+      "reasons": [
+        "In entry zone ($38.69-$39.08)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:47:45.962608+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_ALMS_1781531052",
+      "ticker": "ALMS",
+      "strength": "MODERATE",
+      "price": 24.115,
+      "price_at_alert": 24.115,
+      "entry_zone": [
+        23.92,
+        24.16
+      ],
+      "entry_zone_low": 23.92,
+      "entry_zone_high": 24.16,
+      "stop": 22.2218,
+      "target": 28.0364,
+      "reasons": [
+        "In entry zone ($23.92-$24.16)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:44:12.282044+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SBRA_1781530831",
+      "ticker": "SBRA",
+      "strength": "GOOD",
+      "price": 18.65,
+      "price_at_alert": 18.65,
+      "entry_zone": [
+        18.63,
+        18.81
+      ],
+      "entry_zone_low": 18.63,
+      "entry_zone_high": 18.81,
+      "stop": 17.9016,
+      "target": 20.6418,
+      "reasons": [
+        "In entry zone ($18.63-$18.81)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Above VWAP ($18.62)"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:40:31.716594+00:00",
+      "intraday": {
+        "opening_range": {
+          "or_high": 18.68,
+          "or_low": 18.55,
+          "current": 18.65,
+          "broke_high": false,
+          "broke_low": false,
+          "in_range": true,
+          "status": "IN_RANGE"
+        },
+        "gap": null,
+        "vwap": {
+          "vwap": 18.62,
+          "current": 18.65,
+          "pct_from_vwap": 0.18,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 0.27,
+          "spy_move_pct": 0.17,
+          "intraday_rs": 0.1,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_RXO_1781530599",
+      "ticker": "RXO",
+      "strength": "GOOD",
+      "price": 27.97,
+      "price_at_alert": 27.97,
+      "entry_zone": [
+        27.79,
+        28.07
+      ],
+      "entry_zone_low": 27.79,
+      "entry_zone_high": 28.07,
+      "stop": 25.7418,
+      "target": 32.7264,
+      "reasons": [
+        "In entry zone ($27.79-$28.07)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Outperforming SPY (+0.89%)"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:36:39.592621+00:00",
+      "intraday": {
+        "opening_range": null,
+        "gap": null,
+        "vwap": {
+          "vwap": 28.55,
+          "current": 28.52,
+          "pct_from_vwap": -0.11,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": 1.03,
+          "spy_move_pct": 0.13,
+          "intraday_rs": 0.89,
+          "outperforming": true
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_EXPD_1781530606",
+      "ticker": "EXPD",
+      "strength": "MODERATE",
+      "price": 164.265,
+      "price_at_alert": 164.265,
+      "entry_zone": [
+        163.02,
+        164.66
+      ],
+      "entry_zone_low": 163.02,
+      "entry_zone_high": 164.66,
+      "stop": 159.6039,
+      "target": 174.7721,
+      "reasons": [
+        "In entry zone ($163.02-$164.66)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:36:46.791421+00:00",
+      "intraday": {
+        "opening_range": null,
+        "gap": null,
+        "vwap": {
+          "vwap": 165.27,
+          "current": 164.78,
+          "pct_from_vwap": -0.3,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.45,
+          "spy_move_pct": 0.13,
+          "intraday_rs": -0.59,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_PENG_1781530611",
+      "ticker": "PENG",
+      "strength": "MODERATE",
+      "price": 63.81,
+      "price_at_alert": 63.81,
+      "entry_zone": [
+        63.66,
+        64.3
+      ],
+      "entry_zone_low": 63.66,
+      "entry_zone_high": 64.3,
+      "stop": 53.2964,
+      "target": 86.3071,
+      "reasons": [
+        "In entry zone ($63.66-$64.30)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "C_NEEDS_CONFIRMATION",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:36:51.638358+00:00",
+      "intraday": {
+        "opening_range": null,
+        "gap": null,
+        "vwap": {
+          "vwap": 65.58,
+          "current": 64.51,
+          "pct_from_vwap": -1.63,
+          "above_vwap": false,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -4.74,
+          "spy_move_pct": 0.13,
+          "intraday_rs": -4.87,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_CB_1781530620",
+      "ticker": "CB",
+      "strength": "GOOD",
+      "price": 324.93,
+      "price_at_alert": 324.93,
+      "entry_zone": [
+        324.7,
+        327.96
+      ],
+      "entry_zone_low": 324.7,
+      "entry_zone_high": 327.96,
+      "stop": 317.8996,
+      "target": 348.1107,
+      "reasons": [
+        "In entry zone ($324.70-$327.96)",
+        "RVOL building (0.0x)",
+        "Above stop",
+        "\u2705 Above VWAP ($324.43)"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:37:00.234227+00:00",
+      "intraday": {
+        "opening_range": null,
+        "gap": null,
+        "vwap": {
+          "vwap": 324.43,
+          "current": 324.47,
+          "pct_from_vwap": 0.01,
+          "above_vwap": true,
+          "reclaimed_vwap": false
+        },
+        "rs": {
+          "ticker_move_pct": -0.15,
+          "spy_move_pct": 0.13,
+          "intraday_rs": -0.28,
+          "outperforming": false
+        },
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_LION_1781530624",
+      "ticker": "LION",
+      "strength": "MODERATE",
+      "price": 14.32,
+      "price_at_alert": 14.32,
+      "entry_zone": [
+        14.18,
+        14.32
+      ],
+      "entry_zone_low": 14.18,
+      "entry_zone_high": 14.32,
+      "stop": 13.4564,
+      "target": 16.0471,
+      "reasons": [
+        "In entry zone ($14.18-$14.32)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:37:04.481824+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SBLK_1781530624",
+      "ticker": "SBLK",
+      "strength": "MODERATE",
+      "price": 27.035,
+      "price_at_alert": 27.035,
+      "entry_zone": [
+        26.9,
+        27.17
+      ],
+      "entry_zone_low": 26.9,
+      "entry_zone_high": 27.17,
+      "stop": 25.9593,
+      "target": 29.5914,
+      "reasons": [
+        "In entry zone ($26.90-$27.17)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:37:04.481903+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_ELVN_1781530624",
+      "ticker": "ELVN",
+      "strength": "MODERATE",
+      "price": 46.04,
+      "price_at_alert": 46.04,
+      "entry_zone": [
+        45.67,
+        46.13
+      ],
+      "entry_zone_low": 45.67,
+      "entry_zone_high": 46.13,
+      "stop": 41.7039,
+      "target": 54.9821,
+      "reasons": [
+        "In entry zone ($45.67-$46.13)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:37:04.481930+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_RRC_1781530624",
+      "ticker": "RRC",
+      "strength": "MODERATE",
+      "price": 38.275,
+      "price_at_alert": 38.275,
+      "entry_zone": [
+        38.2,
+        38.58
+      ],
+      "entry_zone_low": 38.2,
+      "entry_zone_high": 38.58,
+      "stop": 36.9879,
+      "target": 41.7643,
+      "reasons": [
+        "In entry zone ($38.20-$38.58)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:37:04.482116+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_AIG_1781530385",
+      "ticker": "AIG",
+      "strength": "MODERATE",
+      "price": 75.39,
+      "price_at_alert": 75.39,
+      "entry_zone": [
+        74.73,
+        75.48
+      ],
+      "entry_zone_low": 74.73,
+      "entry_zone_high": 75.48,
+      "stop": 72.8239,
+      "target": 80.7921,
+      "reasons": [
+        "In entry zone ($74.73-$75.48)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:05.358596+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_MOH_1781530386",
+      "ticker": "MOH",
+      "strength": "MODERATE",
+      "price": 197.165,
+      "price_at_alert": 197.165,
+      "entry_zone": [
+        196.53,
+        198.5
+      ],
+      "entry_zone_low": 196.53,
+      "entry_zone_high": 198.5,
+      "stop": 187.9607,
+      "target": 219.6086,
+      "reasons": [
+        "In entry zone ($196.53-$198.50)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:06.282966+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_WEC_1781530388",
+      "ticker": "WEC",
+      "strength": "MODERATE",
+      "price": 112.38,
+      "price_at_alert": 112.38,
+      "entry_zone": [
+        111.81,
+        112.94
+      ],
+      "entry_zone_low": 111.81,
+      "entry_zone_high": 112.94,
+      "stop": 109.9296,
+      "target": 118.9609,
+      "reasons": [
+        "In entry zone ($111.81-$112.94)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:08.991490+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_AWK_1781530390",
+      "ticker": "AWK",
+      "strength": "MODERATE",
+      "price": 124,
+      "price_at_alert": 124,
+      "entry_zone": [
+        123.9,
+        125.15
+      ],
+      "entry_zone_low": 123.9,
+      "entry_zone_high": 125.15,
+      "stop": 120.9988,
+      "target": 133.4525,
+      "reasons": [
+        "In entry zone ($123.90-$125.15)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:10.530883+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_ROL_1781530390",
+      "ticker": "ROL",
+      "strength": "MODERATE",
+      "price": 46.96,
+      "price_at_alert": 46.96,
+      "entry_zone": [
+        46.96,
+        47.43
+      ],
+      "entry_zone_low": 46.96,
+      "entry_zone_high": 47.43,
+      "stop": 45.1993,
+      "target": 51.8914,
+      "reasons": [
+        "In entry zone ($46.96-$47.43)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:10.985648+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_CAR_1781530392",
+      "ticker": "CAR",
+      "strength": "MODERATE",
+      "price": 185.86,
+      "price_at_alert": 185.86,
+      "entry_zone": [
+        184.97,
+        186.83
+      ],
+      "entry_zone_low": 184.97,
+      "entry_zone_high": 186.83,
+      "stop": 170.7339,
+      "target": 219.0221,
+      "reasons": [
+        "In entry zone ($184.97-$186.83)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:12.928213+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_ATO_1781530394",
+      "ticker": "ATO",
+      "strength": "MODERATE",
+      "price": 168.965,
+      "price_at_alert": 168.965,
+      "entry_zone": [
+        167.59,
+        169.28
+      ],
+      "entry_zone_low": 167.59,
+      "entry_zone_high": 169.28,
+      "stop": 164.7639,
+      "target": 178.3121,
+      "reasons": [
+        "In entry zone ($167.59-$169.28)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:14.289093+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_RDN_1781530394",
+      "ticker": "RDN",
+      "strength": "MODERATE",
+      "price": 34.57,
+      "price_at_alert": 34.57,
+      "entry_zone": [
+        34.4,
+        34.75
+      ],
+      "entry_zone_low": 34.4,
+      "entry_zone_high": 34.75,
+      "stop": 33.3529,
+      "target": 37.5443,
+      "reasons": [
+        "In entry zone ($34.40-$34.75)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:14.751789+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_UDR_1781530399",
+      "ticker": "UDR",
+      "strength": "MODERATE",
+      "price": 39.12,
+      "price_at_alert": 39.12,
+      "entry_zone": [
+        38.79,
+        39.18
+      ],
+      "entry_zone_low": 38.79,
+      "entry_zone_high": 39.18,
+      "stop": 38.0375,
+      "target": 41.48,
+      "reasons": [
+        "In entry zone ($38.79-$39.18)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:19.990509+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_DDOG_1781530407",
+      "ticker": "DDOG",
+      "strength": "MODERATE",
+      "price": 232.79,
+      "price_at_alert": 232.79,
+      "entry_zone": [
+        231.9,
+        234.23
+      ],
+      "entry_zone_low": 231.9,
+      "entry_zone_high": 234.23,
+      "stop": 222.528,
+      "target": 252.9792,
+      "reasons": [
+        "In entry zone ($231.90-$234.23)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:27.101760+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_VIRT_1781530409",
+      "ticker": "VIRT",
+      "strength": "MODERATE",
+      "price": 57.11,
+      "price_at_alert": 57.11,
+      "entry_zone": [
+        56.76,
+        57.33
+      ],
+      "entry_zone_low": 56.76,
+      "entry_zone_high": 57.33,
+      "stop": 54.3982,
+      "target": 63.2086,
+      "reasons": [
+        "In entry zone ($56.76-$57.33)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613188+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_CXW_1781530409",
+      "ticker": "CXW",
+      "strength": "MODERATE",
+      "price": 26.87,
+      "price_at_alert": 26.87,
+      "entry_zone": [
+        26.73,
+        26.99
+      ],
+      "entry_zone_low": 26.73,
+      "entry_zone_high": 26.99,
+      "stop": 25.5057,
+      "target": 29.9736,
+      "reasons": [
+        "In entry zone ($26.73-$26.99)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613241+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_FRSH_1781530409",
+      "ticker": "FRSH",
+      "strength": "MODERATE",
+      "price": 9.405,
+      "price_at_alert": 9.405,
+      "entry_zone": [
+        9.32,
+        9.42
+      ],
+      "entry_zone_low": 9.32,
+      "entry_zone_high": 9.42,
+      "stop": 8.6936,
+      "target": 10.868,
+      "reasons": [
+        "In entry zone ($9.32-$9.42)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613267+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SEM_1781530409",
+      "ticker": "SEM",
+      "strength": "MODERATE",
+      "price": 16.645,
+      "price_at_alert": 16.645,
+      "entry_zone": [
+        16.5,
+        16.66
+      ],
+      "entry_zone_low": 16.5,
+      "entry_zone_high": 16.66,
+      "stop": 16.5825,
+      "target": 16.83,
+      "reasons": [
+        "In entry zone ($16.50-$16.66)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613395+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_PAYC_1781530409",
+      "ticker": "PAYC",
+      "strength": "MODERATE",
+      "price": 134.37,
+      "price_at_alert": 134.37,
+      "entry_zone": [
+        133.27,
+        134.61
+      ],
+      "entry_zone_low": 133.27,
+      "entry_zone_high": 134.61,
+      "stop": 125.0207,
+      "target": 153.7886,
+      "reasons": [
+        "In entry zone ($133.27-$134.61)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613484+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_HPQ_1781530409",
+      "ticker": "HPQ",
+      "strength": "MODERATE",
+      "price": 25.16,
+      "price_at_alert": 25.16,
+      "entry_zone": [
+        24.99,
+        25.24
+      ],
+      "entry_zone_low": 24.99,
+      "entry_zone_high": 25.24,
+      "stop": 22.8475,
+      "target": 30.025,
+      "reasons": [
+        "In entry zone ($24.99-$25.24)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613856+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_EIX_1781530409",
+      "ticker": "EIX",
+      "strength": "MODERATE",
+      "price": 72.345,
+      "price_at_alert": 72.345,
+      "entry_zone": [
+        72.22,
+        72.95
+      ],
+      "entry_zone_low": 72.22,
+      "entry_zone_high": 72.95,
+      "stop": 70.6861,
+      "target": 77.4779,
+      "reasons": [
+        "In entry zone ($72.22-$72.95)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.613986+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_EA_1781530409",
+      "ticker": "EA",
+      "strength": "MODERATE",
+      "price": 203,
+      "price_at_alert": 203,
+      "entry_zone": [
+        201.2,
+        203.22
+      ],
+      "entry_zone_low": 201.2,
+      "entry_zone_high": 203.22,
+      "stop": 201.7332,
+      "target": 206.2236,
+      "reasons": [
+        "In entry zone ($201.20-$203.22)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614010+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_ZS_1781530409",
+      "ticker": "ZS",
+      "strength": "MODERATE",
+      "price": 128.6899,
+      "price_at_alert": 128.6899,
+      "entry_zone": [
+        128.25,
+        129.54
+      ],
+      "entry_zone_low": 128.25,
+      "entry_zone_high": 129.54,
+      "stop": 109.8439,
+      "target": 168.9321,
+      "reasons": [
+        "In entry zone ($128.25-$129.54)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614034+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_SBUX_1781530409",
+      "ticker": "SBUX",
+      "strength": "MODERATE",
+      "price": 102.77,
+      "price_at_alert": 102.77,
+      "entry_zone": [
+        101.99,
+        103.02
+      ],
+      "entry_zone_low": 101.99,
+      "entry_zone_high": 103.02,
+      "stop": 98.8286,
+      "target": 111.4029,
+      "reasons": [
+        "In entry zone ($101.99-$103.02)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614534+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_BNL_1781530409",
+      "ticker": "BNL",
+      "strength": "MODERATE",
+      "price": 21,
+      "price_at_alert": 21,
+      "entry_zone": [
+        20.86,
+        21.07
+      ],
+      "entry_zone_low": 20.86,
+      "entry_zone_high": 21.07,
+      "stop": 20.4882,
+      "target": 22.2336,
+      "reasons": [
+        "In entry zone ($20.86-$21.07)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614558+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_BUD_1781530409",
+      "ticker": "BUD",
+      "strength": "MODERATE",
+      "price": 82.73,
+      "price_at_alert": 82.73,
+      "entry_zone": [
+        82.06,
+        82.89
+      ],
+      "entry_zone_low": 82.06,
+      "entry_zone_high": 82.89,
+      "stop": 80.5896,
+      "target": 87.4907,
+      "reasons": [
+        "In entry zone ($82.06-$82.89)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614581+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_VSNT_1781530409",
+      "ticker": "VSNT",
+      "strength": "MODERATE",
+      "price": 40.275,
+      "price_at_alert": 40.275,
+      "entry_zone": [
+        40.12,
+        40.52
+      ],
+      "entry_zone_low": 40.12,
+      "entry_zone_high": 40.52,
+      "stop": 38.6461,
+      "target": 44.2679,
+      "reasons": [
+        "In entry zone ($40.12-$40.52)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614681+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-15_DOCU_1781530409",
+      "ticker": "DOCU",
+      "strength": "MODERATE",
+      "price": 45.03,
+      "price_at_alert": 45.03,
+      "entry_zone": [
+        44.58,
+        45.03
+      ],
+      "entry_zone_low": 44.58,
+      "entry_zone_high": 45.03,
+      "stop": 40.8546,
+      "target": 53.3807,
+      "reasons": [
+        "In entry zone ($44.58-$45.03)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-15",
+      "alerted_at": "2026-06-15T13:33:29.614728+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OPENING",
+          "weight": 1.0,
+          "note": "High conviction \u2014 opening drive"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OPENING"
+    },
+    {
+      "id": "2026-06-14_ROL_1781398050",
+      "ticker": "ROL",
+      "strength": "MODERATE",
+      "price": 47.19,
+      "price_at_alert": 47.19,
+      "entry_zone": [
+        46.96,
+        47.43
+      ],
+      "entry_zone_low": 46.96,
+      "entry_zone_high": 47.43,
+      "stop": 45.1993,
+      "target": 51.8914,
+      "reasons": [
+        "In entry zone ($46.96-$47.43)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:30.456551+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_RDN_1781398054",
+      "ticker": "RDN",
+      "strength": "MODERATE",
+      "price": 34.66,
+      "price_at_alert": 34.66,
+      "entry_zone": [
+        34.4,
+        34.75
+      ],
+      "entry_zone_low": 34.4,
+      "entry_zone_high": 34.75,
+      "stop": 33.3529,
+      "target": 37.5443,
+      "reasons": [
+        "In entry zone ($34.40-$34.75)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:34.023902+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_MAT_1781398054",
+      "ticker": "MAT",
+      "strength": "MODERATE",
+      "price": 14.65,
+      "price_at_alert": 14.65,
+      "entry_zone": [
+        14.54,
+        14.69
+      ],
+      "entry_zone_low": 14.54,
+      "entry_zone_high": 14.69,
+      "stop": 14.0354,
+      "target": 15.9993,
+      "reasons": [
+        "In entry zone ($14.54-$14.69)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:34.495140+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_SFM_1781398055",
+      "ticker": "SFM",
+      "strength": "MODERATE",
+      "price": 86.33,
+      "price_at_alert": 86.33,
+      "entry_zone": [
+        85.89,
+        86.76
+      ],
+      "entry_zone_low": 85.89,
+      "entry_zone_high": 86.76,
+      "stop": 81.1114,
+      "target": 98.0571,
+      "reasons": [
+        "In entry zone ($85.89-$86.76)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:35.078568+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_PTON_1781398057",
+      "ticker": "PTON",
+      "strength": "MODERATE",
+      "price": 5.55,
+      "price_at_alert": 5.55,
+      "entry_zone": [
+        5.54,
+        5.59
+      ],
+      "entry_zone_low": 5.54,
+      "entry_zone_high": 5.59,
+      "stop": 5.0754,
+      "target": 6.6343,
+      "reasons": [
+        "In entry zone ($5.54-$5.59)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "?",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:37.552687+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_BWA_1781398063",
+      "ticker": "BWA",
+      "strength": "MODERATE",
+      "price": 74.51,
+      "price_at_alert": 74.51,
+      "entry_zone": [
+        74.13,
+        74.88
+      ],
+      "entry_zone_low": 74.13,
+      "entry_zone_high": 74.88,
+      "stop": 69.2025,
+      "target": 86.235,
+      "reasons": [
+        "In entry zone ($74.13-$74.88)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "B_WATCH",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:43.325428+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_PENG_1781398064",
+      "ticker": "PENG",
+      "strength": "MODERATE",
+      "price": 64.13,
+      "price_at_alert": 64.13,
+      "entry_zone": [
+        63.66,
+        64.3
+      ],
+      "entry_zone_low": 63.66,
+      "entry_zone_high": 64.3,
+      "stop": 53.2964,
+      "target": 86.3071,
+      "reasons": [
+        "In entry zone ($63.66-$64.30)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": "C_NEEDS_CONFIRMATION",
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.966724+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": true,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_SIRI_1781398064",
+      "ticker": "SIRI",
+      "strength": "MODERATE",
+      "price": 27.52,
+      "price_at_alert": 27.52,
+      "entry_zone": [
+        27.31,
+        27.59
+      ],
+      "entry_zone_low": 27.31,
+      "entry_zone_high": 27.59,
+      "stop": 26.2105,
+      "target": 29.7972,
+      "reasons": [
+        "In entry zone ($27.31-$27.59)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967062+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_CMC_1781398064",
+      "ticker": "CMC",
+      "strength": "MODERATE",
+      "price": 77.76,
+      "price_at_alert": 77.76,
+      "entry_zone": [
+        77.0,
+        77.78
+      ],
+      "entry_zone_low": 77.0,
+      "entry_zone_high": 77.78,
+      "stop": 74.0214,
+      "target": 85.2971,
+      "reasons": [
+        "In entry zone ($77.00-$77.78)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967125+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_CNK_1781398064",
+      "ticker": "CNK",
+      "strength": "MODERATE",
+      "price": 33.8,
+      "price_at_alert": 33.8,
+      "entry_zone": [
+        33.66,
+        34.0
+      ],
+      "entry_zone_low": 33.66,
+      "entry_zone_high": 34.0,
+      "stop": 32.1218,
+      "target": 37.7564,
+      "reasons": [
+        "In entry zone ($33.66-$34.00)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967199+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_VOD_1781398064",
+      "ticker": "VOD",
+      "strength": "MODERATE",
+      "price": 15.53,
+      "price_at_alert": 15.53,
+      "entry_zone": [
+        15.38,
+        15.53
+      ],
+      "entry_zone_low": 15.38,
+      "entry_zone_high": 15.53,
+      "stop": 15.1416,
+      "target": 16.3068,
+      "reasons": [
+        "In entry zone ($15.38-$15.53)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967219+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_ARIS_1781398064",
+      "ticker": "ARIS",
+      "strength": "MODERATE",
+      "price": 15.89,
+      "price_at_alert": 15.89,
+      "entry_zone": [
+        15.75,
+        15.9
+      ],
+      "entry_zone_low": 15.75,
+      "entry_zone_high": 15.9,
+      "stop": 14.3379,
+      "target": 19.0391,
+      "reasons": [
+        "In entry zone ($15.75-$15.90)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967239+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_ATMU_1781398064",
+      "ticker": "ATMU",
+      "strength": "MODERATE",
+      "price": 49.8,
+      "price_at_alert": 49.8,
+      "entry_zone": [
+        49.55,
+        50.05
+      ],
+      "entry_zone_low": 49.55,
+      "entry_zone_high": 50.05,
+      "stop": 47.5482,
+      "target": 55.0536,
+      "reasons": [
+        "In entry zone ($49.55-$50.05)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967289+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_IAG_1781398064",
+      "ticker": "IAG",
+      "strength": "MODERATE",
+      "price": 16.65,
+      "price_at_alert": 16.65,
+      "entry_zone": [
+        16.5,
+        16.67
+      ],
+      "entry_zone_low": 16.5,
+      "entry_zone_high": 16.67,
+      "stop": 15.2648,
+      "target": 19.4804,
+      "reasons": [
+        "In entry zone ($16.50-$16.67)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967391+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_AEVA_1781398064",
+      "ticker": "AEVA",
+      "strength": "MODERATE",
+      "price": 24.89,
+      "price_at_alert": 24.89,
+      "entry_zone": [
+        24.87,
+        25.12
+      ],
+      "entry_zone_low": 24.87,
+      "entry_zone_high": 25.12,
+      "stop": 20.6318,
+      "target": 34.0964,
+      "reasons": [
+        "In entry zone ($24.87-$25.12)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967440+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_SEM_1781398064",
+      "ticker": "SEM",
+      "strength": "MODERATE",
+      "price": 16.66,
+      "price_at_alert": 16.66,
+      "entry_zone": [
+        16.5,
+        16.66
+      ],
+      "entry_zone_low": 16.5,
+      "entry_zone_high": 16.66,
+      "stop": 16.5825,
+      "target": 16.83,
+      "reasons": [
+        "In entry zone ($16.50-$16.66)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967487+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_SBRA_1781398064",
+      "ticker": "SBRA",
+      "strength": "MODERATE",
+      "price": 18.73,
+      "price_at_alert": 18.73,
+      "entry_zone": [
+        18.63,
+        18.81
+      ],
+      "entry_zone_low": 18.63,
+      "entry_zone_high": 18.81,
+      "stop": 17.9016,
+      "target": 20.6418,
+      "reasons": [
+        "In entry zone ($18.63-$18.81)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967506+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_PAYC_1781398064",
+      "ticker": "PAYC",
+      "strength": "MODERATE",
+      "price": 134.52,
+      "price_at_alert": 134.52,
+      "entry_zone": [
+        133.27,
+        134.61
+      ],
+      "entry_zone_low": 133.27,
+      "entry_zone_high": 134.61,
+      "stop": 125.0207,
+      "target": 153.7886,
+      "reasons": [
+        "In entry zone ($133.27-$134.61)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967567+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_BGC_1781398064",
+      "ticker": "BGC",
+      "strength": "MODERATE",
+      "price": 11.85,
+      "price_at_alert": 11.85,
+      "entry_zone": [
+        11.74,
+        11.85
+      ],
+      "entry_zone_low": 11.74,
+      "entry_zone_high": 11.85,
+      "stop": 11.3375,
+      "target": 12.89,
+      "reasons": [
+        "In entry zone ($11.74-$11.85)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.967801+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_LION_1781398064",
+      "ticker": "LION",
+      "strength": "MODERATE",
+      "price": 14.32,
+      "price_at_alert": 14.32,
+      "entry_zone": [
+        14.18,
+        14.32
+      ],
+      "entry_zone_low": 14.18,
+      "entry_zone_high": 14.32,
+      "stop": 13.4564,
+      "target": 16.0471,
+      "reasons": [
+        "In entry zone ($14.18-$14.32)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968212+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_FRO_1781398064",
+      "ticker": "FRO",
+      "strength": "MODERATE",
+      "price": 39.07,
+      "price_at_alert": 39.07,
+      "entry_zone": [
+        38.69,
+        39.08
+      ],
+      "entry_zone_low": 38.69,
+      "entry_zone_high": 39.08,
+      "stop": 36.9896,
+      "target": 43.2607,
+      "reasons": [
+        "In entry zone ($38.69-$39.08)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968234+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_RIVN_1781398064",
+      "ticker": "RIVN",
+      "strength": "MODERATE",
+      "price": 16.76,
+      "price_at_alert": 16.76,
+      "entry_zone": [
+        16.59,
+        16.76
+      ],
+      "entry_zone_low": 16.59,
+      "entry_zone_high": 16.76,
+      "stop": 15.0071,
+      "target": 20.2657,
+      "reasons": [
+        "In entry zone ($16.59-$16.76)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968284+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_SBLK_1781398064",
+      "ticker": "SBLK",
+      "strength": "MODERATE",
+      "price": 27.15,
+      "price_at_alert": 27.15,
+      "entry_zone": [
+        26.9,
+        27.17
+      ],
+      "entry_zone_low": 26.9,
+      "entry_zone_high": 27.17,
+      "stop": 25.9593,
+      "target": 29.5914,
+      "reasons": [
+        "In entry zone ($26.90-$27.17)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968303+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_HPQ_1781398064",
+      "ticker": "HPQ",
+      "strength": "MODERATE",
+      "price": 25.24,
+      "price_at_alert": 25.24,
+      "entry_zone": [
+        24.99,
+        25.24
+      ],
+      "entry_zone_low": 24.99,
+      "entry_zone_high": 25.24,
+      "stop": 22.8475,
+      "target": 30.025,
+      "reasons": [
+        "In entry zone ($24.99-$25.24)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968323+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_ALMS_1781398064",
+      "ticker": "ALMS",
+      "strength": "MODERATE",
+      "price": 24.15,
+      "price_at_alert": 24.15,
+      "entry_zone": [
+        23.92,
+        24.16
+      ],
+      "entry_zone_low": 23.92,
+      "entry_zone_high": 24.16,
+      "stop": 22.2218,
+      "target": 28.0364,
+      "reasons": [
+        "In entry zone ($23.92-$24.16)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968350+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_ELVN_1781398064",
+      "ticker": "ELVN",
+      "strength": "MODERATE",
+      "price": 46.13,
+      "price_at_alert": 46.13,
+      "entry_zone": [
+        45.67,
+        46.13
+      ],
+      "entry_zone_low": 45.67,
+      "entry_zone_high": 46.13,
+      "stop": 41.7039,
+      "target": 54.9821,
+      "reasons": [
+        "In entry zone ($45.67-$46.13)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968371+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_MUFG_1781398064",
+      "ticker": "MUFG",
+      "strength": "MODERATE",
+      "price": 20.16,
+      "price_at_alert": 20.16,
+      "entry_zone": [
+        19.96,
+        20.16
+      ],
+      "entry_zone_low": 19.96,
+      "entry_zone_high": 20.16,
+      "stop": 19.5911,
+      "target": 21.2979,
+      "reasons": [
+        "In entry zone ($19.96-$20.16)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968390+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_VSH_1781398064",
+      "ticker": "VSH",
+      "strength": "MODERATE",
+      "price": 59.38,
+      "price_at_alert": 59.38,
+      "entry_zone": [
+        58.84,
+        59.43
+      ],
+      "entry_zone_low": 58.84,
+      "entry_zone_high": 59.43,
+      "stop": 49.6489,
+      "target": 78.9921,
+      "reasons": [
+        "In entry zone ($58.84-$59.43)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968409+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_XEL_1781398064",
+      "ticker": "XEL",
+      "strength": "MODERATE",
+      "price": 79.22,
+      "price_at_alert": 79.22,
+      "entry_zone": [
+        78.44,
+        79.23
+      ],
+      "entry_zone_low": 78.44,
+      "entry_zone_high": 79.23,
+      "stop": 76.5943,
+      "target": 84.5014,
+      "reasons": [
+        "In entry zone ($78.44-$79.23)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968428+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_EIX_1781398064",
+      "ticker": "EIX",
+      "strength": "MODERATE",
+      "price": 72.95,
+      "price_at_alert": 72.95,
+      "entry_zone": [
+        72.22,
+        72.95
+      ],
+      "entry_zone_low": 72.22,
+      "entry_zone_high": 72.95,
+      "stop": 70.6861,
+      "target": 77.4779,
+      "reasons": [
+        "In entry zone ($72.22-$72.95)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968447+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    },
+    {
+      "id": "2026-06-14_ZS_1781398064",
+      "ticker": "ZS",
+      "strength": "MODERATE",
+      "price": 129.52,
+      "price_at_alert": 129.52,
+      "entry_zone": [
+        128.25,
+        129.54
+      ],
+      "entry_zone_low": 128.25,
+      "entry_zone_high": 129.54,
+      "stop": 109.8439,
+      "target": 168.9321,
+      "reasons": [
+        "In entry zone ($128.25-$129.54)",
+        "RVOL building (0.0x)",
+        "Above stop"
+      ],
+      "tier": null,
+      "date": "2026-06-14",
+      "alerted_at": "2026-06-14T00:47:44.968483+00:00",
+      "intraday": {
+        "_session_phase": {
+          "phase": "OFF_HOURS",
+          "weight": 0.0,
+          "note": "Outside session"
+        },
+        "_near_zone": true,
+        "_bars_fetched": false,
+        "_is_prime": false
+      },
+      "session_phase": "OFF_HOURS"
+    }
+  ],
+  "last_cycle": "2026-06-15T15:16:14.980732+00:00",
+  "summary": {
+    "total_alerts": 85,
+    "today_alerts": 54,
+    "new_this_cycle": 0,
+    "by_strength": {
+      "PRIME_ENTRY": 0,
+      "STRONG": 0,
+      "GOOD": 12,
+      "MODERATE": 42
+    },
+    "bar_calls_this_cycle": 49,
+    "spy_bars_available": true,
+    "last_triggered": []
+  }
+}

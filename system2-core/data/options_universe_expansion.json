@@ -1,0 +1,32 @@
+{
+  "date": "2026-06-13",
+  "generated_at": "2026-06-13T02:15:12.194708+00:00",
+  "source": "options_universe_expansion",
+  "base_universe_size": 1535,
+  "added_count": 3,
+  "additions": [
+    {
+      "ticker": "VTI",
+      "source": "apewisdom_expansion",
+      "rank_improvement": 146,
+      "mentions": 37,
+      "added_reason": "ApeWisdom rank +146 with 37 mentions"
+    },
+    {
+      "ticker": "DFNS",
+      "source": "apewisdom_expansion",
+      "rank_improvement": 949,
+      "mentions": 16,
+      "added_reason": "ApeWisdom rank +949 with 16 mentions"
+    },
+    {
+      "ticker": "VT",
+      "source": "apewisdom_expansion",
+      "rank_improvement": 162,
+      "mentions": 15,
+      "added_reason": "ApeWisdom rank +162 with 15 mentions"
+    }
+  ],
+  "_system2_run_id": "20260613T021501Z-a252b64e",
+  "_system2_generated_at": "2026-06-13T02:15:12.204796+00:00"
+}

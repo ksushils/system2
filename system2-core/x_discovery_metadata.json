@@ -1,0 +1,21 @@
+{
+  "created_at": "2026-06-14T20:43:19.113521+00:00",
+  "provider": "GetXAPI",
+  "queries_planned": 5,
+  "trusted_handles": [
+    "unusual_whales",
+    "KobeissiLetter",
+    "markminervini",
+    "TraderLion",
+    "OptionsHawk"
+  ],
+  "minimum_unique_authors": 2,
+  "paper_only": true,
+  "status": "OK",
+  "queries_completed": 5,
+  "tweets_fetched": 100,
+  "x_tickers_found": 0,
+  "candidate_pool_count": null,
+  "symbols": [],
+  "errors": []
+}

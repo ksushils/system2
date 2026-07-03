@@ -1,0 +1,141 @@
+{
+  "computed_at": "2026-06-10T13:42:29.890702+00:00",
+  "total_resolved": 10,
+  "insufficient_data": false,
+  "models": {
+    "gemini": {
+      "name": "Gemini",
+      "total_verdicts": 10,
+      "distribution": {
+        "TIER1": 5,
+        "SKIP": 5
+      },
+      "group_stats": {
+        "tier1": {
+          "count": 5,
+          "avg_r": 0.7,
+          "win_rate": 100.0
+        },
+        "tier2": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        },
+        "skip": {
+          "count": 5,
+          "avg_r": 1.2,
+          "win_rate": 100.0
+        }
+      },
+      "tier1_avg_r": 0.7,
+      "skip_avg_r": 1.2,
+      "tier1_count": 5,
+      "skip_count": 5,
+      "force_skip_rate": 0.0,
+      "abstain_rate": 0.0,
+      "agreement_rate": 0.5,
+      "calibrated": false,
+      "insufficient": false
+    },
+    "claude": {
+      "name": "Claude",
+      "total_verdicts": 10,
+      "distribution": {
+        "UPGRADE": 4,
+        "FORCE_SKIP": 6
+      },
+      "group_stats": {
+        "tier1": {
+          "count": 4,
+          "avg_r": 0.65,
+          "win_rate": 100.0
+        },
+        "tier2": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        },
+        "skip": {
+          "count": 6,
+          "avg_r": 1.15,
+          "win_rate": 100.0
+        }
+      },
+      "tier1_avg_r": 0.65,
+      "skip_avg_r": 1.15,
+      "tier1_count": 4,
+      "skip_count": 6,
+      "force_skip_rate": 0.6,
+      "abstain_rate": 0.0,
+      "agreement_rate": 0.4,
+      "calibrated": false,
+      "insufficient": false
+    },
+    "kimi": {
+      "name": "Kimi",
+      "total_verdicts": 5,
+      "distribution": {
+        "TIER2": 5
+      },
+      "group_stats": {
+        "tier1": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        },
+        "tier2": {
+          "count": 5,
+          "avg_r": 1.0,
+          "win_rate": 100.0
+        },
+        "skip": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        }
+      },
+      "tier1_avg_r": null,
+      "skip_avg_r": null,
+      "tier1_count": 0,
+      "skip_count": 0,
+      "force_skip_rate": 0.0,
+      "abstain_rate": 0.5,
+      "agreement_rate": 0.0,
+      "calibrated": false,
+      "insufficient": false
+    },
+    "gpt4o": {
+      "name": "Gpt4o",
+      "total_verdicts": 10,
+      "distribution": {
+        "TIER1": 10
+      },
+      "group_stats": {
+        "tier1": {
+          "count": 10,
+          "avg_r": 0.95,
+          "win_rate": 100.0
+        },
+        "tier2": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        },
+        "skip": {
+          "count": 0,
+          "avg_r": null,
+          "win_rate": null
+        }
+      },
+      "tier1_avg_r": 0.95,
+      "skip_avg_r": null,
+      "tier1_count": 10,
+      "skip_count": 0,
+      "force_skip_rate": 0.0,
+      "abstain_rate": 0.0,
+      "agreement_rate": 1.0,
+      "calibrated": false,
+      "insufficient": false
+    }
+  }
+}
