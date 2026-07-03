@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+"""
+TipRanks Unusual Options Activity Scraper
+Scrapes: https://www.tipranks.com/options/unusual-activity-stocks
+Requires: TIPRANKS_TOKEN + TIPRANKS_JWT in /root/system2-core/.env
+Output: /root/system2-core/data/tipranks_uoa.json
+Cron: 00 10 * * 1-5 (Mon-Fri, before Barchart at 00:15 UTC)
+"""
+
+import os
+import sys
+import json
+import subprocess
+from datetime import datetime, timezone
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
+
+# ── Config ──────────────────────────────────────────────────────────
+ENV_PATH = "/root/system2-core/.env"
+OUTPUT_PATH = "/root/system2-core/data/tipranks_uoa.json"
+LOG_PATH = "/root/system2-core/logs/tipranks_scraper.log"
+URL = "https://www.tipranks.com/options/unusual-activity-stocks"
+
+# Filter thresholds
+SENTIMENT = "Bullish"
+OPTION_TYPE = "Call"
+MIN_VOL_OI = 2.0
+MIN_OPEN_INTEREST = 100
+
+# ── Helpers ─────────────────────────────────────────────────────────
+def log(msg: str):
+    ts = datetime.now(timezone.utc).isoformat()
+    line = f"[{ts}] {msg}"
+    print(line)
+    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+    with open(LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
+
+
+def load_env(key: str, default=None) -> str:
+    """Read key from .env file (simple KEY=VALUE parser)."""
+    if not os.path.exists(ENV_PATH):
+        return default
+    with open(ENV_PATH, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("#") or not line:
+                continue
+            if "=" in line:
+                k, v = line.split("=", 1)
+                if k.strip() == key:
+                    return v.strip().strip('"').strip("'")
+    return default
+
+
+def write_output(candidates: list, raw_count: int, failed: bool = False):
+    payload = {
+        "scraped_at": datetime.now(timezone.utc).isoformat(),
+        "source": "tipranks",
+        "options_flow_source": "tipranks",
+        "url": URL,
+        "raw_rows_extracted": raw_count,
+        "candidates_count": len(candidates),
+        "candidates": candidates,
+        "tipranks_scrape_failed": failed,
+        "filters": {
+            "sentiment": SENTIMENT,
+            "option_type": OPTION_TYPE,
+            "min_vol_oi_ratio": MIN_VOL_OI,
+            "min_open_interest": MIN_OPEN_INTEREST,
+        },
+    }
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    log(f"Wrote output: {OUTPUT_PATH} ({len(candidates)} candidates, failed={failed})")
+
+
+def parse_numeric(val):
+    """Extract float from strings like '2.5x', '$1.25', '1,234'."""
+    if val is None:
+        return None
+    s = str(val).replace(",", "").replace("$", "").replace("x", "").replace("%", "").strip()
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_date(val):
+    """Normalize date strings to ISO YYYY-MM-DD."""
+    if not val:
+        return None
+    val = str(val).strip()
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%b %d, %Y", "%B %d, %Y"):
+        try:
+            return datetime.strptime(val, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return val
+
+
+def extract_rows_from_page(page, log_prefix=""):
+    """Extract table rows from a loaded page. Returns (rows_list, success)."""
+    # Try multiple selector strategies
+    row_selectors = [
+        "table tbody tr",
+        "[data-testid='unusual-activity-table'] tbody tr",
+        "[class*='table'] tbody tr",
+        "[class*='activity'] [class*='row']",
+        "[role='row']",
+    ]
+
+    rows = []
+    for sel in row_selectors:
+        rows = page.query_selector_all(sel)
+        if len(rows) > 1:
+            log(f"{log_prefix}Found {len(rows)} rows with selector: {sel}")
+            break
+
+    if not rows:
+        log(f"{log_prefix}No table rows found with any selector strategy.")
+        return [], False
+
+    raw_rows = []
+    for row in rows:
+        cells = row.query_selector_all("td, [role='cell']")
+        if len(cells) < 6:
+            continue
+
+        texts = [c.inner_text().strip() if c.inner_text() else "" for c in cells]
+        if len(texts) < 9:
+            continue
+
+        record = {
+            "symbol": texts[0] if len(texts) > 0 else None,
+            "contract_name": texts[1] if len(texts) > 1 else None,
+            "sentiment": texts[2] if len(texts) > 2 else None,
+            "expiration_date": parse_date(texts[3]) if len(texts) > 3 else None,
+            "option_type": texts[4] if len(texts) > 4 else None,
+            "strike": parse_numeric(texts[5]) if len(texts) > 5 else None,
+            "price": parse_numeric(texts[6]) if len(texts) > 6 else None,
+            "volume": parse_numeric(texts[7]) if len(texts) > 7 else None,
+            "open_interest": parse_numeric(texts[8]) if len(texts) > 8 else None,
+            "vol_oi_ratio": parse_numeric(texts[9]) if len(texts) > 9 else None,
+        }
+        raw_rows.append(record)
+
+    return raw_rows, True
+
+
+def check_page_loaded(page):
+    """Check if page loaded successfully or hit a challenge/wall."""
+    title = page.title()
+    body_text = ""
+    body = page.query_selector("body")
+    if body:
+        body_text = body.inner_text() or ""
+
+    if "just a moment" in title.lower() or "security verification" in body_text.lower():
+        return "cloudflare"
+    if "login" in title.lower() or "sign in" in body_text.lower():
+        return "login"
+    if "unusual" not in body_text.lower() and "activity" not in body_text.lower():
+        return "mismatch"
+    return "ok"
+
+
+def build_cookies(token, jwt):
+    cookies = []
+    if token:
+        cookies.append({
+            "name": "token",
+            "value": token,
+            "domain": ".tipranks.com",
+            "path": "/",
+        })
+    if jwt:
+        cookies.append({
+            "name": "chat_jwt",
+            "value": jwt,
+            "domain": ".tipranks.com",
+            "path": "/",
+        })
+    return cookies
+
+
+def attempt_scrape(token, jwt, headless=True):
+    """Attempt a single scrape pass. Returns (raw_rows, candidates, status)."""
+    raw_rows = []
+    candidates = []
+    status = "unknown"
+
+    with sync_playwright() as p:
+        launch_args = [
+            "--disable-blink-features=AutomationControlled",
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+        ]
+        browser = p.chromium.launch(headless=headless, args=launch_args)
+        context = browser.new_context(
+            viewport={"width": 1920, "height": 1080},
+            locale="en-US",
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+        )
+
+        cookies = build_cookies(token, jwt)
+        if cookies:
+            context.add_cookies(cookies)
+            log(f"Injected {len(cookies)} cookies (headless={headless}).")
+
+        page = context.new_page()
+
+        try:
+            log(f"Navigating to {URL} (headless={headless})...")
+            page.goto(URL, wait_until="domcontentloaded", timeout=30000)
+            page.wait_for_timeout(10000)
+
+            status = check_page_loaded(page)
+            if status == "cloudflare":
+                log(f"Cloudflare challenge detected (headless={headless}).")
+            elif status == "login":
+                log(f"Login wall detected (headless={headless}).")
+            elif status == "mismatch":
+                log(f"Page content mismatch (headless={headless}).")
+            else:
+                log("Page loaded. Extracting table rows...")
+                raw_rows, ok = extract_rows_from_page(page)
+                if not ok:
+                    status = "no_rows"
+                else:
+                    status = "ok"
+                    log(f"Extracted {len(raw_rows)} raw rows.")
+
+                    # Filter
+                    for r in raw_rows:
+                        sentiment = (r.get("sentiment") or "").strip().lower()
+                        opt_type = (r.get("option_type") or "").strip().lower()
+                        vol_oi = r.get("vol_oi_ratio")
+                        oi = r.get("open_interest")
+
+                        if sentiment != SENTIMENT.lower():
+                            continue
+                        if opt_type != OPTION_TYPE.lower():
+                            continue
+                        if vol_oi is None or vol_oi <= MIN_VOL_OI:
+                            continue
+                        if oi is None or oi <= MIN_OPEN_INTEREST:
+                            continue
+
+                        candidates.append(r)
+
+                    log(f"Filtered to {len(candidates)} bullish call candidates.")
+
+        except PlaywrightTimeout:
+            log(f"Page load timed out (headless={headless}).")
+            status = "timeout"
+        except Exception as e:
+            log(f"Exception during scrape (headless={headless}): {type(e).__name__}: {e}")
+            status = "exception"
+        finally:
+            browser.close()
+
+    return raw_rows, candidates, status
+
+
+def scrape_tipranks_uoa():
+    token = load_env("TIPRANKS_TOKEN")
+    jwt = load_env("TIPRANKS_JWT")
+    if not token or not jwt:
+        log("WARNING: TIPRANKS_TOKEN or TIPRANKS_JWT not found in .env.")
+
+    # Attempt 1: headless=True (default)
+    raw_rows, candidates, status = attempt_scrape(token, jwt, headless=True)
+
+    # Attempt 2: headless=False with xvfb if first attempt failed
+    if status not in ("ok",):
+        log("Retrying with headless=False (xvfb)...")
+        try:
+            raw_rows2, candidates2, status2 = attempt_scrape(token, jwt, headless=False)
+            if status2 == "ok":
+                raw_rows = raw_rows2
+                candidates = candidates2
+                status = status2
+        except Exception as e:
+            log(f"headless=False also failed: {type(e).__name__}: {e}")
+            log("Tip: run scraper via xvfb-run if on a headless server.")
+
+    failed = status != "ok"
+    write_output(candidates, len(raw_rows), failed)
+    return len(raw_rows), len(candidates), failed
+
+
+# ── Main ────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    log("=" * 60)
+    log("TipRanks UOA Scraper starting...")
+    raw, filtered, failed = scrape_tipranks_uoa()
+    status = "FAILED" if failed else "OK"
+    log(f"Done. Status={status} | Raw={raw} | Filtered={filtered}")
+    sys.exit(1 if failed else 0)

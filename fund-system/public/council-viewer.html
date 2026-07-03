@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Council of AIs — System 2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap');
+:root {
+  --bg:#08090b; --s1:#0f1114; --s2:#141719; --border:#1d2128; --border2:#262c35;
+  --txt:#e4e7ec; --dim:#7c8496; --faint:#3a404d;
+  --claude:#d97757; --gpt:#10a37f; --gemini:#4285f4;
+  --green:#34d399; --amber:#fbbf24; --red:#f87171; --purple:#a78bfa;
+  --mono:'DM Mono',monospace; --disp:'Fraunces',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:13px;line-height:1.6;min-height:100vh}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 80% 0%,rgba(66,133,244,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:28px 24px 100px}
+
+/* header */
+header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:14px}
+.council-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:linear-gradient(135deg,var(--claude),var(--gemini));flex-shrink:0}
+h1{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-.3px}
+.sub{color:var(--dim);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.api-row{display:flex;gap:8px}
+.api-row input{background:var(--s1);border:1px solid var(--border);color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:6px;width:240px}
+.btn{background:var(--s2);border:1px solid var(--border2);color:var(--dim);font-family:var(--mono);font-size:11px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{color:var(--txt);border-color:var(--dim)}
+.btn.act{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:var(--green)}
+.conn{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.dot.bad{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* date + summary bar */
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.scard{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.scard-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint)}
+.scard-val{font-family:var(--disp);font-size:24px;font-weight:700;margin-top:5px}
+
+/* controls */
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.controls input[type=text]{background:var(--s1);border:1px solid var(--border);color:var(--txt);font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:7px;width:180px}
+.seg{display:flex;gap:3px}
+.sb{background:var(--s1);border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:10px;padding:6px 11px;border-radius:5px;cursor:pointer}
+.sb.on{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:var(--purple)}
+.spacer{flex:1}
+.date-sel{background:var(--s1);border:1px solid var(--border);color:var(--txt);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:6px}
+
+/* verdict list */
+.verdict-list{display:flex;flex-direction:column;gap:16px}
+
+/* per-stock council card */
+.ccard{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.ccard-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.ccard-header:hover{background:var(--s2)}
+.ticker-row{display:flex;align-items:center;gap:12px}
+.ticker{font-family:var(--disp);font-weight:700;font-size:20px}
+.tier-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.tier-UPGRADE{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+.tier-TIER1{background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.tier-TIER2{background:rgba(52,211,153,.08);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+.tier-TIER3{background:rgba(251,191,36,.08);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
+.tier-SKIP{background:rgba(248,113,113,.08);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.tier-FORCE_SKIP{background:rgba(248,113,113,.2);color:var(--red);border:1px solid rgba(248,113,113,.5)}
+.tier-OFF{background:var(--s2);color:var(--faint);border:1px solid var(--border)}
+.vote-pills{display:flex;gap:6px}
+.vote-pill{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700}
+.v-strong{background:rgba(251,191,36,.15);color:var(--amber)}
+.v-clear{background:rgba(52,211,153,.1);color:var(--green)}
+.v-weak{background:rgba(251,191,36,.1);color:var(--amber)}
+.v-skip{background:rgba(248,113,113,.1);color:var(--red)}
+.v-force_skip{background:rgba(248,113,113,.2);color:var(--red)}
+.v-na{background:var(--s2);color:var(--faint)}
+.conf-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}
+.conf-track{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;border-radius:2px;background:var(--green);transition:width .3s}
+.expand-icon{color:var(--faint);font-size:12px;transition:transform .2s}
+.ccard.open .expand-icon{transform:rotate(180deg)}
+
+/* model panel */
+.models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 20px;background:var(--bg);border-bottom:1px solid var(--border)}
+@media(max-width:900px){.models-grid{grid-template-columns:1fr}}
+.model-panel{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.model-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.model-claude::before{background:var(--claude)}
+.model-gpt::before{background:var(--gpt)}
+.model-gemini::before{background:var(--gemini)}
+.model-name{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.model-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.icon-claude{background:rgba(217,119,87,.2);color:var(--claude)}
+.icon-gpt{background:rgba(16,163,127,.2);color:var(--gpt)}
+.icon-gemini{background:rgba(66,133,244,.2);color:var(--gemini)}
+.model-label{font-size:11px;font-weight:500;color:var(--txt)}
+.model-persona{font-size:9px;color:var(--faint);letter-spacing:1px;text-transform:uppercase}
+.verdict-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.conf-num{font-family:var(--disp);font-size:18px;font-weight:700}
+.reason-text{font-size:11px;color:var(--dim);line-height:1.7;padding:8px 10px;background:var(--s2);border-radius:6px;margin-bottom:8px;border-left:2px solid var(--border2)}
+.flags-section{margin-top:8px}
+.flags-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.flag-pills{display:flex;flex-wrap:wrap;gap:4px}
+.flag-pill{font-size:10px;padding:2px 7px;border-radius:4px}
+.flag-red{background:rgba(248,113,113,.12);color:var(--red)}
+.flag-upgrade{background:rgba(251,191,36,.12);color:var(--amber)}
+.flag-neutral{background:var(--s2);color:var(--faint)}
+.unavail{color:var(--faint);font-size:11px;padding:20px 0;text-align:center}
+
+/* consensus section */
+.consensus{padding:16px 20px}
+.consensus-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+.flag-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.summary-reason{font-size:12px;color:var(--dim);line-height:1.7}
+.reasons-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.reason-item{display:flex;gap:8px;font-size:11px}
+.r-model{flex-shrink:0;font-weight:500}
+.r-claude{color:var(--claude)}
+.r-gpt{color:var(--gpt)}
+.r-gemini{color:var(--gemini)}
+.r-text{color:var(--dim)}
+
+/* empty */
+.empty{text-align:center;padding:80px 20px;color:var(--faint)}
+.empty-icon{font-size:40px;margin-bottom:16px;opacity:.3}
+.empty h3{font-family:var(--disp);color:var(--dim);font-size:18px;margin-bottom:8px}
+
+/* loading */
+.loading-msg{text-align:center;padding:60px;color:var(--dim);font-size:12px}
+
+/* off state card */
+.off-notice{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center}
+.off-notice h3{font-family:var(--disp);color:var(--dim);font-size:18px;margin-bottom:8px}
+.off-notice p{color:var(--faint);font-size:12px;line-height:1.8;max-width:480px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="council-icon">⚖</div>
+      <div>
+        <h1>Council of AIs</h1>
+        <div class="sub">Claude · ChatGPT · Gemini · red-flag review</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="api-row">
+        <input id="api-url" placeholder="http://72.62.134.167:3210">
+        <button class="btn" onclick="saveApi()">connect</button>
+        <button class="btn act" onclick="loadData()">↻ refresh</button>
+      </div>
+      <div class="conn"><span class="dot" id="cdot"></span><span id="ctxt">connecting…</span></div>
+    </div>
+  </header>
+
+  <div class="summary-bar" id="sumbar">
+    <div class="scard"><div class="scard-label">Tonight finalists</div><div class="scard-val" id="s-fin" style="color:var(--purple)">—</div></div>
+    <div class="scard"><div class="scard-label">Council ran</div><div class="scard-val" id="s-ran" style="color:var(--green)">—</div></div>
+    <div class="scard"><div class="scard-label">Tier 1 / Upgrade</div><div class="scard-val" id="s-tier1" style="color:var(--amber)">—</div></div>
+    <div class="scard"><div class="scard-label">SKIP / Force skip</div><div class="scard-val" id="s-skip" style="color:var(--red)">—</div></div>
+    <div class="scard"><div class="scard-label">Avg confidence</div><div class="scard-val" id="s-conf" style="color:var(--dim)">—</div></div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="search ticker…" oninput="render()">
+    <div class="seg" id="tier-seg">
+      <button class="sb on" data-t="all" onclick="setTier('all')">all</button>
+      <button class="sb" data-t="UPGRADE" onclick="setTier('UPGRADE')">upgrade</button>
+      <button class="sb" data-t="TIER1" onclick="setTier('TIER1')">tier 1</button>
+      <button class="sb" data-t="TIER2" onclick="setTier('TIER2')">tier 2</button>
+      <button class="sb" data-t="SKIP" onclick="setTier('SKIP')">skip</button>
+      <button class="sb" data-t="OFF" onclick="setTier('OFF')">not run</button>
+    </div>
+    <div class="spacer"></div>
+    <select class="date-sel" id="date-sel" onchange="loadData()">
+      <option value="">latest</option>
+    </select>
+  </div>
+
+  <div id="output">
+    <div class="loading-msg">Loading council data…</div>
+  </div>
+</div>
+
+<script>
+const LS='sys2_council_api';
+let API=localStorage.getItem(LS)||(location.origin.startsWith('http')?location.origin:'http://72.62.134.167:3210');
+let ALL=[], TIER='all';
+document.getElementById('api-url').value=API;
+
+function saveApi(){API=document.getElementById('api-url').value.trim().replace(/\/$/,'');localStorage.setItem(LS,API);loadData();}
+function setConn(s,m){document.getElementById('cdot').className='dot '+(s==='ok'?'ok':s==='bad'?'bad':'');document.getElementById('ctxt').textContent=m;}
+function setTier(t){TIER=t;document.querySelectorAll('.sb').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render();}
+
+async function loadData(){
+  setConn('','loading…');
+  try{
+    const token=localStorage.getItem('system2_admin_token')||'';
+    const headers={Accept:'application/json'};
+    if(token)headers['x-token']=token;
+    const r=await fetch(API+'/api/ideas?limit=200',{headers});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    ALL=(d.ideas||[]).filter(i=>i.date);
+    setConn('ok','connected');
+    populateDates();
+    updateSummary();
+    render();
+  }catch(e){
+    setConn('bad','failed');
+    // show demo
+    ALL=demoData();
+    updateSummary();
+    render();
+  }
+}
+
+function populateDates(){
+  const dates=[...new Set(ALL.map(i=>i.date))].sort().reverse();
+  const sel=document.getElementById('date-sel');
+  sel.innerHTML='<option value="">latest</option>';
+  dates.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+}
+
+function getIdeas(){
+  const date=document.getElementById('date-sel').value||ALL[0]?.date||'';
+  return date?ALL.filter(i=>i.date===date):ALL.filter(i=>i.date===ALL[0]?.date);
+}
+
+function updateSummary(){
+  const ideas=getIdeas();
+  const ran=ideas.filter(i=>i.council_tier&&i.council_tier!=='OFF'&&i.council_tier!==null);
+  const tier1=ideas.filter(i=>['TIER1','UPGRADE'].includes(i.council_tier));
+  const skips=ideas.filter(i=>['SKIP','FORCE_SKIP'].includes(i.council_tier));
+  const confs=ran.map(i=>i.council_conf||0);
+  const avgConf=confs.length?Math.round(confs.reduce((a,b)=>a+b,0)/confs.length):0;
+  document.getElementById('s-fin').textContent=ideas.length;
+  document.getElementById('s-ran').textContent=ran.length+'/'+ideas.length;
+  document.getElementById('s-tier1').textContent=tier1.length;
+  document.getElementById('s-skip').textContent=skips.length;
+  document.getElementById('s-conf').textContent=confs.length?avgConf+'%':'—';
+}
+
+function render(){
+  const ideas=getIdeas();
+  const query=document.getElementById('search').value.toUpperCase();
+  let rows=[...ideas];
+  if(query)rows=rows.filter(i=>(i.ticker||'').includes(query));
+  if(TIER!=='all'){
+    if(TIER==='OFF')rows=rows.filter(i=>!i.council_tier||i.council_tier==='OFF');
+    else rows=rows.filter(i=>i.council_tier===TIER);
+  }
+  // sort: FORCE_SKIP first, then SKIP, then UPGRADE, then TIER1, then rest
+  const order={FORCE_SKIP:0,SKIP:1,UPGRADE:2,TIER1:3,TIER2:4,TIER3:5,OFF:6};
+  rows.sort((a,b)=>(order[a.council_tier]??7)-(order[b.council_tier]??7));
+  const out=document.getElementById('output');
+  if(!rows.length){out.innerHTML='<div class="empty"><div class="empty-icon">⚖</div><h3>No results</h3></div>';return;}
+  const councilRan=rows.some(i=>i.council_tier&&i.council_tier!=='OFF');
+  if(!councilRan){
+    out.innerHTML=`
+      <div class="off-notice">
+        <h3>Council not yet wired</h3>
+        <p>The Council of AIs is built and configured. It will start running after the API keys are confirmed in n8n (OPENAI_API_KEY and GEMINI_API_KEY are the minimum — Anthropic optional). Once wired, this page shows each model's full verdict, reasoning, red flags, and upgrade signals per finalist.</p>
+        <p style="margin-top:12px;color:var(--faint)">Finalists are shown below in preview mode.</p>
+      </div>
+      <div style="margin-top:16px" class="verdict-list">${rows.map(cardHTML).join('')}</div>`;
+    addToggleListeners();
+    return;
+  }
+  out.innerHTML='<div class="verdict-list">'+rows.map(cardHTML).join('')+'</div>';
+  addToggleListeners();
+}
+
+function addToggleListeners(){
+  document.querySelectorAll('.ccard-header').forEach(h=>{
+    h.addEventListener('click',()=>{h.closest('.ccard').classList.toggle('open');});
+  });
+}
+
+function cardHTML(i){
+  const tier=i.council_tier||'OFF';
+  const votes=i.council_votes??'—';
+  const conf=i.council_conf??null;
+  const claude=i.council_claude;
+  const gpt=i.council_gpt;
+  const gemini=i.council_gemini;
+  const claudeConf=i.council_claude_conf;
+  const gptConf=i.council_gpt_conf;
+  const geminiConf=i.council_gemini_conf;
+  const flags=Array.isArray(i.council_red_flags)?i.council_red_flags:(i.council_red_flags?[i.council_red_flags]:[]);
+  const upgrades=Array.isArray(i.council_upgrade_sigs)?i.council_upgrade_sigs:(i.council_upgrade_sigs?[i.council_upgrade_sigs]:[]);
+  const reasons=(i.council_reasons||'').split(' | ').filter(Boolean);
+
+  const councilRan=!!claude||!!gpt||!!gemini;
+
+  return `
+  <div class="ccard" id="card-${i.ticker}">
+    <div class="ccard-header">
+      <div class="ticker-row">
+        <span class="ticker">$${i.ticker}</span>
+        <span class="tier-badge tier-${tier}">${tierLabel(tier)}</span>
+        ${councilRan?`<div class="vote-pills">
+          ${claude?`<span class="vote-pill v-${(claude||'').toLowerCase()}">${modelIcon('claude')}${claude}</span>`:''}
+          ${gpt?`<span class="vote-pill v-${(gpt||'').toLowerCase()}">${modelIcon('gpt')}${gpt}</span>`:''}
+          ${gemini?`<span class="vote-pill v-${(gemini||'').toLowerCase()}">${modelIcon('gemini')}${gemini}</span>`:''}
+        </div>`:'<span style="color:var(--faint);font-size:11px">council not run yet</span>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        ${conf!==null?`<div class="conf-bar"><span>${conf}%</span><div class="conf-track"><div class="conf-fill" style="width:${conf}%;background:${conf>=70?'var(--green)':conf>=50?'var(--amber)':'var(--red)'}"></div></div></div>`:''}
+        <span class="expand-icon">▼</span>
+      </div>
+    </div>
+
+    <div style="display:none" class="ccard-body">
+      ${councilRan?`
+      <div class="models-grid">
+        ${modelPanelHTML('claude','Claude','Balanced reviewer',claude,claudeConf,
+          getReason(reasons,0),flags.filter(f=>f),upgrades,'claude')}
+        ${modelPanelHTML('gpt','ChatGPT','Momentum chaser',gpt,gptConf,
+          getReason(reasons,1),[],(gpt==='STRONG'?upgrades:[]),'gpt')}
+        ${modelPanelHTML('gemini','Gemini','Cynical short seller',gemini,geminiConf,
+          getReason(reasons,2),flags.filter(f=>f),[],'gemini')}
+      </div>
+      <div class="consensus">
+        <div class="consensus-title">consensus view</div>
+        ${flags.length?`<div style="margin-bottom:8px"><div class="flags-label">red flags raised</div>
+          <div class="flag-row">${flags.map(f=>`<span class="flag-pill flag-red">⚠ ${f}</span>`).join('')}</div></div>`:''}
+        ${upgrades.length?`<div style="margin-bottom:8px"><div class="flags-label">upgrade signals</div>
+          <div class="flag-row">${upgrades.map(f=>`<span class="flag-pill flag-upgrade">⭐ ${f}</span>`).join('')}</div></div>`:''}
+        ${reasons.length?`<div class="reasons-list">
+          ${reasons[0]?`<div class="reason-item"><span class="r-model r-claude">Claude:</span><span class="r-text">${esc(reasons[0])}</span></div>`:''}
+          ${reasons[1]?`<div class="reason-item"><span class="r-model r-gpt">GPT:</span><span class="r-text">${esc(reasons[1])}</span></div>`:''}
+          ${reasons[2]?`<div class="reason-item"><span class="r-model r-gemini">Gemini:</span><span class="r-text">${esc(reasons[2])}</span></div>`:''}
+        </div>`:''}
+        ${!flags.length&&!upgrades.length&&!reasons.length?'<div style="color:var(--faint);font-size:11px">No detailed breakdown available yet</div>':''}
+      </div>`:`
+      <div style="padding:24px 20px">
+        <p style="color:var(--faint);font-size:12px">Council has not reviewed this stock yet. It will be evaluated when the council workflow runs after tonight's nightly pipeline completes (~03:30 UTC).</p>
+        <div style="margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          ${['claude','gpt','gemini'].map(m=>`
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:11px;color:var(--dim);margin-bottom:4px">${modelIcon(m)} ${m==='gpt'?'ChatGPT':m.charAt(0).toUpperCase()+m.slice(1)}</div>
+            <div style="color:var(--faint);font-size:10px">pending</div>
+          </div>`).join('')}
+        </div>
+      </div>`}
+    </div>
+  </div>`;
+}
+
+function modelPanelHTML(key,name,persona,verdict,conf,reason,flags,upgrades,cls){
+  if(!verdict||verdict==='undefined')return`<div class="model-panel model-${cls}"><div class="model-name"><div class="model-icon icon-${cls}">${modelIcon(key)}</div><div><div class="model-label">${name}</div><div class="model-persona">${persona}</div></div></div><div class="unavail">Not available / key not configured</div></div>`;
+  return`<div class="model-panel model-${cls}">
+    <div class="model-name">
+      <div class="model-icon icon-${cls}">${modelIcon(key)}</div>
+      <div><div class="model-label">${name}</div><div class="model-persona">${persona}</div></div>
+    </div>
+    <div class="verdict-row">
+      <span class="vote-pill v-${(verdict||'').toLowerCase()}">${verdict||'—'}</span>
+      ${conf!=null?`<span class="conf-num" style="color:${conf>=70?'var(--green)':conf>=50?'var(--amber)':'var(--red)'}">${conf}%</span>`:''}
+    </div>
+    ${reason?`<div class="reason-text">${esc(reason)}</div>`:''}
+    ${flags.length?`<div class="flags-section"><div class="flags-label">red flags</div><div class="flag-pills">${flags.map(f=>`<span class="flag-pill flag-red">${f}</span>`).join('')}</div></div>`:''}
+    ${upgrades.length?`<div class="flags-section" style="margin-top:6px"><div class="flags-label">upgrades</div><div class="flag-pills">${upgrades.map(f=>`<span class="flag-pill flag-upgrade">${f}</span>`).join('')}</div></div>`:''}
+  </div>`;
+}
+
+function modelIcon(m){return m==='claude'?'C':m==='gpt'?'G':'✦'}
+function tierLabel(t){const l={UPGRADE:'⭐ UPGRADE',TIER1:'✅ TIER 1',TIER2:'✅ TIER 2',TIER3:'⚠ TIER 3',SKIP:'⛔ SKIP',FORCE_SKIP:'🚫 FORCE SKIP',OFF:'○ OFF'};return l[t]||t;}
+function getReason(arr,i){return arr[i]||''}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// toggle body visibility
+document.addEventListener('click',e=>{
+  const h=e.target.closest('.ccard-header');
+  if(!h)return;
+  const body=h.nextElementSibling;
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  h.closest('.ccard').classList.toggle('open',!isOpen);
+});
+
+function demoData(){
+  return [
+    {ticker:'RPRX',date:'2026-06-07',council_tier:'TIER2',council_votes:2,council_conf:68,council_claude:'CLEAR',council_gpt:'CLEAR',council_gemini:'WEAK',council_claude_conf:72,council_gpt_conf:75,council_gemini_conf:56,council_red_flags:['low_options_conviction'],council_upgrade_sigs:[],council_reasons:'Strong technical setup in leading sector, no major risk flags | Healthcare RS strong, momentum intact | Options showing CAUTION concerns the conviction here'},
+    {ticker:'SYY',date:'2026-06-07',council_tier:'TIER1',council_votes:3,council_conf:79,council_claude:'CLEAR',council_gpt:'CLEAR',council_gemini:'CLEAR',council_claude_conf:81,council_gpt_conf:82,council_gemini_conf:74,council_red_flags:[],council_upgrade_sigs:['multi_layer_convergence'],council_reasons:'Clean consumer defensive setup with options confirmation | 8.67x RVOL and sector alpha, strong momentum | Even I cannot find meaningful risks here — sector and options align'},
+    {ticker:'FERG',date:'2026-06-07',council_tier:'UPGRADE',council_votes:3,council_conf:84,council_claude:'STRONG',council_gpt:'STRONG',council_gemini:'CLEAR',council_claude_conf:87,council_gpt_conf:89,council_gemini_conf:76,council_red_flags:[],council_upgrade_sigs:['multi_layer_convergence','options_sweep_bullish'],council_reasons:'Top confluence score, options confirm, sector strength — exceptional setup | Momentum and options both confirming, strong R:R | Reluctant to admit it but all signals align here'},
+    {ticker:'AMCR',date:'2026-06-07',council_tier:'SKIP',council_votes:0,council_conf:38,council_claude:'SKIP',council_gpt:'WEAK',council_gemini:'SKIP',council_claude_conf:35,council_gpt_conf:52,council_gemini_conf:28,council_red_flags:['low_options_conviction','sector_weakness'],council_upgrade_sigs:[],council_reasons:'Options CAUTION with weak signals, sector not confirming | Momentum exists but options and regime concerns | Multiple red flags — options bearish, sector weak, avoid'},
+    {ticker:'BXP',date:'2026-06-07',council_tier:null,council_votes:null,council_conf:null,council_claude:null,council_gpt:null,council_gemini:null,council_red_flags:[],council_upgrade_sigs:[],council_reasons:''},
+  ];
+}
+
+loadData();
+setInterval(loadData, 90000);
+</script>
+</body>
+</html>

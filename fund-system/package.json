@@ -1,0 +1,15 @@
+{
+  "name": "fund-management-system",
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.22.2",
+    "lowdb": "^7.0.1",
+    "pg": "^8.21.0"
+  }
+}

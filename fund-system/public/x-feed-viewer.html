@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X Feed Intelligence — System 2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #070809;
+  --surface: #0d0f11;
+  --surface2: #131618;
+  --border: #1c2028;
+  --border2: #252b33;
+  --txt: #e8eaed;
+  --dim: #7a8290;
+  --faint: #3d4450;
+  --x-blue: #1d9bf0;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #a78bfa;
+  --teal: #2dd4bf;
+  --mono: 'Space Mono', monospace;
+  --disp: 'Syne', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* animated background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(29,155,240,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29,155,240,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* header */
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.x-icon {
+  width: 38px; height: 38px;
+  background: var(--x-blue);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.title-block h1 {
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -.5px;
+  color: var(--txt);
+}
+.title-block p {
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.header-right { text-align: right; }
+.api-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.api-row input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--txt);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  width: 240px;
+}
+.btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn:hover { color: var(--txt); border-color: var(--dim); }
+.btn.primary { background: var(--x-blue); border-color: var(--x-blue); color: #fff; }
+.btn.primary:hover { opacity: .85; }
+.conn-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--dim);
+  justify-content: flex-end;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+.dot.ok { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+.dot.bad { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+/* stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.stat-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--faint); }
+.stat-value { font-family: var(--disp); font-size: 26px; font-weight: 700; margin-top: 4px; }
+.stat-value.blue { color: var(--x-blue); }
+.stat-value.green { color: var(--green); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.purple { color: var(--purple); }
+
+/* controls row */
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.controls input[type=text] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--txt);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  width: 200px;
+}
+.seg { display: flex; gap: 4px; }
+.seg-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: .5px;
+}
+.seg-btn.on { background: var(--x-blue); border-color: var(--x-blue); color: #fff; }
+.spacer { flex: 1; }
+.run-time { color: var(--faint); font-size: 10px; }
+
+/* feed grid */
+.feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+}
+
+/* individual X signal card */
+.xcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  transition: border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+.xcard:hover { border-color: var(--border2); }
+.xcard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.xcard.type-technical::before { background: var(--x-blue); }
+.xcard.type-options_flow::before { background: var(--green); }
+.xcard.type-earnings::before { background: var(--amber); }
+.xcard.type-analyst::before { background: var(--purple); }
+.xcard.type-biotech::before { background: var(--red); }
+.xcard.type-theme::before { background: var(--teal); }
+.xcard.type-pump::before { background: var(--faint); }
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.ticker-block { display: flex; align-items: center; gap: 10px; }
+.ticker {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--txt);
+}
+.in-universe {
+  font-size: 9px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.in-universe.yes { background: rgba(34,197,94,.12); color: var(--green); }
+.in-universe.no { background: rgba(239,68,68,.12); color: var(--red); }
+
+.type-badge {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.type-technical { background: rgba(29,155,240,.12); color: var(--x-blue); }
+.type-options_flow { background: rgba(34,197,94,.12); color: var(--green); }
+.type-earnings { background: rgba(245,158,11,.12); color: var(--amber); }
+.type-analyst { background: rgba(167,139,250,.12); color: var(--purple); }
+.type-biotech { background: rgba(239,68,68,.12); color: var(--red); }
+.type-theme { background: rgba(45,212,191,.12); color: var(--teal); }
+.type-pump { background: rgba(61,68,80,.3); color: var(--faint); }
+
+.reason {
+  font-size: 12px;
+  color: var(--txt);
+  line-height: 1.6;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: 7px;
+  border-left: 2px solid var(--border2);
+}
+
+.meta-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.meta-pill {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+}
+.meta-pill.trusted { border-color: rgba(245,158,11,.3); color: var(--amber); }
+
+.analyst-list {
+  margin-bottom: 10px;
+}
+.analyst-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.analyst-item:last-child { border-bottom: none; }
+.analyst-handle { color: var(--x-blue); }
+.analyst-follower { color: var(--faint); font-size: 10px; margin-left: auto; }
+
+.sample-post {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+  font-style: italic;
+  position: relative;
+}
+.sample-post::before {
+  content: '"';
+  position: absolute;
+  top: 4px; left: 8px;
+  font-size: 20px;
+  color: var(--faint);
+  font-style: normal;
+  line-height: 1;
+}
+.sample-post-text { padding-left: 12px; }
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.score-block { display: flex; align-items: center; gap: 8px; }
+.score-label { font-size: 9px; color: var(--faint); letter-spacing: 1px; text-transform: uppercase; }
+.score-val {
+  font-family: var(--disp);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--x-blue);
+}
+.mention-count { font-size: 10px; color: var(--dim); }
+.mention-count span { color: var(--txt); font-weight: 700; }
+.pump-warning {
+  font-size: 9px;
+  color: var(--red);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid rgba(239,68,68,.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* raw tweet tab */
+.raw-tweets {
+  margin-top: 16px;
+  display: none;
+}
+.raw-tweets.open { display: block; }
+.tweet-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.tweet-row:last-child { border-bottom: none; }
+.tweet-handle { color: var(--x-blue); min-width: 120px; flex-shrink: 0; }
+.tweet-text { color: var(--dim); flex: 1; line-height: 1.6; }
+.tweet-likes { color: var(--faint); white-space: nowrap; }
+
+/* empty state */
+.empty {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--faint);
+}
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: .4; }
+.empty h3 { font-family: var(--disp); font-size: 18px; color: var(--dim); margin-bottom: 8px; }
+.empty p { font-size: 12px; line-height: 1.8; max-width: 360px; margin: 0 auto; }
+
+/* error banner */
+.err-banner {
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--red);
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: none;
+}
+.err-banner.show { display: block; }
+
+/* loading */
+.loading {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px;
+  color: var(--dim);
+  font-size: 12px;
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--x-blue);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media(max-width:800px){
+  .stats-bar { grid-template-columns: repeat(2,1fr); }
+  .feed { grid-template-columns: 1fr; }
+  header { flex-direction: column; gap: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="x-icon">𝕏</div>
+      <div class="title-block">
+        <h1>X Feed Intelligence</h1>
+        <p>FinTwit signals · System 2 candidate source</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="api-row">
+        <input id="api-url" placeholder="http://72.62.134.167:3210" value="">
+        <button class="btn primary" onclick="loadFeed()">↻ Load feed</button>
+        <button class="btn" onclick="runExtractor()">▶ Run now</button>
+      </div>
+      <div class="conn-status">
+        <span class="dot" id="conn-dot"></span>
+        <span id="conn-txt">not connected</span>
+        <span style="color:var(--faint);margin:0 6px">·</span>
+        <span id="run-time" class="run-time"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat"><div class="stat-label">Tickers found</div><div class="stat-value blue" id="s-found">—</div></div>
+    <div class="stat"><div class="stat-label">In universe</div><div class="stat-value green" id="s-universe">—</div></div>
+    <div class="stat"><div class="stat-label">Trusted source</div><div class="stat-value amber" id="s-trusted">—</div></div>
+    <div class="stat"><div class="stat-label">Pump filtered</div><div class="stat-value" style="color:var(--faint)" id="s-pump">—</div></div>
+    <div class="stat"><div class="stat-label">Last run</div><div class="stat-value purple" style="font-size:13px;margin-top:8px" id="s-date">—</div></div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="filter-ticker" placeholder="search ticker…" oninput="renderCards()">
+    <div class="seg" id="type-seg">
+      <button class="seg-btn on" data-type="all" onclick="setType('all')">all</button>
+      <button class="seg-btn" data-type="technical" onclick="setType('technical')">technical</button>
+      <button class="seg-btn" data-type="options_flow" onclick="setType('options_flow')">options</button>
+      <button class="seg-btn" data-type="earnings" onclick="setType('earnings')">earnings</button>
+      <button class="seg-btn" data-type="analyst" onclick="setType('analyst')">analyst</button>
+      <button class="seg-btn" data-type="biotech" onclick="setType('biotech')">biotech</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="toggleUniverseOnly()" id="univ-btn">universe only</button>
+    <button class="btn" onclick="toggleTrustedOnly()" id="trust-btn">trusted only</button>
+  </div>
+
+  <div class="err-banner" id="err-banner"></div>
+
+  <div class="feed" id="feed">
+    <div class="empty">
+      <div class="empty-icon">𝕏</div>
+      <h3>No X signal data yet</h3>
+      <p>Click "Load feed" to pull the latest X/FinTwit candidates, or "Run now" to trigger the extractor on the VPS.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS = 'sys2_x_api';
+let API = localStorage.getItem(LS) || (location.origin.startsWith('http') ? location.origin : 'http://72.62.134.167:3210');
+let ALL = [];
+let ACTIVE_TYPE = 'all';
+let UNIV_ONLY = false;
+let TRUST_ONLY = false;
+
+document.getElementById('api-url').value = API;
+
+function saveApi() {
+  API = document.getElementById('api-url').value.trim().replace(/\/$/, '');
+  localStorage.setItem(LS, API);
+}
+document.getElementById('api-url').addEventListener('change', saveApi);
+
+function setConn(state, msg) {
+  const d = document.getElementById('conn-dot');
+  const t = document.getElementById('conn-txt');
+  d.className = 'dot ' + (state === 'ok' ? 'ok' : state === 'bad' ? 'bad' : '');
+  t.textContent = msg;
+}
+
+function setType(t) {
+  ACTIVE_TYPE = t;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('on', b.dataset.type === t));
+  renderCards();
+}
+
+function toggleUniverseOnly() {
+  UNIV_ONLY = !UNIV_ONLY;
+  document.getElementById('univ-btn').classList.toggle('on', UNIV_ONLY);
+  renderCards();
+}
+
+function toggleTrustedOnly() {
+  TRUST_ONLY = !TRUST_ONLY;
+  document.getElementById('trust-btn').classList.toggle('on', TRUST_ONLY);
+  renderCards();
+}
+
+async function loadFeed() {
+  saveApi();
+  setConn('', 'loading…');
+  document.getElementById('feed').innerHTML = '<div class="loading"><div class="spinner"></div>Fetching X feed data…</div>';
+  document.getElementById('err-banner').classList.remove('show');
+
+  try {
+    const r = await fetch(API + '/api/x-feed', { headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    ALL = data.candidates || [];
+    setConn('ok', 'connected');
+    document.getElementById('run-time').textContent = data.last_run ? 'last run ' + new Date(data.last_run).toLocaleString('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) + ' ET' : '';
+    updateStats(data);
+    renderCards();
+  } catch (e) {
+    setConn('bad', 'failed');
+    showError('Could not load X feed: ' + e.message + '. Make sure the VPS is running and /api/x-feed endpoint exists.');
+    renderDemo();
+  }
+}
+
+function showError(msg) {
+  const b = document.getElementById('err-banner');
+  b.textContent = msg;
+  b.classList.add('show');
+}
+
+function updateStats(data) {
+  const all = data.candidates || [];
+  document.getElementById('s-found').textContent = data.tickers_found ?? all.length;
+  document.getElementById('s-universe').textContent = data.tickers_in_universe ?? all.filter(c => c.in_universe).length;
+  document.getElementById('s-trusted').textContent = all.filter(c => c.trusted_author).length;
+  document.getElementById('s-pump').textContent = data.tickers_filtered_pump ?? 0;
+  document.getElementById('s-date').textContent = data.last_run
+    ? new Date(data.last_run).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    : '—';
+}
+
+function renderCards() {
+  const query = document.getElementById('filter-ticker').value.toUpperCase();
+  let rows = [...ALL];
+  if (query) rows = rows.filter(c => (c.ticker || '').includes(query) || (c.catalyst_summary || '').toUpperCase().includes(query));
+  if (ACTIVE_TYPE !== 'all') rows = rows.filter(c => c.reason_type === ACTIVE_TYPE);
+  if (UNIV_ONLY) rows = rows.filter(c => c.in_universe);
+  if (TRUST_ONLY) rows = rows.filter(c => c.trusted_author);
+
+  const feed = document.getElementById('feed');
+  if (!rows.length) {
+    feed.innerHTML = '<div class="empty"><div class="empty-icon">𝕏</div><h3>No results</h3><p>Try adjusting your filters or refreshing the feed.</p></div>';
+    return;
+  }
+  feed.innerHTML = rows.map(cardHTML).join('');
+}
+
+function cardHTML(c) {
+  const type = c.reason_type || 'technical';
+  const inUniv = c.in_universe !== false;
+  const isPump = type === 'pump';
+
+  const analysts = (c.analyst_names || []).slice(0, 3).map(a =>
+    `<div class="analyst-item">
+      <span class="analyst-handle">@${a.handle || a}</span>
+      <span style="color:var(--dim)">${a.excerpt || ''}</span>
+      ${a.followers ? `<span class="analyst-follower">${fmtNum(a.followers)} followers</span>` : ''}
+    </div>`
+  ).join('');
+
+  const samplePost = c.sample_post
+    ? `<div class="sample-post"><div class="sample-post-text">${escHtml(c.sample_post)}</div></div>`
+    : '';
+
+  return `
+  <div class="xcard type-${type}">
+    <div class="card-header">
+      <div class="ticker-block">
+        <span class="ticker">$${c.ticker}</span>
+        <span class="in-universe ${inUniv ? 'yes' : 'no'}">${inUniv ? '✓ UNIVERSE' : '✗ NOT IN LIST'}</span>
+      </div>
+      <span class="type-badge type-${type}">${typeName(type)}</span>
+    </div>
+
+    <div class="reason">${escHtml(c.catalyst_summary || c.reason || 'No summary available')}</div>
+
+    <div class="meta-row">
+      ${c.post_count ? `<span class="meta-pill">${c.post_count} mention${c.post_count > 1 ? 's' : ''}</span>` : ''}
+      ${c.trusted_author ? `<span class="meta-pill trusted">⭐ trusted source</span>` : ''}
+      ${c.catalyst_date ? `<span class="meta-pill">${c.catalyst_date}</span>` : ''}
+      ${c.sentiment_score ? `<span class="meta-pill">score ${c.sentiment_score}</span>` : ''}
+    </div>
+
+    ${analysts ? `<div class="analyst-list">${analysts}</div>` : ''}
+    ${samplePost}
+    ${isPump ? `<div style="margin-top:8px"><span class="pump-warning">⚠ pump language detected — filtered from universe</span></div>` : ''}
+
+    <div class="card-footer">
+      <div class="score-block">
+        <span class="score-label">signal</span>
+        <span class="score-val">${c.sentiment_score ?? '—'}</span>
+      </div>
+      <span class="mention-count"><span>${c.post_count ?? 0}</span> posts · <span>${(c.analyst_names || []).length}</span> analysts</span>
+      ${inUniv ? '<span style="color:var(--green);font-size:10px">→ enters funnel</span>' : '<span style="color:var(--faint);font-size:10px">outside universe</span>'}
+    </div>
+
+    ${(c.raw_tweets || []).length > 0 ? `
+    <button class="btn" style="margin-top:10px;width:100%;font-size:10px" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▲ hide raw posts':'▼ show ${c.raw_tweets.length} raw posts'">
+      ▼ show ${c.raw_tweets.length} raw posts
+    </button>
+    <div class="raw-tweets">
+      ${(c.raw_tweets || []).map(t => `
+        <div class="tweet-row">
+          <span class="tweet-handle">@${t.handle || t.author || 'unknown'}</span>
+          <span class="tweet-text">${escHtml(t.text || '')}</span>
+          <span class="tweet-likes">${t.likes ? '♥ ' + fmtNum(t.likes) : ''}</span>
+        </div>`).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+function typeName(t) {
+  const map = {
+    technical: '📈 Technical', options_flow: '🔥 Options Flow',
+    earnings: '📊 Earnings', analyst: '🎯 Analyst',
+    biotech: '⚕ Biotech', theme: '💡 Theme', pump: '⚠ Pump'
+  };
+  return map[t] || t;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtNum(n) {
+  if (!n) return '';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return String(n);
+}
+
+async function runExtractor() {
+  saveApi();
+  setConn('', 'running extractor…');
+  try {
+    const r = await fetch(API + '/api/x-feed/run', { method: 'POST' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    setConn('ok', d.message || 'extractor started');
+    setTimeout(loadFeed, 2500);
+  } catch (e) {
+    setConn('bad', 'run failed');
+    showError('Could not run extractor: ' + e.message);
+  }
+}
+
+// Demo data when API not available
+function renderDemo() {
+  ALL = [
+    { ticker: 'NVDA', in_universe: true, reason_type: 'technical', trusted_author: true, catalyst_summary: 'Breaking out above 200-day MA with 4x relative volume. Multiple analysts flagging the move. Sector momentum strong.', post_count: 14, sentiment_score: 87, analyst_names: [{handle:'unusual_whales',excerpt:'unusual call activity',followers:1200000},{handle:'alphatrends',excerpt:'clean breakout setup'}], sample_post: '$NVDA breaking out on massive volume here. 200-day MA reclaim confirmed. Watching for continuation above $130. #trading', catalyst_date: '2026-06-07', raw_tweets: [{handle:'alphatrends',text:'$NVDA clean setup here, watching breakout',likes:342},{handle:'markminervini',text:'$NVDA showing relative strength vs QQQ',likes:891}] },
+    { ticker: 'RPRX', in_universe: true, reason_type: 'analyst', trusted_author: true, catalyst_summary: 'Goldman Sachs upgraded to Buy with $65 PT. Three separate analyst PT raises in 14 days. Healthcare sector outperforming.', post_count: 6, sentiment_score: 74, analyst_names: [{handle:'KobeissiLetter',excerpt:'watching healthcare rotation',followers:890000}], sample_post: '$RPRX GS upgrade today. Healthcare rotation continues. Stock showing relative strength vs XLV.', catalyst_date: '2026-06-07' },
+    { ticker: 'FWONK', in_universe: true, reason_type: 'options_flow', trusted_author: false, catalyst_summary: 'Unusual call activity flagged. Vol/OI ratio 72x on July calls. Premium estimate $1.2M. Smart money positioning ahead of potential catalyst.', post_count: 3, sentiment_score: 65, analyst_names: [{handle:'OptionsHawk',excerpt:'unusual activity spotted',followers:320000}], sample_post: '$FWONK seeing some unusual call flow here. July 90 strikes lighting up. Worth watching.', catalyst_date: '2026-06-07' },
+    { ticker: 'GBTC', in_universe: false, reason_type: 'pump', trusted_author: false, catalyst_summary: 'High mention count from low-follower accounts. Pump language detected. Filtered from candidate pool.', post_count: 45, sentiment_score: 12, analyst_names: [], sample_post: '$GBTC 🚀🚀🚀 TO THE MOON this is going 10x guaranteed not financial advice', catalyst_date: '2026-06-07' },
+    { ticker: 'LNG', in_universe: true, reason_type: 'earnings', trusted_author: true, catalyst_summary: 'EPS beat +12% last week, guidance raised for FY. Post-earnings drift setup forming. Sector tailwind from energy rotation.', post_count: 5, sentiment_score: 71, analyst_names: [{handle:'DeItaone',excerpt:'earnings beat confirmed',followers:760000}], sample_post: '$LNG earnings beat with raised guidance. PEAD setup here, stock holding gains well. Energy sector leading.', catalyst_date: '2026-06-06' },
+  ];
+  updateStats({ candidates: ALL, tickers_found: 5, tickers_in_universe: 4, tickers_filtered_pump: 1, last_run: new Date().toISOString() });
+  renderCards();
+}
+
+// Auto-load on start
+loadFeed();
+setInterval(() => loadFeed(), 120000);
+</script>
+</body>
+</html>

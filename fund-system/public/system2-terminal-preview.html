@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System2 Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    :root{--bg:#080b11;--panel:#111827;--soft:#172033;--line:#29364d;--txt:#edf2f7;--muted:#93a4ba;--green:#39d98a;--amber:#f7c948;--red:#ff6b6b;--blue:#65b7ff;--purple:#b794f4}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% -5%,rgba(101,183,255,.14),transparent 34%),var(--bg);color:var(--txt);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif}
+    .wrap{max-width:1500px;margin:auto;padding:24px} header{display:flex;justify-content:space-between;gap:16px;margin-bottom:16px} h1{margin:0;font-size:30px;letter-spacing:-.04em}.sub,.hint{color:var(--muted);font-size:13px;line-height:1.55}
+    .bar,.cards,.grid,.tabs{display:grid;gap:12px}.bar{grid-template-columns:minmax(230px,1fr) 140px 130px 130px 170px 120px}.cards{grid-template-columns:repeat(6,1fr)}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}
+    input,select,textarea{width:100%;background:#0b111b;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px}textarea{min-height:360px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    button{background:var(--soft);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer}button:hover{border-color:var(--blue)}button.primary{background:var(--green);border-color:var(--green);color:#062314}button.warn{background:var(--amber);border-color:var(--amber);color:#201400}
+    .status{display:flex;gap:8px;align-items:center;color:var(--muted)}.dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}.dot.ok{background:var(--green);box-shadow:0 0 12px var(--green)}.dot.bad{background:var(--red);box-shadow:0 0 12px var(--red)}
+    .tabs{grid-template-columns:repeat(11,max-content);border-bottom:1px solid var(--line);margin:16px 0}.tab{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--muted)}.tab.on{color:var(--green);border-bottom-color:var(--green)}.view{display:none}.view.on{display:block}
+    .panel,.card{background:rgba(17,24,39,.9);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 12px 35px rgba(0,0,0,.25)}.card .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.card .v{font-size:28px;font-weight:900;margin-top:4px}
+    .banner{padding:14px 16px;border-radius:14px;border:1px solid var(--line);margin:14px 0}.banner.ok{color:var(--green);background:rgba(57,217,138,.08);border-color:rgba(57,217,138,.35)}.banner.wait{color:var(--amber);background:rgba(247,201,72,.08);border-color:rgba(247,201,72,.35)}.banner.bad{color:var(--red);background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.35)}
+    table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;cursor:pointer}.num{text-align:right;font-variant-numeric:tabular-nums}.scroll{max-height:620px;overflow:auto}
+    .pill{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900}.confirm,.win{color:var(--green);background:rgba(57,217,138,.13)}.neutral,.open,.timeout{color:var(--amber);background:rgba(247,201,72,.13)}.caution,.nodata,.loss{color:var(--red);background:rgba(255,107,107,.13)}.off,.rejected{color:var(--muted);background:rgba(147,164,186,.13)}
+    .link{background:transparent;border:0;color:var(--blue);padding:0;font-weight:900;text-decoration:underline}.detail{margin-top:12px;background:#060910;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .tradecards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.tradecard{background:#0b111b;border:1px solid var(--line);border-radius:16px;padding:14px}.tradehead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.tradehead h3{margin:.1rem 0}.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.box{background:#060910;border:1px solid var(--line);border-radius:10px;padding:8px}.box .k{font-size:10px;color:var(--muted);text-transform:uppercase}.box .v{font-weight:900;margin-top:2px}.reason{color:var(--muted);font-size:12px;line-height:1.5}
+    .funnel{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;align-items:end}.stage{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:10px;min-height:95px}.stage .name{font-size:11px;color:var(--muted);text-transform:uppercase}.stage .count{font-size:24px;font-weight:900}.stage .drop{font-size:12px;color:var(--red)}.stage .reason{font-size:11px;color:var(--muted)}
+    .stage{cursor:pointer;transition:.12s transform,.12s border-color}.stage:hover{transform:translateY(-2px);border-color:var(--blue)}.stage .details{margin-top:6px;color:var(--blue);font-size:11px;font-weight:900}
+    .modal{position:fixed;inset:0;background:rgba(3,6,12,.86);z-index:50;display:none;padding:22px}.modal.on{display:block}.modalbox{height:calc(100vh - 44px);background:#0b111b;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 70px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden}.modalhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:16px;border-bottom:1px solid var(--line)}.modaltools{display:grid;grid-template-columns:170px 190px 170px 1fr 120px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}.modalbody{padding:16px;overflow:auto}.stagecount{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.stagecount .card{padding:9px 11px;border-radius:12px}.stagecount .card .v{font-size:18px}.stagehist{margin:10px 0;max-width:720px}.stagehist canvas{max-height:180px}.widepre{max-height:280px}
+    pre{white-space:pre-wrap;color:var(--muted);background:#060910;border:1px solid var(--line);border-radius:12px;padding:14px;max-height:560px;overflow:auto}canvas{max-height:320px}
+    @media(max-width:1000px){.bar,.cards,.grid.two,.grid.three,.funnel,.tradecards{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}}
+    .live-section{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+    .live-btn,.ai-btn,.entry-btn{background:var(--soft);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;margin-right:6px;margin-bottom:6px}
+    .live-btn:hover,.ai-btn:hover,.entry-btn:hover{border-color:var(--blue)}
+    .live-snapshot,.ai-snapshot,.entry-snapshot,.tape-snapshot{margin-top:10px;background:#060910;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .snapshot-row{display:flex;justify-content:space-between;gap:8px;margin:4px 0;font-size:12px}
+    .snapshot-row .sk{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.06em}
+    .snapshot-row .sv{font-weight:900}
+    .range-bar{position:relative;height:22px;background:#0b111b;border-radius:6px;margin:10px 0;border:1px solid var(--line)}
+    .range-bar-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:9px;color:var(--muted)}
+    .range-bar-cursor{position:absolute;top:-6px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:10px solid var(--blue);transform:translateX(-7px)}
+    .range-bar-cursor::after{content:attr(data-label);position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--txt);white-space:nowrap}
+    .verdict-box{padding:10px 12px;border-radius:10px;font-weight:900;font-size:14px;margin-bottom:8px}
+    .verdict-buy{background:rgba(57,217,138,.15);color:var(--green);border:1px solid rgba(57,217,138,.4)}
+    .verdict-wait{background:rgba(247,201,72,.15);color:var(--amber);border:1px solid rgba(247,201,72,.4)}
+    .verdict-skip{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4)}
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .stale-fresh{color:#fff}
+    .stale-old{color:var(--amber)}
+    .stale-warn{color:#ff9f43}
+    .stale-danger{color:var(--red)}
+    .perf-badge{font-size:11px;font-weight:900;padding:2px 6px;border-radius:6px;margin-left:4px}
+    .set-badge{font-size:10px;font-weight:900;padding:2px 6px;border-radius:999px;margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+    .set-s1{color:#fff;background:#2563eb}
+    .set-s2{color:#fff;background:#7c3aed}
+    .set-multi{color:#111;background:#facc15}
+    .perf-good{background:rgba(57,217,138,.15);color:var(--green)}
+    .perf-meh{background:rgba(247,201,72,.15);color:var(--amber)}
+    .perf-bad{background:rgba(255,107,107,.15);color:var(--red)}
+    .disclaimer{font-size:10px;color:var(--muted);margin-top:6px}
+
+    .mini-chart{background:transparent}
+    .chart-placeholder{font-size:11px;color:var(--muted);padding:8px 0}
+    .family-bar-row{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:11px}
+    .family-bar-label{width:70px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .family-bar-track{flex:1;height:10px;background:#0b111b;border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+    .family-bar-fill{height:100%;border-radius:5px;transition:width .3s ease}
+    .family-bar-val{width:30px;text-align:right;font-weight:900}
+    .family-bar-fill.green{background:var(--green)}
+    .family-bar-fill.yellow{background:var(--amber)}
+    .family-bar-fill.grey{background:var(--muted)}
+    .family-total{font-size:12px;font-weight:900;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+    @media(max-width:600px){.live-btn,.ai-btn,.entry-btn{display:block;width:100%;margin-right:0}}
+
+    /* --- Upgraded Trade Card v2 --- */
+    .tradecard-v2{background:#0b111b;border:1px solid var(--line);border-radius:16px;padding:0;overflow:hidden;display:flex;flex-direction:column}
+    .tradecard-v2.border-up{border-left:4px solid var(--green)}
+    .tradecard-v2.border-down{border-left:4px solid var(--red)}
+    .tradecard-v2.border-neutral{border-left:4px solid var(--amber)}
+    .tradecard-v2.border-off{border-left:4px solid var(--muted)}
+    .tc2-head{padding:12px 14px;background:rgba(17,24,39,.7);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .tc2-head h3{margin:.1rem 0;font-size:18px}
+    .tc2-scores{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .tc2-score-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;background:var(--soft);border:1px solid var(--line)}
+    .tc2-score-pill.green{color:var(--green);border-color:rgba(57,217,138,.35)}
+    .tc2-score-pill.amber{color:var(--amber);border-color:rgba(247,201,72,.35)}
+    .tc2-score-pill.red{color:var(--red);border-color:rgba(255,107,107,.35)}
+    .regime-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;background:var(--soft);border:1px solid var(--line)}
+    .regime-trending{color:var(--green);background:rgba(57,217,138,.13);border-color:rgba(57,217,138,.35)}
+    .regime-choppy{color:var(--amber);background:rgba(247,201,72,.13);border-color:rgba(247,201,72,.35)}
+    .regime-caution{color:#ff9f43;background:rgba(255,159,67,.13);border-color:rgba(255,159,67,.35)}
+    .regime-riskoff{color:var(--red);background:rgba(255,107,107,.13);border-color:rgba(255,107,107,.35)}
+    .regime-normal{color:var(--muted);background:rgba(147,164,186,.13);border-color:rgba(147,164,186,.35)}
+    .tc2-body{padding:12px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:1100px){.tc2-body{grid-template-columns:1fr}}
+    .tc2-col{display:flex;flex-direction:column;gap:8px}
+    .tc2-col-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-bottom:2px}
+    .tc2-row{display:flex;justify-content:space-between;gap:6px;font-size:12px}
+    .tc2-row .sk{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+    .tc2-row .sv{font-weight:900}
+    .tc2-range{margin:6px 0}
+    .tc2-section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:8px 0 4px;padding-top:8px;border-top:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    .tc2-section-title:hover{color:var(--blue)}
+    .tc2-section-body{display:none}
+    .tc2-section-body.open{display:block}
+    .tc2-footer{padding:10px 14px;border-top:1px solid var(--line);background:rgba(17,24,39,.5);display:flex;flex-wrap:wrap;gap:6px}
+    .tc2-footer button{font-size:11px;padding:5px 10px}
+
+    /* Morning Command Centre */
+    .mcc{background:rgba(17,24,39,.9);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 12px 35px rgba(0,0,0,.25)}
+    .mcc-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:10px}
+    @media(max-width:900px){.mcc-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:600px){.mcc-grid{grid-template-columns:1fr 1fr}}
+    .mcc-item{background:#0b111b;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+    .mcc-item .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .mcc-item .v{font-size:22px;font-weight:900;margin-top:4px}
+    .mcc-filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .mcc-filters select{width:auto;min-width:140px}
+
+    /* UX Intelligence Layer */
+    .conviction-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:900;margin-bottom:6px}
+    .conviction-a-plus{background:rgba(16,185,129,.18);color:#10b981;border:1px solid rgba(16,185,129,.45)}
+    .conviction-a{background:rgba(34,197,94,.18);color:#22c55e;border:1px solid rgba(34,197,94,.45)}
+    .conviction-b{background:rgba(245,158,11,.18);color:#f59e0b;border:1px solid rgba(245,158,11,.45)}
+    .conviction-c{background:rgba(107,114,128,.18);color:#9ca3af;border:1px solid rgba(107,114,128,.45)}
+    .conviction-skip{background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.45)}
+    .trade-narrative{font-size:12px;color:var(--muted);font-style:italic;margin:4px 0 8px;line-height:1.5}
+    .bear-case{margin:8px 14px 0;background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.2);border-radius:10px}
+    .bear-case summary{padding:8px 12px;cursor:pointer;font-size:12px;font-weight:800;color:var(--red);list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .bear-case summary::-webkit-details-marker{display:none}
+    .bear-case[open] summary{border-bottom:1px solid rgba(255,107,107,.15)}
+    .bear-case ul{margin:8px 12px;padding-left:16px;font-size:12px;color:var(--muted);line-height:1.6}
+    .bear-case li{margin:3px 0}
+    .checklist-wrap{margin:10px 14px 0;padding:12px;background:#060910;border:1px solid var(--line);border-radius:12px}
+    .checklist-title{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .checklist-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;margin:5px 0}
+    .checklist-pass{color:var(--green)}
+    .checklist-fail{color:var(--red)}
+    .checklist-detail{color:var(--muted);font-size:11px;margin-left:20px}
+    .checklist-banner{padding:10px 14px;border-radius:10px;font-weight:900;font-size:13px;margin-top:10px}
+    .checklist-banner-pass{background:rgba(57,217,138,.12);color:var(--green);border:1px solid rgba(57,217,138,.35)}
+    .checklist-banner-fail{background:rgba(247,201,72,.12);color:var(--amber);border:1px solid rgba(247,201,72,.35)}
+    .entry-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;background:var(--soft);border:1px solid var(--line)}
+    .entry-inzone{color:var(--green);border-color:rgba(57,217,138,.35)}
+    .entry-justabove{color:var(--amber);border-color:rgba(247,201,72,.35)}
+    .entry-extended{color:#ff9f43;border-color:rgba(255,159,67,.35)}
+    .entry-far{color:var(--red);border-color:rgba(255,107,107,.35)}
+    .entry-below{color:var(--blue);border-color:rgba(101,183,255,.35)}
+    .entry-unknown{color:var(--muted)}
+    .cal-panel{background:#0b111b;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+    .cal-panel h4{margin:0 0 8px;font-size:14px}
+    .cal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    @media(max-width:900px){.cal-grid{grid-template-columns:repeat(2,1fr)}}
+    .cal-item{text-align:center;padding:8px;background:rgba(17,24,39,.5);border-radius:8px}
+    .cal-item .k{font-size:10px;color:var(--muted);text-transform:uppercase}
+    .cal-item .v{font-size:18px;font-weight:900}
+    .cal-sufficient{color:var(--green)}
+    .cal-insufficient{color:var(--muted)}
+    .suggestion-item{background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.2);border-radius:10px;padding:10px;margin:6px 0}
+    .suggestion-item .sg-issue{font-size:11px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+    .suggestion-item .sg-finding{font-size:12px;color:var(--txt);margin:4px 0}
+    .suggestion-item .sg-suggestion{font-size:12px;color:var(--muted);font-style:italic}
+    .prompt-snippet{font-size:11px;color:var(--muted);background:#060910;border-radius:8px;padding:10px;margin:6px 0;line-height:1.5;max-height:120px;overflow:auto}
+
+    /* Two-level menu */
+    .nav-top{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:8px 0 0}
+    .nav-top-btn{background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 16px;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer}
+    .nav-top-btn.on{color:var(--green);border-bottom-color:var(--green)}
+    .nav-sub{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:4px 0;background:rgba(17,24,39,.5)}
+    .nav-sub-btn{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+    .nav-sub-btn.on{color:var(--blue);border-bottom-color:var(--blue)}
+    .nav-sub-wrap{display:none}
+    .nav-sub-wrap.on{display:flex}
+    @media(max-width:900px){.nav-top{flex-wrap:wrap}.nav-sub{flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header><div><h1>System2 Performance Command Center</h1><div class="sub">Paper-mode funnel visibility, rejection review, live paper monitor, no broker controls.</div></div><div class="status"><span id="dot" class="dot"></span><span id="conn">not connected</span></div></header>
+  <div class="bar">
+    <input id="api" placeholder="API URL">
+    <input id="pin" type="password" placeholder="admin PIN">
+    <button onclick="login()">Login</button>
+    <button class="primary" onclick="loadAll()">Refresh</button>
+    <input id="selectedDate" type="date" onchange="loadDay()">
+    <button onclick="logout()">Logout</button>
+  </div>
+  <div id="banner" class="banner wait">Login, then pick a date to review a night.</div>
+  <div id="cards" class="cards"></div>
+  <nav class="nav-top" id="navTop">
+    <button class="nav-top-btn on" data-section="trade" onclick="navTop('trade')">TRADE</button>
+    <button class="nav-top-btn" data-section="review" onclick="navTop('review')">REVIEW</button>
+    <button class="nav-top-btn" data-section="data" onclick="navTop('data')">DATA</button>
+    <button class="nav-top-btn" data-section="performance" onclick="navTop('performance')">PERFORMANCE</button>
+    <button class="nav-top-btn" data-section="system" onclick="navTop('system')">SYSTEM</button>
+  </nav>
+  <div class="nav-sub-wrap on" id="sub-trade">
+    <nav class="nav-sub">
+      <button class="nav-sub-btn on" data-tab="overview" onclick="tab('overview')">Morning Brief</button>
+      <button class="nav-sub-btn" data-tab="finalists" onclick="tab('finalists')">Finalists</button>
+      <button class="nav-sub-btn" data-tab="monitor" onclick="tab('monitor')">Live Monitor</button>
+    </nav>
+  </div>
+  <div class="nav-sub-wrap" id="sub-review">
+    <nav class="nav-sub">
+      <button class="nav-sub-btn" data-tab="day" onclick="tab('day')">Day Review</button>
+      <button class="nav-sub-btn" data-tab="rejections" onclick="tab('rejections')">Rejections</button>
+      <button class="nav-sub-btn" data-tab="council" onclick="tab('council')">Council</button>
+      <button class="nav-sub-btn" data-tab="agreement" onclick="tab('agreement')">Agreement</button>
+    </nav>
+  </div>
+  <div class="nav-sub-wrap" id="sub-data">
+    <nav class="nav-sub">
+      <button class="nav-sub-btn" data-tab="signalIntel" onclick="tab('signalIntel')">Signal Intel</button>
+      <button class="nav-sub-btn" data-tab="optionsStructure" onclick="tab('optionsStructure')">Options Structure</button>
+      <button class="nav-sub-btn" data-tab="sources" onclick="tab('sources')">Sources</button>
+    </nav>
+  </div>
+  <div class="nav-sub-wrap" id="sub-performance">
+    <nav class="nav-sub">
+      <button class="nav-sub-btn" data-tab="statistics" onclick="tab('statistics')">Statistics</button>
+      <button class="nav-sub-btn" data-tab="scoreboard" onclick="tab('scoreboard')">Scoreboard</button>
+      <button class="nav-sub-btn" data-tab="active" onclick="tab('active')">Active/Resolved</button>
+    </nav>
+  </div>
+  <div class="nav-sub-wrap" id="sub-system">
+    <nav class="nav-sub">
+      <button class="nav-sub-btn" data-tab="config" onclick="tab('config')">Config</button>
+      <button class="nav-sub-btn" data-tab="ops" onclick="tab('ops')">Ops/Logs</button>
+    </nav>
+  </div>
+
+  <section id="overview" class="view on">
+    <div class="grid two">
+      <div class="panel"><h2>Selected Night Funnel</h2><div id="funnel"></div></div>
+      <div class="panel"><h2>Status</h2><div id="state"></div></div>
+      <div class="panel"><h2>Sector Performance</h2><div id="perfSummary"></div></div>
+      <div class="panel"><h2>Layer Modes</h2><div id="layers"></div></div>
+    </div>
+    <div class="panel" style="margin-top:12px"><h2>Paper Trading Equity Curve (System 2 v2 — from 9 Jun 2026)</h2><div id="equityCurveWrap"><div id="equityCurvePlaceholder" class="hint">Equity curve will appear after first resolved trade (9 Jun 2026+)</div><div id="equityCurveChart" style="height:240px"></div></div><div id="equityStats" style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px"></div></div>
+  </section>
+  <section id="day" class="view"><div class="panel"><h2>Day-by-Day Review</h2><div id="dayReview"></div></div></section>
+  <section id="finalists" class="view"><div class="panel"><h2>Finalists Full Trade Plan</h2><div class="bar" style="grid-template-columns:220px 1fr"><select id="finalistSort" onchange="renderFinalists()"><option value="confluence" selected>Sort: Confluence score</option><option value="setup">Sort: Setup score</option></select></div><div class="scroll" id="finalistsTable"></div></div></section>
+  <section id="rejections" class="view"><div class="panel"><h2>Rejection Log</h2><div class="bar" style="grid-template-columns:180px 180px 1fr"><select id="rejStage" onchange="renderRejections()"><option value="">all stages</option><option>stage1</option><option>technical</option><option>correlation</option><option>news</option><option>council</option></select><select id="rejNear" onchange="renderRejections()"><option value="">all</option><option value="true">near-misses only</option><option value="false">cheap rejects only</option></select><input id="rejFilter" placeholder="ticker filter" oninput="renderRejections()"></div><div class="scroll" id="rejectionsTable"></div></div></section>
+  <section id="agreement" class="view"><div class="panel"><h2>Layer Agreement View</h2><div id="agreementSummary"></div><div class="scroll" id="agreementTable"></div></div></section>
+  <section id="council" class="view"><div class="panel"><h2>Council of AIs v2 — Deliberation Log</h2><p class="hint">4-model hybrid: Round 1 parallel (Claude, Kimi, Gemini, GPT-4o). Round 2 sequential only on splits. Council does NOT gate trades yet (ride-along).</p><div id="councilSummary"></div><div class="scroll" id="councilTable" style="margin-top:12px"></div></div></section>
+<section id="sources" class="view"><div class="panel"><h2>Data Sources Health</h2><p class="hint">Live pipeline data source status. Stale = older than 26h. Missing = file not found.</p><div id="sourcesSummary"></div><div class="bar" style="grid-template-columns:120px 1fr;margin:10px 0"><button onclick="loadSources()">Refresh</button><span id="sourcesMeta" class="hint"></span></div><div class="scroll" id="sourcesTable"></div></div></section>
+  <section id="signalIntel" class="view"><div class="panel"><h2>Signal Intelligence</h2><p class="hint">Earnings gate, Danelfin AI score, Insider buying, Short interest / squeeze signals.</p><div id="signalIntelSummary"></div><div class="scroll" id="signalIntelTable" style="margin-top:12px"></div></div></section>
+  <section id="optionsStructure" class="view"><div class="panel"><h2>Options Structure</h2><p class="hint">Max pain, call/put walls, gamma flip proxy, TP1 wall conflict, stop wall support.</p><div id="optionsStructureSummary"></div><div class="scroll" id="optionsStructureTable" style="margin-top:12px"></div></div></section>
+  <section id="statistics" class="view">
+    <div class="panel">
+      <h2>Performance Analytics</h2>
+      <p class="hint">Idea-R vs Trade-R separation. Scanner quality is measured from scan price. Trading performance is slippage-adjusted for entered trades only.</p>
+      <div class="bar" style="grid-template-columns:140px 150px 150px 120px 120px 1fr">
+        <select id="statsPreset" onchange="setStatsPreset()"><option value="7d">7d</option><option value="30d" selected>30d</option><option value="90d">90d</option><option value="all">all</option><option value="custom">custom</option></select>
+        <input id="statsFrom" type="date">
+        <input id="statsTo" type="date">
+        <button class="primary" onclick="loadStatistics()">Apply</button>
+        <button onclick="loadStatistics()">Refresh</button>
+      </div>
+    </div>
+    <div class="grid two" style="margin-top:12px">
+      <div class="panel">
+        <h2>📡 Scanner Quality</h2>
+        <p class="hint">All finalists from scan price — does the scanner find good stocks?</p>
+        <div id="perfScanner"></div>
+      </div>
+      <div class="panel">
+        <h2>💰 Trading Performance</h2>
+        <p class="hint">Entered trades only — slippage adjusted</p>
+        <div id="perfTrading"></div>
+      </div>
+      <div class="panel">
+        <h2>📊 Exit Quality Analysis</h2>
+        <p class="hint">Are stops and targets placed correctly?</p>
+        <div id="perfMfeMae"></div>
+      </div>
+      <div class="panel">
+        <h2>🤖 Council Calibration</h2>
+        <p class="hint">Are the AI models adding value?</p>
+        <div id="perfCouncil"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <details id="legacyStats">
+        <summary style="cursor:pointer;font-weight:700">▶ Show legacy data (pre-9 Jun 2026)</summary>
+        <div id="legacyStatsContent"></div>
+      </details>
+    </div>
+    <!-- Old statistics content preserved behind new panels -->
+    <div id="statsHeadline" class="cards" style="display:none"></div>
+    <div class="grid two" style="margin-top:12px;display:none">
+      <div class="panel"><h2>By Source</h2><div id="statsSource"></div><canvas id="statsSourceChart"></canvas></div>
+      <div class="panel"><h2>Keep / Kill Verdicts</h2><div id="statsVerdicts"></div></div>
+      <div class="panel"><h2>By Horizon</h2><div id="statsHorizon"></div></div>
+      <div class="panel"><h2>Distribution of 3d R</h2><canvas id="statsHistogram"></canvas><div id="statsDistribution"></div></div>
+      <div class="panel"><h2>By Sector</h2><div id="statsSector"></div></div>
+      <div class="panel"><h2>By Regime</h2><div id="statsRegime"></div></div>
+      <div class="panel"><h2>By Confluence</h2><div id="statsConfluence"></div></div>
+    </div>
+  </section>
+  <section id="scoreboard" class="view"><div class="panel"><h2>Performance Scoreboard</h2><div class="grid three"><input id="sbTicker" placeholder="ticker" oninput="renderScoreboard()"><select id="sbStatus" onchange="renderScoreboard()"><option value="">all status</option><option>OPEN</option><option>CLOSED</option></select><select id="sbOutcome" onchange="renderScoreboard()"><option value="">all outcomes</option><option>WIN</option><option>LOSS</option><option>TIMEOUT</option></select></div><div id="scoreHeader" style="margin:12px 0"></div><div class="scroll" id="scoreTable"></div></div></section>
+  <section id="active" class="view"><div class="grid two"><div class="panel"><h2>Active Paper Ideas</h2><div class="scroll" id="activeTable"></div></div><div class="panel"><h2>Resolved History</h2><div class="scroll" id="resolvedTable"></div></div></div></section>
+  <section id="monitor" class="view"><div class="panel"><h2>Live Paper Monitor</h2><p class="hint">Tracks OPEN paper ideas only. WOULD-EXIT flags are analysis records, not trade commands.</p><button class="primary" onclick="runMonitor()">Run Monitor Now</button><div class="scroll" id="monitorTable" style="margin-top:12px"></div></div></section>
+  <section id="config" class="view"><div class="grid two"><div class="panel"><h2>Editable Runner Config</h2><textarea id="configText"></textarea><button class="primary" onclick="saveConfig()">Save Config</button></div><div class="panel"><h2>Guardrails</h2><p class="hint">Selection logic remains B1-B4 plus C1 ride-along. C3/C4/C2/C5 stay off until you explicitly greenlight. Config changes affect future runs only.</p><pre id="storageInfo"></pre></div></div></section>
+  <section id="ops" class="view"><div class="grid three"><div class="panel"><h2>Run Baseline</h2><button class="warn" onclick="runBaseline()">Start Paper Baseline</button></div><div class="panel"><h2>Run Scorer</h2><button class="primary" onclick="runScorer()">Score Due Ideas</button></div><div class="panel"><h2>Safety</h2><span class="pill off">LIVE TRADING OFF</span></div></div><div class="grid two" style="margin-top:12px"><div class="panel"><h2>Nightly Log</h2><pre id="nightlyLog"></pre></div><div class="panel"><h2>Cron / Ops Log</h2><pre id="cron"></pre><pre id="opLog">Ready.</pre></div></div></section>
+</div>
+
+<div id="stageModal" class="modal">
+  <div class="modalbox">
+    <div class="modalhead">
+      <div>
+        <h2 id="stageTitle" style="margin:.1rem 0">Stage Detail</h2>
+        <div id="stageSub" class="hint">Click any funnel stage to inspect every ticker.</div>
+        <div id="stageCounts" class="stagecount"></div>
+      </div>
+      <button onclick="closeStageDetail()">Close</button>
+    </div>
+    <div class="modaltools">
+      <select id="stageDate" onchange="loadStageDetail()"></select>
+      <select id="stageSelect" onchange="loadStageDetail()"></select>
+      <select id="stageStatusFilter" onchange="renderStageDetail()"><option value="">ALL</option><option value="KEPT">KEPT</option><option value="REJECTED">REJECTED</option><option value="ENRICHED">ENRICHED</option><option value="NO_DATA">NO_DATA</option><option value="OFF">OFF</option></select>
+      <input id="stageSearch" placeholder="search ticker / reason" oninput="renderStageDetail()">
+      <button onclick="downloadStageCsv()">CSV</button>
+    </div>
+    <div class="modalbody">
+      <div id="stageHistogram" class="stagehist"></div>
+      <div id="stageDetailTable" class="scroll"></div>
+      <h3>Raw Stage JSON</h3>
+      <pre id="stageRaw" class="widepre"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_API='system2_api_url',LS_TOKEN='system2_admin_token';
+let API=localStorage.getItem(LS_API)||location.origin||'http://72.62.134.167:3210',TOKEN=localStorage.getItem(LS_TOKEN)||'';
+let STATUS={},STATS={},PERF={},IDEAS=[],FINALISTS=[],META=null,REJECTIONS=[],MONITOR={},STATISTICS={},STAGE_DETAIL=null,ARTIFACTS={stage7:[],stage2Scored:[],stage2Meta:{}},charts={},sortKey='date',sortDir=-1,stageSortKey='ticker',stageSortDir=1;
+api.value=API;pin.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+function setConn(ok,msg){dot.className='dot '+(ok?'ok':'bad');conn.textContent=msg}
+function h(json=false){const x={Accept:'application/json'};if(TOKEN)x['x-token']=TOKEN;if(json)x['Content-Type']='application/json';return x}
+async function get(p){const r=await fetch(API+p,{headers:h()});if(!r.ok)throw new Error(p+' -> '+r.status);return r.json()}
+async function post(p,b={}){const r=await fetch(API+p,{method:'POST',headers:h(true),body:JSON.stringify(b)});if(!r.ok)throw new Error(p+' -> '+r.status+' '+await r.text());return r.json()}
+async function artifact(name,fallback){try{return (await get('/api/system2/artifacts/'+name)).data}catch{return fallback}}
+function tab(n){document.querySelectorAll('.nav-sub-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===n));if(n==='scoreboard')renderScoreboard();if(n==='monitor')renderMonitor();if(n==='agreement')renderAgreement();if(n==='statistics'){loadStatistics()}}
+function navTop(section){const map={trade:['sub-trade','overview'],review:['sub-review','day'],data:['sub-data','signalIntel'],performance:['sub-performance','statistics'],system:['sub-system','config']};const[subId,defaultTab]=map[section]||['sub-trade','overview'];document.querySelectorAll('.nav-top-btn').forEach(b=>b.classList.toggle('on',b.dataset.section===section));document.querySelectorAll('.nav-sub-wrap').forEach(w=>w.classList.toggle('on',w.id===subId));tab(defaultTab)}
+function cls(v){v=String(v||'off').toLowerCase();return v==='confirm'||v==='win'||v==='target'||v==='live'||v==='trending'?'confirm':v==='neutral'||v==='open'||v==='timeout'||v==='ride-along'||v==='ride_along_logging_only'?'neutral':v==='caution'||v==='risk_off'||v==='no_data'||v==='loss'||v==='stop'?'caution':'off'}
+function pill(v){return `<span class="pill ${cls(v)}">${v??'-'}</span>`}
+function fmt(v){return v==null?'-':Number(v).toLocaleString()} function rfmt(v){return v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'R'}
+function log(m){opLog.textContent=new Date().toISOString()+' '+m+'\n'+opLog.textContent}
+async function login(){API=api.value.trim().replace(/\/$/,'');localStorage.setItem(LS_API,API);setConn(false,'logging in...');banner.className='banner wait';banner.textContent='Logging in and loading dashboard data...';try{const r=await fetch(API+'/api/auth/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:pin.value})});if(!r.ok){setConn(false,'login failed');banner.className='banner bad';banner.textContent='Login failed. Check the admin PIN and API URL.';return}TOKEN=(await r.json()).token;localStorage.setItem(LS_TOKEN,TOKEN);pin.value='';await loadAll();banner.className='banner ok';banner.textContent='Logged in. Dashboard refreshed.'}catch(e){setConn(false,'login error');banner.className='banner bad';banner.textContent='Login error: '+e.message}}
+function logout(){TOKEN='';localStorage.removeItem(LS_TOKEN);setConn(false,'logged out')}
+async function loadAll(){API=api.value.trim().replace(/\/$/,'');localStorage.setItem(LS_API,API);try{[STATUS,STATS,PERF,{ideas:IDEAS},MONITOR,STATISTICS,PERFORMANCE]=await Promise.all([get('/api/system2/status'),get('/api/score/stats'),get('/api/score/performance'),get('/api/ideas?limit=2000'),get('/api/system2/monitor'),get('/api/score/statistics?preset=30d'),get('/api/score/performance-metrics').catch(()=>({}))]);const dates=STATUS.runMetadataDates||[];if(!selectedDate.value)selectedDate.value=dates[0]||new Date().toISOString().slice(0,10);await loadDay(false);setConn(true,'connected');renderAll()}catch(e){setConn(false,e.message);banner.className='banner bad';banner.textContent='Could not load. Login or check services.'}}
+async function loadDay(render=true){const d=selectedDate.value;const [m,r,stage5,stage7,stage2Meta,stage2Scored,council,cal,sug]=await Promise.all([get('/api/run-metadata?date='+encodeURIComponent(d)),get('/api/system2/rejections?date='+encodeURIComponent(d)+'&limit=5000'),artifact('stage5_news_safe_finalists.json',[]),artifact('stage7_clustered_survivors.json',[]),artifact('stage2_surgical_strike_metadata.json',{}),artifact('stage2_surgical_strike_scored.json',[]),artifact('stage6_council_enriched.json',[]),artifact('data/council_calibration.json',{}),artifact('data/council_suggestions.json',{suggestions:[]})]);META=m.metadata;REJECTIONS=r.rejections||[];ARTIFACTS={stage5:stage5||[],stage7:stage7||[],stage2Meta:stage2Meta||{},stage2Scored:stage2Scored||[],council:council||[],calibration:cal||{},suggestions:sug||{suggestions:[]}};FINALISTS=ARTIFACTS.stage5.length?ARTIFACTS.stage5:ARTIFACTS.stage7||[];if(render)renderAll()}
+function renderAll(){renderCards();renderBanner();renderFunnel();renderState();renderSectorPanel();renderLayers();renderDay();renderFinalists();renderRejections();renderAgreement();renderCouncil();renderSignalIntel();renderOptionsStructure();renderScoreboard();renderActive();renderMonitor();renderStatistics();renderPerformanceMetrics();configText.value=JSON.stringify(STATUS.config||{},null,2);storageInfo.textContent='Added storage keys:\\n- system2_run_metadata\\n- system2_rejections\\n- system2_monitor_snapshots\\n\\nEndpoints:\\nGET /api/run-metadata?date=YYYY-MM-DD\\nGET /api/system2/rejections?date=YYYY-MM-DD\\nGET /api/rejections/system2?date=YYYY-MM-DD\\nGET /api/score/performance\\nGET /api/score/statistics?preset=30d\\nGET/POST /api/system2/monitor\\nPOST /api/system2/monitor/run-local';nightlyLog.textContent=STATUS.nightlyLogTail||'';cron.textContent=STATUS.cron||''}
+function regimeClass(r){r=String(r||'').toUpperCase();return r==='TRENDING'?'ok':(r==='RISK_OFF'?'bad':'wait')}
+function regimeLine(){if(!META?.regime)return'';return `Regime: ${META.regime}${META.regime_reason?' - '+META.regime_reason:''} | SPY ${META.spy_1d_pct??'-'}% | QQQ ${META.qqq_1d_pct??'-'}% | VIX ${META.vix_current??'-'}`}
+function renderCards(){const c=(META&&META.counts)||STATUS.artifacts||{};cards.innerHTML=[['Regime',META?.regime||'untagged',true],['Universe',c.universe],['Stage1',c.stage1||c.stage1Survivors],['Stage2',c.stage2||c.stage2Top40],['Finalists',c.finalists||c.stage7Survivors],['Active',PERF.activeCount],['Resolved',PERF.resolvedCount]].map(([k,v,isRegime])=>`<div class="card"><div class="k">${k}</div><div class="v">${isRegime?pill(v):fmt(v)}</div></div>`).join('')}
+function renderBanner(){const n=STATS.scored_3d||0;if(META?.regime_aborted){banner.className='banner bad';banner.textContent=`ABORTED - ${regimeLine()}. No paper ideas were posted for this night.`;return}const base=n>=30?`Baseline has ${n} scored ideas. Review edge before activating any layer.`:`Baseline building: ${n}/30 scored ideas. Keep all unproven layers ride-along/off.`;banner.className='banner '+(META?.regime?regimeClass(META.regime):(n>=30?'ok':'wait'));banner.textContent=META?.regime?`${base} ${regimeLine()}`:base}
+function modeBadge(s){const m=s.mode||(String(s.reason||'').includes('not wired')?'OFF':(String(s.reason||'').includes('ride')?'RIDE-ALONG':'LIVE'));return pill(m)}
+function stageDetail(s){const d=s.details||{};if(s.stage==='Universe'&&d.source_breakdown){const b=d.source_breakdown;return `universe ${b.universe||0} | catalyst ${b.catalyst||0} | X ${b.X||0} | options_flag ${b.options_flag||0}`}
+if(s.stage==='Stage1'&&d.breakdown){const b=d.breakdown;return `vol ${b.removed_volume||0} | price ${b.removed_price||0} | $vol ${b.removed_dollar_vol||0} | earnings ${b.removed_earnings||0} | other ${b.removed_other||0}`}
+if(s.stage==='Stage3 Options'&&d.verdict_counts){const b=d.verdict_counts;return `${b.CONFIRM||0} CONFIRM / ${b.NEUTRAL||0} NEUTRAL / ${b.CAUTION||0} CAUTION / ${b.NO_DATA||0} NO_DATA`}
+if(s.stage==='Stage5 News'&&d.reason_counts){const b=d.reason_counts,parts=Object.entries(b).map(([k,v])=>`${k} ${v}`);return `${parts.join(' | ')||'no landmines'} | NO_DATA ${d.no_data_count||0} | analyst ${d.analyst_change_count||0}`}
+return ''}
+function stageKeyFromName(name){const n=String(name||'').toLowerCase();if(n.includes('universe'))return'universe';if(n.includes('stage1'))return'stage1';if(n.includes('stage2'))return'stage2';if(n.includes('stage3'))return'stage3';if(n.includes('stage4'))return'stage4';if(n.includes('stage5'))return'stage5';if(n.includes('stage6'))return'stage6';if(n.includes('stage7'))return'stage7';if(n.includes('final'))return'finalists';return n}
+function renderFunnel(){const stages=(META&&META.stages)||[];if(META?.regime_aborted){funnel.innerHTML=`<div class="banner bad"><b>ABORTED - ${esc(META.regime||'RISK_OFF')}</b><br>${esc(META.regime_reason||'regime safety switch')}<br>${esc(regimeLine())}</div>`;return}funnel.innerHTML=stages.length?`<div class="funnel">${stages.map(s=>`<div class="stage" onclick="openStageDetail('${stageKeyFromName(s.stage)}')"><div class="name">${s.stage} ${modeBadge(s)}</div><div class="count">${fmt(s.out)}</div><div class="drop">${(s.dropped||0)>0?'-'+fmt(s.dropped):'no cut'}</div><div class="reason">${esc(s.reason||'')}</div><div class="reason">${esc(stageDetail(s))}</div><div class="details">▶ details</div></div>`).join('')}</div>`:'<p class="hint">No run metadata for this date yet. Run the baseline once after this deploy.</p>'}
+function renderState(){state.innerHTML=tbl([['Metric','Value'],['Selected night regime',META?.regime?pill(META.regime):'-'],['Regime reason',META?.regime_reason||'-'],['Regime checked at',META?.regime_checked_at||'-'],['Latest run ok',STATUS.latestRun?.ok],['Latest run finished',STATUS.latestRun?.runFinishedAt],['Ideas total',PERF.totalIdeas],['Win rate',PERF.winRate==null?'-':PERF.winRate+'%'],['Avg R',PERF.avgR],['Rejections',STATUS.rejectionCount],['Monitor snapshots',STATUS.monitorSnapshotCount]])}
+function renderLayers(){layers.innerHTML=Object.entries(STATUS.config?.layers||{}).map(([k,v])=>`<p><b>${k.replaceAll('_',' ')}</b> ${pill(v)}</p>`).join('')}
+const SECTORS=['Technology','Communication Services','Consumer Cyclical','Consumer Defensive','Financial Services','Healthcare','Industrials','Energy','Utilities','Real Estate','Basic Materials'];
+function nval(...vals){for(const v of vals){if(v!==null&&v!==undefined&&v!==''&&!Number.isNaN(Number(v)))return Number(v)}return null}
+function pctfmt(v){return v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%'}
+function sectorStrength(sector){const meta=ARTIFACTS.stage2Meta||{},returns=meta.sectorReturnsPct||{},spy=nval(meta.spyTodayReturnPct)||0;const sr=nval(returns[sector]);const rs=sr==null?null:Number((sr-spy).toFixed(2));const read=rs==null?'not captured':rs>=1?'strong':rs>=0?'neutral':'weak';return{sectorReturn:sr,spyReturn:spy,rs,read}}
+function sectorBadge(sector){const s=sectorStrength(sector);return `<span class="pill ${s.read==='strong'?'confirm':s.read==='weak'?'caution':'neutral'}">${s.read}${s.rs!=null?' '+pctfmt(s.rs)+' vs SPY':''}</span>`}
+function renderSectorPanel(){const rows=sectorRows();perfSummary.innerHTML=`<table><thead><tr><th>Sector</th><th class=num>RS vs SPY</th><th class=num>ETF %</th><th class=num>Finalists</th><th>Read</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.sector}</b></td><td class=num>${pctfmt(r.rs)}</td><td class=num>${pctfmt(r.sectorReturn)}</td><td class=num>${r.finalistPct}% (${r.finalistCount})</td><td>${sectorBadge(r.sector)}</td></tr>`).join('')}</tbody></table><p class="hint">Sector strength uses existing B3 fields: sector ETF return minus SPY return. It is display-only and does not change selection.</p>`}
+function sectorRows(){const finalists=FINALISTS.length?FINALISTS:IDEAS.filter(i=>i.date===selectedDate.value);const total=finalists.length||1;return SECTORS.map(sector=>{const s=sectorStrength(sector);const count=finalists.filter(x=>(x.sector||x.cluster_sector)===sector).length;return{sector,...s,finalistCount:count,finalistPct:Math.round((count/total)*100)}})}
+function riskInfo(r){const entry=nval(r.entry,Array.isArray(r.entryZone)?r.entryZone[0]:null,r.price),stop=nval(r.stop,r.stopLoss),target=nval(r.target,r.tp1),tp2=nval(r.tp2),risk=nval(r.risk_per_share,r.riskPerShare,entry!=null&&stop!=null?entry-stop:null),rr=entry!=null&&stop!=null&&target!=null?(target-entry)/(entry-stop):null;const shares=nval(r.cluster?.shares,r.cluster_shares);const dollarRisk=nval(r.cluster?.actualRiskDollars,r.cluster_actual_risk,shares!=null&&risk!=null?shares*risk:null);return{entry,stop,target,tp2,risk,rr,shares,dollarRisk}}
+function ideaAgeDays(dateStr){if(!dateStr)return 999;return Math.floor((new Date()-new Date(dateStr+'T00:00:00Z'))/86400000)}
+function staleLabel(age){if(age<=1)return['Fresh','stale-fresh'];if(age<=3)return[`${age}d old`,'stale-old'];if(age<=5)return[`⚠️ ${age}d — verify setup`,'stale-warn'];return[`🚫 ${age}d — likely stale`,'stale-danger']}
+function perfBadge(r){const ur=r.unrealized_r;if(ur==null)return'';if(ur>0.5)return`<span class="perf-badge perf-good">💚 +${Number(ur).toFixed(2)}R</span>`;if(ur>=0)return`<span class="perf-badge perf-meh">🟡 +${Number(ur).toFixed(2)}R</span>`;return`<span class="perf-badge perf-bad">🔴 ${Number(ur).toFixed(2)}R</span>`}
+function fmtPrice(v){return v==null?'-':'$'+Number(v).toFixed(2)}
+function pct(v){return v==null?'-':(v>0?'+':'')+Number(v).toFixed(2)+'%'}
+function gapBanner(r){
+  if (r.replan_type === 'ADVERSE_GAP') {
+    return `<div style="background:rgba(255,107,107,.15);color:var(--red);border-bottom:1px solid rgba(255,107,107,.35);padding:10px 14px;font-size:13px;font-weight:900">
+      ⚠️ ADVERSE GAP ${r.gap_pct != null ? r.gap_pct + '%' : ''} — WATCH ONLY<br>
+      <span style="font-size:11px;font-weight:400">${esc(r.replan_reason || 'Do not enter at current price')}</span>
+    </div>`;
+  }
+  if (r.replan_type === 'FAVOURABLE_GAP_REPLAN') {
+    const orig = Array.isArray(r.entryZone) ? `$${Number(r.entryZone[0]).toFixed(2)}-$${Number(r.entryZone[1]).toFixed(2)}` : fmtPrice(r.entry);
+    const replan = r.replanned_entry_zone_low != null ? `$${r.replanned_entry_zone_low}-$${r.replanned_entry_zone_high}` : '-';
+    return `<div style="background:rgba(247,201,72,.15);color:var(--amber);border-bottom:1px solid rgba(247,201,72,.35);padding:10px 14px;font-size:13px;font-weight:900">
+      ⚡ REPLANNED — Use new levels below<br>
+      <span style="font-size:11px;font-weight:400">Original: ${orig} (stale) | Replanned: ${replan} (use this) | Stop: ${fmtPrice(r.replanned_stop)} | TP1: ${fmtPrice(r.replanned_tp1)} | R:R ${r.replanned_rr != null ? r.replanned_rr : '-'}</span>
+    </div>`;
+  }
+  if (r.plan_valid === true && r.replan_type === 'NONE') {
+    return `<div style="background:rgba(57,217,138,.08);color:var(--green);border-bottom:1px solid rgba(57,217,138,.25);padding:4px 14px;font-size:11px;font-weight:900">✅ Zone valid</div>`;
+  }
+  return '';
+}
+function tradeCards(rows){if(!rows.length)return'<p class="hint">No trade ideas for this date.</p>';const html=`<div class="tradecards">${rows.map(tradeCard).join('')}</div>`;setTimeout(()=>{rows.forEach(r=>{const cid='card_'+esc((r.id||r.ticker||'').replace(/[^a-zA-Z0-9]/g,'_'));renderOptionsSvg(cid,r);});},0);return html}
+function preMarketBadge(r){if(r.pre_market_gap_adverse)return pill('PRE-MKT ADVERSE');if(r.pre_market_gap_favourable)return pill('PRE-MKT FAVOURABLE');if(r.pre_market_checked_at&&r.pre_market_gap_error)return pill('PRE-MKT NO DATA');if(r.pre_market_checked_at)return pill('PRE-MKT OK');return pill('PRE-MKT pending')}
+function preMarketText(r){if(!r.pre_market_checked_at)return'pending tomorrow 9:00 ET';if(r.pre_market_gap_error)return r.pre_market_gap_error;return `$${r.pre_market_price??'-'} (${r.pre_market_gap_pct??'-'}%, ${r.pre_market_gap_atr_multiple??'-'}x ATR)`}
+function cardBorderClass(r){const d=String(r.combined_dir||r.chronos_dir||r.action||'').toUpperCase();if(d==='UP'||d==='STRONG_UP'||d==='CONFIRM'||d==='TIER1'||d==='TIER2')return'border-up';if(d==='DOWN'||d==='STRONG_DOWN'||d==='CAUTION'||d==='SKIP'||d==='FORCE_SKIP')return'border-down';if(d==='NEUTRAL'||d==='RIDE_ALONG'||d==='ABSTAIN'||d==='RIDE-ALONG')return'border-neutral';return'border-off'}
+function rangeBarHtml(label,current,low,high,stop,target){if(current==null||low==null||high==null||low===high)return'';const pct=Math.max(0,Math.min(100,((current-low)/(high-low))*100));let cursorColor='var(--blue)';let cursorLabel=label+' '+Number(current).toFixed(2);if(stop!=null&&current<=stop){cursorColor='var(--red)';cursorLabel+=' at stop'}else if(target!=null&&current>=target){cursorColor='var(--green)';cursorLabel+=' at target'}return`<div class="range-bar"><div class="range-bar-track"><span>${fmtPrice(low)}</span><span>${fmtPrice(high)}</span></div><div class="range-bar-cursor" style="left:${pct}%;border-bottom-color:${cursorColor}" data-label="${esc(cursorLabel)}"></div></div>`}
+function tc2Toggle(id){const el=document.getElementById(id);if(el)el.classList.toggle('open')}
+function setBadge(r){
+  const s=r.set||1;
+  const multi=!!r.multi_set_idea;
+  if(multi)return `<span class="set-badge set-multi">S1+S2</span>`;
+  if(s===2)return `<span class="set-badge set-s2">S2 FLOW</span>`;
+  return `<span class="set-badge set-s1">S1</span>`;
+}
+function regimeBadge(r){
+  const regime=text(r.market_regime||r.regime||'NORMAL').toUpperCase();
+  const weights=r.regime_weights_applied||{};
+  const core=weights.core!=null?Math.round(weights.core*100):50;
+  const conf=weights.confirmation!=null?Math.round(weights.confirmation*100):30;
+  const riskW=weights.risk!=null?Math.round(weights.risk*100):20;
+  const weightTooltip=`Core ${core}% / Flow ${conf}% / Risk ${riskW}%`;
+  if(regime==='TRENDING')return `<span class="regime-badge regime-trending" title="${weightTooltip}">📈 TRENDING — momentum favoured</span>`;
+  if(regime==='CHOPPY')return `<span class="regime-badge regime-choppy" title="${weightTooltip}">〰️ CHOPPY — flow favoured</span>`;
+  if(regime==='CAUTION')return `<span class="regime-badge regime-caution" title="${weightTooltip}">⚠️ CAUTION — reduced weights</span>`;
+  if(regime==='RISK_OFF')return `<span class="regime-badge regime-riskoff" title="${weightTooltip}">🛑 RISK OFF — danger mode</span>`;
+  return `<span class="regime-badge regime-normal" title="${weightTooltip}">✅ NORMAL</span>`;
+}
+function set2Section(r){
+  if((r.set||1)!==2&&!r.multi_set_idea)return '';
+  const sweeps=r.ask_side_sweep_count??0;
+  const premium=Number(r.bullish_premium_total||0)/1e3;
+  const repeat=r.repeat_flow_count??0;
+  const cs=r.catalyst_summary||'';
+  return `<div class="tc2-section-title" style="background:rgba(124,58,237,.12)">⚡ OPTIONS FLOW SETUP <span>▾</span></div><div class="tc2-section-body"><div class="tc2-row"><span class="sk">Sweeps</span><span class="sv">${sweeps}</span></div><div class="tc2-row"><span class="sk">Premium</span><span class="sv">$${premium.toFixed(0)}k</span></div><div class="tc2-row"><span class="sk">Repeat</span><span class="sv">${repeat}x</span></div><div class="tc2-row"><span class="sk">Max hold</span><span class="sv">5 days</span></div><div class="tc2-row"><span class="sk">Summary</span><span class="sv">${esc(cs)}</span></div></div>`;
+}
+function computeConvictionScore(r){
+  const setupScore=nval(r.setup_score,r.setupQualityScore,r.convictionScore)||0;
+  const confluenceScore=nval(r.confluence_score)||0;
+  const base=setupScore*0.4+confluenceScore*0.6;
+  let bonuses=0;
+  const fs=r.family_scores||{};
+  const familiesFiring=fs.families_firing||Object.values(fs).filter(v=>v>0).length;
+  if(familiesFiring>=3)bonuses+=8;
+  else if(familiesFiring===2)bonuses+=4;
+  if(r.multi_set_idea||r.is_multi_set)bonuses+=10;
+  const councilV=text(r.council_final_verdict||r.council_verdict).toUpperCase();
+  if(councilV==='TIER1'||councilV==='UPGRADE')bonuses+=8;
+  else if(councilV==='SKIP'||councilV==='FORCE_SKIP')bonuses-=10;
+  const dq=nval(r.data_quality_score,r.dataQuality)||50;
+  if(dq>=70)bonuses+=5;
+  else if(dq<40)bonuses-=8;
+  const regime=text(r.market_regime||r.regime||META?.regime).toUpperCase();
+  if(regime==='RISK_OFF')bonuses-=15;
+  else if(regime==='TRENDING')bonuses+=5;
+  const conviction=Math.min(100,Math.max(0,Math.round(base+bonuses)));
+  let tier='C',label='WATCHLIST',action='Watch only — low conviction',color='#6b7280';
+  if(conviction>=85){tier='A+';label='HIGH CONVICTION';action='Enter full size';color='#10b981'}
+  else if(conviction>=70){tier='A';label='STRONG SETUP';action='Enter standard size';color='#22c55e'}
+  else if(conviction>=55){tier='B';label='MODERATE SETUP';action='Half size or wait for zone';color='#f59e0b'}
+  else if(conviction>=40){tier='C';label='WATCHLIST';action='Watch only — low conviction';color='#6b7280'}
+  else{tier='SKIP';label='INSUFFICIENT CONVICTION';action='Do not enter';color='#ef4444'}
+  return{conviction_score:conviction,conviction_tier:tier,conviction_label:label,conviction_action:action,conviction_color:color}
+}
+function convictionBadgeHtml(conv){
+  return `<span class="conviction-badge conviction-${conv.conviction_tier.toLowerCase().replace('+','-plus')}" style="color:${conv.conviction_color};border-color:${conv.conviction_color}33;background:${conv.conviction_color}18">${conv.conviction_tier} · ${conv.conviction_score} — ${conv.conviction_label}</span>`
+}
+function signalLabel(signal,context){
+  const labels={
+    'STRONG_CONFIRM_AUTH':'🟢 Smart money in calls',
+    'BULLISH_CONFIRM':(context&&context.auth)?'🟢 Smart money in calls':'🟡 Call activity elevated',
+    'NEUTRAL':'⚪ Options quiet',
+    'CAUTION':'🔴 Bearish flow detected',
+    'NO_DATA':'⚫ No options data',
+    'DATA_POOR':'⚫ Limited options data',
+    'STRONG_UP':'📈 Models agree: UP',
+    'UP':'↗️ Slight upward bias',
+    'FLAT':'➡️ No directional signal',
+    'DOWN':'↘️ Slight downward bias',
+    'STRONG_DOWN':'📉 Models agree: DOWN',
+    'STRONG':'🔵 Accumulation detected',
+    'MODERATE':'🔵 Some accumulation',
+    'WEAK':'⚪ No accumulation pattern',
+    'NONE':'⚪ No insider activity',
+    'STRONG_TAIL':'📅 Strong seasonal pattern',
+    'TAIL':'📅 Seasonal tailwind',
+    'HEADWIND':'📅 Seasonal headwind',
+    'INSUFFICIENT_DATA':'📅 Insufficient history',
+    'BULLISH':'📊 Buyers dominating tape',
+    'BEARISH':'📊 Sellers dominating tape',
+    'NORMAL':'✅ Normal conditions',
+    'RISK_OFF':'🛑 Risk off — reduce size',
+    'TRENDING':'📈 Trending market',
+    'CHOPPY':'〰️ Choppy — flow favoured'
+  };
+  return labels[signal]||signal
+}
+function generateNarrative(r){
+  const parts=[];
+  const fs=r.family_scores||{};
+  if(fs.positioning>=20)parts.push('institutional options flow');
+  else if((r.volumeRatio||r.rvol)>5)parts.push(`${(r.volumeRatio||r.rvol)?.toFixed(1)}x volume surge`);
+  else if((r.rsVsSpy||r.rs_vs_spy)>3)parts.push(`RS +${(r.rsVsSpy||r.rs_vs_spy)?.toFixed(1)}% vs SPY`);
+  const sector=r.sector||r.cluster_sector;
+  if(sector)parts.push(`${sector} setup`);
+  const dir=r.chronos_dir||r.combined_dir||r.combined_forecast_dir;
+  if(dir==='STRONG_UP'||dir==='UP')parts.push('models leaning bullish');
+  const earnDays=nval(r.days_to_earnings,r.earnings_in_days);
+  if(earnDays!=null&&earnDays<=14&&earnDays>0)parts.push(`⚠️ earnings in ${earnDays}d`);
+  const zone=Array.isArray(r.entryZone)?`$${Number(r.entryZone[0]).toFixed(2)}–${Number(r.entryZone[1]).toFixed(2)}`:`$${fmtPrice(r.entry||r.price)}`;
+  return parts.length?parts.join(' · ')+`. Enter at ${zone}.`:`Enter at ${zone}.`
+}
+function generateBearCase(r){
+  const risks=[];
+  if((r.chronos_band_pct||0)>8)risks.push('Wide forecast cone — model uncertain');
+  const optProv=text(r.options_provider_used);
+  if(optProv&&optProv!=='impliedoptions_auth'&&optProv!=='impliedoptions')risks.push('Options data from fallback — less reliable');
+  const earnDays=nval(r.days_to_earnings,r.earnings_in_days);
+  if(earnDays!=null&&earnDays<=14&&earnDays>0)risks.push(`Earnings in ${earnDays} days — binary risk`);
+  const dp=text(r.dark_pool_signal);
+  if(dp==='WEAK'||!dp)risks.push('No dark pool accumulation detected');
+  const familiesFiring=(r.family_scores?.families_firing)||0;
+  if(familiesFiring<=1)risks.push('Single signal family — lower edge');
+  if(r.wide_cone_strong_down_flag)risks.push('Bearish forecast present (low conviction)');
+  const stop=nval(r.stop,r.stopLoss);
+  if(stop)risks.push(`Stop at $${stop.toFixed(2)} — thesis fails if broken on volume`);
+  if(risks.length===0)risks.push('No major red flags identified');
+  return risks
+}
+function entryQualityStatus(r,currentPrice){
+  if(currentPrice==null)return{status:'UNKNOWN',text:'Check price to assess',cls:'entry-unknown'};
+  const entryLow=nval(r.entry_zone_low,Array.isArray(r.entryZone)?r.entryZone[0]:null,r.entry);
+  const entryHigh=nval(r.entry_zone_high,Array.isArray(r.entryZone)?r.entryZone[1]:null,r.entry);
+  const atr=nval(r.atr14,r.atr)||0;
+  if(entryLow==null||entryHigh==null)return{status:'UNKNOWN',text:'Check price to assess',cls:'entry-unknown'};
+  const low=Math.min(entryLow,entryHigh),high=Math.max(entryLow,entryHigh);
+  if(currentPrice>=low&&currentPrice<=high)return{status:'IN_ZONE',text:'✅ IN ZONE — enter now',cls:'entry-inzone'};
+  if(currentPrice<low)return{status:'BELOW_ZONE',text:'⏳ BELOW ZONE — not triggered yet',cls:'entry-below'};
+  const above=currentPrice-high;
+  const atrMult=atr>0?above/atr:0;
+  if(atrMult<=0.5)return{status:'JUST_ABOVE',text:'⚠️ JUST ABOVE — watch for pullback',cls:'entry-justabove'};
+  if(atrMult<=1.5)return{status:'EXTENDED',text:'🔶 EXTENDED — wait for pullback',cls:'entry-extended'};
+  return{status:'FAR_EXTENDED',text:'🛑 DO NOT CHASE — too extended',cls:'entry-far'}
+}
+function generateChecklist(r,currentPrice){
+  if(currentPrice==null)return null;
+  const entryLow=nval(r.entry_zone_low,Array.isArray(r.entryZone)?r.entryZone[0]:null,r.entry);
+  const entryHigh=nval(r.entry_zone_high,Array.isArray(r.entryZone)?r.entryZone[1]:null,r.entry);
+  const atr=nval(r.atr14,r.atr)||0;
+  const low=entryLow!=null&&entryHigh!=null?Math.min(entryLow,entryHigh):null;
+  const high=entryLow!=null&&entryHigh!=null?Math.max(entryLow,entryHigh):null;
+  const inZone=low!=null&&high!=null&&currentPrice>=low*0.99&&currentPrice<=high*1.01;
+  const checks=[
+    {label:'Price in entry zone',pass:inZone,detail:inZone?`In zone $${low?.toFixed(2)}–${high?.toFixed(2)}`:`Current $${currentPrice.toFixed(2)} vs zone $${low?.toFixed(2)}–${high?.toFixed(2)}`},
+    {label:'No adverse gap',pass:!r.pre_market_gap_adverse,detail:r.pre_market_gap_adverse?`Gap ${r.pre_market_gap_pct?.toFixed(1)}% adverse — caution`:'No adverse gap detected'},
+    {label:'Volume still elevated',pass:(r.volumeRatio||r.rvol||0)>=1.5,detail:`RVOL: ${(r.volumeRatio||r.rvol||0).toFixed(2)}x (need >1.5x)`},
+    {label:'Tape neutral or bullish',pass:['BULLISH','NEUTRAL',''].includes(r.tape_signal||''),detail:`Tape: ${r.tape_signal||'not running'}`},
+    {label:'Plan valid (not replanned adverse)',pass:r.plan_valid!==false,detail:r.replan_type==='ADVERSE_GAP'?'⚠️ Adverse gap — use new levels':'Original plan valid'}
+  ];
+  const allPass=checks.every(c=>c.pass);
+  const passCount=checks.filter(c=>c.pass).length;
+  return{checks,allPass,passCount}
+}
+function checklistHtml(checklist){
+  if(!checklist)return'';
+  const items=checklist.checks.map(c=>`<div class="checklist-item"><span class="${c.pass?'checklist-pass':'checklist-fail'}">${c.pass?'✅':'❌'}</span><span>${esc(c.label)} — ${esc(c.detail)}</span></div>`).join('');
+  const banner=checklist.allPass
+    ?`<div class="checklist-banner checklist-banner-pass">✅ ALL CHECKS PASSED — Ready to enter</div>`
+    :`<div class="checklist-banner checklist-banner-fail">⚠️ ${5-checklist.passCount} check(s) failed — review before entering</div>`;
+  return `<div class="checklist-wrap" id="checklist_result"><div class="checklist-title">PRE-ENTRY CHECKLIST (${checklist.passCount}/5)</div>${items}${banner}</div>`
+}
+function entryBadgeHtml(r,currentPrice){
+  const eq=entryQualityStatus(r,currentPrice);
+  return `<span class="entry-badge ${eq.cls}">${eq.text}</span>`
+}
+function tradeCard(r){const t=esc(r.ticker||r.symbol),risk=riskInfo(r),score=nval(r.setup_score,r.setupQualityScore,r.convictionScore),confluence=nval(r.confluence_score),entryZone=Array.isArray(r.entryZone)?r.entryZone.map(x=>Number(x).toFixed(2)).join(' – '):(risk.entry!=null?Number(risk.entry).toFixed(2):'-'),reasons=(r.scoreReasons||r.score_reasons||[]).slice(0,6),bonuses=(r.confluence_bonuses||[]).map(x=>`${x.name} ${Number(x.value)>=0?'+':''}${x.value}`),sector=r.sector||r.cluster_sector||'Unknown',setup=r.setupType||r.setup||'-';const age=ideaAgeDays(r.date),[staleText,staleCls]=staleLabel(age);const cardId='card_'+esc((r.id||r.ticker||'').replace(/[^a-zA-Z0-9]/g,'_'));const alreadyEntered=r.actual_entry_price!=null;const border=cardBorderClass(r);const conv=computeConvictionScore(r);r.conviction_score=conv.conviction_score;r.conviction_tier=conv.conviction_tier;r.conviction_label=conv.conviction_label;r.conviction_action=conv.conviction_action;const narrative=generateNarrative(r);const bearRisks=generateBearCase(r);const bearCaseId='bear_'+cardId;
+const col1=`<div class="tc2-col"><div class="tc2-col-title">📐 Price vs Plan</div><div class="tc2-row"><span class="sk">Entry zone</span><span class="sv">${entryZone}</span></div><div class="tc2-row"><span class="sk">Stop</span><span class="sv">${fmtPrice(risk.stop)}</span></div><div class="tc2-row"><span class="sk">TP1 / TP2</span><span class="sv">${fmtPrice(risk.target)} / ${fmtPrice(risk.tp2)}</span></div><div class="tc2-row"><span class="sk">R:R</span><span class="sv">${risk.rr==null?'-':risk.rr.toFixed(2)}</span></div><div class="tc2-row"><span class="sk">Position</span><span class="sv">${risk.shares??'-'} sh / $${risk.dollarRisk==null?'-':Number(risk.dollarRisk).toFixed(0)} risk</span></div><div class="tc2-row"><span class="sk">Pre-market</span><span class="sv">${preMarketText(r)}</span></div>${rangeBarHtml('Price',r.price||r.current_price,(risk.stop!=null?Math.min(risk.stop,risk.entry||0):risk.entry||0)*0.95,(risk.target!=null?Math.max(risk.target,risk.entry||0):risk.entry||0)*1.05,risk.stop,risk.target)}<div id="${cardId}_checklist"></div></div>`;
+const optAuth=text(r.options_provider_used)==='impliedoptions_auth';const optVerdict=r.options_verdict_v2||r.options_verdict||'-';const chrDir=r.chronos_dir||'-';const chrBand=r.chronos_band_pct!=null?Number(r.chronos_band_pct).toFixed(1)+'%':'-';const earnRisk=r.earnings_risk||r.earningsBlackoutNext5d===true?'DANGER':(r.earningsDate?'Near: '+r.earningsDate:'-');const seasonal=text(r.seasonal_signal)||'-';const darkPool=text(r.dark_pool_signal)||'-';const insider=text(r.insider_buy_signal)||'-';const shortSig=text(r.short_signal)||'-';const squeeze=r.short_squeeze_score??'-';const rv=r.volumeRatio??r.rvol??'-';const rs=r.rsVsSpy??r.rs_vs_spy??'-';const vwap=r.distanceFromVWAP!=null?Number(r.distanceFromVWAP).toFixed(2)+'%':'-';const col2=`<div class="tc2-col"><div class="tc2-col-title">📡 Signal Stack</div><div class="tc2-row"><span class="sk">Options</span><span class="sv">${pill(signalLabel(optVerdict,{auth:optAuth}))}</span></div><div class="tc2-row"><span class="sk">Chronos</span><span class="sv">${pill(signalLabel(chrDir))} ${chrBand?'<span class="hint">'+chrBand+'</span>':''}</span></div><div class="tc2-row"><span class="sk">Earnings</span><span class="sv">${earnRisk==='DANGER'?pill('DANGER'):esc(earnRisk)}</span></div><div class="tc2-row"><span class="sk">Seasonal</span><span class="sv">${pill(signalLabel(seasonal))}</span></div><div class="tc2-row"><span class="sk">Dark Pool</span><span class="sv">${pill(signalLabel(darkPool))}</span></div><div class="tc2-row"><span class="sk">Insider</span><span class="sv">${pill(signalLabel(insider))}</span></div><div class="tc2-row"><span class="sk">Short</span><span class="sv">${pill(signalLabel(shortSig))}</span></div><div class="tc2-row"><span class="sk">Squeeze</span><span class="sv">${squeeze}</span></div><div class="tc2-row"><span class="sk">RVOL / RS / VWAP</span><span class="sv">${rv} / ${rs} / ${vwap}</span></div>${renderFamilyBars(r)}</div>`;
+const dan=r.danelfin||{};const danAI=dan.ai_score??(r.danelfin_data_available?'available':'-');const danTech=dan.technical??'-';const danSent=dan.sentiment??'-';const danRisk=dan.low_risk??'-';const councilV=r.council_final_verdict||r.council_verdict||'-';const councilModels=r.council_models_used??0;const councilAbstain=r.council_models_abstained??0;const gemVer=text(r.gemini_verdict)||'-';const claVer=text(r.claude_verdict)||'-';const kimiVer=text(r.kimi_verdict)||'-';const gptVer=text(r.gpt4o_verdict)||'-';const col3=`<div class="tc2-col"><div class="tc2-col-title">🧠 Danelfin + Council</div><div class="tc2-row"><span class="sk">Danelfin AI</span><span class="sv">${danAI}</span></div><div class="tc2-row"><span class="sk">Technical</span><span class="sv">${danTech}</span></div><div class="tc2-row"><span class="sk">Sentiment</span><span class="sv">${danSent}</span></div><div class="tc2-row"><span class="sk">Low Risk</span><span class="sv">${danRisk}</span></div><div class="tc2-row" style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px"><span class="sk">Council</span><span class="sv">${pill(councilV)}</span></div><div class="tc2-row"><span class="sk">Models</span><span class="sv">${councilModels} used / ${councilAbstain} abstain</span></div><div class="tc2-row"><span class="sk">Gemini</span><span class="sv">${pill(gemVer)}</span></div><div class="tc2-row"><span class="sk">Claude</span><span class="sv">${pill(claVer)}</span></div><div class="tc2-row"><span class="sk">Kimi</span><span class="sv">${pill(kimiVer)}</span></div><div class="tc2-row"><span class="sk">GPT-4o</span><span class="sv">${pill(gptVer)}</span></div></div>`;
+const sigId='sig_'+cardId;const sigBody=`<div class="tc2-section-body" id="${sigId}"><div class="tc2-row"><span class="sk">Score reasons</span><span class="sv">${esc(reasons.join(' | ')||'-')}</span></div><div class="tc2-row"><span class="sk">Confluence bonuses</span><span class="sv">${esc(bonuses.join(', ')||'-')}</span></div><div class="tc2-row"><span class="sk">Setup type</span><span class="sv">${esc(setup)}</span></div><div class="tc2-row"><span class="sk">Sector RS</span><span class="sv">${sectorBadge(sector)}</span></div>${missingFields(r).map(m=>`<div class="tc2-row"><span class="sk">Missing</span><span class="sv" style="color:var(--amber)">${esc(m)}</span></div>`).join('')}</div>`;
+const optId='opt_'+cardId;const dte=r.days_to_weekly_expiry??'-';const mpSig=text(r.max_pain_signal)||'-';const cw1=fmtPrice(r.call_wall_1);const pw1=fmtPrice(r.put_wall_1);const tp1W=r.tp1_wall_conflict===true?'YES':(r.tp1_wall_conflict===false?'NO':'-');const stpW=r.stop_wall_support===true?'YES':(r.stop_wall_support===false?'NO':'-');const gamma=text(r.price_vs_gamma_flip)||'-';const optBody=`<div class="tc2-section-body" id="${optId}"><div class="tc2-row"><span class="sk">DTE (weekly)</span><span class="sv">${dte}</span></div><div class="tc2-row"><span class="sk">Max Pain</span><span class="sv">${pill(mpSig)}</span></div><div class="tc2-row"><span class="sk">Call Wall 1</span><span class="sv">${cw1}</span></div><div class="tc2-row"><span class="sk">Put Wall 1</span><span class="sv">${pw1}</span></div><div class="tc2-row"><span class="sk">TP1 Wall Conflict</span><span class="sv">${tp1W}</span></div><div class="tc2-row"><span class="sk">Stop Wall Support</span><span class="sv">${stpW}</span></div><div class="tc2-row"><span class="sk">Gamma Flip</span><span class="sv">${pill(gamma)}</span></div></div>`;
+const bearCaseHtml=bearRisks.length?`<details class="bear-case" id="${bearCaseId}"><summary>⚠️ Bear Case (${bearRisks.length} risks) <span>▾</span></summary><ul>${bearRisks.map(risk=>`<li>${esc(risk)}</li>`).join('')}</ul></details>`:'';
+const footer=`<div class="tc2-footer"><button class="live-btn" onclick="checkLivePrice('${esc(r.id||'')}', '${esc(r.ticker||'')}', '${cardId}', ${risk.entry??'null'}, ${risk.stop??'null'}, ${risk.target??'null'})">Check live price</button><button class="ai-btn" onclick="shouldIEnter('${esc(r.id||'')}', '${cardId}')">Should I enter?</button><button class="entry-btn" onclick="recordPaperEntry('${esc(r.id||'')}', '${cardId}', prompt('Entry price for ${esc(r.ticker||'')}'))">Record paper entry</button><button class="live-btn" onclick="showIdea('${esc(r.id||'')}')">View raw</button></div>`;
+return `<div class="tradecard tradecard-v2 ${border}" id="${cardId}">
+${gapBanner(r)}
+<div class="tc2-head"><div><h3><button class="link" onclick="showIdea('${esc(r.id||'')}')">${t}</button> ${pill(r.paper_outcome||r.hit||r.paper_status||r.action||'WATCH')} ${preMarketBadge(r)} ${perfBadge(r)}</h3><div class="hint">${esc(setup)} | ${esc(sector)} <span class="${staleCls}">${staleText}</span></div><div class="trade-narrative">${esc(narrative)}</div>${convictionBadgeHtml(conv)}</div><div class="tc2-scores"><span class="tc2-score-pill green">Setup ${score??'-'}</span><span class="tc2-score-pill amber">Confluence ${confluence??'-'}</span><span id="${cardId}_entrybadge">${entryBadgeHtml(r,r.current_price)}</span>${regimeBadge(r)}</div></div><div class="tc2-body">${col1}${col2}${col3}</div><div class="tc2-section-title" onclick="tc2Toggle('${sigId}')">📡 Signal Intelligence <span>▾</span></div>${sigBody}<div class="tc2-section-title" onclick="tc2Toggle('${optId}')">🎯 Options Structure <span>▾</span></div>${optBody}${bearCaseHtml}<div id="opt-svg-${cardId}" style="margin-top:8px"></div>${set2Section(r)}${alreadyEntered?`<div class="live-section" style="margin:10px 14px 0"><div class="snapshot-row"><span class="sk">Entered at</span><span class="sv">$${r.actual_entry_price}</span></div><div class="snapshot-row"><span class="sk">Unrealized R</span><span class="sv">${rfmt(r.unrealized_r)}</span></div></div>`:''}<div class="tc2-section-title" onclick="tc2Toggle('chart_${cardId}')">📈 Price Chart <span>▾</span></div><div class="tc2-section-body" id="chart_${cardId}"><div class="chart-placeholder hint">Chart: check price to load</div><div class="mini-chart" id="chart-wrap-${cardId}" style="height:120px;width:100%"></div></div>${footer}</div>`}
+function renderSignalIntel(){const rows=mergeRunRows(FINALISTS.length?FINALISTS:IDEAS.filter(i=>i.date===selectedDate.value));if(!rows.length){signalIntelSummary.innerHTML='<div class="banner wait">No data.</div>';signalIntelTable.innerHTML='';return}const summaries=[];const earnings=rows.filter(r=>r.earnings_risk==='DANGER').length;if(earnings)summaries.push(earnings+' DANGER earnings');const danelfin=rows.filter(r=>r.danelfin_data_available).length;if(danelfin)summaries.push(danelfin+' Danelfin');const insider=rows.filter(r=>text(r.insider_buy_signal)==='STRONG').length;if(insider)summaries.push(insider+' strong insider');const short=rows.filter(r=>text(r.short_signal)==='SQUEEZE_CANDIDATE').length;if(short)summaries.push(short+' squeeze candidates');signalIntelSummary.innerHTML='<div class="banner ok">'+rows.length+' ideas | '+summaries.join(' | ')+'</div>';signalIntelTable.innerHTML='<table><thead><tr><th>Ticker</th><th>Earnings</th><th>Danelfin AI</th><th>Insider</th><th>Short Signal</th><th>Squeeze Score</th></tr></thead><tbody>'+rows.map(r=>{const t=esc(r.ticker||r.symbol||'-');const e=r.earnings_risk||'-';const d=r.danelfin?.ai_score??(r.danelfin_data_available?'yes':'-');const i=text(r.insider_buy_signal)||'-';const s=text(r.short_signal)||'-';const sq=r.short_squeeze_score??'-';return '<tr><td><b>'+t+'</b></td><td>'+e+'</td><td>'+d+'</td><td>'+i+'</td><td>'+s+'</td><td>'+sq+'</td></tr>'}).join('')+'</tbody></table>'}
+function renderOptionsStructure(){const rows=mergeRunRows(FINALISTS.length?FINALISTS:IDEAS.filter(i=>i.date===selectedDate.value));if(!rows.length){optionsStructureSummary.innerHTML='<div class="banner wait">No data.</div>';optionsStructureTable.innerHTML='';return}const summaries=[];const belowPain=rows.filter(r=>text(r.max_pain_signal)==='BELOW_PAIN').length;if(belowPain)summaries.push(belowPain+' below max pain');const aboveFlip=rows.filter(r=>text(r.price_vs_gamma_flip)==='ABOVE_FLIP').length;if(aboveFlip)summaries.push(aboveFlip+' above gamma flip');const tp1Conflict=rows.filter(r=>r.tp1_wall_conflict===true).length;if(tp1Conflict)summaries.push(tp1Conflict+' TP1 wall conflict');const stopSupport=rows.filter(r=>r.stop_wall_support===true).length;if(stopSupport)summaries.push(stopSupport+' stop wall support');optionsStructureSummary.innerHTML='<div class="banner ok">'+rows.length+' ideas | '+summaries.join(' | ')+'</div>';optionsStructureTable.innerHTML='<table><thead><tr><th>Ticker</th><th>Max Pain Signal</th><th>Call Wall 1</th><th>Put Wall 1</th><th>TP1 Conflict</th><th>Stop Support</th><th>Gamma Flip</th></tr></thead><tbody>'+rows.map(r=>{const t=esc(r.ticker||r.symbol||'-');const mp=text(r.max_pain_signal)||'-';const cw1=fmtPrice(r.call_wall_1);const pw1=fmtPrice(r.put_wall_1);const tp1=r.tp1_wall_conflict===true?'YES':(r.tp1_wall_conflict===false?'NO':'-');const stp=r.stop_wall_support===true?'YES':(r.stop_wall_support===false?'NO':'-');const gf=text(r.price_vs_gamma_flip)||'-';return '<tr><td><b>'+t+'</b></td><td>'+mp+'</td><td>'+cw1+'</td><td>'+pw1+'</td><td>'+tp1+'</td><td>'+stp+'</td><td>'+gf+'</td></tr>'}).join('')+'</tbody></table>'}
+function missingFields(r){const m=[];if(!r.chronos_dir)m.push('Chronos direction/band not captured yet');if(r.council_votes==null)m.push('Council votes/confidence not captured while Council is off');if(!r.cluster?.shares&&!r.cluster_shares)m.push('risk-engine shares missing');return m}
+function mergeRunRows(rows){const d=selectedDate.value, byTicker=Object.fromEntries(IDEAS.filter(i=>i.date===d).map(i=>[i.ticker,i]));return rows.map(r=>({...r,...(byTicker[r.symbol||r.ticker]||{})}))}
+function renderDay(){const d=selectedDate.value, ideas=IDEAS.filter(i=>i.date===d);const rows=mergeRunRows(FINALISTS.length?FINALISTS:ideas);dayReview.innerHTML='<h3>Funnel</h3>'+funnel.innerHTML+renderMorningCommandCentre(rows)+'<h3>Trade Idea Cards for '+d+'</h3><p class="hint">Cards surface existing scanner/risk/layer fields. Click a ticker inside a card for the raw logged record.</p>'+tradeCards(rows)+'<div id="stockDetail" class="detail"><span class="hint">Select a ticker above.</span></div>'}
+function text(v){return v==null?'-':String(v)}
+function renderMorningCommandCentre(rows){
+  if(!rows.length) return '';
+  const openIdeas = IDEAS.filter(i => i.paper_status === 'OPEN' && i.paper !== false);
+  const actionable = openIdeas.filter(i => i.plan_valid === true && i.replan_type === 'NONE');
+  const replanned = openIdeas.filter(i => i.replan_type === 'FAVOURABLE_GAP_REPLAN');
+  const watchOnly = openIdeas.filter(i => i.replan_type === 'ADVERSE_GAP');
+  const waiting = openIdeas.filter(i => i.plan_valid === true && i.replan_type !== 'NONE' && i.replan_type !== 'FAVOURABLE_GAP_REPLAN' && i.replan_type !== 'ADVERSE_GAP');
+  const entered = openIdeas.filter(i => i.trade_entered === true);
+  const totalOpenR = entered.reduce((sum, i) => sum + (Number(i.position_r) || 1.0), 0);
+
+  // Sector exposure
+  const sectorMap = {};
+  for (const i of entered) {
+    const s = i.sector || i.cluster_sector || 'Unknown';
+    if (!sectorMap[s]) sectorMap[s] = {count: 0, r: 0};
+    sectorMap[s].count += 1;
+    sectorMap[s].r += (Number(i.position_r) || 1.0);
+  }
+  const sectorWarnings = Object.entries(sectorMap)
+    .filter(([_, v]) => v.count > 3)
+    .map(([k, v]) => `⚠️ ${k}: ${v.count} open ideas — concentrated`);
+
+  // Regime from META or first row (use idea-level regime if available)
+  const firstRegime = rows.length ? text(rows[0].market_regime || rows[0].regime).toUpperCase() : '';
+  const regime = firstRegime || META?.regime || 'untagged';
+  const regimeReason = META?.regime_reason || '';
+  const vix = META?.vix_current || '-';
+  const spy = META?.spy_1d_pct ?? '-';
+  const qqq = META?.qqq_1d_pct ?? '-';
+  let regimeText = 'NORMAL — Full size. Favour momentum ideas with options confirmation.';
+  let weightLine = 'Weights tonight: Core 50% / Flow 30% / Risk 20%';
+  if (regime === 'TRENDING') {
+    regimeText = 'TRENDING — momentum favoured. Technicals more reliable.';
+    weightLine = 'Weights tonight: Core 55% / Flow 28% / Risk 17%';
+  } else if (regime === 'CHOPPY') {
+    regimeText = 'CHOPPY — flow favoured. Momentum less reliable.';
+    weightLine = 'Weights tonight: Core 40% / Flow 38% / Risk 22%';
+  } else if (regime === 'CAUTION') {
+    regimeText = 'CAUTION — Half size. Avoid extended setups.';
+    weightLine = 'Weights tonight: Core 45% / Flow 35% / Risk 20%';
+  } else if (regime === 'RISK_OFF') {
+    regimeText = 'RISK OFF — danger mode. Flow matters most.';
+    weightLine = 'Weights tonight: Core 35% / Flow 40% / Risk 25%';
+  }
+
+  // Top 3 actionable
+  const top3 = actionable.slice(0, 3).map((r, idx) => {
+    const ez = Array.isArray(r.entryZone) ? `$${Number(r.entryZone[0]).toFixed(2)}-$${Number(r.entryZone[1]).toFixed(2)}` : fmtPrice(r.entry);
+    const stop = fmtPrice(r.stop || r.replanned_stop);
+    const gem = text(r.gemini_verdict) || 'ABSTAIN';
+    const gemWarn = gem === 'SKIP' || gem === 'FORCE_SKIP' ? `<br>    ⚠️ Gemini says ${gem} — check before entering` : '';
+    return `[S${idx+1}] ${r.ticker}  | Zone ${ez} | Stop ${stop}<br>    RVOL ${r.volumeRatio ?? r.rvol ?? '-'} | Options ${r.options_verdict ?? 'NO_DATA'} | Council ${r.council_final_verdict ?? r.council_verdict ?? '-'}${gemWarn}`;
+  }).join('<br>');
+
+  const riskWarning = totalOpenR > 10 ? `<div style="color:var(--red);margin-top:6px">⚠️ Total open risk ${totalOpenR.toFixed(1)}R — consider sizing down</div>` : '';
+
+  return `<div class="mcc">
+    <details open>
+      <summary style="cursor:pointer;font-weight:900;font-size:16px">🌅 MORNING BRIEF — ${selectedDate.value} ET</summary>
+      <div style="margin-top:12px">
+        <div style="font-weight:900;margin-bottom:6px">REGIME</div>
+        <div style="font-size:13px;line-height:1.6">
+          VIX: ${vix} | SPY: ${spy}% | QQQ: ${qqq}%<br>
+          Mode: <b>${regime}</b> — ${regimeText}<br>
+          <span style="font-size:11px;color:var(--muted)">${weightLine}</span>
+        </div>
+        <div style="font-weight:900;margin:12px 0 6px">TODAY'S OPEN IDEAS</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px">
+          <span>✅ Actionable: <b>${actionable.length}</b></span>
+          <span>⚡ Replanned: <b>${replanned.length}</b></span>
+          <span>⚠️ Watch only: <b>${watchOnly.length}</b></span>
+          <span>🔄 Waiting: <b>${waiting.length}</b></span>
+          <span>Total open: <b>${openIdeas.length}</b></span>
+        </div>
+        ${top3 ? `<div style="font-weight:900;margin:12px 0 6px">TOP ACTIONABLE RIGHT NOW:</div><div style="font-size:12px;line-height:1.7;background:#0b111b;border-radius:10px;padding:10px;border:1px solid var(--line)">${top3}</div>` : ''}
+        <div style="font-weight:900;margin:12px 0 6px">TOTAL OPEN RISK</div>
+        <div style="font-size:13px;line-height:1.6">
+          Open ideas: ${openIdeas.length} | Entered trades: ${entered.length}<br>
+          Total open risk: <b>${totalOpenR.toFixed(1)}R</b><br>
+          ${Object.entries(sectorMap).map(([k,v]) => `${k}: ${v.count} ideas (${v.r.toFixed(1)}R)`).join(' | ') || 'No sector exposure yet'}
+          ${sectorWarnings.length ? '<br>' + sectorWarnings.join('<br>') : ''}
+        </div>
+        ${riskWarning}
+      </div>
+    </details>
+  </div>`;
+}
+function renderFinalists(){let rows=mergeRunRows(FINALISTS.length?FINALISTS:IDEAS.filter(i=>i.date===selectedDate.value));const key=finalistSort?.value==='setup'?'setup_score':'confluence_score';rows.sort((a,b)=>(nval(b[key],b.setupQualityScore,b.convictionScore)||0)-(nval(a[key],a.setupQualityScore,a.convictionScore)||0));finalistsTable.innerHTML=renderMorningCommandCentre(rows)+tradeCards(rows)}
+function renderRejections(){const st=rejStage.value,nm=rejNear.value,f=rejFilter.value.toUpperCase();let rows=REJECTIONS.filter(r=>(!st||r.stage_rejected===st)&&(!nm||String(!!r.near_miss)===nm)&&(!f||String(r.ticker).includes(f)));rejectionsTable.innerHTML=`<table><thead><tr><th>Ticker</th><th>Stage</th><th>Reason</th><th class=num>Score</th><th>Near miss</th><th class=num>3d R</th><th>Hit</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.ticker}</b></td><td>${r.stage_rejected}</td><td>${r.reason}</td><td class=num>${r.setup_score??'-'}</td><td>${r.near_miss?'yes':'no'}</td><td class=num>${rfmt(r.r_3d)}</td><td>${r.hit||'-'}</td></tr>`).join('')}</tbody></table>`}
+function renderAgreement(){const rows=IDEAS.filter(i=>i.date===selectedDate.value);const agreed=rows.filter(allAgree),split=rows.filter(i=>!allAgree(i));const avg=a=>a.filter(x=>x.r_3d!=null).length?(a.filter(x=>x.r_3d!=null).reduce((s,x)=>s+x.r_3d,0)/a.filter(x=>x.r_3d!=null).length).toFixed(2):'-';agreementSummary.innerHTML=`<div class="banner wait">All layers agreed -> avg R ${avg(agreed)} | layers split -> avg R ${avg(split)}. Null/off layers are treated as not agreed until wired.</div>`;agreementTable.innerHTML=`<table><thead><tr><th>Ticker</th><th class=num>Scanner</th><th>Options</th><th>Chronos</th><th>Council</th><th class=num>3d R</th><th>Hit</th></tr></thead><tbody>${rows.map(i=>`<tr><td><b>${i.ticker}</b></td><td class=num>${i.setup_score??'-'}</td><td>${pill(i.options_verdict)}</td><td>${i.chronos_dir||'-'} ${i.chronos_band_pct??''}</td><td>${i.council_votes??'-'} / ${i.council_conf??'-'}</td><td class=num>${rfmt(i.r_3d)}</td><td>${i.hit||'-'}</td></tr>`).join('')}</tbody></table>`}
+function allAgree(i){return (i.setup_score||0)>=70&&i.options_verdict==='CONFIRM'&&i.chronos_dir==='UP'&&(i.council_votes||0)>=2}
+function councilVerdictClass(v){v=String(v||'').toUpperCase();if(v==='UPGRADE'||v==='TIER1')return'confirm';if(v==='TIER2'||v==='TIER3')return'neutral';if(v==='SKIP'||v==='FORCE_SKIP')return'caution';if(v==='ABSTAIN'||v==='ERROR')return'off';return'neutral'}
+function councilQuorumClass(q){q=String(q||'').toUpperCase();if(q==='FULL')return'confirm';if(q==='REDUCED')return'neutral';return'caution'}
+function renderCouncil(){
+const rows=ARTIFACTS.council||[];
+if(!rows.length){councilSummary.innerHTML='<div class="banner wait">No council data for this date. Council runs after Confluence in the nightly pipeline.</div>';councilTable.innerHTML='';return}
+const byVerdict={};rows.forEach(r=>{const v=r.council_final_verdict||'UNKNOWN';byVerdict[v]=(byVerdict[v]||0)+1});
+const summaryParts=Object.entries(byVerdict).sort((a,b)=>b[1]-a[1]).map(([v,c])=>`${c} ${pill(v)}`).join(' | ');
+const r2Count=rows.filter(r=>r.council_round===2).length;
+const quorumCounts={};rows.forEach(r=>{const q=r.council_quorum||'UNKNOWN';quorumCounts[q]=(quorumCounts[q]||0)+1});
+const quorumParts=Object.entries(quorumCounts).map(([q,c])=>`${c} ${pill(q)}`).join(' | ');
+councilSummary.innerHTML=`<div class="banner ok">${rows.length} ideas reviewed | ${summaryParts} | Round 2 triggered: ${r2Count} | Quorum: ${quorumParts}</div>`;
+const models=[{key:'claude',name:'Claude',role:'Analyst'},{key:'kimi',name:'Kimi',role:"Devil's Advocate"},{key:'gemini',name:'Gemini',role:'Short Seller'},{key:'gpt4o',name:'GPT-4o',role:'Judge'}];
+
+// Calibration section
+const cal=ARTIFACTS.calibration||{};
+const suggestions=(ARTIFACTS.suggestions||{}).suggestions||[];
+let calHtml='';
+if(cal.insufficient_data){
+  calHtml=`<div class="banner wait">Council calibration: insufficient resolved trades (${cal.total_resolved||0}/5 needed). Calibration will appear after more ideas resolve.</div>`;
+} else {
+  calHtml=`<h3>📊 Model Calibration</h3><div class="cal-grid">${models.map(m=>{
+    const s=(cal.models||{})[m.key]||{};
+    const dist=s.distribution||{};
+    const distParts=Object.entries(dist).map(([v,c])=>`${v}:${c}`).join(' ');
+    const tier1Avg=s.tier1_avg_r;
+    const skipAvg=s.skip_avg_r;
+    const tier1Ok=tier1Avg!=null&&tier1Avg>0;
+    const skipOk=skipAvg!=null&&skipAvg<0;
+    const calibrated=s.calibrated?'✅':'❌';
+    const suff=s.insufficient?'cal-insufficient':'cal-sufficient';
+    return `<div class="cal-panel"><h4>${m.name} — ${m.role}</h4><div class="cal-item"><div class="k">Verdicts</div><div class="v ${suff}">${s.total_verdicts||0}</div></div><div style="font-size:10px;color:var(--muted);margin:6px 0">${distParts||'none'}</div><div class="cal-item"><div class="k">TIER1 avg R</div><div class="v" style="color:${tier1Ok?'var(--green)':tier1Avg!=null?'var(--red)':'var(--muted)'}">${tier1Avg!=null?tier1Avg+'R':'-'}</div></div><div class="cal-item"><div class="k">SKIP avg R</div><div class="v" style="color:${skipOk?'var(--green)':skipAvg!=null?'var(--red)':'var(--muted)'}">${skipAvg!=null?skipAvg+'R':'-'}</div></div><div class="cal-item"><div class="k">FORCE_SKIP</div><div class="v">${((s.force_skip_rate||0)*100).toFixed(0)}%</div></div><div class="cal-item"><div class="k">Abstain</div><div class="v">${((s.abstain_rate||0)*100).toFixed(0)}%</div></div><div class="cal-item"><div class="k">Agree w/ final</div><div class="v">${((s.agreement_rate||0)*100).toFixed(0)}%</div></div><div class="cal-item"><div class="k">Calibrated</div><div class="v">${calibrated}</div></div></div>`;
+  }).join('')}</div>`;
+}
+
+// Prompt viewer
+const PROMPTS={
+  claude:{name:'Claude',role:'The Analyst',text:'You are The Analyst (Claude). Your job is to evaluate a swing-trade setup honestly and specifically. You are given a JSON payload with the trade idea. Score the setup. What is the bull case? What are the real risks? Be specific to the data provided, not generic. Respond ONLY with a JSON object in this exact format: {"verdict": "UPGRADE" or "TIER1" or "TIER2" or "TIER3" or "SKIP" or "FORCE_SKIP", "confidence": "HIGH" or "MEDIUM" or "LOW", "reasoning": "max 3 sentences, specific to this idea"}'},
+  kimi:{name:'Kimi',role:"The Devil's Advocate",text:"You are The Devil's Advocate (Kimi). Your job is to challenge assumptions. You are given a JSON payload with a swing-trade setup. Question US-centric bias. Look for macro and global factors the analyst missed. You MUST find a specific reason to disagree or explicitly state you cannot. Respond ONLY with a JSON object in this exact format: {\"verdict\": \"UPGRADE\" or \"TIER1\" or \"TIER2\" or \"TIER3\" or \"SKIP\" or \"FORCE_SKIP\", \"confidence\": \"HIGH\" or \"MEDIUM\" or \"LOW\", \"reasoning\": \"max 3 sentences, specific to this idea\"}"},
+  gemini:{name:'Gemini',role:'The Short Seller',text:'You are The Short Seller (Gemini). You are cynical and bearish by default. You are given a JSON payload with a swing-trade setup. Make the bear case. Would you short this? Rate the downside risk. Be specific to the data. Respond ONLY with a JSON object in this exact format: {"verdict": "UPGRADE" or "TIER1" or "TIER2" or "TIER3" or "SKIP" or "FORCE_SKIP", "confidence": "HIGH" or "MEDIUM" or "LOW", "reasoning": "max 3 sentences, specific to this idea"}'},
+  gpt4o:{name:'GPT-4o',role:'The Judge',text:'You are The Judge (GPT-4o). You are a senior portfolio manager. You are given a JSON payload with a swing-trade setup. Weigh the setup quality, risk, and edge. Make a balanced ruling. No personal bias — purely adjudicate the idea on its merits. Respond ONLY with a JSON object in this exact format: {"verdict": "UPGRADE" or "TIER1" or "TIER2" or "TIER3" or "SKIP" or "FORCE_SKIP", "confidence": "HIGH" or "MEDIUM" or "LOW", "reasoning": "max 3 sentences, specific to this idea"}'}
+};
+const promptViewerHtml=`<h3>📝 Current Prompts <span class="hint">(read from council_stage6_v2.py)</span></h3>${Object.entries(PROMPTS).map(([k,p])=>`<details class="bear-case"><summary>${p.name} — ${p.role} <span>▾</span></summary><div class="prompt-snippet">${esc(p.text)}</div></details>`).join('')}`;
+
+// Suggestions
+let sugHtml='';
+if(suggestions.length){
+  sugHtml=`<h3>⚠️ Prompt Suggestions <span class="hint">(human approval required — no auto-changes)</span></h3>${suggestions.map((s,idx)=>`<div class="suggestion-item" id="sug_${idx}"><div class="sg-issue">${esc(s.model)} — ${esc(s.issue)}</div><div class="sg-finding">${esc(s.finding)}</div><div class="sg-suggestion">${esc(s.suggestion)}</div><div style="font-size:10px;color:var(--muted);margin-top:4px">Section: ${esc(s.prompt_section_to_change)}</div><button class="live-btn" style="margin-top:6px" onclick="document.getElementById('sug_${idx}').style.opacity='0.5';this.textContent='Marked reviewed';this.disabled=true">MARK REVIEWED</button></div>`).join('')}`;
+} else {
+  sugHtml=`<div class="banner ok">No pending prompt suggestions. All models within expected ranges.</div>`;
+}
+
+// Deliberation table
+const tableHtml=`<table><thead><tr><th>Ticker</th><th>Final</th><th class=num>Rd</th><th>Quorum</th><th>Claude</th><th>Kimi</th><th>Gemini</th><th>GPT-4o</th><th class=num>Score</th></tr></thead><tbody>${rows.map(r=>{
+const ticker=esc(r.symbol||r.ticker||'-');
+const final=r.council_final_verdict||'-';const fcls=councilVerdictClass(final);
+const round=r.council_round||0;const quorum=r.council_quorum||'-';const qcls=councilQuorumClass(quorum);
+const cells=models.map(m=>{const v=r[m.key+'_verdict']||'ABSTAIN';const c=r[m.key+'_confidence']||'-';const vcls=councilVerdictClass(v);return `<td><span class="pill ${vcls}">${v}</span> <span style="font-size:10px;color:var(--muted)">${c}</span></td>`}).join('');
+const score=nval(r.confluence_score,r.setupQualityScore,r.convictionScore);
+return `<tr><td><b>${ticker}</b></td><td><span class="pill ${fcls}">${final}</span></td><td class=num>${round}</td><td><span class="pill ${qcls}">${quorum}</span></td>${cells}<td class=num>${score??'-'}</td></tr>`
+}).join('')}</tbody></table>`;
+
+councilTable.innerHTML=calHtml+promptViewerHtml+sugHtml+tableHtml;
+}
+function renderActive(){activeTable.innerHTML=ideasTable(IDEAS.filter(i=>i.paper_status==='OPEN'));resolvedTable.innerHTML=ideasTable(IDEAS.filter(i=>i.paper_status==='CLOSED'))}
+function renderMonitor(){const rows=MONITOR.active||[];monitorTable.innerHTML=`<table><thead><tr><th>Ticker</th><th class=num>Current</th><th class=num>Unreal R</th><th class=num>% Entry</th><th class=num>To Target</th><th class=num>To Stop</th><th class=num>Peak</th><th class=num>Worst</th><th>Would Exit</th><th>Updated</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.ticker}</b></td><td class=num>${r.current_price??'-'}</td><td class=num>${rfmt(r.unrealized_r)}</td><td class=num>${r.current_gain_pct??'-'}%</td><td class=num>${r.distance_to_target_pct??'-'}%</td><td class=num>${r.distance_to_stop_pct??'-'}%</td><td class=num>${r.peak_gain_pct??'-'}%</td><td class=num>${r.worst_dd_pct??'-'}%</td><td>${pill(r.paper_exit_reason||'-')}</td><td>${r.monitor_updated_at||'-'}</td></tr>`).join('')}</tbody></table>`}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showIdea(id){const i=IDEAS.find(x=>x.id===id);const el=document.getElementById('stockDetail');if(!i||!el)return;const keys=['date','ticker','source','sub_type','sub_types','catalyst_summary','catalyst_date','entry','stop','target','atr14','atrPct','sector','setup','grade','setup_score','confluence_score','confluence_bonuses','pre_market_checked_at','pre_market_price','pre_market_gap_pct','pre_market_gap_atr_multiple','pre_market_gap_adverse','pre_market_gap_favourable','pre_market_gap_error','options_verdict','options_signals_count','iv_rank','vol_oi_ratio','chronos_dir','chronos_band_pct','council_votes','council_conf','current_price','unrealized_r','current_gain_pct','distance_to_target_pct','distance_to_stop_pct','monitor_updated_at','r_1d','r_3d','r_10d','max_gain_pct','max_dd_pct','hit','paper_status','paper_outcome'];el.innerHTML=`<h3>${esc(i.ticker)} full paper record</h3>`+tbl(keys.map(k=>[k,Array.isArray(i[k])?esc(JSON.stringify(i[k])):esc(i[k])]))+`<pre>${esc(JSON.stringify(i,null,2))}</pre>`;el.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function ideasTable(rows,sortable=false){return `<table><thead><tr>${['date','ticker','source','entry','stop','target','r_1d','r_3d','r_10d','max_gain_pct','max_dd_pct','hit','paper_status'].map(k=>`<th onclick="sortKey='${k}';sortDir*=-1;renderScoreboard()">${k}</th>`).join('')}</tr></thead><tbody>${rows.map(i=>`<tr><td>${i.date}</td><td><button class="link" onclick="showIdea('${esc(i.id)}')">${esc(i.ticker)}</button></td><td>${esc(i.source||'-')}</td><td class=num>${i.entry??'-'}</td><td class=num>${i.stop??'-'}</td><td class=num>${i.target??'-'}</td><td class=num>${rfmt(i.r_1d)}</td><td class=num>${rfmt(i.r_3d)}</td><td class=num>${rfmt(i.r_10d)}</td><td class=num>${i.max_gain_pct??'-'}</td><td class=num>${i.max_dd_pct??'-'}</td><td>${esc(i.hit||'-')}</td><td>${pill(i.paper_status)}</td></tr>`).join('')}</tbody></table>`}
+function tbl(rows){return `<table><tbody>${rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]??'-'}</td></tr>`).join('')}</tbody></table>`}
+function statText(s,k){if(!s)return'insufficient sample (0/30)';if(!s.ready)return s.insufficient||`insufficient sample (${s.count||0}/30)`;if(k==='win_rate')return s.win_rate+'%';if(k==='avg_r')return rfmt(s.avg_r);return s[k]??'-'}
+function statRow(name,s){return `<tr><td><b>${name}</b></td><td class=num>${s?.count??0}</td><td class=num>${statText(s,'win_rate')}</td><td class=num>${statText(s,'avg_r')}</td></tr>`}
+function setStatsPreset(){if(statsPreset.value!=='custom'){statsFrom.value='';statsTo.value=''}loadStatistics()}
+async function loadStatistics(){try{let q='';if(statsPreset.value==='custom'){q='?from='+encodeURIComponent(statsFrom.value||'0000-01-01')+'&to='+encodeURIComponent(statsTo.value||'9999-12-31')}else{q='?preset='+encodeURIComponent(statsPreset.value||'30d')}STATISTICS=await get('/api/score/statistics'+q);renderStatistics()}catch(e){statsHeadline.innerHTML=`<div class="card"><div class="k">Statistics</div><div class="v">Error</div><div class="hint">${e.message}</div></div>`}}
+function renderPerformanceMetrics(){
+  const p = PERFORMANCE || {};
+  const scanner = p.scanner || {};
+  const trading = p.trading || {};
+  const mfe = p.mfe_mae || {};
+  const council = p.council || {};
+
+  // Panel 1 — Scanner Quality
+  const scannerHtml = `
+    <div class="cards">
+      <div class="card"><div class="k">Finalists generated</div><div class="v">${scanner.scanner_ideas_total ?? '-'}</div></div>
+      <div class="card"><div class="k">Resolved</div><div class="v">${scanner.scanner_ideas_resolved ?? '-'}</div></div>
+      <div class="card"><div class="k">Hit TP1 from scan</div><div class="v">${scanner.scanner_hit_tp1_rate != null ? scanner.scanner_hit_tp1_rate + '%' : '-'}</div></div>
+      <div class="card"><div class="k">Hit stop from scan</div><div class="v">${scanner.scanner_hit_stop_rate != null ? scanner.scanner_hit_stop_rate + '%' : '-'}</div></div>
+      <div class="card"><div class="k">Unentered (zone never triggered)</div><div class="v">${scanner.scanner_unentered_rate != null ? scanner.scanner_unentered_rate + '%' : '-'}</div></div>
+      <div class="card"><div class="k">Avg Scanner R (all)</div><div class="v">${scanner.scanner_avg_idea_r != null ? scanner.scanner_avg_idea_r + 'R' : '-'}</div></div>
+      <div class="card"><div class="k">Avg R Set 1</div><div class="v">${scanner.scanner_avg_r_set1 != null ? scanner.scanner_avg_r_set1 + 'R' : '-'}</div></div>
+      <div class="card"><div class="k">Avg R Set 2</div><div class="v">${scanner.scanner_avg_r_set2 != null ? scanner.scanner_avg_r_set2 + 'R' : '-'}</div></div>
+      <div class="card"><div class="k">Avg R Multi-set</div><div class="v">${scanner.scanner_avg_r_multiset != null ? scanner.scanner_avg_r_multiset + 'R' : '-'}</div></div>
+    </div>
+    ${(scanner.scanner_ideas_resolved || 0) < 10 ? `<p class="hint">Tracking started. Need ${10 - (scanner.scanner_ideas_resolved || 0)} more resolved ideas.</p>` : ''}
+  `;
+  document.getElementById('perfScanner').innerHTML = scannerHtml;
+
+  // Panel 2 — Trading Performance
+  let tradingHtml = '';
+  if (trading.trades_taken == null || trading.trades_taken === 0) {
+    tradingHtml = `<p class="hint">No trades taken yet for v2 era.</p>`;
+  } else {
+    const pfColor = (trading.profit_factor || 0) > 1.5 ? 'green' : (trading.profit_factor || 0) >= 1.0 ? 'yellow' : 'red';
+    const expColor = (trading.expectancy || 0) > 0.3 ? 'green' : (trading.expectancy || 0) >= 0 ? 'yellow' : 'red';
+    tradingHtml = `
+      <div class="cards">
+        <div class="card"><div class="k">Trades taken</div><div class="v">${trading.trades_taken}</div></div>
+        <div class="card"><div class="k">Win rate</div><div class="v">${trading.win_rate != null ? trading.win_rate + '%' : '-'}</div></div>
+        <div class="card"><div class="k">Avg R (net)</div><div class="v">${trading.avg_r_net != null ? trading.avg_r_net + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Avg R (gross)</div><div class="v">${trading.avg_r_gross != null ? trading.avg_r_gross + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Slippage cost</div><div class="v">${trading.slippage_impact != null ? trading.slippage_impact + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Profit Factor</div><div class="v" style="color:var(--${pfColor})">${trading.profit_factor != null ? trading.profit_factor : '-'}</div></div>
+        <div class="card"><div class="k">Expectancy</div><div class="v" style="color:var(--${expColor})">${trading.expectancy != null ? trading.expectancy + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Current streak</div><div class="v">${trading.current_streak != null ? (trading.current_streak > 0 ? '+' + trading.current_streak + ' wins' : trading.current_streak + ' losses') : '-'}</div></div>
+        <div class="card"><div class="k">Max drawdown</div><div class="v">${trading.max_drawdown_r != null ? trading.max_drawdown_r + 'R' : '-'}</div></div>
+      </div>
+      ${trading.trades_taken < 10 ? `<p class="hint">Need ${10 - trading.trades_taken} more trades for reliable stats.</p>` : ''}
+    `;
+  }
+  document.getElementById('perfTrading').innerHTML = tradingHtml;
+
+  // Panel 3 — MFE/MAE
+  let mfeHtml = '';
+  if (mfe.note) {
+    mfeHtml = `<p class="hint">${mfe.note}</p>`;
+  } else {
+    const sq = mfe.stop_quality_score || 0;
+    const eq = mfe.exit_quality_score || 0;
+    mfeHtml = `
+      <div class="cards">
+        <div class="card"><div class="k">Avg MFE</div><div class="v">${mfe.avg_mfe_r != null ? mfe.avg_mfe_r + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Avg MAE</div><div class="v">${mfe.avg_mae_r != null ? mfe.avg_mae_r + 'R' : '-'}</div></div>
+        <div class="card"><div class="k">Capture rate</div><div class="v">${mfe.avg_capture_rate != null ? mfe.avg_capture_rate + '%' : '-'}</div></div>
+        <div class="card"><div class="k">Stop quality</div><div class="v">${sq}%</div></div>
+        <div class="card"><div class="k">Exit quality</div><div class="v">${eq}%</div></div>
+      </div>
+      ${sq > 40 ? `<p class="hint">⚠️ ${sq}% of losers went in your favour before stopping — stops may be too tight</p>` : sq < 20 ? `<p class="hint">✅ Stop placement looks appropriate</p>` : ''}
+      ${eq < 40 ? `<p class="hint">⚠️ Low capture rate — consider trailing stops or wider TP</p>` : eq > 60 ? `<p class="hint">✅ Exit timing looks good</p>` : ''}
+    `;
+  }
+  mfeHtml += `<div id="mfeScatterWrap" style="margin-top:14px"></div>`;
+  document.getElementById('perfMfeMae').innerHTML = mfeHtml;
+  setTimeout(()=>renderMfeMaeScatter(),0);
+
+  // Panel 4 — Council Calibration
+  let councilHtml = '';
+  const perModel = council.per_model || {};
+  const models = ['gemini','claude','kimi','gpt4o'];
+  let rows = '';
+  for (const mk of models) {
+    const data = perModel[mk];
+    if (!data) continue;
+    if (data.note) {
+      rows += `<tr><td>${mk}</td><td colspan="3" class="hint">${data.note}</td></tr>`;
+      continue;
+    }
+    const verdicts = data.by_verdict || {};
+    let summary = Object.entries(verdicts).map(([v,s]) => `${v}:${s.count}(${s.avg_r_net != null ? s.avg_r_net + 'R' : '-'}${s.win_rate != null ? ',' + s.win_rate + '%' : ''})`).join(' ');
+    const icon = data.calibrated ? '✅' : '⏳';
+    rows += `<tr><td>${mk}</td><td>${summary}</td><td>${icon}</td></tr>`;
+  }
+  councilHtml = `<table><thead><tr><th>Model</th><th>Verdicts</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  if (council.council_adds_value) {
+    councilHtml += `<p class="hint">✅ Council is adding value</p>`;
+  } else {
+    councilHtml += `<p class="hint">⚠️ Council not yet proven — keep council_gates_trades=false</p>`;
+  }
+  document.getElementById('perfCouncil').innerHTML = councilHtml;
+
+  // Legacy section
+  const legacyIdeas = (IDEAS || []).filter(i => i.era === 'legacy');
+  if (legacyIdeas.length > 0) {
+    const legacyResolved = legacyIdeas.filter(i => i.r_3d != null || i.r_10d != null);
+    const legacyWins = legacyResolved.filter(i => (i.r_3d || i.r_10d || 0) > 0);
+    const legacyAvgR = legacyResolved.length ? (legacyResolved.reduce((s,i)=>s+(i.r_3d||i.r_10d||0),0)/legacyResolved.length).toFixed(2) : '-';
+    document.getElementById('legacyStatsContent').innerHTML = `
+      <p class="hint">${legacyIdeas.length} ideas | ${legacyResolved.length} resolved | ${legacyWins.length} wins | ${legacyAvgR}R avg | Note: legacy system, not representative</p>
+    `;
+  } else {
+    document.getElementById('legacyStatsContent').innerHTML = '<p class="hint">No legacy data</p>';
+  }
+}
+
+function renderStatistics(){const s=STATISTICS||{},h=s.headline||{};statsHeadline.innerHTML=[['Total ideas',h.total_ideas],['Resolved',`${h.percent_resolved??0}% (${h.resolved_count??0})`],['Overall win rate',h.insufficient||((h.win_rate??'-')+'%')],['Avg R / expectancy',h.insufficient||rfmt(h.avg_r)],['Best trade',h.best_trade?`${h.best_trade.ticker} ${rfmt(h.best_trade.r_3d)}`:'-'],['Worst trade',h.worst_trade?`${h.worst_trade.ticker} ${rfmt(h.worst_trade.r_3d)}`:'-'],['Open tracking',h.current_open_count]].map(([k,v])=>`<div class="card"><div class="k">${k}</div><div class="v">${v??'-'}</div></div>`).join('');renderStatsSource();renderStatsVerdicts();renderStatsHorizon();renderStatsGroup(statsSector,s.by_sector||{});renderStatsGroup(statsRegime,s.by_regime||{});renderStatsConfluence();renderStatsDistribution();renderStatsCharts()}
+function renderStatsConfluence(){const c=STATISTICS.by_confluence||{};statsConfluence.innerHTML=`<table><thead><tr><th>Cohort</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${statRow('High >90',c.high)}${statRow('Medium 75-90',c.medium)}${statRow('Low <75',c.low)}</tbody></table><p class="hint">Measurement only. Each cohort requires 30 scored ideas before headline statistics are shown.</p>`}
+function renderStatsSource(){const src=STATISTICS.by_source||{},cat=STATISTICS.catalyst_sub_type||{};statsSource.innerHTML=`<h3>Discovery Source</h3><table><thead><tr><th>Source</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${['scanner','catalyst','X','options_flag','vanta'].map(k=>statRow(k,src[k])).join('')}</tbody></table><h3>Catalyst Sub-Type</h3><table><thead><tr><th>Sub-type</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${['earnings','analyst','insider','corporate','fda','unknown'].map(k=>statRow(k,cat[k])).join('')}</tbody></table>`}
+function verdictBadge(d){if(!d)return pill('ACCUMULATING');if(!d.ready)return `<span class="pill neutral">${d.badge||'still accumulating'}</span>`;return `<span class="pill ${d.verdict==='KEEP'?'confirm':'caution'}">${d.verdict} ${d.edge_delta_r!=null?'('+rfmt(d.edge_delta_r)+')':''}</span>`}
+function renderStatsVerdicts(){const l=STATISTICS.layer_verdicts||{};const opt=l.options||{},chr=l.chronos||{},cou=l.council||{},pm=l.pre_market_gap||{};statsVerdicts.innerHTML=`<div class="banner wait">Verdicts require >=30 scored ideas in both comparison cohorts and a >=0.05R edge. Until then, this page reports accumulation only.</div><h3>Options</h3><p>${verdictBadge(opt.decision)} CONFIRM vs non-CONFIRM</p><table><thead><tr><th>Verdict</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${['CONFIRM','NEUTRAL','CAUTION','NO_DATA'].map(k=>statRow(k,opt.groups?.[k])).join('')}</tbody></table><h3>Pre-Market Gap</h3><p>${verdictBadge(pm.decision)} favourable gaps vs adverse/neutral. Ride-along only.</p><table><thead><tr><th>Gap read</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${statRow('favourable',pm.favourable)}${statRow('adverse',pm.adverse)}${statRow('neutral',pm.neutral)}${statRow('unchecked',pm.unchecked)}</tbody></table><h3>Chronos</h3><p>${verdictBadge(chr.decision)} tight band vs wide band</p><table><thead><tr><th>Band</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${statRow('tight-band',chr.tight_band)}${statRow('wide-band',chr.wide_band)}</tbody></table><h3>Council</h3><p>${verdictBadge(cou.decision)} 3/3 vs lower agreement</p><table><thead><tr><th>Agreement</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${statRow('3 of 3',cou.three_of_three)}${statRow('2 of 3',cou.two_of_three)}${statRow('single-model',cou.single_model)}</tbody></table>`}
+function renderStatsHorizon(){const h=STATISTICS.by_horizon||{};statsHorizon.innerHTML=`<table><thead><tr><th>Horizon</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${['1d','3d','10d'].map(k=>statRow(k,h[k])).join('')}</tbody></table><p class="hint">This shows whether the edge appears early or needs the full paper tracking window.</p>`}
+function renderStatsGroup(el,groups){const rows=Object.entries(groups).sort((a,b)=>(b[1]?.count||0)-(a[1]?.count||0));el.innerHTML=rows.length?`<table><thead><tr><th>Group</th><th class=num>Scored</th><th class=num>Win rate</th><th class=num>Avg R</th></tr></thead><tbody>${rows.map(([k,v])=>statRow(k,v)).join('')}</tbody></table>`:'<p class="hint">No data in this range.</p>'}
+function renderStatsDistribution(){const bins=STATISTICS.distribution||[];statsDistribution.innerHTML=`<table><thead><tr><th>R bin</th><th class=num>Trades</th></tr></thead><tbody>${bins.map(b=>`<tr><td>${b.label}</td><td class=num>${b.count}</td></tr>`).join('')}</tbody></table><p class="hint">${(STATISTICS.notes||[]).join(' ')}</p>`}
+function chart(id,cfg){if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(!el||typeof Chart==='undefined')return;charts[id]=new Chart(el,cfg)}
+function renderStatsCharts(){const src=STATISTICS.by_source||{},labels=['scanner','catalyst','X','options_flag','vanta'];chart('statsSourceChart',{type:'bar',data:{labels,datasets:[{label:'Scored count',data:labels.map(k=>src[k]?.count||0),backgroundColor:'rgba(101,183,255,.55)'},{label:'Ready avg R x100',data:labels.map(k=>src[k]?.ready?Math.round((src[k].avg_r||0)*100):0),backgroundColor:'rgba(57,217,138,.55)'}]},options:{plugins:{legend:{labels:{color:'#edf2f7'}}},scales:{x:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}},y:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}}}}});const bins=STATISTICS.distribution||[];chart('statsHistogram',{type:'bar',data:{labels:bins.map(b=>b.label),datasets:[{label:'3d R outcomes',data:bins.map(b=>b.count),backgroundColor:'rgba(183,148,244,.65)'}]},options:{plugins:{legend:{labels:{color:'#edf2f7'}}},scales:{x:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}},y:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}}}}})}
+const STAGE_OPTIONS=[['universe','Universe'],['stage1','Stage 1 Cheap Filter'],['stage2','Stage 2 Technical'],['stage4','Stage 4 Chronos'],['stage3','Stage 3 Options'],['stage7','Stage 7 Correlation'],['stage5','Stage 5 News'],['stage6','Stage 6 Council'],['finalists','Finalists']];
+function stageColumns(key){const common=[['ticker','Ticker'],['status','Status'],['reason','Reason']];const maps={universe:[['ticker','Ticker'],['source','Source'],['catalyst_summary','Catalyst'],['entered_pool','Entered']],stage1:[['ticker','Ticker'],['status','Status'],['price','Price'],['avg_volume','Avg Vol'],['dollar_volume','Dollar Vol'],['earnings_in_days','Earnings'],['reason','Reason']],stage2:[['ticker','Ticker'],['status','Status'],['setup_score','Score'],['grade','Grade'],['setup_type','Setup'],['rvol','RVOL'],['rs_vs_spy','RS vs SPY'],['vwap_distance','VWAP %'],['atr','ATR'],['sector','Sector'],['sector_rs','Sector RS'],['reason','Reason']],stage3:[['ticker','Ticker'],['status','Status'],['options_verdict','Verdict'],['signals_count','Signals'],['iv_rank','IV Rank'],['call_vol_oi_ratio','Call Vol/OI'],['put_call_vol_ratio','Put/Call'],['call_oi_skew','Call OI Skew'],['options_notes','Notes']],stage4:[['ticker','Ticker'],['status','Status'],['chronos_dir','Dir'],['chronos_band_pct','Band %'],['forecastConviction','Conviction'],['chronos2_1d','1d'],['chronos2_3d','3d'],['chronos2_5d','5d'],['reason','Reason']],stage5:[['ticker','Ticker'],['status','Status'],['news_checked','Checked'],['analyst_change','Analyst Change'],['hard_landmine','Landmine'],['news_recent_items_checked','Items'],['reason','Reason']],stage6:[['ticker','Ticker'],['status','Status'],['council_votes','Votes'],['council_conf','Conf'],['claude_verdict','Claude'],['gpt_verdict','GPT'],['gemini_verdict','Gemini'],['red_flags','Red Flags'],['reason','Reason']],stage7:[['ticker','Ticker'],['status','Status'],['cluster','Cluster'],['setup_score','Score'],['volumeRatio','RVOL'],['rsVsSpy','RS'],['reason','Reason']],finalists:[['ticker','Ticker'],['status','Status'],['reason','Reason']]};return maps[key]||common}
+function val(row,key){let v=row[key];if(key==='cluster')v=row.cluster?.sector?`${row.cluster.sector} / ${row.cluster.etf||''} rank ${row.cluster.clusterRank||'-'}`:row.cluster;if(key==='analyst_change')v=v?.summary||v;if(key==='hard_landmine')v=v?.summary||v;if(key==='chronos2_1d'||key==='chronos2_3d'||key==='chronos2_5d')v=v?`${v.direction||''} ${v.expected_return_pct??''}%`:'-';if(Array.isArray(v))return v.join(', ');if(v&&typeof v==='object')return JSON.stringify(v);return v??'-'}
+function stageRows(){if(!STAGE_DETAIL)return[];let rows=[...(STAGE_DETAIL.tickers||[])];const f=stageStatusFilter.value;if(f)rows=rows.filter(r=>r.status===f);const q=stageSearch.value.trim().toUpperCase();if(q)rows=rows.filter(r=>(r.ticker+' '+r.status+' '+r.reason+' '+JSON.stringify(r.data||{})).toUpperCase().includes(q));rows.sort((a,b)=>{const av=val(a,stageSortKey),bv=val(b,stageSortKey);const an=Number(av),bn=Number(bv);if(!Number.isNaN(an)&&!Number.isNaN(bn))return(an-bn)*stageSortDir;return String(av).localeCompare(String(bv))*stageSortDir});return rows}
+async function openStageDetail(stage='stage2'){stageModal.classList.add('on');stageDate.innerHTML=(STATUS.runMetadataDates||[selectedDate.value]).map(d=>`<option value="${d}" ${d===selectedDate.value?'selected':''}>${d}</option>`).join('');stageSelect.innerHTML=STAGE_OPTIONS.map(([k,n])=>`<option value="${k}" ${k===stage?'selected':''}>${n}</option>`).join('');stageStatusFilter.value='';stageSearch.value='';stageSortKey='ticker';stageSortDir=1;await loadStageDetail()}
+function closeStageDetail(){stageModal.classList.remove('on')}
+async function loadStageDetail(){const d=stageDate.value||selectedDate.value,st=stageSelect.value;stageDetailTable.innerHTML='<p class="hint">Loading stage detail...</p>';try{const r=await get('/api/stage-detail?date='+encodeURIComponent(d)+'&stage='+encodeURIComponent(st));STAGE_DETAIL=r.stage;renderStageDetail()}catch(e){stageDetailTable.innerHTML='<div class="banner bad">Stage detail failed: '+esc(e.message)+'</div>'}}
+function renderStageDetail(){if(!STAGE_DETAIL){stageTitle.textContent='Stage Detail';stageDetailTable.innerHTML='<p class="hint">No stage detail stored for this date yet.</p>';return}const key=STAGE_DETAIL.stage_key,rows=stageRows(),cols=stageColumns(key);stageTitle.textContent=STAGE_DETAIL.stage;stageSub.textContent=`${stageDate.value} | ${STAGE_DETAIL.entered} entered, ${STAGE_DETAIL.kept} kept/enriched, ${STAGE_DETAIL.rejected} rejected, ${STAGE_DETAIL.no_data||0} no data`;stageCounts.innerHTML=[['Entered',STAGE_DETAIL.entered],['Kept',STAGE_DETAIL.kept],['Rejected',STAGE_DETAIL.rejected],['No data',STAGE_DETAIL.no_data||0],['Showing',rows.length]].map(([k,v])=>`<div class="card"><div class="k">${k}</div><div class="v">${fmt(v)}</div></div>`).join('');stageDetailTable.innerHTML=`<table><thead><tr>${cols.map(([k,n])=>`<th onclick="stageSortKey='${k}';stageSortDir*=-1;renderStageDetail()">${n}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(([k])=>`<td>${k==='status'?pill(val(r,k)):esc(val(r,k))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;stageRaw.textContent=JSON.stringify(STAGE_DETAIL.metadata||{},null,2);renderStageHistogram()}
+function renderStageHistogram(){if(charts.stageDetailHistogram){charts.stageDetailHistogram.destroy();delete charts.stageDetailHistogram}if(STAGE_DETAIL?.stage_key!=='stage2'){stageHistogram.innerHTML='';return}const d=STAGE_DETAIL.metadata?.scoreDistribution||{},cut=STAGE_DETAIL.metadata?.scoreCutoff;stageHistogram.innerHTML=`<div class="banner wait">Stage 2 cutoff: top-40 line was score ${cut??'-'}. Rejected rows below show exact score/cutoff reason.</div><canvas id="stageDetailHistogram"></canvas>`;const labels=['80-100','70-79','60-69','50-59','40-49','<40'];const values=[d.score_80_100||0,d.score_70_79||0,d.score_60_69||0,d.score_50_59||0,d.score_40_49||0,d.score_below_40||0];chart('stageDetailHistogram',{type:'bar',data:{labels,datasets:[{label:'Setup scores',data:values,backgroundColor:'rgba(101,183,255,.6)'}]},options:{plugins:{legend:{labels:{color:'#edf2f7'}}},scales:{x:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}},y:{ticks:{color:'#93a4ba'},grid:{color:'#29364d'}}}}})}
+function downloadStageCsv(){if(!STAGE_DETAIL)return;const cols=stageColumns(STAGE_DETAIL.stage_key),rows=stageRows();const csv=[cols.map(c=>c[1]).join(',')].concat(rows.map(r=>cols.map(([k])=>`"${String(val(r,k)).replaceAll('"','""')}"`).join(','))).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${stageDate.value}_${STAGE_DETAIL.stage_key}.csv`;a.click();URL.revokeObjectURL(a.href)}
+Object.assign(window,{openStageDetail,closeStageDetail,loadStageDetail,renderStageDetail,downloadStageCsv});
+async function saveConfig(){try{await post('/api/system2/config',JSON.parse(configText.value));log('config saved');await loadAll()}catch(e){log('config save failed '+e.message)}}
+async function runBaseline(){if(confirm('Start paper baseline now?')){log(JSON.stringify(await post('/api/system2/run')))}}
+async function runScorer(){log(JSON.stringify(await post('/api/score/run')));await loadAll()}
+async function runMonitor(){try{const r=await post('/api/system2/monitor/run');log(JSON.stringify(r));await loadAll();banner.className=r.updated?'banner ok':'banner wait';banner.textContent=r.updated?`Live monitor updated ${r.updated} open ideas.`:`Live monitor checked ${r.checked} open ideas but updated 0. Missing prices: ${(r.missingPrices||[]).slice(0,8).join(', ')||'none reported'}`}catch(e){log('monitor failed '+e.message);banner.className='banner bad';banner.textContent='Live monitor failed: '+e.message}}
+async function checkLivePrice(ideaId,ticker,cardId,entry,stop,target){
+  const snapshot=document.getElementById(cardId+'_snapshot');
+  const aiSection=document.getElementById(cardId+'_ai');
+  const entrySection=document.getElementById(cardId+'_entry');
+  if(!snapshot)return;
+  snapshot.style.display='block';
+  snapshot.innerHTML='<div class="snapshot-row"><span class="sk">Fetching price...</span><span class="spinner"></span></div>';
+  aiSection.style.display='none';
+  entrySection.style.display='none';
+  try{
+    const controller=new AbortController();
+    const to=setTimeout(()=>controller.abort(),10000);
+    const res=await fetch(API+'/api/system2/live-price/'+encodeURIComponent(ticker),{headers:h(),signal:controller.signal});
+    clearTimeout(to);
+    if(!res.ok)throw new Error('Price fetch failed: '+res.status);
+    const data=await res.json();
+    const price=data.price;
+    const changePct=data.change_pct;
+    const spyChange=data.spy_change_pct;
+    const vsSpy=(changePct!=null&&spyChange!=null)?Number((changePct-spyChange).toFixed(2)):null;
+    const idea=IDEAS.find(i=>i.id===ideaId);
+    const alreadyEntered=idea&&idea.actual_entry_price!=null;
+    let positionText='';
+    const entryLow=Math.min(entry??price,entry??price);
+    const entryHigh=Math.max(entry??price,entry??price);
+    const inZone=price>=entryLow&&price<=entryHigh;
+    const belowZone=price<entryLow;
+    const aboveZone=price>entryHigh;
+    const pctAbove=entryHigh>0?((price-entryHigh)/entryHigh)*100:0;
+    const distToStop=stop>0?((price-stop)/price)*100:null;
+    if(belowZone){
+      positionText=`⬇️ Price below entry zone by $${Math.abs(price-entryLow).toFixed(2)} (${Math.abs(((price-entryLow)/entryLow)*100).toFixed(2)}%)`;
+    }else if(inZone){
+      positionText=`✅ Price IN entry zone — setup active`;
+    }else if(pctAbove<2){
+      positionText=`⚠️ Price just above zone — marginal entry`;
+    }else{
+      positionText=`🚫 Price above zone — do not chase`;
+    }
+    if(distToStop!=null&&distToStop<=3){
+      positionText+=`<br>🛑 Price near stop — setup invalidating`;
+    }
+    const rangeLow=Math.min(stop??price,entryLow);
+    const rangeHigh=Math.max(target??price,entryHigh);
+    const range=rangeHigh-rangeLow;
+    const cursorPct=range>0?((price-rangeLow)/range)*100:50;
+    const rangeBarHtml=`<div class="range-bar"><div class="range-bar-track"><span>[STOP ${fmtPrice(stop)}]</span><span>[ENTRY ${fmtPrice(entryLow)}-${fmtPrice(entryHigh)}]</span><span>[TP1 ${fmtPrice(target)}]</span></div><div class="range-bar-cursor" style="left:${Math.max(0,Math.min(100,cursorPct))}%" data-label="${fmtPrice(price)}"></div></div>`;
+    const ideaAge=idea?ideaAgeDays(idea.date):0;
+    const staleWarn=ideaAge>3?`<div class="snapshot-row" style="color:var(--amber)">⚠️ STALE WARNING — ${ideaAge} days old</div>`:'';
+    snapshot.innerHTML=`<div class="snapshot-row"><span class="sk">Current Price</span><span class="sv">${fmtPrice(price)}</span></div><div class="snapshot-row"><span class="sk">Change Today</span><span class="sv" style="color:${changePct>=0?'var(--green)':'var(--red)'}">${changePct>=0?'▲':'▼'} ${pct(changePct)}</span></div><div class="snapshot-row"><span class="sk">vs SPY Today</span><span class="sv" style="color:${vsSpy>=0?'var(--green)':'var(--red)'}">${vsSpy>=0?'+':''}${vsSpy}% ${vsSpy>=0?'outperforming':'underperforming'}</span></div>${staleWarn}<div style="margin:8px 0;font-size:11px;color:var(--muted)">POSITION vs PLAN</div>${rangeBarHtml}<div class="snapshot-row" style="margin-top:6px"><span class="sv">${positionText}</span></div><div class="snapshot-row"><span class="sk">Time since generated</span><span class="sv">${ideaAge} day${ideaAge!==1?'s':''} ago</span></div>`;
+    aiSection.style.display='block';
+    aiSection.innerHTML=`<button class="ai-btn" onclick="shouldIEnter('${esc(ideaId)}','${esc(cardId)}')">🤖 Should I Enter?</button><div id="${esc(cardId)}_verdict" style="display:none;margin-top:8px"></div>`;
+    if(inZone&&!alreadyEntered){
+      entrySection.style.display='block';
+      entrySection.innerHTML=`<button class="entry-btn primary" onclick="recordPaperEntry('${esc(ideaId)}','${esc(cardId)}',${price})">📝 Record Paper Entry at ${fmtPrice(price)}</button>`;
+    }else if(alreadyEntered){
+      entrySection.style.display='block';
+      entrySection.innerHTML=`<div class="snapshot-row"><span class="sk">Entry</span><span class="sv confirm">✅ Already entered at ${fmtPrice(idea.actual_entry_price)} on ${(idea.actual_entry_date||'').slice(0,10)}</span></div>`;
+    }
+    if(idea)idea.current_price=price;
+    const entryBadgeEl=document.getElementById(cardId+'_entrybadge');
+    if(entryBadgeEl&&idea)entryBadgeEl.innerHTML=entryBadgeHtml(idea,price);
+    const checklistEl=document.getElementById(cardId+'_checklist');
+    if(checklistEl&&idea)checklistEl.innerHTML=checklistHtml(generateChecklist(idea,price));
+    if(idea&&idea.ohlcv_60&&idea.ohlcv_60.length){
+      try{initMiniChart(cardId,ticker,idea.ohlcv_60,entry,entry,stop,target,null);}catch(e){}
+    }
+    // Fetch tape data
+    const tapeSection=document.getElementById(cardId+'_tape');
+    try{
+      const tapeRes=await fetch(API+'/api/system2/tape/'+encodeURIComponent(ticker),{headers:h()});
+      if(tapeRes.ok){
+        const tape=await tapeRes.json();
+        if(tape.available){
+          const sigColor=tape.tape_signal==='BULLISH'?'var(--green)':tape.tape_signal==='BEARISH'?'var(--red)':'var(--muted)';
+          const sigEmoji=tape.tape_signal==='BULLISH'?'🟢':tape.tape_signal==='BEARISH'?'🔴':'⚪';
+          const updatedAgo=Math.round((Date.now()-new Date(tape.updated_at))/1000);
+          tapeSection.style.display='block';
+          tapeSection.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:8px">LIVE TAPE — updated ${updatedAgo}s ago</div><div class="snapshot-row"><span class="sk">Delta</span><span class="sv" style="color:${tape.delta_direction==='BULLISH'?'var(--green)':tape.delta_direction==='BEARISH'?'var(--red)':'var(--muted)'}">${tape.cumulative_delta>=0?'+':''}${tape.cumulative_delta.toLocaleString()} ${tape.delta_direction==='BULLISH'?'▲ BUYERS WIN':tape.delta_direction==='BEARISH'?'▼ SELLERS WIN':'◆ FLAT'}</span></div><div class="snapshot-row"><span class="sk">Aggressor</span><span class="sv">${Math.round(tape.aggressor_ratio*100)}% buy / ${Math.round((1-tape.aggressor_ratio)*100)}% sell</span></div><div class="snapshot-row"><span class="sk">vs VWAP</span><span class="sv">${tape.price_vs_vwap} ${tape.vwap!=null&&tape.last_price!=null?'by $'+Math.abs(tape.last_price-tape.vwap).toFixed(2):''}</span></div><div class="snapshot-row"><span class="sk">Large prints</span><span class="sv">${tape.large_prints_today} blocks today</span></div><div class="snapshot-row"><span class="sk">Last block</span><span class="sv">${tape.last_large_print?tape.last_large_print.size+'sh @ $'+tape.last_large_print.price:'none'}</span></div><div class="snapshot-row"><span class="sk">TAPE SIGNAL</span><span class="sv" style="color:${sigColor};font-weight:900">${sigEmoji} ${tape.tape_signal}</span></div>`;
+        }else{
+          tapeSection.style.display='block';
+          tapeSection.innerHTML=`<div style="font-size:11px;color:var(--muted)">Tape: Market closed / service offline</div>`;
+        }
+      }else{
+        tapeSection.style.display='block';
+        tapeSection.innerHTML=`<div style="font-size:11px;color:var(--muted)">Tape: Market closed / service offline</div>`;
+      }
+    }catch(_e){
+      tapeSection.style.display='block';
+      tapeSection.innerHTML=`<div style="font-size:11px;color:var(--muted)">Tape: Market closed / service offline</div>`;
+    }
+  }catch(e){
+    snapshot.innerHTML=`<div class="snapshot-row"><span class="sv caution">Price unavailable — try again</span></div>`;
+  }
+}
+async function shouldIEnter(ideaId,cardId){
+  const verdictBox=document.getElementById(cardId+'_verdict');
+  const entrySection=document.getElementById(cardId+'_entry');
+  if(!verdictBox)return;
+  verdictBox.style.display='block';
+  verdictBox.innerHTML='<div class="snapshot-row"><span class="sk">AI thinking...</span><span class="spinner"></span></div>';
+  try{
+    const controller=new AbortController();
+    const to=setTimeout(()=>controller.abort(),10000);
+    const res=await fetch(API+'/api/system2/ai-decision',{method:'POST',headers:h(true),body:JSON.stringify({idea_id:ideaId}),signal:controller.signal});
+    clearTimeout(to);
+    if(!res.ok)throw new Error('AI request failed: '+res.status);
+    const data=await res.json();
+    const verdict=data.verdict||'WAIT';
+    const verdictClass=verdict==='BUY NOW'?'verdict-buy':verdict==='SKIP'?'verdict-skip':'verdict-wait';
+    verdictBox.innerHTML=`<div class="verdict-box ${verdictClass}">${verdict}</div><div class="reason" style="font-size:12px">${esc(data.reasoning||data.content||'')}</div><div class="disclaimer">AI decision aid only. Always apply your own judgment.</div>`;
+    const idea=IDEAS.find(i=>i.id===ideaId);
+    const price=idea?.current_price;
+    const entryLow=Array.isArray(idea?.entryZone)?idea.entryZone[0]:idea?.entry;
+    const entryHigh=Array.isArray(idea?.entryZone)?idea.entryZone[1]:idea?.entry;
+    const inZone=price!=null&&entryLow!=null&&entryHigh!=null&&price>=Math.min(entryLow,entryHigh)&&price<=Math.max(entryLow,entryHigh);
+    const alreadyEntered=idea&&idea.actual_entry_price!=null;
+    if((verdict==='BUY NOW'||inZone)&&!alreadyEntered&&price!=null){
+      entrySection.style.display='block';
+      entrySection.innerHTML=`<button class="entry-btn primary" onclick="recordPaperEntry('${esc(ideaId)}','${esc(cardId)}',${price})">📝 Record Paper Entry at ${fmtPrice(price)}</button>`;
+    }
+  }catch(e){
+    verdictBox.innerHTML=`<div class="snapshot-row"><span class="sv caution">AI unavailable — use your judgment</span></div>`;
+  }
+}
+async function recordPaperEntry(ideaId,cardId,price){
+  const entrySection=document.getElementById(cardId+'_entry');
+  if(!entrySection)return;
+  entrySection.innerHTML='<div class="snapshot-row"><span class="sk">Recording...</span><span class="spinner"></span></div>';
+  try{
+    const controller=new AbortController();
+    const to=setTimeout(()=>controller.abort(),10000);
+    const res=await fetch(API+'/api/ideas/'+encodeURIComponent(ideaId)+'/enter',{method:'POST',headers:h(true),body:JSON.stringify({actual_entry_price:price,actual_entry_date:new Date().toISOString(),actual_entry_source:'manual_dashboard'}),signal:controller.signal});
+    clearTimeout(to);
+    if(!res.ok)throw new Error('Entry failed: '+res.status);
+    const data=await res.json();
+    if(data.alreadyEntered){
+      entrySection.innerHTML=`<div class="snapshot-row"><span class="sk">Entry</span><span class="sv confirm">✅ Already entered at ${fmtPrice(data.actual_entry_price)} on ${(data.actual_entry_date||'').slice(0,10)}</span></div>`;
+    }else{
+      entrySection.innerHTML=`<div class="snapshot-row"><span class="sk">Entry</span><span class="sv confirm">✅ Entry recorded at ${fmtPrice(data.actual_entry_price)}</span></div>`;
+    }
+    const idea=IDEAS.find(i=>i.id===ideaId);
+    if(idea){idea.actual_entry_price=data.actual_entry_price;idea.actual_entry_date=data.actual_entry_date;}
+  }catch(e){
+    entrySection.innerHTML=`<div class="snapshot-row"><span class="sv caution">Entry failed — try again</span></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 2 — Equity Curve
+// ═══════════════════════════════════════════════════════════════════
+function renderEquityCurve(){
+  const wrap=document.getElementById('equityCurveChart');
+  const placeholder=document.getElementById('equityCurvePlaceholder');
+  const stats=document.getElementById('equityStats');
+  if(!wrap||!placeholder)return;
+  const resolved=IDEAS.filter(i=>i.paper_status==='CLOSED'&&i.date>='2026-06-09');
+  if(!resolved.length){placeholder.style.display='block';wrap.style.display='none';stats.innerHTML='';return}
+  placeholder.style.display='none';wrap.style.display='block';
+  resolved.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let grossR=0,netR=0,maxRun=0,currRun=0,worstDD=0,peak=0,winSum=0,lossSum=0,wins=0,losses=0;
+  let underwaterStart=null,maxUnderwaterDur=0;
+  const grossData=[],netData=[];
+  resolved.forEach((r,idx)=>{
+    const g=r.r_3d??0;
+    const n=g*0.92;
+    grossR+=g;netR+=n;
+    grossData.push({time:r.date,value:Number(grossR.toFixed(2))});
+    netData.push({time:r.date,value:Number(netR.toFixed(2))});
+    if(g>0){currRun++;maxRun=Math.max(maxRun,currRun);winSum+=g;wins++}else{currRun=0;lossSum+=Math.abs(g);losses++}
+    peak=Math.max(peak,netR);
+    const dd=netR-peak;
+    worstDD=Math.min(worstDD,dd);
+    if(dd<0){if(underwaterStart===null)underwaterStart=idx}
+    else{if(underwaterStart!==null){maxUnderwaterDur=Math.max(maxUnderwaterDur,idx-underwaterStart);underwaterStart=null}}
+  });
+  if(underwaterStart!==null){maxUnderwaterDur=Math.max(maxUnderwaterDur,resolved.length-underwaterStart)}
+  const wlRatio=lossSum>0?(winSum/lossSum).toFixed(2):'-';  const winRate=resolved.length>0?Math.round((wins/resolved.length)*100):0;
+  const returns=resolved.map(r=>r.r_3d??0);
+  const mean=returns.reduce((a,b)=>a+b,0)/returns.length;
+  const variance=returns.reduce((a,b)=>a+Math.pow(b-mean,2),0)/returns.length;
+  const stdDev=Math.sqrt(variance);
+  const sharpe=stdDev>0?(mean/stdDev*Math.sqrt(252/resolved.length)).toFixed(2):'-';  const calmar=worstDD!==0?(netR/Math.abs(worstDD)).toFixed(2):'-';  if(typeof LightweightCharts!=='undefined'){
+    wrap.innerHTML='';
+    const chart=LightweightCharts.createChart(wrap,{width:wrap.clientWidth,height:240,layout:{background:{type:'solid',color:'transparent'},textColor:'#edf2f7'},grid:{vertLines:{color:'#29364d'},horzLines:{color:'#29364d'}},rightPriceScale:{borderColor:'#29364d'},timeScale:{borderColor:'#29364d'}});
+    const grossSeries=chart.addLineSeries({color:'#ffffff',lineWidth:2,title:'Gross R'});
+    const netSeries=chart.addLineSeries({color:'#f7c948',lineWidth:2,title:'Net R'});
+    grossSeries.setData(grossData);
+    netSeries.setData(netData);
+    const zeroLine=chart.addLineSeries({color:'#666',lineWidth:1,lineStyle:LightweightCharts.LineStyle.Dotted,title:'Break-even'});
+    zeroLine.setData(grossData.map(d=>({time:d.time,value:0})));
+    chart.timeScale().fitContent();
+  }
+  stats.innerHTML=`<span>Net: <b style="color:${netR>=0?'var(--green)':'var(--red)'}">${netR>=0?'+':''}${netR.toFixed(1)}R</b></span><span>Trades: <b>${resolved.length}</b></span><span>Win rate: <b>${winRate}%</b></span><span>W/L ratio: <b>${wlRatio}</b></span><span>Best run: <b>${maxRun}W</b></span><span>Max DD: <b style="color:var(--red)">${worstDD.toFixed(1)}R</b></span><span>Underwater: <b>${maxUnderwaterDur}T</b></span><span>Sharpe: <b>${sharpe}</b></span><span>Calmar: <b>${calmar}</b></span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 3 — Sources Health Tab
+// ═══════════════════════════════════════════════════════════════════
+async function loadSources(){
+  const table=document.getElementById('sourcesTable');
+  const summary=document.getElementById('sourcesSummary');
+  const meta=document.getElementById('sourcesMeta');
+  if(!table)return;
+  table.innerHTML='<p class="hint">Loading source health...</p>';
+  try{
+    const now=new Date();
+    const isStale=(ts)=>{if(!ts)return true;const h=(now-new Date(ts))/3600000;return h>26};
+    const fmtTime=(ts)=>{if(!ts)return'MISSING';const h=(now-new Date(ts))/3600000;if(h<1)return Math.round(h*60)+'m ago';if(h<24)return Math.round(h)+'h ago';return Math.round(h/24)+'d ago'};
+    const files=[
+      {name:'ImpliedOptions',path:'/api/system2/artifacts/options_flow.json',expected:'rows',icon:'🎯'},
+      {name:'Barchart UOA',path:'/api/system2/artifacts/data/barchart_uoa.json',expected:'rows',icon:'📊'},
+      {name:'StockAnalysis',path:'/api/system2/artifacts/data/stockanalysis_growth.json',expected:'rows',icon:'📈'},
+      {name:'Danelfin',path:'/api/system2/artifacts/data/danelfin_scores.json',expected:'coverage',icon:'🧠'},
+      {name:'FlashAlpha GEX',path:'/api/system2/artifacts/data/flashalpha_gex.json',expected:'regime',icon:'⚡'},
+      {name:'FMP quotes',path:'/api/system2/artifacts/universe.json',expected:'rows',icon:'💰'},
+      {name:'FMP news',path:'/api/system2/artifacts/fmp_news_analyst_metadata.json',expected:'rows',icon:'📰'},
+      {name:'X/FinTwit',path:'/api/system2/artifacts/candidate_pool.json',expected:'rows',icon:'🐦'},
+      {name:'Chronos forecast',path:'/api/system2/artifacts/stage5_combined_forecast_top40.json',expected:'rows',icon:'🔮'},
+      {name:'Kronos forecast',path:'/api/system2/artifacts/stage5_combined_forecast_top40.json',expected:'rows',icon:'⏳'},
+      {name:'Council',path:'/api/system2/artifacts/stage6_council_enriched.json',expected:'models',icon:'🏛️'},
+    ];
+    const rows=[];
+    for(const src of files){
+      try{
+        const data=await artifact(src.path.replace('/api/system2/artifacts/',''));
+        let status='✅',statusCls='confirm',rowsCount='-',coverage='-',ts=null;
+        if(data==null||data===fallback||Object.keys(data).length===0){status='❌';statusCls='caution';rowsCount='MISSING';}
+        else{
+          ts=data._system2_generated_at||data.date||data.createdAt;
+          if(isStale(ts)){status='⚠️';statusCls='neutral';}
+          if(Array.isArray(data))rowsCount=data.length;
+          else if(data.candidates)rowsCount=data.candidates.length;
+          else if(data.candidate_count!=null)rowsCount=data.candidate_count;
+          else if(data.finalists)rowsCount=data.finalists.length;
+          else if(data.inputCount!=null)rowsCount=data.inputCount;
+          else if(data.outputCount!=null)rowsCount=data.outputCount;
+          else if(data.tickers)rowsCount=data.tickers.length;
+          else rowsCount='present';
+          if(src.name==='Danelfin'){const c=data.coverage||data.universe_coverage_pct||'-';coverage=c+'% universe';}
+          if(src.name==='FlashAlpha GEX'){const r=data.regime||data.gex_regime||'-';coverage='regime: '+r;}
+          if(src.name==='Council'){const m=data.models_used||data.council_models_used||[];coverage=Array.isArray(m)?m.length+'/4 models':'-';if(Array.isArray(m)&&m.length===0){status='❌';statusCls='caution';}}
+          if(src.name==='FMP news'&&rowsCount==='present'){status='⚠️';statusCls='neutral';rowsCount='401 plan limit';}
+        }
+        rows.push({...src,status,statusCls,rowsCount,coverage,time:fmtTime(ts)});
+      }catch(e){
+        rows.push({...src,status:'❌',statusCls:'caution',rowsCount:'ERROR',coverage:'-',time:'ERROR'});
+      }
+    }
+    const healthy=rows.filter(r=>r.status==='✅').length;
+    const degraded=rows.filter(r=>r.status==='⚠️').length;
+    const failed=rows.filter(r=>r.status==='❌').length;
+    const total=rows.length;
+    const healthPct=Math.round((healthy/total)*100);
+    const healthColor=healthPct>=90?'var(--green)':healthPct>=70?'var(--amber)':'var(--red)';
+    summary.innerHTML=`<div class="banner ${healthPct>=90?'ok':healthPct>=70?'wait':'bad'}">${healthy} healthy / ${degraded} degraded / ${failed} failed</div><div style="margin-top:8px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Pipeline health score: <b style="color:${healthColor}">${healthPct}%</b></div><div style="height:8px;background:#0b111b;border-radius:4px;overflow:hidden;border:1px solid var(--line)"><div style="width:${healthPct}%;height:100%;background:${healthColor};transition:width .5s ease"></div></div></div>`;
+    table.innerHTML=`<table><thead><tr><th>Source</th><th>Last Run</th><th>Rows</th><th>Status</th><th>Coverage</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.icon} ${r.name}</td><td>${r.time}</td><td>${r.rowsCount}</td><td><span class="pill ${r.statusCls}">${r.status}</span></td><td>${r.coverage}</td></tr>`).join('')}</tbody></table>`;
+    const latest=STATUS.latestRun||{};
+    meta.textContent=`Last full pipeline run: ${latest.runFinishedAt||'-'} | Status: ${latest.ok?'✅ OK':'❌ FAILED'} | Duration: ${latest.runtimeMinutes||'-'} min`;
+  }catch(e){
+    table.innerHTML=`<div class="banner bad">Sources load failed: ${esc(e.message)}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 1 — Mini Candlestick Chart
+// ═══════════════════════════════════════════════════════════════════
+function initMiniChart(cardId, ticker, ohlcv, entryLow, entryHigh, stop, tp1, tp2){
+  const wrap=document.getElementById('chart-wrap-'+cardId);
+  if(!wrap||typeof LightweightCharts==='undefined')return;
+  wrap.innerHTML='';
+  const chart=LightweightCharts.createChart(wrap,{width:wrap.clientWidth,height:160,layout:{background:{type:'solid',color:'transparent'},textColor:'#93a4ba'},grid:{vertLines:{color:'#1a2332'},horzLines:{color:'#1a2332'}},rightPriceScale:{borderColor:'#29364d',scaleMargins:{top:0.15,bottom:0.25}},timeScale:{borderColor:'#29364d',visible:false},crosshair:{mode:LightweightCharts.CrosshairMode.Normal,vertLine:{color:'#65b7ff',width:1,style:LightweightCharts.LineStyle.Dashed,labelBackgroundColor:'#65b7ff'},horzLine:{color:'#65b7ff',width:1,style:LightweightCharts.LineStyle.Dashed,labelBackgroundColor:'#65b7ff'}}});
+  const series=chart.addCandlestickSeries({upColor:'#39d98a',downColor:'#ff6b6b',borderUpColor:'#39d98a',borderDownColor:'#ff6b6b',wickUpColor:'#39d98a',wickDownColor:'#ff6b6b'});
+  const data=(ohlcv||[]).slice(-30).map((bar,idx)=>({time:idx,open:bar.o,high:bar.h,low:bar.l,close:bar.c}));
+  series.setData(data);
+  // Volume histogram
+  const maxVol=Math.max(...(ohlcv||[]).slice(-30).map(b=>b.v||0),1);
+  const volSeries=chart.addHistogramSeries({color:'rgba(101,183,255,.35)',priceFormat:{type:'volume'},priceScaleId:'',overlay:true});
+  volSeries.priceScale().applyOptions({scaleMargins:{top:0.85,bottom:0}});
+  const volData=data.map((d,idx)=>({time:d.time,value:((ohlcv||[]).slice(-30)[idx]?.v||0)/maxVol*100,color:d.close>=d.open?'rgba(57,217,138,.25)':'rgba(255,107,107,.25)'}));
+  volSeries.setData(volData);
+  if(entryLow!=null&&entryHigh!=null){
+    chart.addLineSeries({color:'rgba(57,217,138,.5)',lineStyle:LightweightCharts.LineStyle.Dashed,lastValueVisible:false,title:'E'}).setData(data.map(()=>({time:0,value:entryLow})));
+    chart.addLineSeries({color:'rgba(57,217,138,.5)',lineStyle:LightweightCharts.LineStyle.Dashed,lastValueVisible:false}).setData(data.map(()=>({time:0,value:entryHigh})));
+  }
+  if(stop!=null)chart.addLineSeries({color:'#ff6b6b',lastValueVisible:false,title:'S'}).setData(data.map(()=>({time:0,value:stop})));
+  if(tp1!=null)chart.addLineSeries({color:'#65b7ff',lineStyle:LightweightCharts.LineStyle.Dashed,lastValueVisible:false,title:'T1'}).setData(data.map(()=>({time:0,value:tp1})));
+  if(tp2!=null)chart.addLineSeries({color:'#65b7ff',lineStyle:LightweightCharts.LineStyle.Dotted,lastValueVisible:false,title:'T2'}).setData(data.map(()=>({time:0,value:tp2})));
+  chart.timeScale().fitContent();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 4 — Options SVG Bar Chart
+// ═══════════════════════════════════════════════════════════════════
+function renderOptionsSvg(cardId, data){
+  const wrap=document.getElementById('opt-svg-'+cardId);
+  if(!wrap)return;
+  const {price,call_wall_1,call_wall_1_oi,call_wall_2,call_wall_2_oi,put_wall_1,put_wall_1_oi,put_wall_2,put_wall_2_oi,max_pain_weekly}=data;
+  if(!price||!call_wall_1_oi){wrap.innerHTML='<div class="hint">Options chain: data unavailable (market closed / Yahoo fallback)</div>';return}
+  const maxOI=Math.max(call_wall_1_oi||0,call_wall_2_oi||0,put_wall_1_oi||0,put_wall_2_oi||0,1);
+  const barH=(oi)=>(oi/maxOI)*55;
+  const svgW=320,svgH=160,midY=75;
+  const strikes=[call_wall_1,call_wall_2,put_wall_1,put_wall_2,max_pain_weekly,price].filter(Boolean);
+  const minS=Math.min(...strikes)*0.95,maxS=Math.max(...strikes)*1.05;
+  const toX=(strike)=>((strike-minS)/(maxS-minS))*svgW;
+  const fmtK=(v)=>Number(v).toFixed(1);
+  wrap.innerHTML=`<svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;max-width:340px">
+    <text x="4" y="14" fill="#93a4ba" font-size="9" font-weight="700">CALL WALLS ↑</text>
+    <text x="4" y="${svgH-4}" fill="#93a4ba" font-size="9" font-weight="700">PUT WALLS ↓</text>
+    ${max_pain_weekly?`<line x1="${toX(max_pain_weekly)}" y1="8" x2="${toX(max_pain_weekly)}" y2="${svgH-8}" stroke="#f7c948" stroke-dasharray="4" stroke-width="1.5"/><text x="${toX(max_pain_weekly)+3}" y="14" fill="#f7c948" font-size="8" font-weight="700">MP $${fmtK(max_pain_weekly)}</text>`:''}
+    ${call_wall_1?`<rect x="${toX(call_wall_1)-10}" y="${midY-barH(call_wall_1_oi)}" width="20" height="${barH(call_wall_1_oi)}" rx="2" fill="rgba(57,217,138,.65)"/><text x="${toX(call_wall_1)}" y="${midY-barH(call_wall_1_oi)-6}" fill="#39d98a" font-size="8" text-anchor="middle" font-weight="700">C1 ${(call_wall_1_oi/1e3).toFixed(1)}k</text><text x="${toX(call_wall_1)}" y="${midY-2}" fill="#111" font-size="7" text-anchor="middle" font-weight="700">$${fmtK(call_wall_1)}</text>`:''}
+    ${call_wall_2?`<rect x="${toX(call_wall_2)-10}" y="${midY-barH(call_wall_2_oi)}" width="20" height="${barH(call_wall_2_oi)}" rx="2" fill="rgba(57,217,138,.4)"/><text x="${toX(call_wall_2)}" y="${midY-barH(call_wall_2_oi)-6}" fill="#39d98a" font-size="8" text-anchor="middle" font-weight="700">C2 ${(call_wall_2_oi/1e3).toFixed(1)}k</text>`:''}
+    ${put_wall_1?`<rect x="${toX(put_wall_1)-10}" y="${midY}" width="20" height="${barH(put_wall_1_oi)}" rx="2" fill="rgba(255,107,107,.65)"/><text x="${toX(put_wall_1)}" y="${midY+barH(put_wall_1_oi)+12}" fill="#ff6b6b" font-size="8" text-anchor="middle" font-weight="700">P1 ${(put_wall_1_oi/1e3).toFixed(1)}k</text><text x="${toX(put_wall_1)}" y="${midY+10}" fill="#111" font-size="7" text-anchor="middle" font-weight="700">$${fmtK(put_wall_1)}</text>`:''}
+    ${put_wall_2?`<rect x="${toX(put_wall_2)-10}" y="${midY}" width="20" height="${barH(put_wall_2_oi)}" rx="2" fill="rgba(255,107,107,.4)"/><text x="${toX(put_wall_2)}" y="${midY+barH(put_wall_2_oi)+12}" fill="#ff6b6b" font-size="8" text-anchor="middle" font-weight="700">P2 ${(put_wall_2_oi/1e3).toFixed(1)}k</text>`:''}
+    <line x1="${toX(price)}" y1="8" x2="${toX(price)}" y2="${svgH-8}" stroke="#edf2f7" stroke-width="1.5"/><circle cx="${toX(price)}" cy="${midY}" r="4" fill="#edf2f7"/><text x="${toX(price)+5}" y="${svgH-10}" fill="#edf2f7" font-size="9" font-weight="700">$${fmtK(price)}</text>
+    <line x1="0" y1="${midY}" x2="${svgW}" y2="${midY}" stroke="#29364d" stroke-width="1"/>
+  </svg>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 5 — Family Score Breakdown
+// ═══════════════════════════════════════════════════════════════════
+function renderFamilyBars(r){
+  const fs=r.family_scores||{};
+  const raw=r.family_scores_raw||{};
+  const caps={momentum:25,positioning:35,catalyst:20,structural:20};
+  const labels={momentum:'Momentum',positioning:'Flow',catalyst:'Catalyst',structural:'Structural'};
+  const colors={momentum:'#39d98a',positioning:'#65b7ff',catalyst:'#f7c948',structural:'#b794f4'};
+  const total=Object.values(fs).reduce((a,b)=>a+(b||0),0);
+  return `<div style="margin-top:6px">${Object.entries(labels).map(([k,l])=>{
+    const v=fs[k]||0;const cap=caps[k];const pct=Math.round((v/cap)*100);
+    const rawV=raw[k]!=null?raw[k]:v;
+    const cls=pct>=80?'green':pct>=50?'yellow':'grey';
+    const col=colors[k];
+    return `<div class="family-bar-row" title="Raw ${k}: ${rawV} | Capped: ${v}/${cap}"><span class="family-bar-label" style="color:${col}">${l}</span><div class="family-bar-track"><div class="family-bar-fill ${cls}" style="width:${pct}%;background:${col}"></div></div><span class="family-bar-val">${v}/${cap}</span></div>`;
+  }).join('')}<div class="family-total">TOTAL CONFIRMATION: <b>${total}</b>/100</div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VISUAL 6 — MFE/MAE Scatter Chart (per-trade dot plot)
+// ═══════════════════════════════════════════════════════════════════
+function renderMfeMaeScatter(){
+  const wrap=document.getElementById('mfeScatterWrap');
+  if(!wrap)return;
+  const trades=IDEAS.filter(i=>i.paper_status==='CLOSED'&&i.date>='2026-06-09'&&(i.mfe_r!=null||i.mae_r!=null));
+  if(!trades.length){wrap.innerHTML='';return}
+  const svgW=360,svgH=220,padding=30;
+  const maxMfe=Math.max(...trades.map(t=>t.mfe_r||0),0.5);
+  const maxMae=Math.max(...trades.map(t=>Math.abs(t.mae_r)||0),0.5);
+  const maxAxis=Math.max(maxMfe,maxMae,1.5);
+  const toX=(mae)=>padding+((Math.abs(mae||0)/maxAxis)*(svgW-padding*2));
+  const toY=(mfe)=>svgH-padding-((Math.max(mfe||0,0)/maxAxis)*(svgH-padding*2));
+  const dots=trades.map(t=>{
+    const mfe=t.mfe_r||0;
+    const mae=Math.abs(t.mae_r||0);
+    const win=(t.r_3d||0)>0;
+    const color=win?'var(--green)':'var(--red)';
+    const r=win?5:4;
+    return `<circle cx="${toX(mae)}" cy="${toY(mfe)}" r="${r}" fill="${color}" stroke="${win?'#39d98a':'#ff6b6b'}" stroke-width="1.5" opacity="0.85" title="${t.ticker}: MFE ${mfe.toFixed(2)}R | MAE ${mae.toFixed(2)}R | Outcome ${t.r_3d?.toFixed(2)||'-'}R"/>`;
+  }).join('');
+  const xTicks=[0,0.5,1.0,1.5,2.0].filter(v=>v<=maxAxis);
+  const yTicks=[0,0.5,1.0,1.5,2.0].filter(v=>v<=maxAxis);
+  const xAxis=xTicks.map(v=>`<text x="${toX(v)}" y="${svgH-padding+14}" fill="#93a4ba" font-size="9" text-anchor="middle">${v}R</text><line x1="${toX(v)}" y1="${svgH-padding}" x2="${toX(v)}" y2="${svgH-padding+4}" stroke="#93a4ba"/>`).join('');
+  const yAxis=yTicks.map(v=>`<text x="${padding-8}" y="${toY(v)+3}" fill="#93a4ba" font-size="9" text-anchor="end">${v}R</text><line x1="${padding-4}" y1="${toY(v)}" x2="${padding}" y2="${toY(v)}" stroke="#93a4ba"/>`).join('');
+  // Quadrant labels
+  const qLabels=`<text x="${svgW-padding-4}" y="${padding+12}" fill="var(--green)" font-size="9" text-anchor="end" opacity="0.6">High MFE / Low MAE ✅</text><text x="${padding+4}" y="${svgH-padding-4}" fill="var(--red)" font-size="9" text-anchor="start" opacity="0.6">Low MFE / High MAE ⚠️</text>`;
+  wrap.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:6px">📍 Each dot = 1 trade. Green = win, Red = loss. X = MAE (|drawdown|), Y = MFE (peak gain).</div><svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;max-width:420px;background:#060910;border:1px solid var(--line);border-radius:10px">
+    <line x1="${padding}" y1="${svgH-padding}" x2="${svgW-padding}" y2="${svgH-padding}" stroke="#29364d" stroke-width="1"/>
+    <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgH-padding}" stroke="#29364d" stroke-width="1"/>
+    <line x1="${padding}" y1="${toY(0.5)}" x2="${svgW-padding}" y2="${toY(0.5)}" stroke="#29364d" stroke-dasharray="3" stroke-width="0.5" opacity="0.5"/>
+    <line x1="${toX(0.5)}" y1="${padding}" x2="${toX(0.5)}" y2="${svgH-padding}" stroke="#29364d" stroke-dasharray="3" stroke-width="0.5" opacity="0.5"/>
+    ${xAxis}${yAxis}${qLabels}${dots}
+    <text x="${svgW/2}" y="${svgH-2}" fill="#93a4ba" font-size="9" text-anchor="middle">MAE (abs R lost before peak)</text>
+    <text x="8" y="${svgH/2}" fill="#93a4ba" font-size="9" text-anchor="middle" transform="rotate(-90,8,${svgH/2})">MFE (R gained at best)</text>
+  </svg>`;
+}
+
+// Hook renderAll to call new renderers
+const _origRenderAll=renderAll;
+renderAll=function(){_origRenderAll();renderEquityCurve();};
+
+// Hook tab switch to load sources when tab is opened
+const _origTab=tab;
+tab=function(n){_origTab(n);if(n==='sources')loadSources();};
+
+loadAll();setInterval(loadAll,60000);
+</script>
+<script>
+(()=> {
+  const LS_API='system2_api_url', LS_TOKEN='system2_admin_token';
+  const stages=[['universe','Universe'],['stage1','Stage 1 Cheap Filter'],['stage2','Stage 2 Technical'],['stage4','Stage 4 Chronos'],['stage3','Stage 3 Options'],['stage7','Stage 7 Correlation'],['stage5','Stage 5 News'],['stage6','Stage 6 Council'],['finalists','Finalists']];
+  let current=null, sortKey='ticker', sortDir=1, hist=null;
+  const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const api=()=>localStorage.getItem(LS_API)||location.origin, headers=()=>{const h={Accept:'application/json'};const t=localStorage.getItem(LS_TOKEN);if(t)h['x-token']=t;return h};
+  async function jget(p){const r=await fetch(api().replace(/\/$/,'')+p,{headers:headers()});if(!r.ok)throw new Error(p+' -> '+r.status);return r.json()}
+  function explain(k){return {universe:'Candidate pool input. Shows core scanner universe plus catalyst/X/options sources before any cuts.',stage1:'Cheap mechanical filter. Removes low liquidity, sub-$5 names, dollar-volume failures, and earnings blackout names.',stage2:'Surgical Strike technical scoring. Keeps the top 40 by setup quality; score ties use RVOL then RS vs SPY.',stage3:'Options flow enrichment. Ride-along only. CONFIRM/NEUTRAL/CAUTION is logged but does not cut.',stage4:'Chronos forecast enrichment. Ride-along only. Tight cone + agreeing direction is useful context; wide cone means ignore direction.',stage5:'News safety kill-filter. LIVE safety layer: fresh offerings, halts, fraud/litigation or guidance withdrawal force-skip.',stage6:'Council of AIs v2. 4-model 2-round hybrid deliberation. Round 1: parallel scoring by Claude (Analyst), Kimi (Devil\'s Advocate), Gemini (Short Seller), GPT-4o (Judge). Round 2: sequential debate on splits. Ride-along only — does not gate trades.',stage7:'Correlation/cluster guard. Groups by sector/ETF and keeps the best 1-2 so one cluster counts as one risk bet.',finalists:'Final paper-mode trade cards after risk, cluster, and safety checks.'}[k]||''}
+  function cols(k){return ({universe:[['ticker','Ticker'],['source','Source'],['catalyst_summary','Catalyst'],['entered_pool','Entered']],stage1:[['ticker','Ticker'],['status','Status'],['price','Price'],['avg_volume','Avg Vol'],['dollar_volume','Dollar Vol'],['earnings_in_days','Earnings'],['reason','Reason']],stage2:[['ticker','Ticker'],['status','Status'],['setup_score','Score'],['grade','Grade'],['setup_type','Setup'],['rvol','RVOL'],['rs_vs_spy','RS vs SPY'],['vwap_distance','VWAP %'],['atr','ATR'],['sector','Sector'],['sector_rs','Sector RS'],['reason','Reason']],stage3:[['ticker','Ticker'],['status','Status'],['options_verdict','Verdict'],['signals_count','Signals'],['iv_rank','IV Rank'],['call_vol_oi_ratio','Call Vol/OI'],['put_call_vol_ratio','Put/Call'],['call_oi_skew','Call OI Skew'],['threshold_notes','Threshold Notes'],['options_notes','Notes']],stage4:[['ticker','Ticker'],['status','Status'],['chronos_dir','Dir'],['chronos_band_pct','Band %'],['cone_flag','Cone'],['forecastConviction','Conviction'],['conviction_flag','Conv Flag'],['chronos2_1d','1d'],['chronos2_3d','3d'],['chronos2_5d','5d'],['reason','Reason']],stage5:[['ticker','Ticker'],['status','Status'],['news_checked','Checked'],['fetch_failed','Fetch Failed'],['analyst_change','Analyst Change'],['hard_landmine','Landmine'],['news_recent_items_checked','Items'],['news_items','Headlines'],['reason','Reason']],stage6:[['ticker','Ticker'],['status','Status'],['council_votes','Votes'],['council_conf','Conf'],['claude_verdict','Claude'],['gpt_verdict','GPT'],['gemini_verdict','Gemini'],['red_flags','Red Flags'],['reason','Reason']],stage7:[['ticker','Ticker'],['status','Status'],['cluster','Cluster'],['setup_score','Score'],['volumeRatio','RVOL'],['rsVsSpy','RS'],['tiebreak','Tiebreak'],['reason','Reason']],finalists:[['ticker','Ticker'],['status','Status'],['reason','Reason']]})[k]||[['ticker','Ticker'],['status','Status'],['reason','Reason']]}
+  function val(r,k){let v=r[k];if(k==='cluster')v=r.cluster?.sector?`${r.cluster.sector} / ${r.cluster.etf||''} rank ${r.cluster.clusterRank||'-'}`:r.cluster;if(k==='analyst_change'||k==='hard_landmine')v=v?.summary||v;if(k==='news_items')v=(v||[]).map(x=>`${x.date?.slice(0,10)||''} ${x.title}`).join(' | ') || (r.fetch_failed?'fetch failed':'0 items found');if(k.startsWith('chronos2_'))v=v?`${v.direction||''} ${v.expected_return_pct??''}%`:'-';if(Array.isArray(v))return v.join(', ');if(v&&typeof v==='object')return JSON.stringify(v);return v??'-'}
+  function cls(v){v=String(v||'off').toLowerCase();return v==='kept'||v==='enriched'||v==='finalist'||v==='confirm'||v==='live'||v==='tight'||v==='high'?'confirm':v==='rejected'||v==='no_data'||v==='caution'||v==='wide'||v==='low'?'caution':'neutral'}
+  function pill(v){return `<span class="pill ${cls(v)}">${esc(v??'-')}</span>`}
+  function cell(r,k){const v=val(r,k);if(['status','options_verdict','cone_flag','conviction_flag'].includes(k))return pill(v);if(k==='call_oi_skew'&&Number(v)>50)return `<span class="pill ${Number(v)>100?'confirm':'neutral'}">${esc(v)} extreme</span>`;return esc(v)}
+  function filtered(){let rows=[...(current?.tickers||[])];const f=$('stageStatusFilter').value;if(f)rows=rows.filter(r=>r.status===f);const q=$('stageSearch').value.trim().toUpperCase();if(q)rows=rows.filter(r=>(r.ticker+' '+r.status+' '+r.reason+' '+JSON.stringify(r.data||{})).toUpperCase().includes(q));rows.sort((a,b)=>String(val(a,sortKey)).localeCompare(String(val(b,sortKey)),undefined,{numeric:true})*sortDir);return rows}
+  async function open(stage='stage2'){ $('stageModal').classList.add('on'); const meta=await jget('/api/run-metadata'); const dates=meta.available_dates||[meta.date]; $('stageDate').innerHTML=dates.map(d=>`<option value="${d}" ${d===(document.getElementById('selectedDate')?.value||meta.date)?'selected':''}>${d}</option>`).join(''); $('stageSelect').innerHTML=stages.map(([k,n])=>`<option value="${k}" ${k===stage?'selected':''}>${n}</option>`).join(''); $('stageStatusFilter').value=''; $('stageSearch').value=''; sortKey='ticker'; sortDir=1; await load() }
+  function close(){ $('stageModal').classList.remove('on') }
+  async function load(){const d=$('stageDate').value, s=$('stageSelect').value; $('stageDetailTable').innerHTML='<p class="hint">Loading stage detail...</p>'; const r=await jget('/api/stage-detail?date='+encodeURIComponent(d)+'&stage='+encodeURIComponent(s)); current=r.stage; render()}
+  function summary(){const m=current?.metadata||{},k=current?.stage_key;if(k==='stage1')return `Rejected: ${m.rejectionBreakdown?.removed_volume||0} volume / ${m.rejectionBreakdown?.removed_price||0} price / ${m.rejectionBreakdown?.removed_dollar_vol||0} dollar-vol / ${m.rejectionBreakdown?.removed_earnings||0} earnings / ${m.rejectionBreakdown?.removed_other||0} other.`;if(k==='stage3'){const v=m.verdictCounts||{};return `${v.CONFIRM||0} CONFIRM / ${v.NEUTRAL||0} NEUTRAL / ${v.CAUTION||0} CAUTION / ${v.NO_DATA||0} NO_DATA. Thresholds: P/C bullish <0.70, call OI skew extreme >50.`}if(k==='stage4'){const d=m.directionCounts||{},c=m.coneCounts||{};return `${d.UP||0} UP / ${d.DOWN||0} DOWN / ${d.FLAT||0} FLAT — avg band ${m.avgBandPct??'-'}% (${c.TIGHT||0} tight / ${c.MODERATE||0} moderate / ${c.WIDE||0} wide) — avg conviction ${m.avgConviction??'-'}.`}if(k==='stage7'){const l=m.largestCluster;return `${m.clusterCount||0} clusters. Largest: ${l?`${l.sector||l.etf} (${l.rawCount})`:'-'}; tiebreak: score, then RVOL, then RS vs SPY.`}if(k==='stage5')return `News items and press releases scanned. 0 items found means no recent articles; fetch failed means FMP did not return data.`;return ''}
+  function miniPreMarket(d){if(d.pre_market_gap_adverse)return pill('PRE-MKT ADVERSE');if(d.pre_market_gap_favourable)return pill('PRE-MKT FAVOURABLE');if(d.pre_market_checked_at&&d.pre_market_gap_error)return pill('PRE-MKT NO DATA');if(d.pre_market_checked_at)return pill('PRE-MKT OK');return pill('PRE-MKT pending')}
+  function tradeCardMini(r){const d=r.data||{},entry=Array.isArray(d.entryZone)?d.entryZone[0]:d.price,stop=d.stopLoss,target=d.tp1,tp2=d.tp2,risk=entry&&stop?entry-stop:null,rr=risk&&target?((target-entry)/risk).toFixed(2):'-',cluster=d.cluster||{},pm=d.pre_market_checked_at?`$${d.pre_market_price??'-'} ${d.pre_market_gap_pct??'-'}% / ${d.pre_market_gap_atr_multiple??'-'}x ATR`:'pending 9:00 ET';return `<div class="tradecard"><div class="tradehead"><div><h3>${esc(r.ticker)} ${pill(d.action||'WATCH')} ${miniPreMarket(d)}</h3><div class="hint">${esc(d.setupType||d.setup||'-')} | ${esc(d.sector||'-')}</div></div><div>${pill(d.grade||'-')} <b>${d.setupQualityScore??d.convictionScore??'-'}/100</b></div></div><div class="mini"><div class="box"><div class="k">Entry</div><div class="v">${entry??'-'}</div></div><div class="box"><div class="k">Stop</div><div class="v">${stop??'-'}</div></div><div class="box"><div class="k">TP1/TP2</div><div class="v">${target??'-'} / ${tp2??'-'}</div></div><div class="box"><div class="k">R:R</div><div class="v">${rr}</div></div><div class="box"><div class="k">Position</div><div class="v">${cluster.shares??'-'} sh / $${cluster.actualRiskDollars??'-'}</div></div><div class="box"><div class="k">Pre-market</div><div class="v">${esc(pm)}</div></div><div class="box"><div class="k">Layers</div><div class="v">Opt ${d.options_verdict||'-'} | Chr ${d.chronos_dir||'-'} ${d.chronos_band_pct??''}</div></div></div><div class="reason">${esc((d.scoreReasons||[]).join(' | ')||r.reason)}</div></div>`}
+  function render(){if(!current){$('stageDetailTable').innerHTML='<p class="hint">No stage detail stored for this date yet.</p>';return}const rows=filtered(), c=cols(current.stage_key);$('stageTitle').textContent=current.stage;$('stageSub').textContent=`${$('stageDate').value} | ${current.entered} entered, ${current.kept} kept/enriched, ${current.rejected} rejected, ${current.no_data||0} no data`;$('stageCounts').innerHTML=[['Entered',current.entered],['Kept',current.kept],['Rejected',current.rejected],['No data',current.no_data||0],['Showing',rows.length]].map(([k,v])=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');const top=`<div class="banner wait">${esc(explain(current.stage_key))}<br>${esc(summary())}</div>`;if(current.stage_key==='finalists'){$('stageDetailTable').innerHTML=top+`<div class="tradecards">${rows.map(tradeCardMini).join('')}</div>`}else{$('stageDetailTable').innerHTML=top+`<table><thead><tr>${c.map(([k,n])=>`<th onclick="window.__stageSetSort('${k}')">${n}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${c.map(([k])=>`<td>${cell(r,k)}</td>`).join('')}</tr>`).join('')}</tbody></table>`}$('stageRaw').textContent=JSON.stringify(current.metadata||{},null,2);histogram()}
+  function histogram(){if(hist){hist.destroy();hist=null}if(current?.stage_key!=='stage2'){$('stageHistogram').innerHTML='';return}const d=current.metadata?.scoreDistribution||{},cut=current.metadata?.scoreCutoff;$('stageHistogram').innerHTML=`<div class="banner wait">Stage 2 cutoff: top-40 line was score ${cut??'-'}.</div><canvas id="stageDetailHistogram"></canvas>`;if(window.Chart)hist=new Chart($('stageDetailHistogram'),{type:'bar',data:{labels:['80-100','70-79','60-69','50-59','40-49','<40'],datasets:[{label:'Ticker count by setup score bucket',data:[d.score_80_100||0,d.score_70_79||0,d.score_60_69||0,d.score_50_59||0,d.score_40_49||0,d.score_below_40||0],backgroundColor:'rgba(101,183,255,.6)'}]},options:{plugins:{legend:{labels:{color:'#edf2f7'}}},scales:{x:{title:{display:true,text:'Setup score bucket',color:'#93a4ba'},ticks:{color:'#93a4ba'},grid:{color:'#29364d'}},y:{title:{display:true,text:'Ticker count',color:'#93a4ba'},ticks:{color:'#93a4ba'},grid:{color:'#29364d'}}}}})}
+  function csv(){if(!current)return;const c=cols(current.stage_key), rows=filtered();const text=[c.map(x=>x[1]).join(',')].concat(rows.map(r=>c.map(([k])=>`"${String(val(r,k)).replaceAll('"','""')}"`).join(','))).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download=`${$('stageDate').value}_${current.stage_key}.csv`;a.click();URL.revokeObjectURL(a.href)}
+  window.openStageDetail=open; window.closeStageDetail=close; window.loadStageDetail=load; window.renderStageDetail=render; window.downloadStageCsv=csv; window.__stageSetSort=k=>{sortKey=k;sortDir*=-1;render()};
+})();
+</script>
+</body>
+</html>

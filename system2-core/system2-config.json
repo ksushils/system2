@@ -1,0 +1,36 @@
+{
+  "mode": "paper",
+  "notes": "Bare core baseline with Stage 5 news safety live, Chronos/options/social ride-along logging-only. Council/C4/C5 edge layers are not wired.",
+  "universe": {
+    "target_size": 1500,
+    "min_market_cap": 1000000000,
+    "min_avg_volume": 500000,
+    "exclude_price_below": 5
+  },
+  "stage1": {
+    "min_price": 5,
+    "min_avg_volume": 1000000,
+    "min_dollar_volume": 20000000,
+    "earnings_blackout_days": 5,
+    "blocked_tickers": ["STRC"]
+  },
+  "stage2": {
+    "top_n": 40,
+    "max_workers": 4
+  },
+  "stage7": {
+    "account_size": 25000,
+    "risk_pct": 0.01,
+    "max_trades_per_day": 3,
+    "max_portfolio_heat": 0.06,
+    "max_names_per_cluster": 2
+  },
+  "layers": {
+    "options_flow": "ride_along_logging_only",
+    "chronos": "ride_along_logging_only",
+    "news_safety": "LIVE",
+    "council": "off",
+    "options_discovery": "off",
+    "social_sentiment": "ride_along_logging_only"
+  }
+}
