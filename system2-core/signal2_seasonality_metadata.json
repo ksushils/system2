@@ -1,16 +1,16 @@
 {
   "stage": "SIGNAL2_SEASONALITY",
-  "createdAt": "2026-06-14T20:58:09.779039+00:00",
-  "inputCount": 50,
-  "outputCount": 50,
-  "fmpCalls": 50,
+  "createdAt": "2026-07-24T02:29:37.545969+00:00",
+  "inputCount": 45,
+  "outputCount": 45,
+  "fmpCalls": 45,
   "fmpErrors": [],
-  "currentMonth": "06",
+  "currentMonth": "07",
   "signalDistribution": {
-    "TAILWIND": 18,
-    "NEUTRAL": 26,
-    "INSUFFICIENT_DATA": 3,
-    "HEADWIND": 3
+    "NEUTRAL": 13,
+    "HEADWIND": 29,
+    "TAILWIND": 2,
+    "INSUFFICIENT_DATA": 1
   },
   "mode": "ride_along_logging_only",
   "paperOnly": true

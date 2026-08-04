@@ -279,8 +279,17 @@ def build_payload(setup: dict, run_date: str) -> dict:
         "cluster_rank": cluster.get("clusterRank"),
         "cluster_risk_budget": cluster.get("clusterRiskBudget"),
         "cluster_allocated_risk": cluster.get("allocatedRiskDollars"),
+        "cluster_base_allocated_risk": cluster.get("baseAllocatedRiskDollars"),
         "cluster_actual_risk": cluster.get("actualRiskDollars"),
         "cluster_shares": cluster.get("shares"),
+        "size_rule": setup.get("size_rule"),
+        "size_rule_multiplier": setup.get("size_rule_multiplier"),
+        "size_rule_reason": setup.get("size_rule_reason"),
+        "intake_source_layer": setup.get("intake_source_layer") or setup.get("source_layer") or setup.get("universe_source"),
+        "source_layer": setup.get("source_layer") or setup.get("intake_source_layer") or setup.get("universe_source"),
+        "normal_nonpmf_halfsize_enabled": setup.get("normal_nonpmf_halfsize_enabled"),
+        "normal_nonpmf_halfsize_deployed_at": setup.get("normal_nonpmf_halfsize_deployed_at"),
+        "normal_nonpmf_halfsize_reeval_threshold": setup.get("normal_nonpmf_halfsize_reeval_threshold"),
         "momentum_bull_stack": momentum.get("bullStack"),
         "momentum_rsi14": momentum.get("rsi14"),
         "momentum_adx14": momentum.get("adx14"),
@@ -421,7 +430,7 @@ def build_payload(setup: dict, run_date: str) -> dict:
         "tape_signal": setup.get("tape_signal"),
         "gex_regime": setup.get("gex_regime"),
         # Prompt 3 — portfolio exposure fields
-        "position_r": 1.0,
+        "position_r": setup.get("position_r") if setup.get("position_r") is not None else 1.0,
         "entered_at": None,
     }
 

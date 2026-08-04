@@ -5,14 +5,19 @@
     "target_size": 1500,
     "min_market_cap": 1000000000,
     "min_avg_volume": 500000,
-    "exclude_price_below": 5
+    "exclude_price_below": 5,
+    "liquid_midcap_pad_mode": "fallback_only",
+    "options_expansion_enabled": false,
+    "implied_options_discovery_enabled": false
   },
   "stage1": {
     "min_price": 5,
     "min_avg_volume": 1000000,
     "min_dollar_volume": 20000000,
     "earnings_blackout_days": 5,
-    "blocked_tickers": ["STRC"]
+    "blocked_tickers": [
+      "STRC"
+    ]
   },
   "stage2": {
     "top_n": 40,
@@ -23,7 +28,13 @@
     "risk_pct": 0.01,
     "max_trades_per_day": 3,
     "max_portfolio_heat": 0.06,
-    "max_names_per_cluster": 2
+    "max_names_per_cluster": 2,
+    "normal_nonpmf_halfsize_enabled": true,
+    "normal_nonpmf_halfsize_deployed_at": "2026-06-30T13:40:00Z",
+    "normal_nonpmf_halfsize_reeval_threshold": 40
+  },
+  "presentation": {
+    "pmf_focus_mode_enabled": true
   },
   "layers": {
     "options_flow": "ride_along_logging_only",

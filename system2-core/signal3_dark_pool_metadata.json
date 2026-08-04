@@ -1,12 +1,11 @@
 {
   "stage": "SIGNAL3_DARK_POOL_PROXY",
-  "createdAt": "2026-06-14T20:58:09.904485+00:00",
-  "inputCount": 50,
-  "outputCount": 50,
+  "createdAt": "2026-07-24T02:29:37.719424+00:00",
+  "inputCount": 45,
+  "outputCount": 45,
   "signalDistribution": {
-    "NONE": 36,
-    "MODERATE": 1,
-    "WEAK": 13
+    "NONE": 38,
+    "WEAK": 7
   },
   "mode": "ride_along_logging_only",
   "paperOnly": true

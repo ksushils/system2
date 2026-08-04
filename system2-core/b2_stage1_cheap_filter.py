@@ -31,11 +31,13 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import fmp_cache
+import fmp_bandwidth
 
 
 ROOT = Path(__file__).resolve().parent
 DOWNLOADS = Path.home() / "Downloads"
 UNIVERSE_PATH = ROOT / "universe.json"
+UNIVERSE_META_PATH = ROOT / "universe.metadata.json"
 CANDIDATE_POOL_PATH = ROOT / "candidate_pool.json"
 SURVIVORS_PATH = ROOT / "stage1_survivors.json"
 DETAILS_PATH = ROOT / "stage1_details.json"
@@ -109,10 +111,23 @@ class FmpClient:
             try:
                 req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "system2-b2/1.0"})
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    data = json.loads(resp.read().decode("utf-8", "ignore"))
+                    raw = resp.read()
+                    fmp_bandwidth.record(
+                        endpoint,
+                        len(raw),
+                        status=getattr(resp, "status", None),
+                        source="b2_stage1_cheap_filter",
+                    )
+                    data = json.loads(raw.decode("utf-8", "ignore"))
                     self.consecutive_failures = 0
                     return data
             except urllib.error.HTTPError as exc:
+                fmp_bandwidth.record(
+                    endpoint,
+                    0,
+                    status=exc.code,
+                    source="b2_stage1_cheap_filter",
+                )
                 if exc.code == 429 and attempt < 2:
                     time.sleep(2 * (attempt + 1))
                     continue
@@ -148,8 +163,20 @@ def clean_symbol(value) -> str:
     return re.sub(r"[^A-Z0-9.]", "", str(value or "").upper()).strip(".")
 
 
+def load_source_by_symbol() -> dict[str, str]:
+    try:
+        meta = json.loads(UNIVERSE_META_PATH.read_text(encoding="utf-8"))
+        source_by_symbol = meta.get("sourceBySymbol") or {}
+        if isinstance(source_by_symbol, dict):
+            return {clean_symbol(k): str(v) for k, v in source_by_symbol.items() if k and v}
+    except Exception:
+        pass
+    return {}
+
+
 def load_candidates() -> tuple[list[dict], str]:
     path = CANDIDATE_POOL_PATH if CANDIDATE_POOL_PATH.exists() else UNIVERSE_PATH
+    source_by_symbol = load_source_by_symbol()
     raw = json.loads(path.read_text(encoding="utf-8"))
     candidates: list[dict] = []
     for item in raw:
@@ -159,11 +186,15 @@ def load_candidates() -> tuple[list[dict], str]:
                 continue
             row = {**item, "symbol": symbol, "ticker": symbol}
             row.setdefault("source", "scanner")
+            if not row.get("intake_source_layer"):
+                row["intake_source_layer"] = source_by_symbol.get(symbol)
+            if not row.get("source_layer"):
+                row["source_layer"] = row.get("intake_source_layer")
             candidates.append(row)
         else:
             symbol = clean_symbol(item)
             if symbol:
-                candidates.append({"symbol": symbol, "ticker": symbol, "source": "scanner"})
+                candidates.append({"symbol": symbol, "ticker": symbol, "source": "scanner", "intake_source_layer": source_by_symbol.get(symbol), "source_layer": source_by_symbol.get(symbol)})
     deduped: dict[str, dict] = {}
     for row in candidates:
         deduped[row["symbol"]] = {**deduped.get(row["symbol"], {}), **row}

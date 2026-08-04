@@ -3,10 +3,35 @@ import cors from 'cors';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import attachScoring from './scoring-endpoints.cjs';
-import { loadFromPostgres, saveToPostgres, postgresEnabled, dualWriteEnabled } from './storage-adapter.js';
+import {
+  attachParamStore,
+  getScannerParams,
+  initParamStore
+} from './param-store.js';
+import {
+  applyTradePricePath,
+  attachLayer1,
+  computeFillSlippage,
+  finalizeTradePath,
+  initLayer1
+} from './layer1.js';
+import {
+  loadFromPostgres,
+  saveToPostgres,
+  postgresEnabled,
+  dualWriteEnabled,
+  upsertHeartbeatPostgres,
+  insertPingPostgres,
+  insertSignalPostgres,
+  insertRejectionPostgres,
+  insertUpdatePostgres,
+  upsertTradePostgres,
+  insertBrainPostgres
+} from './storage-adapter.js';
+import fundIntegrity from './fund-integrity.cjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
@@ -38,6 +63,49 @@ app.use((req, res, next) => {
 // ── DB ───────────────────────────────────────────────────────
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../data/fund.json');
 mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const DATA_DIR = path.dirname(DB_PATH);
+const LOCAL_ENV_PATH = path.join(__dirname, '../.env');
+
+function readLocalEnvValue(key) {
+  try {
+    if (!existsSync(LOCAL_ENV_PATH)) return '';
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = readFileSync(LOCAL_ENV_PATH, 'utf8').match(new RegExp(`^${escaped}=(.*)$`, 'm'));
+    return match ? match[1].trim().replace(/^['"]|['"]$/g, '') : '';
+  } catch {
+    return '';
+  }
+}
+
+function envValue(...keys) {
+  for (const key of keys) {
+    const value = process.env[key] || readLocalEnvValue(key);
+    if (value) return value;
+  }
+  return '';
+}
+
+async function sendTelegramAlert(text) {
+  const token = envValue('TELEGRAM_BOT_TOKEN', 'TG_BOT_TOKEN');
+  const chatId = envValue('TELEGRAM_CHAT_ID', 'TG_CHAT_ID');
+  if (!token || !chatId) {
+    return { ok: false, skipped: 'telegram credentials missing' };
+  }
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      disable_web_page_preview: true
+    })
+  });
+  const bodyText = await response.text();
+  let body;
+  try { body = bodyText ? JSON.parse(bodyText) : null; } catch { body = bodyText; }
+  return { ok: response.ok, status: response.status, body };
+}
+fundIntegrity.validateFundFileOnLoad(DB_PATH);
 
 const defaultData = {
   // Fund config
@@ -138,6 +206,20 @@ if (postgresEnabled) {
   }
 }
 
+try {
+  await initParamStore();
+  console.log('✓ Parameter store ready');
+} catch (e) {
+  console.error('⚠ Parameter store init failed:', e.message);
+}
+
+try {
+  await initLayer1();
+  console.log('Layer 1 intelligence ready');
+} catch (e) {
+  console.error('Layer 1 intelligence init failed:', e.message);
+}
+
 // Seed IDs
 const ids = {};
 ['investors','stakes','allocations','risk_settings','trades','signals',
@@ -162,6 +244,68 @@ const save = async () => {
   } else {
     await db.write();
   }
+};
+
+let jsonMirrorTimer = null;
+let jsonMirrorInFlight = false;
+let jsonMirrorDirty = false;
+
+const scheduleJsonMirror = () => {
+  if (!dualWriteEnabled) return;
+  jsonMirrorDirty = true;
+  if (jsonMirrorTimer || jsonMirrorInFlight) return;
+  jsonMirrorTimer = setTimeout(async () => {
+    jsonMirrorTimer = null;
+    if (jsonMirrorInFlight) return;
+    jsonMirrorInFlight = true;
+    jsonMirrorDirty = false;
+    try {
+      await db.write();
+    } catch (e) {
+      console.error('dual-write json failed:', e.message);
+    } finally {
+      jsonMirrorInFlight = false;
+      if (jsonMirrorDirty) scheduleJsonMirror();
+    }
+  }, Number(process.env.JSON_MIRROR_DEBOUNCE_MS || 5000));
+  jsonMirrorTimer.unref?.();
+};
+
+const saveHeartbeat = async (scanner, heartbeat) => {
+  if (postgresEnabled) {
+    await upsertHeartbeatPostgres(scanner, heartbeat);
+    return;
+  }
+  await db.write();
+};
+
+const savePing = async (ping) => {
+  if (postgresEnabled) {
+    await insertPingPostgres(ping);
+    return;
+  }
+  await db.write();
+};
+
+const saveSignalHot = async (signal) => {
+  if (postgresEnabled) { await insertSignalPostgres(signal); scheduleJsonMirror(); return; }
+  await db.write();
+};
+const saveRejectionHot = async (rejection) => {
+  if (postgresEnabled) { await insertRejectionPostgres(rejection); scheduleJsonMirror(); return; }
+  await db.write();
+};
+const saveUpdateHot = async (update) => {
+  if (postgresEnabled) { await insertUpdatePostgres(update); scheduleJsonMirror(); return; }
+  await db.write();
+};
+const saveTradeHot = async (trade) => {
+  if (postgresEnabled) { await upsertTradePostgres(trade); scheduleJsonMirror(); return; }
+  await db.write();
+};
+const saveBrainHot = async (brain) => {
+  if (postgresEnabled) { await insertBrainPostgres(brain); scheduleJsonMirror(); return; }
+  await db.write();
 };
 
 const hashPin  = pin => crypto.createHash('sha256').update(pin + 'fund_salt_v1').digest('hex');
@@ -576,9 +720,10 @@ app.post('/api/signal', scannerAuth, async (req,res)=>{
     const b=req.body;
     if (!validTicker(b.ticker||b.pair||b.asset)) return res.status(400).json({status:'error',message:'valid ticker required (1-20 chars, alphanumeric)'});
     if (b.entry != null && !validNumber(b.entry, 0.0001, 1000000)) return res.status(400).json({status:'error',message:'entry must be 0.0001-1000000'});
-    db.data.signals.unshift({ id:nid('signals'), ts:b.ts||now(), scanner:b.scanner||'unknown', type:b.type||'skip', ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null });
+    const signal = { id:nid('signals'), ts:b.ts||now(), scanner:b.scanner||'unknown', type:b.type||'skip', ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null };
+    db.data.signals.unshift(signal);
     if(db.data.signals.length>1000) db.data.signals=db.data.signals.slice(0,1000);
-    await save(); res.json({status:'ok'});
+    await saveSignalHot(signal); res.json({status:'ok'});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -597,17 +742,32 @@ app.post('/api/trade/open', scannerAuth, async (req,res)=>{
       const existing = (db.data.trades || []).find(t => t.deal_id === dealId && ['OPEN','PARTIAL'].includes(t.status));
       if (existing) return res.json({status:'ok', duplicate:true, trade_id:existing.id});
     }
-    db.data.trades.unshift({ id:nid('trades'), ts:b.ts||now(), scanner:b.scanner||'unknown', ticker:(b.ticker||b.epic).toUpperCase(), deal_id:b.deal_id||b.dealId||null, direction:String(b.direction).toUpperCase(), setup_type:b.setup_type||b.type||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, status:'OPEN', close_price:null, pnl:null, opened_at:b.ts||now(), closed_at:null });
-    await save(); res.json({status:'ok'});
+    const entry = b.entry ?? b.entry_price ?? null;
+    const intendedEntry = b.intended_entry ?? b.intendedEntry ?? null;
+    const initialSl = b.sl ?? b.stop_loss ?? null;
+    const trade = { id:nid('trades'), ts:b.ts||now(), scanner:b.scanner||'unknown', ticker:(b.ticker||b.epic).toUpperCase(), deal_id:b.deal_id||b.dealId||null, direction:String(b.direction).toUpperCase(), setup_type:b.setup_type||b.type||'', entry, intended_entry:intendedEntry, fill_slippage_pct:computeFillSlippage(b.direction, entry, intendedEntry), sl:initialSl, initial_sl:initialSl, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, status:'OPEN', close_price:null, pnl:null, max_favorable:entry, max_adverse:entry, mae_r:null, mfe_r:null, opened_at:b.ts||now(), closed_at:null };
+    db.data.trades.unshift(trade);
+    await saveTradeHot(trade); res.json({status:'ok'});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
 app.post('/api/trade/close', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
-    const t=(db.data.trades||[]).find(t=>(b.deal_id&&t.deal_id===b.deal_id)||(b.ticker&&t.ticker===b.ticker&&t.status==='OPEN'));
-    if(t){ t.status=b.action==='PARTIAL_EXIT'?'PARTIAL':'CLOSED'; t.close_price=b.close_price??b.closePrice??null; t.pnl=b.pnl??b.pnl_realised??null; if(t.status==='CLOSED') t.closed_at=b.ts||now(); }
-    db.data.updates.unshift({ id:nid('updates'), ts:b.ts||now(), deal_id:b.deal_id||null, ticker:b.ticker||null, scanner:b.scanner||null, action:b.action||'FULL_EXIT', close_price:b.close_price||null, pnl_realised:b.pnl||null });
+    const t=(db.data.trades||[]).find(t=>(b.deal_id&&t.deal_id===b.deal_id)||(b.ticker&&t.ticker===b.ticker&&['OPEN','PARTIAL'].includes(t.status)));
+    if(t){
+      const closePrice = b.close_price??b.closePrice??b.current_price??null;
+      applyTradePricePath(t, closePrice);
+      t.status=b.action==='PARTIAL_EXIT'?'PARTIAL':'CLOSED';
+      t.close_price=closePrice;
+      t.pnl=b.pnl??b.pnl_realised??null;
+      if(t.status==='CLOSED') {
+        t.closed_at=b.ts||now();
+        finalizeTradePath(t);
+      }
+    }
+    const update = { id:nid('updates'), ts:b.ts||now(), deal_id:b.deal_id||null, ticker:b.ticker||null, scanner:b.scanner||null, action:b.action||'FULL_EXIT', close_price:b.close_price||null, pnl_realised:b.pnl||null };
+    db.data.updates.unshift(update);
 
     // ── Auto-feed the Trade Brain on a FULL close ──
     if (t && t.status === 'CLOSED') {
@@ -629,9 +789,12 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
       db.data.trade_brain = db.data.trade_brain || [];
       if (rec.deal_id) db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
       db.data.trade_brain.push(rec);
+      await saveBrainHot(rec);
     }
 
-    await save(); res.json({status:'ok',found:!!t});
+    if (t) await saveTradeHot(t);
+    await saveUpdateHot(update);
+    res.json({status:'ok',found:!!t});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -640,15 +803,20 @@ app.post('/api/trade/update', scannerAuth, async (req,res)=>{
     const b=req.body;
     const t=(db.data.trades||[]).find(t=>(b.deal_id&&t.deal_id===b.deal_id)||(b.ticker&&t.ticker===b.ticker&&['OPEN','PARTIAL'].includes(t.status)));
     if(t&&b.new_sl) t.sl=b.new_sl;
-    db.data.updates.unshift({ id:nid('updates'), ts:b.ts||now(), deal_id:b.deal_id||null, ticker:b.ticker||null, scanner:b.scanner||null, action:'UPDATE_SL', old_sl:b.old_sl||null, new_sl:b.new_sl||null });
-    await save(); res.json({status:'ok',found:!!t});
+    if(t) applyTradePricePath(t, b.current_price);
+    const update = { id:nid('updates'), ts:b.ts||now(), deal_id:b.deal_id||null, ticker:b.ticker||null, scanner:b.scanner||null, action:'UPDATE_SL', old_sl:b.old_sl||null, new_sl:b.new_sl||null, current_price:b.current_price??null };
+    db.data.updates.unshift(update);
+    if (t) await saveTradeHot(t);
+    await saveUpdateHot(update);
+    res.json({status:'ok',found:!!t});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
 app.post('/api/rejection', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
-    db.data.rejections.unshift({
+    const rejection = {
+      ...b,
       id:nid('rejections'),
       ts:b.ts||now(),
       scanner:b.scanner||'unknown',
@@ -661,10 +829,14 @@ app.post('/api/rejection', scannerAuth, async (req,res)=>{
       intended_tp1:b.intended_tp1??null,
       intended_tp2:b.intended_tp2??null,
       rejected_price:b.rejected_price??null,
-      rejected_time:b.rejected_time||b.ts||now()
-    });
+      rejected_time:b.rejected_time||b.ts||now(),
+      risk_response:b.risk_response??null,
+      item_keys:b.item_keys??null,
+      score:b.score??null
+    };
+    db.data.rejections.unshift(rejection);
     if(db.data.rejections.length>500) db.data.rejections=db.data.rejections.slice(0,500);
-    await save(); res.json({status:'ok'});
+    await saveRejectionHot(rejection); res.json({status:'ok'});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -780,9 +952,10 @@ app.get('/api/rejection-analysis', (req,res)=>{
 app.post('/api/ping', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
-    db.data.pings.unshift({ id:nid('pings'), ts:b.ts||now(), scanner:b.scanner||'unknown', status:b.status||'running', signals_today:b.signals_today||0, open_trades:b.open_trades||0, portfolio_heat:b.portfolio_heat||0, regime:b.regime||'', message:b.message||'' });
+    const ping = { id:nid('pings'), ts:b.ts||now(), scanner:b.scanner||'unknown', status:b.status||'running', signals_today:b.signals_today||0, open_trades:b.open_trades||0, portfolio_heat:b.portfolio_heat||0, regime:b.regime||'', message:b.message||'' };
+    db.data.pings.unshift(ping);
     if(db.data.pings.length>400) db.data.pings=db.data.pings.slice(0,400);
-    await save(); res.json({status:'ok'});
+    await savePing(ping); res.json({status:'ok'});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -1418,13 +1591,320 @@ app.get('/api/positions/live', adminOnly, (req,res)=>{
 
 
 // ════════════════════════════════════════════════════════════
+// FMP PROXY — shared fleet cache + outbound rate limiting
+// ════════════════════════════════════════════════════════════
+
+const fmpCache = new Map();
+const fmpQueue = [];
+const fmpStats = { requests: 0, hits: 0, misses: 0, outbound: 0, errors: 0, rate_limited: 0 };
+let fmpProcessing = false;
+let fmpBackoffUntil = 0;
+let fmpBackfillPausedUntil = Date.parse(process.env.FMP_BACKFILL_PAUSED_UNTIL || readLocalEnvValue('FMP_BACKFILL_PAUSED_UNTIL') || '') || 0;
+const FMP_BUDGET_PATH = process.env.FMP_BUDGET_PATH || readLocalEnvValue('FMP_BUDGET_PATH') || path.join(DATA_DIR, 'fmp-proxy-budget.json');
+const FMP_BACKFILL_DAILY_CAP = Number(process.env.FMP_BACKFILL_DAILY_CAP || readLocalEnvValue('FMP_BACKFILL_DAILY_CAP') || 1500);
+const FMP_MIN_INTERVAL_MS = Math.ceil(60_000 / 250);
+const FMP_STALE_MAX_MS = 15 * 60_000;
+const FMP_QUOTE_TTL_MS = 3 * 60_000;
+
+function fmpDayKey(ts = new Date()) {
+  return ts.toISOString().slice(0, 10);
+}
+
+function loadFmpBudget() {
+  try {
+    if (!existsSync(FMP_BUDGET_PATH)) return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null };
+    const parsed = JSON.parse(readFileSync(FMP_BUDGET_PATH, 'utf8'));
+    if (parsed.day !== fmpDayKey()) return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: parsed.reset_observed_at || null };
+    return { outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null, ...parsed };
+  } catch (e) {
+    console.error('[fmp-budget] load failed:', e.message);
+    return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null };
+  }
+}
+
+let fmpBudget = loadFmpBudget();
+
+function persistFmpBudget() {
+  try {
+    mkdirSync(path.dirname(FMP_BUDGET_PATH), { recursive: true });
+    writeFileSync(FMP_BUDGET_PATH, JSON.stringify(fmpBudget, null, 2));
+  } catch (e) {
+    console.error('[fmp-budget] persist failed:', e.message);
+  }
+}
+
+function refreshFmpBudgetDay() {
+  const day = fmpDayKey();
+  if (fmpBudget.day !== day) {
+    fmpBudget = { day, outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: fmpBudget.reset_observed_at || null };
+    persistFmpBudget();
+  }
+}
+
+function fmpBudgetSnapshot() {
+  refreshFmpBudgetDay();
+  return {
+    ...fmpBudget,
+    backfill_daily_cap: FMP_BACKFILL_DAILY_CAP,
+    backfill_remaining: Math.max(0, FMP_BACKFILL_DAILY_CAP - Number(fmpBudget.backfill_outbound || 0)),
+    path: FMP_BUDGET_PATH
+  };
+}
+
+function fmpApiKey() {
+  const cfg = db.data.scanner_config || {};
+  return process.env.FMP_API_KEY ||
+    process.env.FINANCIALMODELINGPREP_API_KEY ||
+    readLocalEnvValue('FMP_API_KEY') ||
+    readLocalEnvValue('FMP_KEY') ||
+    readLocalEnvValue('FINANCIALMODELINGPREP_API_KEY') ||
+    cfg.fmp_api_key ||
+    cfg.FMP_API_KEY ||
+    '';
+}
+
+function refreshFmpBackfillPause() {
+  const fromDisk = Date.parse(readLocalEnvValue('FMP_BACKFILL_PAUSED_UNTIL') || '') || 0;
+  if (fromDisk > fmpBackfillPausedUntil) fmpBackfillPausedUntil = fromDisk;
+}
+
+function fmpCacheGet(key) {
+  const hit = fmpCache.get(key);
+  if (!hit || hit.expires <= Date.now()) return null;
+  fmpStats.hits++;
+  return hit;
+}
+
+function fmpCacheGetStale(key) {
+  const hit = fmpCache.get(key);
+  if (!hit) return null;
+  const age = Date.now() - Date.parse(hit.cached_at || 0);
+  if (!Number.isFinite(age) || age > FMP_STALE_MAX_MS) {
+    fmpCache.delete(key);
+    return null;
+  }
+  fmpStats.hits++;
+  return hit;
+}
+
+function fmpCacheSet(key, ttlMs, value) {
+  fmpCache.set(key, { ...value, expires: Date.now() + ttlMs, cached_at: new Date().toISOString() });
+}
+
+function runFmpQueue() {
+  if (fmpProcessing || !fmpQueue.length) return;
+  fmpProcessing = true;
+  const wait = Math.max(0, fmpBackoffUntil - Date.now(), FMP_MIN_INTERVAL_MS);
+  setTimeout(async () => {
+    const job = fmpQueue.shift();
+    try {
+      fmpStats.outbound++;
+      refreshFmpBudgetDay();
+      fmpBudget.outbound = Number(fmpBudget.outbound || 0) + 1;
+      if (job.traffic === 'backfill') fmpBudget.backfill_outbound = Number(fmpBudget.backfill_outbound || 0) + 1;
+      else fmpBudget.live_outbound = Number(fmpBudget.live_outbound || 0) + 1;
+      persistFmpBudget();
+      const response = await fetch(job.url, { headers: { Accept: 'application/json' } });
+      const text = await response.text();
+      const headers = {};
+      for (const [k, v] of response.headers.entries()) {
+        if (/limit|remaining|reset|quota|plan|ratelimit/i.test(k)) headers[k] = v;
+      }
+      let body;
+      try { body = text ? JSON.parse(text) : null; } catch { body = text; }
+      if (response.status === 429) {
+        fmpStats.rate_limited++;
+        fmpBudget.rate_limited = Number(fmpBudget.rate_limited || 0) + 1;
+        persistFmpBudget();
+        const retryAfter = Number(response.headers.get('retry-after') || 30);
+        fmpBackoffUntil = Date.now() + Math.max(5, retryAfter) * 1000;
+      }
+      job.resolve({ status: response.status, ok: response.ok, headers, body });
+    } catch (e) {
+      fmpStats.errors++;
+      job.reject(e);
+    } finally {
+      fmpProcessing = false;
+      runFmpQueue();
+    }
+  }, wait);
+}
+
+function queueFmp(url, traffic = 'live') {
+  return new Promise((resolve, reject) => {
+    fmpQueue.push({ url, traffic, resolve, reject });
+    runFmpQueue();
+  });
+}
+
+async function fmpProxyFetch(cacheKey, ttlMs, endpoint) {
+  fmpStats.requests++;
+  const cached = fmpCacheGet(cacheKey);
+  if (cached) return { ...cached, cache: 'HIT' };
+  refreshFmpBackfillPause();
+  if (cacheKey.startsWith('l1:') && Date.now() < fmpBackfillPausedUntil) {
+    return {
+      status: 429,
+      ok: false,
+      headers: {},
+      body: { error: 'FMP backfill paused after upstream 429', paused_until: new Date(fmpBackfillPausedUntil).toISOString() },
+      cache: 'PAUSED'
+    };
+  }
+  const isBackfill = cacheKey.startsWith('l1:');
+  refreshFmpBudgetDay();
+  if (isBackfill && FMP_BACKFILL_DAILY_CAP > 0 && Number(fmpBudget.backfill_outbound || 0) >= FMP_BACKFILL_DAILY_CAP) {
+    return {
+      status: 429,
+      ok: false,
+      headers: {},
+      body: {
+        error: 'FMP backfill daily budget exhausted',
+        cap: FMP_BACKFILL_DAILY_CAP,
+        used: Number(fmpBudget.backfill_outbound || 0),
+        day: fmpBudget.day
+      },
+      cache: 'BUDGET_BLOCKED'
+    };
+  }
+  fmpStats.misses++;
+  const key = fmpApiKey();
+  if (!key) {
+    const err = new Error('FMP API key not configured on server');
+    err.statusCode = 503;
+    throw err;
+  }
+  const sep = endpoint.includes('?') ? '&' : '?';
+  const url = `https://financialmodelingprep.com/${endpoint}${sep}apikey=${encodeURIComponent(key)}`;
+  const result = await queueFmp(url, isBackfill ? 'backfill' : 'live');
+  if (result.status === 429) {
+    fmpBackfillPausedUntil = Math.max(fmpBackfillPausedUntil, Date.now() + 30 * 60_000);
+    if (isBackfill) persistFmpBudget();
+    const stale = fmpCacheGetStale(cacheKey);
+    if (stale) return { ...stale, cache: 'STALE', stale_reason: 'upstream_429' };
+  } else if (result.ok || Number(result.status) < 400) {
+    fmpCacheSet(cacheKey, ttlMs, result);
+  }
+  const total = fmpStats.hits + fmpStats.misses;
+  if (total % 25 === 0) {
+    console.log(`FMP proxy cache hit rate ${(fmpStats.hits / total * 100).toFixed(1)}% (${fmpStats.hits}/${total}), queue=${fmpQueue.length}`);
+  }
+  return { ...result, cache: 'MISS' };
+}
+
+function sendFmpProxy(res, result) {
+  res.set('X-FMP-Proxy-Cache', result.cache);
+  for (const [k, v] of Object.entries(result.headers || {})) res.set(`X-FMP-${k}`, String(v));
+  res.status(result.status || 200).json(result.body);
+}
+
+app.get('/api/proxy/fmp/quote', scannerAuth, async (req, res) => {
+  try {
+    const ticker = String(req.query.ticker || '').trim().toUpperCase();
+    if (!/^[A-Z0-9.^-]{1,20}$/.test(ticker)) return res.status(400).json({ error: 'valid ticker required' });
+    const result = await fmpProxyFetch(`quote:${ticker}`, FMP_QUOTE_TTL_MS, `stable/quote?symbol=${encodeURIComponent(ticker)}`);
+    sendFmpProxy(res, result);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ error: e.message });
+  }
+});
+
+app.get('/api/proxy/fmp/candles', scannerAuth, async (req, res) => {
+  try {
+    const ticker = String(req.query.ticker || '').trim().toUpperCase();
+    const resKey = String(req.query.res || '5min').trim().toLowerCase();
+    const allowed = new Set(['1min', '5min', '15min', '30min', '1hour', '4hour']);
+    if (!/^[A-Z0-9.^-]{1,20}$/.test(ticker)) return res.status(400).json({ error: 'valid ticker required' });
+    if (!allowed.has(resKey)) return res.status(400).json({ error: 'unsupported res; use 1min,5min,15min,30min,1hour,4hour' });
+    const endpoint = `stable/historical-chart/${encodeURIComponent(resKey)}?symbol=${encodeURIComponent(ticker)}`;
+    const result = await fmpProxyFetch(`candles:${ticker}:${resKey}`, 5 * 60_000, endpoint);
+    sendFmpProxy(res, result);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ error: e.message });
+  }
+});
+
+app.get('/api/proxy/fmp/regime', scannerAuth, async (req, res) => {
+  try {
+    const cached = fmpCacheGet('regime');
+    if (cached) {
+      res.set('X-FMP-Proxy-Cache', 'HIT');
+      return res.json(cached.body);
+    }
+    fmpStats.requests++;
+    fmpStats.misses++;
+    const [spy, vix] = await Promise.all([
+      fmpProxyFetch('quote:SPY', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=SPY'),
+      fmpProxyFetch('quote:%5EVIX', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=%5EVIX')
+    ]);
+    const body = { spy: Array.isArray(spy.body) ? spy.body[0] : spy.body, vix: Array.isArray(vix.body) ? vix.body[0] : vix.body };
+    fmpCacheSet('regime', 10 * 60_000, { status: 200, ok: true, headers: { ...spy.headers, ...vix.headers }, body });
+    res.set('X-FMP-Proxy-Cache', 'MISS');
+    res.json(body);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ error: e.message });
+  }
+});
+
+app.get('/api/proxy/fmp/raw', scannerAuth, async (req, res) => {
+  try {
+    let rawPath = String(req.query.path || '').trim();
+    if (!rawPath) return res.status(400).json({ error: 'path required' });
+    rawPath = rawPath.replace(/^\/+/, '');
+    // FMP now rejects some legacy api/v3 paths upstream. Prefer stable/... paths.
+    if (!/^(stable|api\/v3)\/[A-Za-z0-9_./-]+(\?.*)?$/.test(rawPath)) {
+      return res.status(400).json({ error: 'path must be an FMP stable/ or api/v3 path; prefer stable/ paths' });
+    }
+    if (/apikey=/i.test(rawPath)) return res.status(400).json({ error: 'do not include apikey in path' });
+    const result = await fmpProxyFetch(`raw:${rawPath}`, 5 * 60_000, rawPath);
+    sendFmpProxy(res, result);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ error: e.message });
+  }
+});
+
+app.get('/api/proxy/fmp/stats', serviceOrAdmin, (req, res) => {
+  refreshFmpBackfillPause();
+  const total = fmpStats.hits + fmpStats.misses;
+  res.json({
+    ...fmpStats,
+    cache_entries: fmpCache.size,
+    queue_depth: fmpQueue.length,
+    backoff_until: fmpBackoffUntil ? new Date(fmpBackoffUntil).toISOString() : null,
+    backfill_paused_until: fmpBackfillPausedUntil ? new Date(fmpBackfillPausedUntil).toISOString() : null,
+    daily_budget: fmpBudgetSnapshot(),
+    cache_hit_rate_pct: total ? +(fmpStats.hits / total * 100).toFixed(1) : 0,
+    fmp_key_configured: !!fmpApiKey()
+  });
+});
+
+// ════════════════════════════════════════════════════════════
 // CENTRALIZED CONFIG — single source of truth for all scanners
 // ════════════════════════════════════════════════════════════
 
 // Scanners GET this at startup instead of hardcoding values.
 // Public (no auth) so n8n can fetch without credentials.
-app.get('/api/config', (req, res) => {
-  res.json(db.data.scanner_config || {});
+app.get('/api/config', async (req, res) => {
+  const base = { ...(db.data.scanner_config || {}) };
+  const scanner = req.query.scanner ? String(req.query.scanner) : '';
+  if (!scanner) return res.json(base);
+  try {
+    const merged = await getScannerParams(scanner);
+    res.json({
+      ...base,
+      params: merged.params,
+      params_updated_at: merged.params_updated_at,
+      params_source: Object.keys(merged.params || {}).length ? 'server' : 'local'
+    });
+  } catch (e) {
+    res.json({
+      ...base,
+      params: {},
+      params_updated_at: null,
+      params_source: 'local',
+      params_error: e.message
+    });
+  }
 });
 
 // Admin updates config from dashboard Settings
@@ -1542,13 +2022,14 @@ app.post('/api/heartbeat', scannerAuth, async (req, res) => {
   const { scanner, status = 'running', message = '' } = req.body || {};
   if (!scanner) return res.status(400).json({ error: 'scanner required' });
   db.data.heartbeats = db.data.heartbeats || {};
-  db.data.heartbeats[scanner] = {
+  const heartbeat = {
     ts: Date.now(),
     iso: new Date().toISOString(),
     status,
     msg: message
   };
-  await save();
+  db.data.heartbeats[scanner] = heartbeat;
+  await saveHeartbeat(scanner, heartbeat);
   res.json({ status: 'ok' });
 });
 
@@ -1569,7 +2050,7 @@ app.get('/api/heartbeat/status', (req, res) => {
   res.json(out);
 });
 
-app.get('/api/health', (req, res) => {
+function buildHealthPayload() {
   const trades = db.data.trades || [];
   const tradeOpen = trades.filter(t => ['OPEN','PARTIAL'].includes(t.status)).length;
   const riskOpen = (db.data.risk_ledger || []).length;
@@ -1581,7 +2062,7 @@ app.get('/api/health', (req, res) => {
   if (heartbeatCount < 7) issues.push('missing_scanner_heartbeats');
   if (!SCANNER_API_KEY) issues.push('scanner_api_key_not_enforced');
   if (!corsOrigins.length) issues.push('cors_allowlist_not_configured');
-  res.status(issues.length ? 503 : 200).json({
+  return {
     status: issues.length ? 'degraded' : 'ok',
     timestamp: now(),
     storage: postgresEnabled ? (dualWriteEnabled ? 'postgres_dual_write' : 'postgres') : 'json',
@@ -1593,7 +2074,12 @@ app.get('/api/health', (req, res) => {
       scanner_heartbeats: heartbeatCount
     },
     issues
-  });
+  };
+}
+
+app.get('/api/health', (req, res) => {
+  const payload = buildHealthPayload();
+  res.status(payload.issues.length ? 503 : 200).json(payload);
 });
 
 app.get('/api/health/details', adminOnly, (req, res) => {
@@ -1993,6 +2479,107 @@ attachScoring(app, db, {
 });
 
 // ── Kill switch endpoints ────────────────────────────────────
+attachParamStore(app, db, { adminOnly });
+attachLayer1(app, db, { adminOnly, fmpProxyFetch });
+
+function eventMs(row) {
+  const value = row?.ts || row?.rejected_time || row?.created_at || row?.iso;
+  const ms = typeof value === 'number' ? value : Date.parse(value || '');
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+function berlinClockParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Berlin',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).formatToParts(date);
+  return Object.fromEntries(parts.map(p => [p.type, p.value]));
+}
+
+function isBerlinMarketHours(date = new Date()) {
+  const parts = berlinClockParts(date);
+  const hour = Number(parts.hour);
+  return !['Sat', 'Sun'].includes(parts.weekday) && hour >= 8 && hour < 21;
+}
+
+function fleetActivitySince(cutoffMs) {
+  const signalCount = (db.data.signals || []).filter(row => eventMs(row) >= cutoffMs).length;
+  const rejectionCount = (db.data.rejections || []).filter(row => eventMs(row) >= cutoffMs).length;
+  const heartbeatCount = Object.values(db.data.heartbeats || {})
+    .filter(row => eventMs(row) >= cutoffMs || Number(row?.ts || 0) >= cutoffMs).length;
+  return { signals: signalCount, rejections: rejectionCount, heartbeats: heartbeatCount, total: signalCount + rejectionCount + heartbeatCount };
+}
+
+let lastDeadmanAlertBucket = '';
+let lastHealthSignature = '';
+let healthPushPrimed = false;
+
+async function checkFleetDeadman({ simulate = false } = {}) {
+  if (!simulate && !isBerlinMarketHours()) return { ok: true, skipped: 'outside Berlin market-hours window' };
+  const cutoffMs = Date.now() - 30 * 60_000;
+  const activity = simulate ? { signals: 0, rejections: 0, heartbeats: 0, total: 0 } : fleetActivitySince(cutoffMs);
+  if (activity.total > 0) return { ok: true, sent: false, activity };
+  const bucket = new Date(Math.floor(Date.now() / (30 * 60_000)) * 30 * 60_000).toISOString();
+  if (!simulate && lastDeadmanAlertBucket === bucket) {
+    return { ok: true, sent: false, skipped: 'already alerted this silent bucket', activity };
+  }
+  const clock = berlinClockParts();
+  const message = `${simulate ? '[TEST] ' : ''}FLEET SILENT: zero signals + rejections + heartbeats in the last 30 minutes. Berlin ${clock.weekday} ${clock.hour}:${clock.minute}.`;
+  const telegram = await sendTelegramAlert(message);
+  if (!simulate) lastDeadmanAlertBucket = bucket;
+  return { ok: telegram.ok, sent: true, activity, message, telegram };
+}
+
+async function checkHealthChange({ simulate = false } = {}) {
+  const payload = buildHealthPayload();
+  const signature = JSON.stringify({
+    status: simulate ? `test-${payload.status}` : payload.status,
+    issues: [...(payload.issues || [])].sort()
+  });
+  if (!simulate && !healthPushPrimed) {
+    lastHealthSignature = signature;
+    healthPushPrimed = true;
+    return { ok: true, sent: false, primed: true, health: payload };
+  }
+  if (!simulate && signature === lastHealthSignature) return { ok: true, sent: false, unchanged: true, health: payload };
+  const previous = lastHealthSignature || '(none)';
+  const message = `${simulate ? '[TEST] ' : ''}Dashboard health changed: status=${payload.status}; issues=${payload.issues.join(',') || 'none'}; previous=${previous}`;
+  const telegram = await sendTelegramAlert(message);
+  if (!simulate) lastHealthSignature = signature;
+  return { ok: telegram.ok, sent: true, message, health: payload, telegram };
+}
+
+app.post('/api/admin/alerts/deadman/test', adminOnly, async (req, res) => {
+  try {
+    res.json(await checkFleetDeadman({ simulate: true }));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/admin/alerts/health-change/test', adminOnly, async (req, res) => {
+  try {
+    res.json(await checkHealthChange({ simulate: true }));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+function startFleetMonitors() {
+  const deadmanTimer = setInterval(() => {
+    checkFleetDeadman().catch(e => console.error('deadman monitor failed', e));
+  }, 15 * 60_000);
+  const healthTimer = setInterval(() => {
+    checkHealthChange().catch(e => console.error('health-change monitor failed', e));
+  }, 60_000);
+  deadmanTimer.unref?.();
+  healthTimer.unref?.();
+  checkHealthChange().catch(e => console.error('health-change monitor prime failed', e));
+}
+
 app.get('/api/admin/kill-switch', adminOnly, (req, res) => {
   const cfg = db.data.scanner_config || {};
   res.json({ kill_switch: cfg.kill_switch === true, paper_only: cfg.paper_only === true, updated_at: cfg.updated_at || null });
@@ -2031,4 +2618,5 @@ app.listen(PORT, () => {
   if (!SCANNER_API_KEY) console.warn('WARNING: SCANNER_API_KEY is unset; scanner write endpoints are not authenticated.');
   if (!corsOrigins.length) console.warn('WARNING: CORS_ORIGINS is unset; cross-origin requests are unrestricted.');
   if (!process.env.ADMIN_PIN || process.env.ADMIN_PIN === '1234') console.warn('WARNING: default ADMIN_PIN is active.');
+  startFleetMonitors();
 });

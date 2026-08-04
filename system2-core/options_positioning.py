@@ -28,6 +28,11 @@ if env_path.exists():
             os.environ.setdefault(k.strip(), v.strip())
 
 FMP_KEY = os.getenv("FMP_API_KEY", "")
+OPTIONS_POSITIONING_ENABLED = os.getenv("OPTIONS_POSITIONING_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
+PAUSE_REASON = (
+    "Stream paused pending strategy review - max-pain drift thesis unproven on current sample "
+    "(0% win, -1.03R over 11 trades). Historical record preserved."
+)
 
 
 def get_days_to_expiry(today=None):
@@ -333,6 +338,26 @@ def performance_summary():
 def run(force=False, no_telegram=False):
     dte, expiry = get_days_to_expiry()
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    if not OPTIONS_POSITIONING_ENABLED:
+        output = {
+            "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "dte": dte,
+            "expiry": expiry.isoformat(),
+            "active": False,
+            "paused": True,
+            "pause_reason": PAUSE_REASON,
+            "idea_stream": "options_positioning",
+            "hold_period": "1-3 day",
+            "reason": PAUSE_REASON,
+            "idea_count": 0,
+            "ideas": [],
+            "performance": performance_summary(),
+        }
+        OUTPUT_PATH.write_text(json.dumps(output, indent=2))
+        print(PAUSE_REASON)
+        return []
 
     if dte > 3 and not force:
         output = {

@@ -54,6 +54,26 @@ def r_value(entry, risk, price):
     return round((price - entry) / risk, 3)
 
 
+def has_recorded_entry(row):
+    return row.get("trade_entered") is True
+
+
+def stamp_measurement_population(row):
+    row["measurement_population"] = "ENTERED_TRADE" if has_recorded_entry(row) else "WATCHLIST_UNENTERED"
+    if not has_recorded_entry(row):
+        row["would_be_measurement"] = "DIRECTIONAL_MARKOUT"
+
+
+def set_would_be_markout(row, days, price):
+    if has_recorded_entry(row):
+        return
+    entry = num(row.get("entry"))
+    risk = num(row.get("risk_per_share")) or (entry - num(row.get("stop")) if entry is not None and num(row.get("stop")) is not None else None)
+    stamp_measurement_population(row)
+    row[f"would_be_r_markout_{days}d"] = r_value(entry, risk, price)
+    row[f"would_be_return_pct_{days}d"] = round((price - entry) / entry * 100, 2) if entry and price is not None else None
+
+
 def simulated_long_exit(row, window, fallback_close, timeout_hit):
     stop = num(row.get("stop"))
     target = num(row.get("target"))
@@ -87,6 +107,10 @@ def apply_marks(row, hist, today):
         bar = after_entry[mark["days"] - 1]
         close_px = num(bar.get("close"))
         row[mark["field"]] = close_px
+        stamp_measurement_population(row)
+        set_would_be_markout(row, mark["days"], close_px)
+        if mark["days"] >= 10 and len(after_entry) >= 5 and row.get("would_be_r_markout_5d") is None:
+            set_would_be_markout(row, 5, num(after_entry[4].get("close")))
         window = after_entry[:mark["days"]]
         highs = [num(bar.get("high")) for bar in window if num(bar.get("high")) is not None]
         lows = [num(bar.get("low")) for bar in window if num(bar.get("low")) is not None]

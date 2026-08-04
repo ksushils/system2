@@ -1,12 +1,93 @@
 {
   "table": "shadow_portfolio",
   "db": "/root/system2-core/system2_shadow.db",
-  "inserted": 33,
-  "total_records": 389,
-  "reentry_blocked_symbols": 381,
-  "checked": 385,
-  "missed_move_alerts": 0,
+  "inserted": 25,
+  "total_records": 1066,
+  "reentry_blocked_symbols": 493,
+  "checked": 404,
+  "missed_move_alerts": 4,
   "errors": 0,
-  "alert_results": [],
+  "alert_results": [
+    {
+      "ok": true,
+      "result": {
+        "message_id": 174171,
+        "from": {
+          "id": 7975860185,
+          "is_bot": true,
+          "first_name": "stockbot",
+          "username": "sushilstockbot"
+        },
+        "chat": {
+          "id": 5779651617,
+          "first_name": "sushil",
+          "last_name": "kulkarni",
+          "type": "private"
+        },
+        "date": 1784774778,
+        "text": "SYSTEM 2 MISSED MOVE\nBP rose 10.47% within 8 trading days after rejection at stage7_correlation.\nReason: contradiction_gate: forecastDecision=REJECT with chronos_conviction<40\nPaper-mode shadow tracking only."
+      }
+    },
+    {
+      "ok": true,
+      "result": {
+        "message_id": 174172,
+        "from": {
+          "id": 7975860185,
+          "is_bot": true,
+          "first_name": "stockbot",
+          "username": "sushilstockbot"
+        },
+        "chat": {
+          "id": 5779651617,
+          "first_name": "sushil",
+          "last_name": "kulkarni",
+          "type": "private"
+        },
+        "date": 1784774870,
+        "text": "SYSTEM 2 MISSED MOVE\nFRVO rose 13.18% within 3 trading days after rejection at stage7_correlation.\nReason: contradiction_gate: forecastDecision=REJECT with chronos_conviction<40\nPaper-mode shadow tracking only."
+      }
+    },
+    {
+      "ok": true,
+      "result": {
+        "message_id": 174173,
+        "from": {
+          "id": 7975860185,
+          "is_bot": true,
+          "first_name": "stockbot",
+          "username": "sushilstockbot"
+        },
+        "chat": {
+          "id": 5779651617,
+          "first_name": "sushil",
+          "last_name": "kulkarni",
+          "type": "private"
+        },
+        "date": 1784774884,
+        "text": "SYSTEM 2 MISSED MOVE\nHBM rose 13.00% within 1 trading days after rejection at stage7_correlation.\nReason: contradiction_gate: forecastDecision=REJECT with chronos_conviction<40\nPaper-mode shadow tracking only."
+      }
+    },
+    {
+      "ok": true,
+      "result": {
+        "message_id": 174174,
+        "from": {
+          "id": 7975860185,
+          "is_bot": true,
+          "first_name": "stockbot",
+          "username": "sushilstockbot"
+        },
+        "chat": {
+          "id": 5779651617,
+          "first_name": "sushil",
+          "last_name": "kulkarni",
+          "type": "private"
+        },
+        "date": 1784774918,
+        "text": "SYSTEM 2 MISSED MOVE\nRIOT rose 17.55% within 1 trading days after rejection at stage7_correlation.\nReason: contradiction_gate: forecastDecision=REJECT with chronos_conviction<40\nPaper-mode shadow tracking only."
+      }
+    }
+  ],
   "paper_only": true
 }

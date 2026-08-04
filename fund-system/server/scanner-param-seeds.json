@@ -1,0 +1,968 @@
+[
+  {
+    "scanner": "comm",
+    "param": "ACCOUNT_SIZE",
+    "value": "5000",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "comm",
+    "param": "DAILY_LOSS_LIMIT_PCT",
+    "value": "0.03",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "AUTO_TRADE",
+    "value": "true",
+    "value_type": "bool",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_ACCOUNT_SIZE",
+    "value": "1000",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_MAX_DAILY_LOSS_R",
+    "value": "2",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_MAX_LEVERAGE",
+    "value": "2",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_MAX_OPEN",
+    "value": "3",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_MAX_TRADE_HOURS",
+    "value": "24",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_MIN_MARGIN_LEVEL",
+    "value": "2",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "BINANCE_RISK_PCT",
+    "value": "0.005",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "CRYPTO_COOLDOWN_MIN",
+    "value": "120",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "CRYPTO_MIN_QVOL",
+    "value": "20000000",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "crypto",
+    "param": "CRYPTO_MIN_SCORE",
+    "value": "10",
+    "value_type": "number",
+    "node": "Init Config"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "AUTO_TRADE",
+    "value": "true",
+    "value_type": "bool",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "BE_BUFFER_ATR",
+    "value": "0.03",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "FAIL_BELOW_OR_PCT",
+    "value": "0.1",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "HTF_CONFLUENCE_TOL_PCT",
+    "value": "0.4",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "LATE_SHORT_CRASH_BLOCK_PCT",
+    "value": "-8",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MACRO_SIZE_MODIFIER",
+    "value": "0.5",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_3DAY_UP_MOVE_TO_SHORT",
+    "value": "30",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_DAILY_LOSS_R",
+    "value": "2",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_ENTRY_EXTENSION_ATR",
+    "value": "2.2",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_OPEN_POSITIONS",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_OR_HIGH_TESTS",
+    "value": "12",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_PORTFOLIO_RISK",
+    "value": "0.025",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_PRICE",
+    "value": "300",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_RSI_5M",
+    "value": "68",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_SPREAD_AS_RISK",
+    "value": "0.12",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_TRADE_MINUTES",
+    "value": "120",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_TRADES_PER_DAY",
+    "value": "4",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MAX_WATCHLIST",
+    "value": "90",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_ABS_CANDLE_VOL",
+    "value": "15000",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_BELOW_VWAP_PCT",
+    "value": "0.05",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_BREAK_ABOVE_OR_PCT",
+    "value": "0.25",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_DOLLAR_VOLUME",
+    "value": "1500000",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_MARKET_CAP",
+    "value": "250000000",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_PRICE",
+    "value": "5",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_REJECTION_FROM_HIGH_PCT",
+    "value": "0.12",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_RR1",
+    "value": "1",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_RR2",
+    "value": "1.8",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_RSI_5M",
+    "value": "35",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_SCORE",
+    "value": "9",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_VOLUME_RATIO",
+    "value": "1.2",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "MIN_WATCHLIST_UP_PCT",
+    "value": "1.5",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "NEWS_LOOKBACK_HOURS",
+    "value": "48",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "OR_MINUTES",
+    "value": "30",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "RECLAIM_MAX_BARS",
+    "value": "10",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "REDUCE_SIZE_ON_MACRO_EVENT",
+    "value": "true",
+    "value_type": "bool",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "RISK_PCT",
+    "value": "0.005",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "STOP_BUFFER_ATR",
+    "value": "0.55",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "STRONG_MARKET_UP_PCT",
+    "value": "1",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "TP1_CLOSE_PCT",
+    "value": "0.5",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "VIX_HALT",
+    "value": "35",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "VIX_LOW_REGIME",
+    "value": "17",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "failed_breakout",
+    "param": "VIX_YELLOW",
+    "value": "25",
+    "value_type": "number",
+    "node": "⚙️ P1 Config + Watchlist Builder"
+  },
+  {
+    "scanner": "fmp",
+    "param": "ACCOUNT_SIZE",
+    "value": "37667.53",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "fmp",
+    "param": "MAX_OPEN_POSITIONS",
+    "value": "12",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp",
+    "param": "MAX_PORTFOLIO_HEAT",
+    "value": "0.2",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp",
+    "param": "MAX_RISK_PER_TRADE",
+    "value": "0.02",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp",
+    "param": "T212_ACCOUNT_SIZE",
+    "value": "10000",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp_alpaca",
+    "param": "ACCOUNT_SIZE",
+    "value": "37667.53",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp_alpaca",
+    "param": "MAX_OPEN_POSITIONS",
+    "value": "6",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp_alpaca",
+    "param": "MAX_PORTFOLIO_HEAT",
+    "value": "0.1",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp_alpaca",
+    "param": "MAX_RISK_PER_TRADE",
+    "value": "0.02",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "fmp_alpaca",
+    "param": "T212_ACCOUNT_SIZE",
+    "value": "10000",
+    "value_type": "number",
+    "node": "⚙️ Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "ACCOUNT_SIZE",
+    "value": "30000.53",
+    "value_type": "number",
+    "node": "Forex Phase 2 Gate"
+  },
+  {
+    "scanner": "forex",
+    "param": "MAX_LOTS",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "MAX_OPEN_POSITIONS",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "MAX_PORTFOLIO_HEAT",
+    "value": "0.06",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "MAX_RISK_PER_TRADE",
+    "value": "0.01",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "MAX_SPREAD_PIPS",
+    "value": "4",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "forex",
+    "param": "MIN_STOP_PIPS",
+    "value": "12",
+    "value_type": "number",
+    "node": "⚙️ Forex Config (Edit Here)"
+  },
+  {
+    "scanner": "indices",
+    "param": "ACCOUNT_SIZE",
+    "value": "37667.53",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "COOLDOWN_MS",
+    "value": "5400000",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "DAILY_LOSS_LIMIT_PCT",
+    "value": "0.04",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "MAX_CONSEC_LOSSES",
+    "value": "3",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "MAX_HEAT",
+    "value": "0.18",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "MAX_PER_ASSET_CLASS",
+    "value": "2",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "MAX_POSITIONS",
+    "value": "4",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "MIN_SIGNAL_SCORE",
+    "value": "40",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "RISK_PCT",
+    "value": "0.015",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "indices",
+    "param": "SL_MULT",
+    "value": "2",
+    "value_type": "number",
+    "node": "Phase 2 Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "ACCOUNT_SIZE",
+    "value": "10000",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "ATR_STOP_MULT",
+    "value": "1.5",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "COOLDOWN_MIN",
+    "value": "30",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MA_BUFFER_PCT",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MAX_CANDIDATES",
+    "value": "30",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MAX_HEAT_PCT",
+    "value": "6",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MAX_POSITIONS",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MIN_AVG_VOLUME",
+    "value": "1000000",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MIN_MARKETCAP",
+    "value": "2000000000",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "MIN_PRICE",
+    "value": "10",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "PARTIAL_AT_TP1",
+    "value": "1",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "PULLBACK_MAX_PCT",
+    "value": "-1",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "PULLBACK_MIN_PCT",
+    "value": "-4",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "REQUIRE_UPTREND",
+    "value": "true",
+    "value_type": "bool",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "RISK_PCT",
+    "value": "0.01",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "SCORE_MIN",
+    "value": "5",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "SCREENER_LIMIT",
+    "value": "200",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "SPY_TREND_GATE",
+    "value": "true",
+    "value_type": "bool",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "TIME_STOP_BARS",
+    "value": "4",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "TP1_ATR_MULT",
+    "value": "1",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "mean_reversion",
+    "param": "VIX_MAX",
+    "value": "28",
+    "value_type": "number",
+    "node": "⚙️ Config + Market Gate"
+  },
+  {
+    "scanner": "pa",
+    "param": "MAX_HEAT",
+    "value": "0.12",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "pa",
+    "param": "MAX_TRADES",
+    "value": "4",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "pa",
+    "param": "RISK_PCT",
+    "value": "0.01",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "IDEAL_RRR",
+    "value": "2",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "LEVEL_ZONE_PCT",
+    "value": "0.005",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "LONG_RSI_HIGH",
+    "value": "76",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "LONG_RSI_LOW",
+    "value": "38",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_ATR_PCT",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_CONSECUTIVE_LOSSES",
+    "value": "2",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_DAILY_LOSS_R",
+    "value": "2",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_EXPOSURE",
+    "value": "1.5",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_GAP_FROM_POC",
+    "value": "0.06",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_HEAT",
+    "value": "0.03",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_POC_TOUCHES",
+    "value": "2",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_PRICE",
+    "value": "300",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_SLIPPAGE_PCT",
+    "value": "0.5",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_SPREAD_PCT",
+    "value": "0.003",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_SPREAD_TO_RISK",
+    "value": "0.35",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MAX_TRADES",
+    "value": "3",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_ABS_CANDLE_VOL",
+    "value": "8000",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_ATR_PCT",
+    "value": "0.08",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_AVG_DOLLAR_VOL",
+    "value": "20000000",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_BODY_RATIO",
+    "value": "0.28",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_DAILY_VOL",
+    "value": "500000",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_POC_TO_VAH",
+    "value": "0.005",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_PRICE",
+    "value": "5",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_RRR",
+    "value": "1.5",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "MIN_VOL_RATIO",
+    "value": "0.4",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "POC_ZONE_PCT",
+    "value": "0.004",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "RISK_PCT",
+    "value": "0.005",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "SHORT_RSI_HIGH",
+    "value": "66",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "SHORT_RSI_LOW",
+    "value": "24",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "SPREAD_PCT",
+    "value": "0.0015",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "VIX_PAUSE",
+    "value": "35",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  },
+  {
+    "scanner": "volume",
+    "param": "VIX_REDUCED",
+    "value": "25",
+    "value_type": "number",
+    "node": "⚙️ PA Config"
+  }
+]

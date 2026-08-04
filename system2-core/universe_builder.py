@@ -33,6 +33,8 @@ from typing import Any
 
 import requests
 
+import fmp_bandwidth
+
 
 ROOT = Path(__file__).resolve().parent
 FMP = "https://financialmodelingprep.com/stable"
@@ -45,13 +47,14 @@ ODD_TICKERS_TO_CHECK = [
 
 
 def load_config() -> dict[str, Any]:
-    path = ROOT / "system2-config.json"
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    for path in [ROOT / "system2-config.json", ROOT / "config.json"]:
+        if not path.exists():
+            continue
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
 
 
 CONFIG = load_config()
@@ -62,6 +65,9 @@ MIN_MARKET_CAP = int(UNIVERSE_CONFIG.get("min_market_cap", 1_000_000_000))
 MIN_AVG_VOLUME = int(UNIVERSE_CONFIG.get("min_avg_volume", 500_000))
 EXCLUDE_PRICE_BELOW = float(UNIVERSE_CONFIG.get("exclude_price_below", 5.0))
 SCREENER_LIMIT = int(UNIVERSE_CONFIG.get("screener_limit", 3000))
+LIQUID_MIDCAP_PAD_MODE = str(UNIVERSE_CONFIG.get("liquid_midcap_pad_mode", "always")).lower()
+OPTIONS_EXPANSION_ENABLED = bool(UNIVERSE_CONFIG.get("options_expansion_enabled", True))
+IMPLIED_OPTIONS_DISCOVERY_ENABLED = bool(UNIVERSE_CONFIG.get("implied_options_discovery_enabled", True))
 
 
 def get(endpoint: str, params: dict[str, Any] | None = None) -> tuple[Any | None, int | None, str]:
@@ -71,6 +77,12 @@ def get(endpoint: str, params: dict[str, Any] | None = None) -> tuple[Any | None
     url = f"{FMP}/{endpoint}"
     try:
         r = requests.get(url, params=query, timeout=45, headers={"User-Agent": "system2-universe-builder/2.0"})
+        fmp_bandwidth.record(
+            endpoint,
+            len(r.content or b""),
+            status=r.status_code,
+            source="universe_builder",
+        )
         if r.status_code == 200:
             return r.json(), r.status_code, endpoint
         print(f"  ! {r.status_code} on /stable/{endpoint}")
@@ -295,7 +307,8 @@ def build_universe() -> tuple[list[str], dict[str, Any]]:
     else:
         layers.append(russell)
 
-    layers.append(fetch_screener("liquid_midcap_pad", large_cap=False))
+    if LIQUID_MIDCAP_PAD_MODE == "always":
+        layers.append(fetch_screener("liquid_midcap_pad", large_cap=False))
 
     universe: list[str] = []
     seen: set[str] = set()
@@ -307,12 +320,17 @@ def build_universe() -> tuple[list[str], dict[str, Any]]:
         added = add_layer(universe, seen, names, sources, layer)
         source_counts[layer["label"]] = added
 
+    if LIQUID_MIDCAP_PAD_MODE == "fallback_only" and len(universe) < TARGET_SIZE:
+        pad = fetch_screener("liquid_midcap_pad", large_cap=False)
+        layers.append(pad)
+        source_counts[pad["label"]] = add_layer(universe, seen, names, sources, pad)
+
     sorted_universe = sorted(universe)[:TARGET_SIZE]
 
     # Merge options-flow / social expansion tickers (if fresh)
     expansion_path = ROOT / "data" / "options_universe_expansion.json"
     expansion_tickers = []
-    if expansion_path.exists():
+    if OPTIONS_EXPANSION_ENABLED and expansion_path.exists():
         try:
             exp_data = json.loads(expansion_path.read_text(encoding="utf-8"))
             if exp_data.get("date") == datetime.now(timezone.utc).date().isoformat():
@@ -335,11 +353,13 @@ def build_universe() -> tuple[list[str], dict[str, Any]]:
         score_key="aiscore",
         min_score=8.0,
     )
-    implied_options_expansion_tickers = _merge_discovery_expansion(
-        seen, sorted_universe, names, sources,
-        ROOT / "data" / "implied_options_discovery.json",
-        "implied_options_discovery",
-    )
+    implied_options_expansion_tickers = []
+    if IMPLIED_OPTIONS_DISCOVERY_ENABLED:
+        implied_options_expansion_tickers = _merge_discovery_expansion(
+            seen, sorted_universe, names, sources,
+            ROOT / "data" / "implied_options_discovery.json",
+            "implied_options_discovery",
+        )
 
     if danelfin_expansion_tickers:
         print(f"Danelfin added {len(danelfin_expansion_tickers)} stocks to universe")

@@ -1,33 +1,31 @@
 {
   "stage": "STAGE4_OPTIONS",
-  "createdAt": "2026-06-14T21:02:12.713310+00:00",
-  "inputCount": 48,
-  "outputCount": 48,
+  "createdAt": "2026-07-24T02:32:15.513730+00:00",
+  "inputCount": 35,
+  "outputCount": 35,
   "serviceUrl": "http://127.0.0.1:8002/options-flow",
   "serviceOk": true,
-  "serviceRuntimeSeconds": 21.168,
+  "serviceRuntimeSeconds": 14.143,
   "error": null,
   "verdictCounts": {
-    "CONFIRM": 37,
-    "CAUTION": 8,
-    "NEUTRAL": 3
+    "CONFIRM": 26,
+    "CAUTION": 7,
+    "NEUTRAL": 2
   },
   "signalsCountDistribution": {
+    "5": 3,
+    "9": 2,
+    "3": 5,
+    "11": 1,
+    "0": 7,
+    "1": 4,
+    "2": 4,
+    "4": 3,
+    "13": 2,
     "10": 1,
-    "1": 11,
-    "3": 7,
-    "5": 4,
-    "23": 1,
-    "0": 2,
-    "2": 8,
-    "13": 4,
-    "9": 3,
-    "537": 1,
-    "8": 2,
-    "31": 1,
-    "4": 1,
     "14": 1,
-    "6": 1
+    "45": 1,
+    "24": 1
   },
   "loggingOnly": true,
   "selectionInfluence": "confluence rerank within fixed top-40 only; cannot create trades or change size",
@@ -36,8 +34,8 @@
     "This stage cannot change membership or size; approved v2 contributions may re-rank within the fixed top-40 during confluence.",
     "Only the Stage 3 news-safe top-40 are sent to Yahoo/yfinance; never the full universe."
   ],
-  "confirm_count": 37,
-  "neutral_count": 3,
-  "caution_count": 8,
+  "confirm_count": 26,
+  "neutral_count": 2,
+  "caution_count": 7,
   "no_data_count": 0
 }

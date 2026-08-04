@@ -1,14 +1,16 @@
 {
   "stage": "FMP_NEWS_ANALYST",
-  "createdAt": "2026-06-14T20:57:24.706967+00:00",
-  "inputCount": 50,
-  "outputCount": 50,
+  "createdAt": "2026-07-24T02:28:46.125224+00:00",
+  "inputCount": 45,
+  "outputCount": 45,
   "hard_rejects": 0,
+  "excluded_non_english": 0,
+  "excluded_mismatch": 0,
   "analyst_positive": 0,
   "analyst_negative": 0,
   "consistent_beaters": 0,
   "errors": [],
   "paperOnly": true,
-  "_system2_run_id": "20260614T204315Z-d8d5fe58",
-  "_system2_generated_at": "2026-06-14T20:57:24.759021+00:00"
+  "_system2_run_id": "20260724T021502Z-9a51ab14",
+  "_system2_generated_at": "2026-07-24T02:28:46.196257+00:00"
 }

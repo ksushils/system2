@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
+const pmfAutoExecutor = require('./pmf-auto-executor.cjs');
 
 module.exports = function attachScoring(app, db, deps) {
   const { adminOnly, now, fmpKey, httpGet } = deps;
@@ -36,6 +37,7 @@ module.exports = function attachScoring(app, db, deps) {
       normal_nonpmf_halfsize_deployed_at: null,
       normal_nonpmf_halfsize_reeval_threshold: 40,
     },
+    presentation: { pmf_focus_mode_enabled: true },
     layers: { options_flow: 'ride_along_logging_only', chronos: 'ride_along_logging_only', news_safety: 'LIVE', council: 'off', options_discovery: 'off', social_sentiment: 'off' },
   };
 
@@ -145,17 +147,46 @@ module.exports = function attachScoring(app, db, deps) {
     return deepMerge(defaultSystem2Config, readJson(configPath, {}));
   }
 
-  function latestRunSummary() {
+  function phaseRunSummaries() {
     try {
-      const files = fs.readdirSync(logDir)
+      return fs.readdirSync(logDir)
         .filter(f => /^phase_b_core_.*\.json$/.test(f))
-        .sort();
-      if (!files.length) return null;
-      const name = files[files.length - 1];
-      return { file: name, ...readJson(path.join(logDir, name), {}) };
+        .map(name => ({ file: name, ...readJson(path.join(logDir, name), {}) }))
+        .sort((a, b) => String(a.runStartedAt || a.file).localeCompare(String(b.runStartedAt || b.file)));
     } catch {
-      return null;
+      return [];
     }
+  }
+
+  function latestRunSummary() {
+    const runs = phaseRunSummaries();
+    return runs.length ? runs[runs.length - 1] : null;
+  }
+
+  function phaseRunStatus(run) {
+    if (!run) return 'UNKNOWN';
+    if (run.ok === true) return 'SUCCESS';
+    if (run.ok === false) return String(run.pipeline_status || run.status || 'FAILED').toUpperCase();
+    return String(run.pipeline_status || run.status || 'UNKNOWN').toUpperCase();
+  }
+
+  function isScheduledNightlyRun(run) {
+    const raw = run?.runStartedAt || '';
+    const d = new Date(raw);
+    if (!Number.isFinite(d.getTime())) return false;
+    const hour = d.getUTCHours();
+    const minute = d.getUTCMinutes();
+    return hour === 2 && minute >= 0 && minute <= 35;
+  }
+
+  function latestScheduledNightlyRun() {
+    const runs = phaseRunSummaries().filter(isScheduledNightlyRun);
+    return runs.length ? runs[runs.length - 1] : null;
+  }
+
+  function latestManualRun() {
+    const runs = phaseRunSummaries().filter(r => !isScheduledNightlyRun(r));
+    return runs.length ? runs[runs.length - 1] : null;
   }
 
   function lastLines(file, maxLines = 120) {
@@ -238,6 +269,97 @@ module.exports = function attachScoring(app, db, deps) {
     return row?.pre_market_gap_favourable === true || row?.pre_market_favourable === true || status === 'FAVOURABLE';
   }
 
+  function isPmfConfirmedAtStamp(row) {
+    return row?.pmf_confirmed_at_stamp === true;
+  }
+
+  function pmfStampCohort(row) {
+    return String(row?.pmf_stamp_cohort || row?.pmf_entry_cohort || row?.pmf_cohort || '').toUpperCase();
+  }
+
+  function isPmfLate(row) {
+    if (isPmfConfirmedAtStamp(row)) return pmfStampCohort(row) === 'PMF_LATE';
+    return row?.pre_market_gap_favourable_late === true && String(row?.pmf_cohort || '').toUpperCase() === 'PMF_LATE';
+  }
+
+  function isPrimaryPmf(row) {
+    return isPmfConfirmedAtStamp(row) && !isPmfLate(row);
+  }
+
+  function writePmfConfirmationStamp(idea, stamp) {
+    if (!idea || idea.pmf_confirmed_at_stamp != null || !stamp) return;
+    idea.pmf_confirmed_at_stamp = true;
+    idea.pmf_stamp_time = stamp.at;
+    idea.pmf_atr_multiple_at_stamp = stamp.atrMultiple;
+    idea.pmf_price_at_stamp = stamp.price;
+    idea.pmf_entry_at_stamp = stamp.entry;
+    idea.pmf_atr_at_stamp = stamp.atr;
+    idea.pmf_stamp_cohort = stamp.cohort;
+  }
+
+  function intakeSourceLayer(row) {
+    const raw = row?.intake_source_layer || row?.source_layer || row?.universe_source || row?.sourceLayer || row?.intakeSourceLayer;
+    return raw ? String(raw) : 'unknown';
+  }
+
+  function currentUniverseSourceMeta() {
+    const meta = readJson(path.join(system2Root, 'universe.metadata.json'), {});
+    const sourceBySymbol = meta?.sourceBySymbol && typeof meta.sourceBySymbol === 'object' ? meta.sourceBySymbol : {};
+    const counts = {};
+    for (const src of Object.values(sourceBySymbol)) {
+      if (!src) continue;
+      counts[src] = (counts[src] || 0) + 1;
+    }
+    return {
+      sourceBySymbol,
+      counts,
+      sourceAddedCountsAfterDedup: meta?.sourceAddedCountsAfterDedup || {},
+      sourceFetchCountsBeforeDedup: meta?.sourceFetchCountsBeforeDedup || {},
+    };
+  }
+
+  function pmfSourceTallyPayload() {
+    ensure();
+    const allPmf = db.data.ideas.filter(isDisplayableIdea).filter(isPrimaryPmf);
+    const nowMs = Date.now();
+    const last30 = allPmf.filter(r => {
+      const d = Date.parse(`${String(r.date || r.created_at || r.pre_market_checked_at || '').slice(0, 10)}T00:00:00Z`);
+      return Number.isFinite(d) && nowMs - d <= 30 * 86400000;
+    });
+    const meta = currentUniverseSourceMeta();
+    const rowsFor = rows => {
+      const bySource = new Map();
+      for (const row of rows) {
+        const source = intakeSourceLayer(row);
+        if (!bySource.has(source)) bySource.set(source, { source, pmf_count: 0, unique_tickers: new Set() });
+        const bucket = bySource.get(source);
+        bucket.pmf_count += 1;
+        if (row.ticker) bucket.unique_tickers.add(String(row.ticker).toUpperCase());
+      }
+      return Array.from(bySource.values()).map(bucket => {
+        const currentNames = meta.counts[bucket.source] || 0;
+        const uniquePmf = bucket.unique_tickers.size;
+        return {
+          source: bucket.source,
+          pmf_count: bucket.pmf_count,
+          unique_pmf_tickers: uniquePmf,
+          current_universe_names: currentNames,
+          pmf_rate_current_universe: currentNames ? Number((uniquePmf / currentNames).toFixed(4)) : null,
+          note: bucket.source === 'unknown' ? 'Historical row has no persisted intake source layer.' : (uniquePmf < 10 ? 'TOO THIN - directional only' : 'sample building'),
+        };
+      }).sort((a, b) => (b.unique_pmf_tickers - a.unique_pmf_tickers) || a.source.localeCompare(b.source));
+    };
+    return {
+      ok: true,
+      generated_at: new Date().toISOString(),
+      source: 'fund.json persisted intake_source_layer; historical untagged PMFs remain unknown',
+      current_universe_source_counts: meta.counts,
+      source_added_counts_after_dedup: meta.sourceAddedCountsAfterDedup,
+      last30: rowsFor(last30),
+      all_time: rowsFor(allPmf),
+    };
+  }
+
   function ideaRegime(row) {
     return String(row?.market_regime || row?.regime || '').trim().toUpperCase();
   }
@@ -278,13 +400,11 @@ module.exports = function attachScoring(app, db, deps) {
       .map(withDerivedStatus)
       .filter(isDisplayableIdea)
       .filter(i => String(i.date || '') >= '2026-06-09')
-      .filter(i => i.paper_status === 'CLOSED' || i.r_1d != null || i.r_3d != null || i.r_10d != null);
+      .filter(i => canonicalResolvedR(i) != null);
   }
 
   function statsFromR(rows, rKey = 'r_3d') {
-    const vals = rows.map(r => (
-      r[rKey] != null ? riskAdjustedStoredR(r, r[rKey]) : resolvedActualR(r)
-    )).filter(v => v != null);
+    const vals = rows.map(r => canonicalResolvedR(r)).filter(v => v != null);
     const wins = vals.filter(v => v > 0);
     const losses = vals.filter(v => v < 0);
     const grossWin = wins.reduce((s, v) => s + v, 0);
@@ -296,6 +416,87 @@ module.exports = function attachScoring(app, db, deps) {
       total_r: vals.length ? Number(vals.reduce((s, v) => s + v, 0).toFixed(3)) : 0,
       profit_factor: grossLoss ? Number((grossWin / grossLoss).toFixed(2)) : (grossWin ? 'infinity' : null),
     };
+  }
+
+  function statsFromNumericField(rows, key) {
+    const vals = rows.map(r => numericOrNull(r?.[key])).filter(v => v != null);
+    const wins = vals.filter(v => v > 0);
+    const losses = vals.filter(v => v < 0);
+    const grossWin = wins.reduce((s, v) => s + v, 0);
+    const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+    return {
+      count: vals.length,
+      win_rate: vals.length ? Number((wins.length / vals.length * 100).toFixed(1)) : null,
+      avg_r: vals.length ? Number((vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(3)) : null,
+      total_r: vals.length ? Number(vals.reduce((s, v) => s + v, 0).toFixed(3)) : 0,
+      profit_factor: grossLoss ? Number((grossWin / grossLoss).toFixed(2)) : (grossWin ? 'infinity' : null),
+    };
+  }
+
+  function canonicalStatus(row) {
+    return String(row?.paper_status || row?.status || '').trim().toUpperCase();
+  }
+
+  function isOpenPlaceholder(row) {
+    return ['OPEN', 'WATCHING', 'PENDING', 'ACTIVE'].includes(canonicalStatus(row));
+  }
+
+  function isResolvedForCanonical(row) {
+    if (!row || isOpenPlaceholder(row)) return false;
+    const exitPrice = numericOrNull(row.paper_exit_price);
+    if (!(exitPrice != null && exitPrice !== 0)) return false;
+    const status = canonicalStatus(row);
+    return ['WON', 'LOST', 'TIMED_OUT', 'CLOSED', 'RESOLVED', 'EXITED', 'INVALID', 'ERROR'].includes(status);
+  }
+
+  function rawCanonicalResolvedR(row) {
+    if (!isResolvedForCanonical(row)) return null;
+    const entry = effectiveEntry(row);
+    const stop = effectiveStop(row);
+    const exitPrice = numericOrNull(row.paper_exit_price);
+    if (!(entry != null && stop != null && exitPrice != null)) return null;
+    const risk = entry - stop;
+    if (!Number.isFinite(risk) || Math.abs(risk) < 1e-12) return null;
+    return Number(((exitPrice - entry) / risk).toFixed(4));
+  }
+
+  function canonicalQuarantineReasons(row) {
+    const reasons = [];
+    if (!isResolvedForCanonical(row)) return reasons;
+    const status = canonicalStatus(row);
+    const exitReason = String(row.paper_exit_reason || row.exit_reason || row.hit || '').trim().toUpperCase();
+    const entry = effectiveEntry(row);
+    const stop = effectiveStop(row);
+    const target = effectiveTarget(row);
+    const exitPrice = numericOrNull(row.paper_exit_price);
+    const risk = entry != null && stop != null ? Math.abs(entry - stop) : null;
+    const canonical = rawCanonicalResolvedR(row);
+
+    if (row.r_calculation_suspect === true || String(row.r_calculation_suspect).toLowerCase() === 'true') reasons.push('r_calculation_suspect');
+    if (['INVALID', 'ERROR'].includes(status) || ['INVALID', 'ERROR'].includes(exitReason)) reasons.push('paper_status/exit_reason invalid_error');
+    if (entry != null && risk != null && risk < 0.005 * Math.abs(entry)) reasons.push('|entry-stop| < 0.5% entry');
+    if (canonical != null && Math.abs(canonical) > 10) reasons.push('|canonical_R| > 10');
+    if (exitPrice != null && exitPrice !== 0 && entry != null && stop != null && target != null && risk != null && risk > 0) {
+      const lower = Math.min(stop, target) - 5 * risk;
+      const upper = Math.max(stop, target) + 5 * risk;
+      if (exitPrice < lower || exitPrice > upper) reasons.push('paper_exit_price outside stop/target sane band');
+    }
+    return [...new Set(reasons)];
+  }
+
+  function isCanonicalRQuarantined(row) {
+    return canonicalQuarantineReasons(row).length > 0;
+  }
+
+  function canonicalResolvedR(row, { includeQuarantined = false } = {}) {
+    if (!row || isInvalidTicker(row.ticker)) return null;
+    if (!includeQuarantined && isCanonicalRQuarantined(row)) return null;
+    const raw = rawCanonicalResolvedR(row);
+    const hasPaperExit = numericOrNull(row.paper_exit_price) != null && String(row.paper_exit_reason || row.hit || '').trim();
+    if (hasPaperExit && raw != null) return raw;
+    const stored = numericOrNull(row.canonical_r);
+    if (stored != null && (includeQuarantined || row.canonical_r_quarantined !== true)) return stored;
+    return raw;
   }
 
   const TRUE_R_SLIPPAGE_PCT = 0.001;
@@ -344,6 +545,24 @@ module.exports = function attachScoring(app, db, deps) {
     const risk = effectiveRiskPerShare(row);
     const direction = String(row?.original_direction || '').toUpperCase() === 'SHORT' ? 'SHORT' : 'LONG';
     if (!(plannedEntry > 0 && stop > 0 && risk > 0)) return null;
+
+    if (row?.fill_source === 'alpaca_paper') {
+      const alpacaEntry = firstNumeric(row?.actual_entry_price);
+      const alpacaExit = firstNumeric(row?.actual_exit_price);
+      if (alpacaEntry != null && alpacaExit != null) {
+        const numerator = direction === 'SHORT' ? alpacaEntry - alpacaExit : alpacaExit - alpacaEntry;
+        return {
+          realistic_entry: Number(alpacaEntry.toFixed(4)),
+          realistic_exit: Number(alpacaExit.toFixed(4)),
+          slippage_applied_pct: 0,
+          true_r: Number((numerator / risk).toFixed(3)),
+          true_r_fill_source: 'alpaca_paper',
+          true_r_denominator_risk: Number(risk.toFixed(4)),
+          true_r_estimated_fill: false,
+          true_r_rule: 'Alpaca paper actual entry and exit fills; separate from modeled canonical R.',
+        };
+      }
+    }
 
     const trigger = trueRTriggerPrice(row);
     let baseEntry = null;
@@ -424,8 +643,9 @@ module.exports = function attachScoring(app, db, deps) {
   }
 
   function trueRComparison(rows = cleanResolvedRows()) {
-    const pmf = rows.filter(isPreMarketFavourable);
-    const normalNonPmf = rows.filter(r => ideaRegime(r) === 'NORMAL' && !isPreMarketFavourable(r) && r.size_rule === 'NORMAL_nonPMF_halfsize');
+    const pmf = rows.filter(isPrimaryPmf);
+    const pmfLate = rows.filter(isPmfLate);
+    const normalNonPmf = rows.filter(r => ideaRegime(r) === 'NORMAL' && !isPmfConfirmedAtStamp(r) && !isPmfLate(r) && r.size_rule === 'NORMAL_nonPMF_halfsize');
     const caution = rows.filter(r => ideaRegime(r) === 'CAUTION');
     const normal = rows.filter(r => ideaRegime(r) === 'NORMAL');
     return {
@@ -439,6 +659,7 @@ module.exports = function attachScoring(app, db, deps) {
       cohorts: {
         all_resolved: storedVsTrueStats(rows),
         pre_market_favourable: storedVsTrueStats(pmf),
+        pmf_late: storedVsTrueStats(pmfLate),
         normal_non_pmf_halfsize: storedVsTrueStats(normalNonPmf),
         caution: storedVsTrueStats(caution),
         normal: storedVsTrueStats(normal),
@@ -455,7 +676,7 @@ module.exports = function attachScoring(app, db, deps) {
     return db.data.ideas
       .map(withDerivedStatus)
       .filter(isDisplayableIdea)
-      .filter(i => i.paper_status === 'CLOSED' || i.r_1d != null || i.r_3d != null || i.r_10d != null || i.r != null || resolvedActualR(i) != null);
+      .filter(i => canonicalResolvedR(i) != null);
   }
 
   function latestIdeaDate(rows) {
@@ -474,7 +695,7 @@ module.exports = function attachScoring(app, db, deps) {
       resolved_v2_clean: {
         ...resolved_v2_clean,
         label: 'v2 integrity-verified set',
-        definition: 'displayable paper ideas dated 2026-06-09 or later with CLOSED status or stored R outcome',
+        definition: 'displayable paper ideas dated 2026-06-09 or later with real non-zero paper_exit_price, canonical R available, and not quarantined',
         latest_trade_date: latestIdeaDate(v2Clean),
       },
       resolved_all_including_legacy: {
@@ -504,8 +725,8 @@ module.exports = function attachScoring(app, db, deps) {
     const deployedDate = deployedAt ? String(deployedAt).slice(0, 10) : new Date().toISOString().slice(0, 10);
     const threshold = Number(rule.normal_nonpmf_halfsize_reeval_threshold || 40);
     const since = rows.filter(r => String(r.date || '').slice(0, 10) >= deployedDate);
-    const normalNonPmf = since.filter(r => ideaRegime(r) === 'NORMAL' && !isPreMarketFavourable(r) && r.size_rule === 'NORMAL_nonPMF_halfsize');
-    const cautionNonPmf = since.filter(r => ideaRegime(r) === 'CAUTION' && !isPreMarketFavourable(r));
+    const normalNonPmf = since.filter(r => ideaRegime(r) === 'NORMAL' && !isPmfConfirmedAtStamp(r) && !isPmfLate(r) && r.size_rule === 'NORMAL_nonPMF_halfsize');
+    const cautionNonPmf = since.filter(r => ideaRegime(r) === 'CAUTION' && !isPmfConfirmedAtStamp(r) && !isPmfLate(r));
     return {
       enabled: rule.normal_nonpmf_halfsize_enabled !== false,
       flag_path: 'stage7.normal_nonpmf_halfsize_enabled',
@@ -534,7 +755,7 @@ module.exports = function attachScoring(app, db, deps) {
       normal_nonpmf_halfsize_reeval_threshold: Number(rule.normal_nonpmf_halfsize_reeval_threshold || 40),
     } : {};
     if (rule.normal_nonpmf_halfsize_enabled === false) return base;
-    if (ideaRegime(merged) === 'NORMAL' && !isPreMarketFavourable(merged)) {
+    if (ideaRegime(merged) === 'NORMAL' && !isPreMarketFavourable(merged) && !isPmfLate(merged)) {
       return {
         size_rule: 'NORMAL_nonPMF_halfsize',
         size_rule_multiplier: 0.5,
@@ -764,10 +985,10 @@ module.exports = function attachScoring(app, db, deps) {
       const tracked = rejected.filter(r => numericOrNull(r.would_be_r) != null && r.tracking_status !== 'tracking');
       const positive = tracked.filter(r => Number(r.would_be_r) > 0);
       const passedTickers = (stage.tickers || []).filter(r => ['KEPT', 'ENRICHED', 'FINALIST', 'TIER1', 'TIER2', 'UPGRADE'].includes(String(r.status || '').toUpperCase())).map(r => String(r.ticker || '').toUpperCase());
-      const survivorResolved = passedTickers.map(t => ideasByTicker.get(t)).filter(i => i && i.paper_status === 'CLOSED' && Number.isFinite(Number(resolvedActualR(i) ?? i.r_3d)));
-      const survivorWins = survivorResolved.filter(i => Number(resolvedActualR(i) ?? i.r_3d) > 0);
+      const survivorResolved = passedTickers.map(t => ideasByTicker.get(t)).filter(i => i && canonicalResolvedR(i) != null);
+      const survivorWins = survivorResolved.filter(i => Number(canonicalResolvedR(i)) > 0);
       const rejectAvg = tracked.length ? tracked.reduce((s, r) => s + Number(r.would_be_r), 0) / tracked.length : null;
-      const survivorAvg = survivorResolved.length ? survivorResolved.reduce((s, i) => s + Number(resolvedActualR(i) ?? i.r_3d), 0) / survivorResolved.length : null;
+      const survivorAvg = survivorResolved.length ? survivorResolved.reduce((s, i) => s + Number(canonicalResolvedR(i)), 0) / survivorResolved.length : null;
       const rejectQuality = tracked.length ? positive.length / tracked.length : null;
       const survivorQuality = survivorResolved.length ? survivorWins.length / survivorResolved.length : null;
       let verdict = 'Partial data';
@@ -874,10 +1095,7 @@ module.exports = function attachScoring(app, db, deps) {
   }
 
   function resolvedActualR(row) {
-    if (!row || isInvalidTicker(row.ticker) || row.r_calculation_suspect) return null;
-    const v = numericOrNull(row?.actual_r ?? row?.paper_exit_r);
-    if (v != null && Math.abs(v) > MAX_SANE_ABS_R) return null;
-    return riskAdjustedStoredR(row, v);
+    return canonicalResolvedR(row);
   }
 
   function rValue(entry, riskPerShare, price) {
@@ -1017,22 +1235,254 @@ module.exports = function attachScoring(app, db, deps) {
     return out;
   }
 
-  async function sendTelegramAlert(text) {
-    const token = process.env.TELEGRAM_BOT_TOKEN || process.env.TG_BOT_TOKEN || readEnvValue('TELEGRAM_BOT_TOKEN') || readEnvValue('TG_BOT_TOKEN');
-    const chatId = process.env.TELEGRAM_CHAT_ID || process.env.TG_CHAT_ID || readEnvValue('TELEGRAM_CHAT_ID') || readEnvValue('TG_CHAT_ID');
+  function envFlag(name, fallback = false) {
+    const raw = process.env[name] ?? readEnvValue(name);
+    if (raw == null || raw === '') return fallback;
+    return ['1', 'true', 'yes', 'on'].includes(String(raw).toLowerCase());
+  }
+
+  function pmfAlertConfig() {
+    return {
+      enabled: envFlag('PMF_ALERTS_ENABLED', false),
+      pmfConfirmed: envFlag('PMF_ALERT_PMF_CONFIRMED', true),
+      autoFilled: envFlag('PMF_ALERT_AUTO_FILLED', true),
+      positionClosed: envFlag('PMF_ALERT_POSITION_CLOSED', true),
+      failures: envFlag('PMF_ALERT_FAILURES', true),
+      dailySummary: envFlag('PMF_ALERT_DAILY_SUMMARY', false),
+      pmfLate: envFlag('PMF_ALERT_PMF_LATE', false),
+      timeoutMs: Number(process.env.PMF_ALERT_TIMEOUT_MS || readEnvValue('PMF_ALERT_TIMEOUT_MS') || 4000),
+    };
+  }
+
+  function logPmfAlert(event) {
+    try {
+      fs.mkdirSync(logDir, { recursive: true });
+      fs.appendFileSync(path.join(logDir, 'pmf_telegram_alerts.log'), `${new Date().toISOString()} ${JSON.stringify(event)}\n`);
+    } catch {}
+  }
+
+  async function sendTelegramAlert(text, overrides = {}) {
+    const token = overrides.token ?? process.env.TELEGRAM_BOT_TOKEN ?? process.env.TG_BOT_TOKEN ?? readEnvValue('TELEGRAM_BOT_TOKEN') ?? readEnvValue('TG_BOT_TOKEN');
+    const chatId = overrides.chatId ?? process.env.TELEGRAM_CHAT_ID ?? process.env.TG_CHAT_ID ?? readEnvValue('TELEGRAM_CHAT_ID') ?? readEnvValue('TG_CHAT_ID');
     if (!token || !chatId) return { sent: false, reason: 'missing TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID' };
-    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text }),
+    const timeoutMs = Number(overrides.timeoutMs || pmfAlertConfig().timeoutMs || 4000);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), Math.max(1, timeoutMs));
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text }),
+        signal: controller.signal,
+      });
+      if (!r.ok) return { sent: false, reason: `telegram ${r.status}` };
+      return { sent: true };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async function safeSendTelegramAlert(text, meta = {}, overrides = {}) {
+    try {
+      const sent = await sendTelegramAlert(text, overrides);
+      logPmfAlert({ event: meta.event || 'telegram_alert', text, ...meta, ...sent });
+      return sent;
+    } catch (e) {
+      const reason = e?.name === 'AbortError' ? 'telegram timeout' : (e?.message || String(e));
+      logPmfAlert({ event: meta.event || 'telegram_alert_failed', text, ...meta, sent: false, reason });
+      return { sent: false, reason };
+    }
+  }
+
+  function queuePmfTelegramAlert(text, meta = {}, category = null) {
+    const cfg = pmfAlertConfig();
+    if (!cfg.enabled) return { queued: false, reason: 'PMF_ALERTS_ENABLED=false' };
+    if (category && cfg[category] === false) return { queued: false, reason: `${category}=false` };
+    Promise.resolve()
+      .then(() => safeSendTelegramAlert(text, meta))
+      .catch(e => logPmfAlert({ event: 'telegram_alert_unhandled_failure', text, ...meta, sent: false, reason: e?.message || String(e) }));
+    return { queued: true };
+  }
+
+  function convictionLabel(gapPct) {
+    const g = Math.abs(Number(gapPct) || 0);
+    if (g >= 7) return 'high';
+    if (g >= 5) return 'strong';
+    if (g >= 3) return 'moderate';
+    return 'watch';
+  }
+
+  function fmtPrice(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toFixed(n >= 1 ? 2 : 4) : 'n/a';
+  }
+
+  function formatPmfConfirmedMessage(rows) {
+    const sorted = [...rows].sort((a, b) => Math.abs(Number(b.pre_market_gap_pct || 0)) - Math.abs(Number(a.pre_market_gap_pct || 0)));
+    const lines = sorted.map(row => {
+      const ticker = row.ticker || row.symbol;
+      return `PMF: ${ticker} ${Number(row.pre_market_gap_pct || 0) >= 0 ? '+' : ''}${row.pre_market_gap_pct ?? 'n/a'}% (${row.pre_market_gap_atr_multiple ?? row.pmf_atr_multiple_at_stamp ?? 'n/a'}x ATR) | entry ${fmtPrice(effectiveEntry(row))} stop ${fmtPrice(effectiveStop(row))} target ${fmtPrice(effectiveTarget(row))} | conviction: ${convictionLabel(row.pre_market_gap_pct)}`;
     });
-    if (!r.ok) return { sent: false, reason: `telegram ${r.status}` };
-    return { sent: true };
+    return lines.join('\n');
+  }
+
+  function formatAutoExecMessage(result, idea) {
+    const ticker = result.ticker || idea?.ticker || idea?.symbol || 'UNKNOWN';
+    if (result.action === 'placed' && result.actual_entry_price) {
+      return `FILLED: ${ticker} 1sh @ ${fmtPrice(result.actual_entry_price)} (slip ${idea?.entry_slippage_vs_model != null ? `${idea.entry_slippage_vs_model >= 0 ? '+' : ''}${idea.entry_slippage_vs_model}%` : 'n/a'}) | OCO stop ${fmtPrice(idea?.recalibrated_stop || result.recalibrated_stop)} target ${fmtPrice(idea?.recalibrated_target || result.recalibrated_target)}`;
+    }
+    if (result.action === 'risk_breaker_blocked') return `RISK BREAKER TRIPPED: ${result.breaker || 'unknown'} - ${ticker} blocked: ${result.reason || 'unknown'}`;
+    if (['failed', 'bracket_attach_failed'].includes(result.action)) return `AUTO-EXEC FAILED: ${ticker} - ${result.reason || result.status || 'unknown'}`;
+    return null;
+  }
+
+  function formatSyncAlertMessage(result, idea) {
+    const ticker = result.ticker || idea?.ticker || idea?.symbol || 'UNKNOWN';
+    if (String(result.action || '').startsWith('updated_exit')) {
+      return `CLOSED: ${ticker} @ ${fmtPrice(idea?.actual_exit_price || result.exit_price)} | ${idea?.actual_exit_reason || 'ALPACA_EXIT'} | real R ${idea?.real_r != null ? `${Number(idea.real_r) >= 0 ? '+' : ''}${Number(idea.real_r).toFixed(2)}` : 'n/a'}`;
+    }
+    if (result.action === 'alert_no_exit_order') return `NAKED POSITION: ${ticker} has no exit order`;
+    if (result.action === 'sync_failed') return `AUTO-EXEC FAILED: ${ticker} - sync failed: ${result.reason || 'unknown'}`;
+    return null;
+  }
+
+  function buildDailyProgressReport() {
+    const today = new Date().toISOString().slice(0, 10);
+    const rows = Array.isArray(db?.data?.ideas) ? db.data.ideas : [];
+    const safe = (fn, fallback = 'unknown') => {
+      try { return fn(); } catch (e) { return fallback; }
+    };
+    const n = value => {
+      const out = Number(value);
+      return Number.isFinite(out) ? out : null;
+    };
+    const fmtR = value => {
+      const out = n(value);
+      return out == null ? 'unknown' : `${out >= 0 ? '+' : ''}${out.toFixed(2)}R`;
+    };
+    const fmtPx = value => {
+      const out = n(value);
+      return out == null ? 'unknown' : out.toFixed(out >= 1 ? 2 : 4);
+    };
+    const dateOnly = value => String(value || '').slice(0, 10);
+    const activeRows = rows.filter(r => r && r.fill_source === 'alpaca_paper' && !r.test_order && n(r.actual_entry_price) != null);
+    const isResolved = r => n(r.actual_exit_price) != null || n(r.real_r) != null;
+    const isCohortB = r => String(r.bracket_mode || r.execution_bracket_mode || '').toLowerCase() === 'recalibrated_to_fill'
+      && String(r.actual_entry_time || r.auto_exec_at || '').slice(0, 10) >= '2026-07-23';
+    const cohortB = activeRows.filter(isCohortB);
+    const cohortBResolved = cohortB.filter(isResolved);
+    const cohortBOpen = cohortB.filter(r => !isResolved(r));
+    const cohortA = activeRows.filter(r => !isCohortB(r));
+    const cohortAResolved = cohortA.filter(isResolved);
+    const avg = values => {
+      const xs = values.map(n).filter(v => v != null);
+      return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+    };
+    const winRate = list => {
+      const resolved = list.filter(r => n(r.real_r) != null);
+      return resolved.length ? (resolved.filter(r => n(r.real_r) > 0).length / resolved.length) : null;
+    };
+    const formatResolvedList = list => {
+      if (!list.length) return 'none yet';
+      return list
+        .slice()
+        .sort((a, b) => String(a.actual_exit_time || '').localeCompare(String(b.actual_exit_time || '')))
+        .slice(-10)
+        .map(r => `${r.ticker || r.symbol} ${fmtR(r.real_r)} (${r.actual_exit_reason || r.exit_reason || 'EXIT'})`)
+        .join(', ');
+    };
+    const resolutionPaceDays = safe(() => {
+      if (cohortBResolved.length <= 0) return null;
+      const times = cohortBResolved.map(r => Date.parse(r.actual_exit_time || r.actual_entry_time || r.auto_exec_at)).filter(Number.isFinite);
+      if (!times.length) return null;
+      const firstEntryTimes = cohortB.map(r => Date.parse(r.actual_entry_time || r.auto_exec_at)).filter(Number.isFinite);
+      const startMs = firstEntryTimes.length ? Math.min(...firstEntryTimes) : Math.min(...times);
+      const elapsedDays = Math.max(1, (Date.now() - startMs) / 86400000);
+      return elapsedDays / cohortBResolved.length;
+    }, null);
+    const verdictDate = safe(() => {
+      if (!resolutionPaceDays || cohortBResolved.length >= 15) return cohortBResolved.length >= 15 ? 'ready now' : 'unknown';
+      const remaining = 15 - cohortBResolved.length;
+      const d = new Date(Date.now() + remaining * resolutionPaceDays * 86400000);
+      return `~${d.toISOString().slice(0, 10)}`;
+    }, 'unknown');
+    const confirmedToday = safe(() => rows.filter(r => dateOnly(r.pmf_stamp_time || r.pre_market_checked_at) === today && isPmfConfirmedAtStamp(r)).length, 'unknown');
+    const placedTodayRows = safe(() => activeRows.filter(r => dateOnly(r.actual_entry_time || r.auto_exec_at) === today), []);
+    const closedTodayRows = safe(() => activeRows.filter(r => dateOnly(r.actual_exit_time) === today), []);
+    const newFills = Array.isArray(placedTodayRows) && placedTodayRows.length
+      ? placedTodayRows.map(r => `${r.ticker || r.symbol} @ ${fmtPx(r.actual_entry_price)} (slip ${r.entry_slippage_vs_model != null ? `${Number(r.entry_slippage_vs_model) >= 0 ? '+' : ''}${Number(r.entry_slippage_vs_model).toFixed(1)}%` : 'unknown'})`).join(', ')
+      : 'none';
+    const closedToday = Array.isArray(closedTodayRows) && closedTodayRows.length
+      ? closedTodayRows.map(r => `${r.ticker || r.symbol} @ ${fmtPx(r.actual_exit_price)} ${r.actual_exit_reason || r.exit_reason || 'EXIT'} ${fmtR(r.real_r)}`).join(', ')
+      : 'none';
+    const openLines = safe(() => {
+      const open = activeRows.filter(r => !isResolved(r));
+      const naked = open.filter(r => r.auto_exec_alert === 'NAKED_POSITION' || r.exit_order_live === false || r.has_live_exit_order === false);
+      const shown = open.slice(0, 8).map(r => {
+        const entry = n(r.actual_entry_price);
+        const current = n(r.current_price);
+        const stop = n(r.recalibrated_stop ?? r.stop);
+        const risk = entry != null && stop != null ? Math.abs(entry - stop) : null;
+        const ur = current != null && entry != null && risk ? (current - entry) / risk : n(r.unrealized_real_r ?? r.unrealized_r);
+        return `${r.ticker || r.symbol} ${fmtR(ur)}`;
+      });
+      return { open, naked, text: shown.length ? `${shown.join(' - ')}${open.length > shown.length ? ` ... ${open.length} positions` : ''}` : 'none' };
+    }, { open: [], naked: [], text: 'unknown' });
+    const health = safe(() => {
+      const issues = [];
+      const files = [
+        path.join(logDir, 'fund_integrity_alert.log'),
+        path.join(logDir, 'crontab_drift_alert.txt'),
+        path.join(logDir, 'pmf_risk_breaker_alert.json'),
+      ];
+      for (const f of files) if (fs.existsSync(f)) issues.push(path.basename(f));
+      const backupManifest = readJson(path.join(system2Root, 'backups', 'fund-validated', 'manifest.json'), null);
+      const backupOk = backupManifest ? 'backup OK' : 'backup unknown';
+      const scheduledRun = latestScheduledNightlyRun();
+      const phase = scheduledRun ? phaseRunStatus(scheduledRun) : null;
+      const pipeline = phase?.ok === true ? 'pipeline SUCCESS' : (phase ? `pipeline ${phase.ok === false ? 'FAILED' : 'unknown'}` : 'pipeline unknown');
+      return issues.length ? `${pipeline} - ${backupOk} - issues: ${issues.join(', ')}` : `all 10 jobs OK - ${pipeline} - ${backupOk}`;
+    }, 'unknown');
+    const configWarning = safe(() => {
+      const driftPath = path.join(logDir, 'pmf_config_drift_alert.json');
+      if (!fs.existsSync(driftPath)) return 'config hash unchanged';
+      const drift = readJson(driftPath, null);
+      if (!drift) return 'WARNING config hash changed';
+      return `WARNING config hash changed ${drift.previous_hash || 'unknown'} -> ${drift.current_hash || 'unknown'}`;
+    }, 'config hash unknown');
+    const cohortBAvg = avg(cohortBResolved.map(r => r.real_r));
+    const cohortAAvg = avg(cohortAResolved.map(r => r.real_r));
+    const cohortAWin = winRate(cohortAResolved);
+    const tooEarly = cohortBResolved.length < 15 ? ' (TOO EARLY, not a verdict)' : '';
+    const prefix = openLines.naked.length > 0 ? 'WARNING: ' : '';
+    return `${prefix}DAILY REPORT - ${today} (after close)\n\n`
+      + `COHORT B PROGRESS (the fair test):\n`
+      + `  resolved: ${cohortBResolved.length} / 15 needed for verdict\n`
+      + `  open: ${cohortBOpen.length}\n`
+      + `  resolved so far: ${formatResolvedList(cohortBResolved)}\n`
+      + `  running avg${tooEarly}: ${fmtR(cohortBAvg)}\n`
+      + `  est. verdict date at current pace: ${verdictDate}\n\n`
+      + `TODAY:\n`
+      + `  PMF confirmed: ${confirmedToday} - orders placed: ${Array.isArray(placedTodayRows) ? placedTodayRows.length : 'unknown'} - closed: ${Array.isArray(closedTodayRows) ? closedTodayRows.length : 'unknown'}\n`
+      + `  new fills: ${newFills}\n`
+      + `  closed: ${closedToday}\n\n`
+      + `OPEN POSITIONS (${openLines.naked.length === 0 ? 'all protected' : 'WARNING naked positions present'}):\n`
+      + `  ${openLines.text}\n`
+      + `  ${openLines.open.length} positions, ${openLines.naked.length} naked: ${openLines.naked.length}\n\n`
+      + `HEALTH: ${health} - ${configWarning}\n\n`
+      + `Cohort A reference (broken execution, not a verdict): ${cohortAResolved.length} resolved, ${cohortAWin == null ? 'unknown' : `${(cohortAWin * 100).toFixed(1)}%`}, ${fmtR(cohortAAvg)} avg\n`
+      + `Modeled baseline (NOT achievable): 84.8% / +1.96R`;
+  }
+
+  function buildDailyPmfSummary() {
+    return buildDailyProgressReport();
   }
 
   async function runPreMarketGapCheck(opts = {}) {
     ensure();
     const dryRun = Boolean(opts.dryRun || opts.dry_run);
+    const cohort = String(opts.cohort || opts.pmf_cohort || 'primary').toLowerCase();
+    const lateMode = cohort === 'late' || cohort === 'pmf_late';
     const thresholdAtrMultiple = Number(opts.thresholdAtrMultiple || opts.threshold_atr_multiple || 1.5);
     const at = now();
     const openIdeas = db.data.ideas
@@ -1042,12 +1492,38 @@ module.exports = function attachScoring(app, db, deps) {
     const checked = [];
     const alerts = [];
     const errors = [];
+    const newlyStampedPmfs = [];
+    const newlyStampedPmfLate = [];
+    let configDrift = { changed: false };
+    if (!dryRun) {
+      try {
+        configDrift = pmfAutoExecutor.detectConfigDrift(readEnvValue, {
+          thresholdAtrMultiple,
+          gapCheckCohort: lateMode ? 'PMF_LATE' : 'PMF',
+          gapCheckCronTimesUtc: { primary: '14:00', late: '15:30' },
+          priceSourceFallbackOrder: ['preMarketPrice', 'price', 'close', 'previousClose'],
+        });
+        if (configDrift.changed) {
+          const shownFields = (configDrift.fields_changed || []).map(f => f.field).slice(0, 12).join(', ');
+          const moreFields = (configDrift.fields_changed || []).length > 12 ? `, +${(configDrift.fields_changed || []).length - 12} more` : '';
+          const msg = `CONFIG CHANGED: ${configDrift.previous_hash} -> ${configDrift.current_hash} | fields: ${shownFields}${moreFields}`;
+          console.error(`[CONFIG_CHANGED_ALERT] ${msg}`);
+          const queued = queuePmfTelegramAlert(`⚠ ${msg}`, { event: 'config_changed', old_hash: configDrift.previous_hash, new_hash: configDrift.current_hash, fields_changed: configDrift.fields_changed || [] }, 'failures');
+          alerts.push({ type: 'config_changed', message: msg, ...queued });
+        }
+      } catch (e) {
+        console.error(`[CONFIG_CHANGED_CHECK_FAILED] ${e.message}`);
+        errors.push(`config drift check failed: ${e.message}`);
+      }
+    }
 
     for (const idea of db.data.ideas) {
       const derived = withDerivedStatus(idea);
       if (isInvalidTicker(idea.ticker)) continue;
       if (!(derived.paper !== false && derived.paper_status === 'OPEN' && effectiveEntry(derived))) continue;
       const ticker = String(idea.ticker).toUpperCase();
+      const wasPmf = isPreMarketFavourable(idea) || isPmfConfirmedAtStamp(idea);
+      let pmfStamp = null;
       const q = quotes[ticker];
       const { price: pmPrice, source: priceSource } = quotePrice(q);
       const atr = Number(idea.atr14 || idea.atr || effectiveRiskPerShare(idea));
@@ -1065,40 +1541,124 @@ module.exports = function attachScoring(app, db, deps) {
         pre_market_price_source: priceSource,
         pre_market_gap_adverse: false,
         pre_market_gap_favourable: false,
+        pre_market_gap_favourable_late: Boolean(idea.pre_market_gap_favourable_late),
         pre_market_gap_pct: null,
         pre_market_gap_atr_multiple: null,
         pre_market_gap_threshold_atr: thresholdAtrMultiple,
         pre_market_gap_error: null,
+        pmf_cohort: idea.pmf_cohort || null,
+        pmf_late_checked_at: lateMode ? at : idea.pmf_late_checked_at || null,
+        pmf_late_price: lateMode ? pmPrice : idea.pmf_late_price || null,
+        pmf_late_price_source: lateMode ? priceSource : idea.pmf_late_price_source || null,
+        pmf_late_gap_pct: null,
+        pmf_late_gap_atr_multiple: null,
+        pmf_late_threshold_atr: lateMode ? thresholdAtrMultiple : idea.pmf_late_threshold_atr || null,
+        pmf_late_error: null,
       };
 
       if (!Number.isFinite(pmPrice) || pmPrice <= 0) {
         update.pre_market_gap_error = 'no pre-market/quote price from FMP';
+        if (lateMode) update.pmf_late_error = update.pre_market_gap_error;
         errors.push(`${ticker}: ${update.pre_market_gap_error}`);
       } else if (!Number.isFinite(atr) || atr <= 0) {
         update.pre_market_gap_error = 'missing ATR; used by 1.5x ATR gap rule';
+        if (lateMode) update.pmf_late_error = update.pre_market_gap_error;
         errors.push(`${ticker}: ${update.pre_market_gap_error}`);
       } else {
         const move = pmPrice - entry;
         const signedSetupMove = direction === 'LONG' ? move : -move;
         update.pre_market_gap_pct = Number(((move / entry) * 100).toFixed(2));
         update.pre_market_gap_atr_multiple = Number((Math.abs(move) / atr).toFixed(2));
+        const signedAtrMultiple = Number((signedSetupMove / atr).toFixed(3));
+        if (lateMode) {
+          update.pmf_late_gap_pct = update.pre_market_gap_pct;
+          update.pmf_late_gap_atr_multiple = update.pre_market_gap_atr_multiple;
+        }
         update.pre_market_gap_adverse = signedSetupMove <= -(thresholdAtrMultiple * atr);
-        update.pre_market_gap_favourable = signedSetupMove >= (thresholdAtrMultiple * atr);
+        const qualifies = signedSetupMove >= (thresholdAtrMultiple * atr);
+        if (lateMode) {
+          update.pre_market_gap_favourable = idea.pre_market_gap_favourable === true;
+          update.pre_market_gap_favourable_late = qualifies && !wasPmf;
+          update.pmf_cohort = update.pre_market_gap_favourable_late ? 'PMF_LATE' : (idea.pmf_cohort || null);
+          if (update.pre_market_gap_favourable_late) {
+            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF_LATE' };
+          }
+        } else {
+          update.pre_market_gap_favourable = qualifies;
+          update.pre_market_gap_favourable_late = Boolean(idea.pre_market_gap_favourable_late);
+          update.pmf_cohort = qualifies ? 'PMF' : (idea.pmf_cohort || null);
+          if (qualifies) {
+            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF' };
+          }
+        }
         if (update.pre_market_gap_adverse && !dryRun) {
           const gapDirection = move < 0 ? 'down' : 'up';
           const msg = `⚠️ PRE-MARKET GAP: ${ticker} gapped ${gapDirection} ${Math.abs(update.pre_market_gap_pct)}% against setup. Review before market open.`;
-          try {
-            const sent = await sendTelegramAlert(msg);
-            alerts.push({ ticker, message: msg, ...sent });
-          } catch (e) {
-            alerts.push({ ticker, message: msg, sent: false, reason: e.message });
-          }
+          const queued = queuePmfTelegramAlert(msg, { event: 'adverse_gap_alert', ticker }, 'failures');
+          alerts.push({ ticker, message: msg, ...queued });
         }
       }
 
-      Object.assign(update, normalNonPmfHalfsizeFields(idea, update));
+      if (!lateMode) Object.assign(update, normalNonPmfHalfsizeFields(idea, update));
       checked.push(update);
-      if (!dryRun) Object.assign(idea, update);
+      if (!dryRun) {
+        if (lateMode) {
+          const lateUpdate = {
+            pmf_late_checked_at: update.pmf_late_checked_at,
+            pmf_late_price: update.pmf_late_price,
+            pmf_late_price_source: update.pmf_late_price_source,
+            pmf_late_gap_pct: update.pmf_late_gap_pct,
+            pmf_late_gap_atr_multiple: update.pmf_late_gap_atr_multiple,
+            pmf_late_threshold_atr: update.pmf_late_threshold_atr,
+            pmf_late_error: update.pmf_late_error,
+            pre_market_gap_favourable_late: update.pre_market_gap_favourable_late,
+          };
+          if (update.pre_market_gap_favourable_late) lateUpdate.pmf_cohort = 'PMF_LATE';
+          Object.assign(idea, lateUpdate);
+          if (update.pre_market_gap_favourable_late) writePmfConfirmationStamp(idea, pmfStamp);
+        } else {
+          Object.assign(idea, update);
+          if (update.pre_market_gap_favourable) writePmfConfirmationStamp(idea, pmfStamp);
+        }
+        if (!lateMode && update.pre_market_gap_favourable && !wasPmf) newlyStampedPmfs.push(idea);
+        if (lateMode && update.pre_market_gap_favourable_late) newlyStampedPmfLate.push(idea);
+      }
+    }
+
+    let autoExec = { ok: true, enabled: false, placed: 0, skipped: 0, results: [] };
+    if (!dryRun && newlyStampedPmfs.length) {
+      try {
+        autoExec = await pmfAutoExecutor.maybeExecuteConfirmedPmfs({
+          ideas: newlyStampedPmfs,
+          allIdeas: db.data.ideas,
+          readEnvValue,
+          now,
+        });
+      } catch (e) {
+        autoExec = { ok: false, error: e.message, placed: 0, results: [] };
+      }
+    }
+
+    const alertEvents = [];
+    if (!dryRun && !lateMode && newlyStampedPmfs.length) {
+      const msg = formatPmfConfirmedMessage(newlyStampedPmfs);
+      const queued = queuePmfTelegramAlert(msg, { event: 'pmf_confirmed', count: newlyStampedPmfs.length, tickers: newlyStampedPmfs.map(i => i.ticker || i.symbol) }, 'pmfConfirmed');
+      alertEvents.push({ type: 'pmf_confirmed', ...queued });
+    }
+    if (!dryRun && Array.isArray(autoExec?.results)) {
+      for (const result of autoExec.results) {
+        const idea = db.data.ideas.find(i => String(i.ticker || i.symbol || '').toUpperCase() === String(result.ticker || '').toUpperCase());
+        const msg = formatAutoExecMessage(result, idea);
+        if (!msg) continue;
+        const category = result.action === 'placed' ? 'autoFilled' : 'failures';
+        const queued = queuePmfTelegramAlert(msg, { event: result.action === 'placed' ? 'auto_exec_filled' : 'auto_exec_failed', ticker: result.ticker, action: result.action }, category);
+        alertEvents.push({ type: result.action === 'placed' ? 'auto_exec_filled' : 'auto_exec_failed', ticker: result.ticker, ...queued });
+      }
+      if (autoExec.ok === false && autoExec.error) {
+        const msg = `AUTO-EXEC FAILED: batch - ${autoExec.error}`;
+        const queued = queuePmfTelegramAlert(msg, { event: 'auto_exec_failed', ticker: 'batch', error: autoExec.error }, 'failures');
+        alertEvents.push({ type: 'auto_exec_failed', ticker: 'batch', ...queued });
+      }
     }
 
     if (!dryRun) await db.write();
@@ -1108,9 +1668,11 @@ module.exports = function attachScoring(app, db, deps) {
       dryRun,
       checked: openIdeas.length,
       updated: dryRun ? 0 : checked.length,
+      cohort: lateMode ? 'PMF_LATE' : 'PMF',
       fmpCallEstimate: Math.max(1, Math.ceil(openIdeas.length / 50)),
       adverse: checked.filter(x => x.pre_market_gap_adverse).length,
       favourable: checked.filter(x => x.pre_market_gap_favourable).length,
+      favourable_late: checked.filter(x => x.pre_market_gap_favourable_late).length,
       neutral: checked.filter(x => !x.pre_market_gap_adverse && !x.pre_market_gap_favourable && !x.pre_market_gap_error).length,
       size_rule_affected: sizeRuleAffected.length,
       size_rule_affected_examples: sizeRuleAffected.slice(0, 12).map(x => x.ticker),
@@ -1118,6 +1680,12 @@ module.exports = function attachScoring(app, db, deps) {
       size_rule_caution_nonpmf_affected: sizeRuleAffected.filter(x => ideaRegime(x) === 'CAUTION' && !isPreMarketFavourable(x)).length,
       errors: errors.slice(0, 50),
       alerts,
+      alert_events: alertEvents,
+      config_drift: configDrift,
+      auto_exec: autoExec,
+      newly_stamped_pmf_count: newlyStampedPmfs.length,
+      newly_stamped_pmf_late_count: newlyStampedPmfLate.length,
+      newly_stamped_pmf_late_examples: newlyStampedPmfLate.slice(0, 12).map(x => x.ticker),
       results: checked,
     };
   }
@@ -1224,6 +1792,9 @@ module.exports = function attachScoring(app, db, deps) {
   }
 
   function scoredValue(row, field) {
+    if (['r', 'actual_r', 'paper_exit_r', 'r_3d', 'r_10d', 'r_1d', 'canonical_r'].includes(field)) {
+      return canonicalResolvedR(row);
+    }
     if (row[field] == null || row[field] === '') return null;
     const v = Number(row[field]);
     return Number.isFinite(v) ? v : null;
@@ -1289,13 +1860,13 @@ module.exports = function attachScoring(app, db, deps) {
     ensure();
     const range = dateRangeFromQuery(req);
     const rows = db.data.ideas.map(withDerivedStatus).filter(r => r.paper_status !== 'INVALID' && r.date >= range.from && r.date <= range.to);
-    const scored3 = rows.filter(r => scoredValue(r, 'r_3d') != null);
-    const resolved = rows.filter(r => r.paper_status === 'CLOSED' || r.r_3d != null || r.r_10d != null);
+    const scored3 = rows.filter(r => canonicalResolvedR(r) != null);
+    const resolved = scored3;
     const active = rows.filter(r => r.paper_status === 'OPEN');
     const headlineStats = cohortStats(rows, 'r_3d');
-    const scoredValues = scored3.map(r => scoredValue(r, 'r_3d'));
-    const best = scored3.slice().sort((a,b)=>b.r_3d-a.r_3d)[0] || null;
-    const worst = scored3.slice().sort((a,b)=>a.r_3d-b.r_3d)[0] || null;
+    const scoredValues = scored3.map(r => canonicalResolvedR(r));
+    const best = scored3.slice().sort((a,b)=>canonicalResolvedR(b)-canonicalResolvedR(a))[0] || null;
+    const worst = scored3.slice().sort((a,b)=>canonicalResolvedR(a)-canonicalResolvedR(b))[0] || null;
     const sources = ['scanner', 'catalyst', 'X', 'options_flag', 'vanta'];
     const bySource = Object.fromEntries(sources.map(src => [
       src,
@@ -1317,8 +1888,9 @@ module.exports = function attachScoring(app, db, deps) {
     const council2 = rows.filter(r => Number(r.council_votes) === 2);
     const councilSingle = rows.filter(r => Number(r.council_votes) === 1);
     const preMarketAdverse = rows.filter(r => r.pre_market_gap_adverse === true);
-    const preMarketFavourable = rows.filter(r => r.pre_market_gap_favourable === true);
-    const preMarketNeutral = rows.filter(r => r.pre_market_checked_at && !r.pre_market_gap_adverse && !r.pre_market_gap_favourable && !r.pre_market_gap_error);
+    const preMarketFavourable = rows.filter(isPrimaryPmf);
+    const preMarketLate = rows.filter(isPmfLate);
+    const preMarketNeutral = rows.filter(r => r.pre_market_checked_at && !r.pre_market_gap_adverse && !isPreMarketFavourable(r) && !isPmfLate(r) && !r.pre_market_gap_error);
     const preMarketUnchecked = rows.filter(r => !r.pre_market_checked_at);
     const highConfluence = rows.filter(r => scoredValue(r, 'confluence_score') > 90);
     const mediumConfluence = rows.filter(r => {
@@ -1343,8 +1915,8 @@ module.exports = function attachScoring(app, db, deps) {
         avg_r: headlineStats.avg_r,
         expectancy_r: headlineStats.avg_r,
         insufficient: headlineStats.insufficient,
-        best_trade: best ? { date: best.date, ticker: best.ticker, r_3d: best.r_3d, hit: best.hit } : null,
-        worst_trade: worst ? { date: worst.date, ticker: worst.ticker, r_3d: worst.r_3d, hit: worst.hit } : null,
+        best_trade: best ? { date: best.date, ticker: best.ticker, r_3d: canonicalResolvedR(best), canonical_r: canonicalResolvedR(best), hit: best.hit || best.paper_exit_reason } : null,
+        worst_trade: worst ? { date: worst.date, ticker: worst.ticker, r_3d: canonicalResolvedR(worst), canonical_r: canonicalResolvedR(worst), hit: worst.hit || worst.paper_exit_reason } : null,
       },
       by_source: bySource,
       catalyst_sub_type: catalystBySubType,
@@ -1372,6 +1944,8 @@ module.exports = function attachScoring(app, db, deps) {
         pre_market_gap: {
           adverse: cohortStats(preMarketAdverse, 'r_3d'),
           favourable: cohortStats(preMarketFavourable, 'r_3d'),
+          pmf_late: cohortStats(preMarketLate, 'r_3d'),
+          pmf_late_true_r: statsFromTrueR(preMarketLate),
           neutral: cohortStats(preMarketNeutral, 'r_3d'),
           unchecked: cohortStats(preMarketUnchecked, 'r_3d'),
           decision: verdict(cohortStats(preMarketFavourable, 'r_3d'), cohortStats([...preMarketAdverse, ...preMarketNeutral], 'r_3d')),
@@ -1442,6 +2016,7 @@ module.exports = function attachScoring(app, db, deps) {
           'danelfin_technical',
           'danelfin_fundamental',
           'danelfin_sentiment',
+          'intake_source_layer', 'source_layer', 'universe_source',
         ];
         for (const field of refreshFields) {
           if (b[field] !== undefined) existing[field] = b[field];
@@ -1514,6 +2089,9 @@ module.exports = function attachScoring(app, db, deps) {
         target: b.target != null ? Number(b.target) : null,
         risk_per_share: (b.entry != null && b.stop != null) ? Number(b.entry) - Number(b.stop) : null,
         source: b.source || null,
+        intake_source_layer: b.intake_source_layer || b.source_layer || b.universe_source || null,
+        source_layer: b.source_layer || b.intake_source_layer || b.universe_source || null,
+        universe_source: b.universe_source || null,
         grade: b.grade || null,
         sector: b.sector || null,
         setup: b.setup || null,
@@ -1723,11 +2301,11 @@ module.exports = function attachScoring(app, db, deps) {
     try {
       ensure();
       const rows = db.data.ideas.map(withDerivedStatus).filter(i => i.paper_status !== 'INVALID');
-      const scored = rows.filter(i => i.r_3d != null);
+      const scored = rows.filter(i => canonicalResolvedR(i) != null);
       const n = scored.length;
       const avg = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 
-      const r3 = scored.map(i => i.r_3d);
+      const r3 = scored.map(i => canonicalResolvedR(i));
       const wins = r3.filter(r => r > 0).length;
 
       // does high council agreement actually beat low?
@@ -1737,11 +2315,11 @@ module.exports = function attachScoring(app, db, deps) {
       const tight = scored.filter(i => i.chronos_band_pct != null && i.chronos_band_pct <= 3);
       const wide  = scored.filter(i => i.chronos_band_pct != null && i.chronos_band_pct > 3);
       const confluenceStats = (rows) => {
-        const values = rows.map(i => i.r_3d);
+        const values = rows.map(i => canonicalResolvedR(i)).filter(v => v != null);
         return {
-          count: rows.length,
-          win_rate: rows.length ? Math.round((values.filter(v => v > 0).length / rows.length) * 100) : null,
-          avg_r: rows.length ? Number(avg(values).toFixed(3)) : null,
+          count: values.length,
+          win_rate: values.length ? Math.round((values.filter(v => v > 0).length / values.length) * 100) : null,
+          avg_r: values.length ? Number(avg(values).toFixed(3)) : null,
         };
       };
 
@@ -1759,21 +2337,21 @@ module.exports = function attachScoring(app, db, deps) {
           return c.length ? Math.round((c.filter(i=>i.council_helped).length / c.length)*100) : null;
         })(),
         tier_compare: {
-          council_3of3_avg_r: hi.length ? Number(avg(hi.map(i=>i.r_3d)).toFixed(3)) : null,
-          council_2of3_avg_r: mid.length ? Number(avg(mid.map(i=>i.r_3d)).toFixed(3)) : null,
+          council_3of3_avg_r: hi.length ? Number(avg(hi.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3)) : null,
+          council_2of3_avg_r: mid.length ? Number(avg(mid.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3)) : null,
         },
         chronos_band_compare: {
-          tight_band_avg_r: tight.length ? Number(avg(tight.map(i=>i.r_3d)).toFixed(3)) : null,
-          wide_band_avg_r:  wide.length  ? Number(avg(wide.map(i=>i.r_3d)).toFixed(3))  : null,
+          tight_band_avg_r: tight.length ? Number(avg(tight.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3)) : null,
+          wide_band_avg_r:  wide.length  ? Number(avg(wide.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3))  : null,
         },
         options_compare: (() => {
           const confirmed = scored.filter(i => i.options_verdict === 'CONFIRM' || (i.options_signals_count || 0) >= 2);
           const notConfirmed = scored.filter(i => !(i.options_verdict === 'CONFIRM' || (i.options_signals_count || 0) >= 2));
           return {
             confirm_count: confirmed.length,
-            confirm_avg_r: confirmed.length ? Number(avg(confirmed.map(i=>i.r_3d)).toFixed(3)) : null,
+            confirm_avg_r: confirmed.length ? Number(avg(confirmed.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3)) : null,
             non_confirm_count: notConfirmed.length,
-            non_confirm_avg_r: notConfirmed.length ? Number(avg(notConfirmed.map(i=>i.r_3d)).toFixed(3)) : null,
+            non_confirm_avg_r: notConfirmed.length ? Number(avg(notConfirmed.map(i=>canonicalResolvedR(i)).filter(v=>v!=null)).toFixed(3)) : null,
           };
         })(),
         by_confluence: {
@@ -1786,7 +2364,8 @@ module.exports = function attachScoring(app, db, deps) {
           for (const row of scored) {
             const src = row.source || 'unknown';
             if (!bySource[src]) bySource[src] = [];
-            bySource[src].push(row.r_3d);
+            const v = canonicalResolvedR(row);
+            if (v != null) bySource[src].push(v);
           }
           return Object.fromEntries(Object.entries(bySource).map(([src, vals]) => [
             src,
@@ -1834,15 +2413,83 @@ module.exports = function attachScoring(app, db, deps) {
     }
   });
 
+  app.get('/api/system2/non-pmf-entry-guardrail', adminOnly, (req, res) => {
+    try {
+      ensure();
+      const resolved = cleanResolvedRows();
+      const pmfRows = resolved.filter(isPrimaryPmf);
+      const nonPmfRows = resolved.filter(r => !isPmfConfirmedAtStamp(r) && !isPmfLate(r));
+      const trueStats = trueRComparison(resolved);
+      const entryDate = row => String(
+        row.actual_entry_date ||
+        row.paper_entry_date ||
+        row.user_marked_entered_at ||
+        row.trigger_price_at ||
+        row.date ||
+        ''
+      ).slice(0, 10);
+      const enteredRows = db.data.ideas
+        .map(withDerivedStatus)
+        .filter(isDisplayableIdea)
+        .filter(row => !isPmfConfirmedAtStamp(row) && !isPmfLate(row))
+        .filter(row => row.actual_entry_price != null || row.paper_entry_price != null || row.entryRecorded === true || row.user_marked_entered === true);
+      const now = new Date();
+      const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      const day = todayUtc.getUTCDay();
+      const mondayOffset = day === 0 ? 6 : day - 1;
+      const weekStart = new Date(todayUtc);
+      weekStart.setUTCDate(todayUtc.getUTCDate() - mondayOffset);
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      const weekStartText = weekStart.toISOString().slice(0, 10);
+      const monthStartText = monthStart.toISOString().slice(0, 10);
+      const enteredThisWeek = enteredRows.filter(row => entryDate(row) >= weekStartText);
+      const enteredThisMonth = enteredRows.filter(row => entryDate(row) >= monthStartText);
+      res.json({
+        ok: true,
+        source: 'cleanResolvedRows() + trueRComparison() + live fund.json entry flags',
+        generated_at: new Date().toISOString(),
+        resolved_sample: {
+          definition: 'v2 clean resolved rows with canonical R, enriched with True R realistic-fill calculation',
+          count: resolved.length,
+        },
+        true_r: {
+          pmf: statsFromTrueR(pmfRows),
+          non_pmf: statsFromTrueR(nonPmfRows),
+          source_path: 'trueRComparison(cleanResolvedRows())',
+          comparison: trueStats.cohorts,
+        },
+        entries: {
+          week_start: weekStartText,
+          month_start: monthStartText,
+          non_pmf_this_week: enteredThisWeek.length,
+          non_pmf_this_month: enteredThisMonth.length,
+          latest_non_pmf_entries: enteredRows
+            .slice()
+            .sort((a, b) => entryDate(b).localeCompare(entryDate(a)))
+            .slice(0, 10)
+            .map(row => ({
+              id: row.id,
+              ticker: row.ticker,
+              entry_date: entryDate(row),
+              user_marked_entered: row.user_marked_entered === true,
+              actual_entry_price: numericOrNull(row.actual_entry_price ?? row.paper_entry_price),
+            })),
+        },
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
   app.get('/api/score/performance', adminOnly, (req, res) => {
     ensure();
     const rows = db.data.ideas.map(withDerivedStatus).filter(i => i.paper_status !== 'INVALID');
-    const resolved = rows.filter(i => i.paper_status === 'CLOSED' || i.r_3d != null || i.r_10d != null);
+    const resolved = rows.filter(i => canonicalResolvedR(i) != null);
     const active = rows.filter(i => i.paper_status === 'OPEN');
-    const rValues = resolved.map(i => i.r_3d ?? i.r_10d ?? i.r_1d).filter(v => v != null);
-    const wins = resolved.filter(i => i.paper_outcome === 'WIN' || i.hit === 'TARGET' || (i.r_3d != null && i.r_3d > 0));
-    const best = rows.filter(i => i.r_3d != null).sort((a,b)=>b.r_3d-a.r_3d)[0] || null;
-    const worst = rows.filter(i => i.r_3d != null).sort((a,b)=>a.r_3d-b.r_3d)[0] || null;
+    const rValues = resolved.map(i => canonicalResolvedR(i)).filter(v => v != null);
+    const wins = rValues.filter(v => v > 0);
+    const best = resolved.slice().sort((a,b)=>canonicalResolvedR(b)-canonicalResolvedR(a))[0] || null;
+    const worst = resolved.slice().sort((a,b)=>canonicalResolvedR(a)-canonicalResolvedR(b))[0] || null;
     const avg = rValues.length ? rValues.reduce((a,b)=>a+b,0)/rValues.length : null;
     res.json({
       ok: true,
@@ -1850,10 +2497,10 @@ module.exports = function attachScoring(app, db, deps) {
       activeCount: active.length,
       resolvedCount: resolved.length,
       percentResolved: rows.length ? Math.round((resolved.length / rows.length) * 100) : 0,
-      winRate: resolved.length ? Math.round((wins.length / resolved.length) * 100) : null,
+      winRate: rValues.length ? Math.round((wins.length / rValues.length) * 100) : null,
       avgR: avg == null ? null : Number(avg.toFixed(3)),
-      bestTrade: best ? { date: best.date, ticker: best.ticker, r_3d: best.r_3d, hit: best.hit } : null,
-      worstTrade: worst ? { date: worst.date, ticker: worst.ticker, r_3d: worst.r_3d, hit: worst.hit } : null,
+      bestTrade: best ? { date: best.date, ticker: best.ticker, r_3d: canonicalResolvedR(best), canonical_r: canonicalResolvedR(best), hit: best.hit || best.paper_exit_reason } : null,
+      worstTrade: worst ? { date: worst.date, ticker: worst.ticker, r_3d: canonicalResolvedR(worst), canonical_r: canonicalResolvedR(worst), hit: worst.hit || worst.paper_exit_reason } : null,
     });
   });
 
@@ -1985,8 +2632,35 @@ module.exports = function attachScoring(app, db, deps) {
     const date = req.query.date || rows[0]?.date;
     const row = rows.find(r => r.date === date) || null;
     if (!row) return res.json({ ok: true, date, available_dates: rows.map(r => r.date), stages: [], stage: null });
+    const runMeta = (db.data.system2_run_metadata || []).find(r => r.date === date) || null;
+    const correctedStageCount = (key) => {
+      const counts = runMeta?.counts || {};
+      if (key === 'universe') return counts.universe;
+      if (key === 'stage1') return counts.stage1;
+      if (key === 'stage2') return counts.stage2;
+      if (key === 'stage5') return counts.stage5 ?? counts.stage3;
+      if (key === 'stage6') return counts.stage6;
+      if (key === 'stage7') return counts.stage7;
+      if (key === 'finalists') return counts.finalists;
+      return null;
+    };
+    const withCorrectedCount = (stage) => {
+      const key = normalizeStageKey(stage.stage_key || stage.stage);
+      const count = correctedStageCount(key);
+      if (count == null) return stage;
+      const entered = key === 'universe' || key === 'stage5' || key === 'stage6' || key === 'finalists' ? count : stage.entered;
+      const rejected = Number.isFinite(Number(entered)) ? Math.max(0, Number(entered) - Number(count)) : stage.rejected;
+      return {
+        ...stage,
+        entered,
+        kept: count,
+        rejected: key === 'stage5' || key === 'stage6' || key === 'finalists' ? 0 : rejected,
+        metadata: { ...(stage.metadata || {}), count_source: 'system2_run_metadata.counts' },
+      };
+    };
     const enrichStage = (stage) => {
       if (!stage) return stage;
+      stage = withCorrectedCount(stage);
       const key = normalizeStageKey(stage.stage_key || stage.stage);
       if (key === 'stage5') {
         const safe = rootArtifact('stage3_news_safe_top40.json', []) || [];
@@ -2013,9 +2687,9 @@ module.exports = function attachScoring(app, db, deps) {
         ].filter(r => r.ticker);
         return {
           ...stage,
-          entered: rows.length,
-          kept: rows.filter(r => r.status === 'KEPT').length,
-          rejected: rows.filter(r => r.status === 'REJECTED').length,
+          entered: stage.entered ?? rows.length,
+          kept: stage.kept ?? rows.filter(r => r.status === 'KEPT').length,
+          rejected: stage.rejected ?? rows.filter(r => r.status === 'REJECTED').length,
           no_data: rows.filter(r => String(r.reason || '').includes('NO_DATA')).length,
           tickers: rows,
           metadata: { ...(stage.metadata || {}), source: 'stage3_news_safe_top40 + stage3_news_rejections' },
@@ -2140,7 +2814,7 @@ module.exports = function attachScoring(app, db, deps) {
   function ideaPerformanceStatus(row, priceForMove) {
     const outcome = String(row.paper_outcome || row.hit || row.paper_exit_reason || row.exit_reason || '').toUpperCase();
     const paperStatus = String(row.paper_status || '').toUpperCase();
-    const actualR = numericOrNull(row.actual_r ?? row.paper_exit_r ?? row.r);
+    const actualR = canonicalResolvedR(row);
     if (outcome === 'TARGET' || outcome === 'WIN') return 'WON';
     if (outcome === 'STOP' || outcome === 'LOSS') return 'LOST';
     if (outcome === 'TIME' || outcome === 'TIMEOUT' || row.scored_stage >= 10) return 'TIMED_OUT';
@@ -2183,7 +2857,8 @@ module.exports = function attachScoring(app, db, deps) {
         const pctMove = suggestedEntry != null && priceForMove != null && suggestedEntry !== 0
           ? Number((((priceForMove - suggestedEntry) / suggestedEntry) * 100).toFixed(3))
           : null;
-        const rValue = signedMove != null && risk > 0 ? Number((signedMove / risk).toFixed(2)) : null;
+        const canonical = canonicalResolvedR(i);
+        const rValue = canonical != null ? canonical : (signedMove != null && risk > 0 ? Number((signedMove / risk).toFixed(2)) : null);
         const suggestedMs = dateSuggested ? new Date(dateSuggested + 'T00:00:00Z').getTime() : null;
         const exitDate = String(i.paper_exit_at || i.actual_exit_at || i.exit_at || '').slice(0, 10) || null;
         const exitMs = exitDate ? new Date(exitDate + 'T00:00:00Z').getTime() : null;
@@ -2210,6 +2885,9 @@ module.exports = function attachScoring(app, db, deps) {
           price_updated_at: exitPrice != null ? exitDate : (live.updated_at || (live.timestamp ? new Date(Number(live.timestamp) * 1000).toISOString() : null)),
           pct_move: pctMove,
           r_value: rValue,
+          canonical_r: canonical,
+          canonical_r_quarantined: i.canonical_r_quarantined === true || isCanonicalRQuarantined(i),
+          canonical_r_quarantine_reasons: i.canonical_r_quarantine_reasons || canonicalQuarantineReasons(i),
           would_be_r: rValue,
           days_since: daysSince,
           days_held: daysHeld,
@@ -2218,7 +2896,9 @@ module.exports = function attachScoring(app, db, deps) {
           user_marked_entered: i.user_marked_entered === true,
           user_marked_entered_at: i.user_marked_entered_at || null,
           hit: i.paper_outcome || i.hit || i.paper_exit_reason || null,
-          pre_market_favourable: i.pre_market_gap_favourable === true || i.pre_market_favourable === true || String(i.pre_market_status || i.gap_status || '').toUpperCase() === 'FAVOURABLE',
+          pre_market_favourable: isPrimaryPmf(i),
+          pre_market_current_favourable: isPreMarketFavourable(i),
+        intake_source_layer: intakeSourceLayer(i),
           council_tier: i.council_tier || i.council_final_verdict || i.trade_readiness_tier || null,
         };
       })
@@ -2323,7 +3003,7 @@ module.exports = function attachScoring(app, db, deps) {
     }).filter(r => r.ticker);
 
     const active = ideas.filter(i => i.paper_status === 'OPEN');
-    const activePmf = active.filter(i => i.pre_market_gap_favourable === true).length;
+    const activePmf = active.filter(isPrimaryPmf).length;
     const unchecked = active.filter(i => !i.thesis_checked_at && !i.thesis_status).length;
     const nearLine = active.flatMap(i => {
       const toStop = numericOrNull(i.distance_to_stop_pct);
@@ -2354,8 +3034,9 @@ module.exports = function attachScoring(app, db, deps) {
     const tr = statsFromR(resolved);
     const trueTr = statsFromTrueR(resolved);
     const sizeRuleMonitor = normalNonPmfHalfsizeReadout(resolved);
-    const pmfStats = statsFromR(resolved.filter(r => r.pre_market_gap_favourable === true));
-    const pmfTrueStats = statsFromTrueR(resolved.filter(r => r.pre_market_gap_favourable === true));
+    const pmfRows = resolved.filter(isPrimaryPmf);
+    const pmfStats = statsFromR(pmfRows);
+    const pmfTrueStats = statsFromTrueR(pmfRows);
     const regimeCoverage = regimeCoverageFromRows(resolved).regime_coverage || [];
     const latestRun = latestRunSummary() || {};
     const currentRegime =
@@ -2369,13 +3050,14 @@ module.exports = function attachScoring(app, db, deps) {
     const optionActiveCount = Array.isArray(optData.ideas) ? optData.ideas.length : 0;
 
     const tierA = finalists
-      .filter(f => f.pre_market_gap_favourable === true || f.pre_market_favourable === true)
+      .filter(isPrimaryPmf)
       .map(f => ({
         tier: 'A',
         kind: 'proven_edge',
         ticker: f.ticker,
         label: 'Proven edge signal',
-        reason: `${f.ticker} is pre-market favourable; this is the system's strongest verified setup (${pmfStats.win_rate ?? '-'}% win over ${pmfStats.count || 0} resolved trades).`,
+        reason: `${f.ticker} is pre-market favourable; src: ${intakeSourceLayer(f)}; this is the system's strongest verified setup (${pmfStats.win_rate ?? '-'}% win over ${pmfStats.count || 0} resolved trades).`,
+        intake_source_layer: intakeSourceLayer(f),
         link: { section: 'trade', tab: 'finalists' },
       }));
 
@@ -2452,6 +3134,7 @@ module.exports = function attachScoring(app, db, deps) {
         true_win_rate: trueTr.win_rate,
         true_avg_r: trueTr.avg_r,
         true_total_r: trueTr.total_r,
+        pmf_strict_count: pmfStats.count,
         pmf_true_win_rate: pmfTrueStats.win_rate,
         pmf_true_avg_r: pmfTrueStats.avg_r,
         source: 'cleanResolvedRows / track-record-readiness source',
@@ -2504,6 +3187,89 @@ module.exports = function attachScoring(app, db, deps) {
     }
   });
 
+
+  app.post('/api/system2/pmf-auto-exec/sync-local', localOnly, async (req, res) => {
+    try {
+      ensure();
+      const result = await pmfAutoExecutor.syncOpenAutoPositions({
+        allIdeas: db.data.ideas,
+        readEnvValue,
+        now,
+        dryRun: Boolean(req.body?.dryRun || req.body?.dry_run),
+      });
+      const alertEvents = [];
+      if (!result.dryRun && Array.isArray(result.results)) {
+        for (const row of result.results) {
+          const idea = db.data.ideas.find(i => String(i.ticker || i.symbol || '').toUpperCase() === String(row.ticker || '').toUpperCase());
+          const msg = formatSyncAlertMessage(row, idea);
+          if (!msg) continue;
+          const closed = String(row.action || '').startsWith('updated_exit');
+          const queued = queuePmfTelegramAlert(msg, { event: closed ? 'position_closed' : 'auto_exec_failure', ticker: row.ticker, action: row.action }, closed ? 'positionClosed' : 'failures');
+          alertEvents.push({ type: closed ? 'position_closed' : 'auto_exec_failure', ticker: row.ticker, ...queued });
+        }
+      }
+      if (!result.dryRun) await db.write();
+      res.json({ ...result, alert_events: alertEvents });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.post('/api/system2/pmf-auto-exec/dry-run-local', localOnly, async (req, res) => {
+    try {
+      ensure();
+      const body = req.body || {};
+      const fallback = db.data.ideas.find(i => isPreMarketFavourable(i) && effectiveEntry(i) && effectiveStop(i) && effectiveTarget(i));
+      const idea = body.idea || fallback || {};
+      res.json(pmfAutoExecutor.dryRunPreview(idea, readEnvValue));
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.post('/api/system2/pmf-alerts/test-local', localOnly, async (req, res) => {
+    try {
+      const messages = [
+        { type: 'pmf_confirmed', text: '[TEST] PMF: SUNB +9.08% (1.76x ATR) | entry 69.93 stop 64.88 target 81.08 | conviction: high' },
+        { type: 'auto_exec_filled', text: '[TEST] FILLED: SUNB 1sh @ 76.32 (slip +5.2%) | OCO stop 71.27 target 87.47' },
+        { type: 'position_closed', text: '[TEST] CLOSED: EIX @ 80.24 | TARGET | real R +0.48' },
+        { type: 'failure', text: '[TEST] AUTO-EXEC FAILED: TEST - simulated failure alert' },
+      ];
+      if (envFlag('PMF_ALERT_DAILY_SUMMARY', false) || req.body?.includeDailySummary) {
+        messages.push({ type: 'daily_summary', text: `[TEST] ${buildDailyPmfSummary()}` });
+      }
+      const results = [];
+      for (const msg of messages) {
+        const sent = await safeSendTelegramAlert(msg.text, { event: `test_${msg.type}`, test: true });
+        results.push({ ...msg, ...sent });
+      }
+      res.json({ ok: true, enabled: pmfAlertConfig().enabled, results });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.post('/api/system2/pmf-alerts/daily-summary-local', localOnly, async (req, res) => {
+    try {
+      const text = buildDailyPmfSummary();
+      const queued = queuePmfTelegramAlert(text, { event: 'daily_summary' }, 'dailySummary');
+      res.json({ ok: true, text, ...queued });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.post('/api/system2/pmf-alerts/failure-sim-local', localOnly, async (req, res) => {
+    try {
+      const sent = await safeSendTelegramAlert('[TEST] forced Telegram failure isolation check', { event: 'test_forced_failure', test: true }, { token: 'bad-token-for-failure-sim', timeoutMs: 1 });
+      const fallback = db.data.ideas.find(i => isPreMarketFavourable(i) && effectiveEntry(i) && effectiveStop(i) && effectiveTarget(i));
+      const executorDryRun = fallback ? pmfAutoExecutor.dryRunPreview(fallback, readEnvValue) : { ok: false, reason: 'no PMF fallback idea available' };
+      res.json({ ok: true, telegram_failure_was_swallowed: sent.sent === false, telegram_result: sent, executor_dry_run_ok: executorDryRun?.ok !== false, executor_dry_run_action: executorDryRun?.action || null });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
   app.get('/api/system2/config', adminOnly, (req, res) => {
     res.json({ ok: true, config: readSystem2Config(), path: configPath });
   });
@@ -2545,6 +3311,9 @@ module.exports = function attachScoring(app, db, deps) {
           stage2Top40: countArtifact('stage2_surgical_strike_top40.json'),
           stage4ChronosTop40: countArtifact('stage4_chronos_enriched_top40.json'),
           stage3OptionsTop40: countArtifact('stage3_options_enriched_top40.json'),
+          stage3NewsSafeTop40: countArtifact('stage3_news_safe_top40.json'),
+          stage5CombinedForecastTop40: countArtifact('stage5_combined_forecast_top40.json'),
+          stage6CouncilEnriched: countArtifact('stage6_council_enriched.json'),
           confluenceTop40: countArtifact('stage2_confluence_ranked_top40.json'),
           stage5NewsSafeFinalists: countArtifact('stage5_news_safe_finalists.json'),
           stage7Survivors: countArtifact('stage7_clustered_survivors.json'),
@@ -2595,9 +3364,125 @@ module.exports = function attachScoring(app, db, deps) {
 
   app.get('/api/system2/learning-engine', adminOnly, (req, res) => {
     try {
-      const data = readJson(path.join(system2Root, 'data', 'learned_weights.json'), null);
+      const file = path.join(system2Root, 'data', 'learned_weights.json');
+      const data = readJson(file, null);
       if (data == null) return res.json({ mode: 'DORMANT', error: 'file not found' });
-      res.json({ ok: true, ...data });
+      let generated = data.generated_at || null;
+      try { generated = generated || fs.statSync(file).mtime.toISOString(); } catch {}
+      res.json({
+        ok: true,
+        source: 'data/learned_weights.json',
+        generated_at: generated,
+        sample: data.ledger_count ?? data.total_resolved ?? 0,
+        ...data,
+      });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  function readJsonl(file) {
+    try {
+      return fs.readFileSync(file, 'utf8')
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map(line => JSON.parse(line));
+    } catch {
+      return [];
+    }
+  }
+
+  function councilCalibrationFromRealLedger() {
+    const file = path.join(system2Root, 'data', 'signal_outcomes.jsonl');
+    const rows = readJsonl(file);
+    const resolved = rows.filter(r => numericOrNull(r.actual_r) != null && numericOrNull(r.actual_r) !== 0);
+    const modelKeys = ['claude', 'gpt4o', 'gemini', 'kimi'];
+    const abstain = new Set(['', '-', 'NONE', 'NULL', 'ERROR', 'TIMEOUT', 'ABSTAIN']);
+    const groups = {
+      tier1: new Set(['UPGRADE', 'TIER1']),
+      tier2: new Set(['TIER2', 'TIER3']),
+      skip: new Set(['SKIP', 'FORCE_SKIP']),
+    };
+    const groupFor = (verdict) => {
+      const v = String(verdict || '').trim().toUpperCase();
+      for (const [name, vals] of Object.entries(groups)) if (vals.has(v)) return name;
+      return abstain.has(v) ? 'abstain' : 'other';
+    };
+    const avg = vals => vals.length ? Number((vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(3)) : null;
+    const models = {};
+    for (const model of modelKeys) {
+      const modelRows = resolved.filter(r => !abstain.has(String(r[`${model}_verdict`] || r[`council_${model}`] || '').trim().toUpperCase()));
+      const dist = {};
+      for (const row of modelRows) {
+        const v = String(row[`${model}_verdict`] || row[`council_${model}`] || '').trim().toUpperCase();
+        dist[v] = (dist[v] || 0) + 1;
+      }
+      const groupStats = {};
+      for (const [group, vals] of Object.entries(groups)) {
+        const subset = modelRows.filter(r => vals.has(String(r[`${model}_verdict`] || r[`council_${model}`] || '').trim().toUpperCase()));
+        const rVals = subset.map(r => numericOrNull(r.actual_r)).filter(v => v != null);
+        groupStats[group] = {
+          count: subset.length,
+          avg_r: avg(rVals),
+          win_rate: rVals.length ? Number((rVals.filter(v => v > 0).length / rVals.length * 100).toFixed(1)) : null,
+        };
+      }
+      let agreement = 0;
+      let checked = 0;
+      for (const row of resolved) {
+        const mv = String(row[`${model}_verdict`] || row[`council_${model}`] || '').trim().toUpperCase();
+        if (abstain.has(mv)) continue;
+        const fg = groupFor(row.council_final_verdict);
+        const mg = groupFor(mv);
+        checked += 1;
+        if (mg === fg) agreement += 1;
+      }
+      const forceSkip = dist.FORCE_SKIP || 0;
+      const abstainCount = resolved.length - modelRows.length;
+      models[model] = {
+        name: model === 'gpt4o' ? 'GPT-4o' : model.charAt(0).toUpperCase() + model.slice(1),
+        total_verdicts: modelRows.length,
+        distribution: dist,
+        group_stats: groupStats,
+        tier1_avg_r: groupStats.tier1.avg_r,
+        skip_avg_r: groupStats.skip.avg_r,
+        tier1_count: groupStats.tier1.count,
+        skip_count: groupStats.skip.count,
+        force_skip_rate: modelRows.length ? forceSkip / modelRows.length : 0,
+        abstain_rate: resolved.length ? abstainCount / resolved.length : 0,
+        agreement_rate: checked ? agreement / checked : null,
+        calibrated: false,
+        insufficient: modelRows.length < 30,
+      };
+    }
+    let generated = null;
+    let size = 0;
+    try {
+      const stat = fs.statSync(file);
+      generated = stat.mtime.toISOString();
+      size = stat.size;
+    } catch {}
+    return {
+      ok: true,
+      source: 'data/signal_outcomes.jsonl',
+      generated_at: generated,
+      file_bytes: size,
+      total_resolved: resolved.length,
+      sample: resolved.length,
+      needed: 30,
+      insufficient_data: resolved.length < 30,
+      message: resolved.length < 30
+        ? `No real council calibration data yet (${resolved.length} real resolved outcomes, need 30+). Council gating remains disabled. The numbers previously shown were test fixtures and have been removed.`
+        : null,
+      council_gates_trades: false,
+      models: resolved.length >= 30 ? models : {},
+      raw_rows_available: rows.length,
+    };
+  }
+
+  app.get('/api/system2/council-calibration', adminOnly, (req, res) => {
+    try {
+      res.json(councilCalibrationFromRealLedger());
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
@@ -2628,7 +3513,10 @@ module.exports = function attachScoring(app, db, deps) {
       try {
         runs = fs.readdirSync(logDir)
           .filter(f => /^phase_b_core_.*\.json$/.test(f))
-          .map(f => readJson(path.join(logDir, f), null))
+          .map(f => {
+            const row = readJson(path.join(logDir, f), null);
+            return row ? { file: f, ...row } : null;
+          })
           .filter(Boolean)
           .sort((a, b) => String(a.runStartedAt || '').localeCompare(String(b.runStartedAt || '')));
       } catch {}
@@ -2642,6 +3530,10 @@ module.exports = function attachScoring(app, db, deps) {
         success_rate: runs.length ? Number((successful.length / runs.length * 100).toFixed(1)) : null,
         successful_runs: successful.length,
         total_runs: runs.length,
+        sample: runs.length,
+        source: 'live phase_b_core logs',
+        generated_at: new Date().toISOString(),
+        scope_label: `over current full run set (${runs.length} runs)`,
         avg_finalists: avg(finalistVals),
         avg_runtime_minutes: avg(runtimeVals),
         latest_funnel: {
@@ -2654,29 +3546,43 @@ module.exports = function attachScoring(app, db, deps) {
           date: String(latest.runStartedAt || '').slice(0, 10),
           status: latest.pipeline_status || (latest.ok ? 'SUCCESS' : 'UNKNOWN'),
           duration_minutes: latest.duration_minutes ?? latest.runtimeMinutes ?? null,
+          file: latest.file || null,
         },
       };
       const outcomeRows = rejectedOutcomeRows();
       const outcomeSummary = rejectedOutcomeSummary(outcomeRows);
       const trackedOutcomes = outcomeRows.filter(r => numericOrNull(r.would_be_r) != null && r.tracking_status !== 'tracking');
+      const rawShadowGroups = {};
+      for (const row of shadowRows()) {
+        const reason = plainReason(row.rejection_reason);
+        const days = numericOrNull(row.trading_days_since_rejection) ?? 0;
+        const move = numericOrNull(row.price_change_pct);
+        if (move == null || days < 3) continue;
+        if (!rawShadowGroups[reason]) rawShadowGroups[reason] = [];
+        rawShadowGroups[reason].push(move);
+      }
       const gates = Object.fromEntries(outcomeSummary.map(g => [
         g.reason,
-        {
-          count: g.tracked,
-          avg_5d_return: g.tracked ? Number((outcomeRows
-            .filter(r => plainReason(r.reason || r.shadow_reason || r.stage_rejected) === g.reason)
-            .map(r => Number(r.shadow_move_pct))
-            .filter(Number.isFinite)
-            .reduce((s, v, _, arr) => s + v / arr.length, 0)).toFixed(2)) : null,
+        (() => {
+          const rawMoves = rawShadowGroups[g.reason] || [];
+          return {
+          count: rawMoves.length || g.tracked,
+          raw_shadow_count: rawMoves.length,
+          would_be_r_tracked: g.tracked,
+          avg_5d_return: rawMoves.length ? Number((rawMoves.reduce((s, v) => s + v, 0) / rawMoves.length).toFixed(2)) : null,
           avg_missed_r: g.tracked ? Number((g.total_r / g.tracked).toFixed(2)) : null,
           net_r: g.total_r,
           status: g.total_r > 0 ? 'gate may be too strict here' : 'gate saved risk',
-        },
+          };
+        })(),
       ]));
       const totalCost = trackedOutcomes.filter(r => Number(r.would_be_r) > 0).reduce((s, r) => s + Number(r.would_be_r), 0);
       const totalSaved = trackedOutcomes.filter(r => Number(r.would_be_r) <= 0).reduce((s, r) => s + Math.abs(Number(r.would_be_r)), 0);
       const shadow_portfolio = {
         source: 'system2_shadow.db shadow_portfolio',
+        generated_at: new Date().toISOString(),
+        sample: trackedOutcomes.length,
+        metric_note: 'Rejected names use shadow avg 5d move / estimated would-be R. Directional only, not directly comparable to survivor realized canonical R.',
         total_tracked: trackedOutcomes.length,
         total_tracking: outcomeRows.filter(r => r.tracking_status === 'tracking').length,
         total_cost_r: Number(totalCost.toFixed(2)),
@@ -2690,7 +3596,7 @@ module.exports = function attachScoring(app, db, deps) {
         overall_avg_5d_return: trackedOutcomes.length ? Number((trackedOutcomes.map(r => Number(r.shadow_move_pct)).filter(Number.isFinite).reduce((s, v, _, arr) => s + v / arr.length, 0)).toFixed(2)) : null,
         overall_pct_up: trackedOutcomes.length ? Number((trackedOutcomes.filter(r => Number(r.shadow_move_pct) > 0).length / trackedOutcomes.length * 100).toFixed(1)) : null,
       };
-      res.json({ ok: true, report: { ...report, run_summary, shadow_portfolio, stage_performance: stagePerformanceFrom(outcomeRows) } });
+      res.json({ ok: true, report: { ...report, generated_at: new Date().toISOString(), run_summary, shadow_portfolio, stage_performance: stagePerformanceFrom(outcomeRows) } });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
@@ -2833,12 +3739,175 @@ module.exports = function attachScoring(app, db, deps) {
     res.json({ ok: true, name, data });
   });
 
+  function canonicalPerformanceMetricsPayload() {
+    ensure();
+    const rows = cleanResolvedRows().slice().sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    const vals = rows.map(r => canonicalResolvedR(r)).filter(v => v != null);
+    const wins = vals.filter(v => v > 0);
+    const losses = vals.filter(v => v < 0);
+    const grossWin = wins.reduce((s, v) => s + v, 0);
+    const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+    const avg = arr => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
+    const round = (v, d = 3) => v == null || !Number.isFinite(Number(v)) ? null : Number(Number(v).toFixed(d));
+    const stats = statsFromR(rows);
+    let cumulative = 0;
+    let peak = 0;
+    let maxDrawdown = 0;
+    let winStreak = 0;
+    let lossStreak = 0;
+    let maxWinStreak = 0;
+    let maxLossStreak = 0;
+    const equityCurve = rows.map(row => {
+      const r = canonicalResolvedR(row) || 0;
+      cumulative = Number((cumulative + r).toFixed(4));
+      peak = Math.max(peak, cumulative);
+      maxDrawdown = Math.max(maxDrawdown, peak - cumulative);
+      if (r > 0) {
+        winStreak += 1;
+        lossStreak = 0;
+      } else if (r < 0) {
+        lossStreak += 1;
+        winStreak = 0;
+      }
+      maxWinStreak = Math.max(maxWinStreak, winStreak);
+      maxLossStreak = Math.max(maxLossStreak, lossStreak);
+      return {
+        date: String(row.date || row.paper_exit_at || '').slice(0, 10),
+        ticker: row.ticker,
+        r: round(r, 4),
+        cumulative_r: round(cumulative, 4),
+      };
+    });
+    const byGroup = (keyFn) => {
+      const groups = {};
+      for (const row of rows) {
+        const key = keyFn(row) || 'unknown';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(row);
+      }
+      return Object.fromEntries(Object.entries(groups).map(([key, group]) => {
+        const g = statsFromR(group);
+        return [key, {
+          trades: g.count,
+          win_rate: g.win_rate,
+          avg_r: g.avg_r,
+          total_r: g.total_r,
+        }];
+      }));
+    };
+    return {
+      ok: true,
+      source: 'canonicalResolvedR / cleanResolvedRows',
+      source_label: 'v2-clean resolved trades (post 2026-06-09, integrity-verified)',
+      live_canonical: true,
+      generated_at: new Date().toISOString(),
+      trade_count: stats.count,
+      win_rate: stats.win_rate,
+      avg_r: stats.avg_r,
+      expectancy: stats.avg_r,
+      total_r: stats.total_r,
+      profit_factor: stats.profit_factor,
+      avg_win: round(avg(wins)),
+      avg_loss: round(avg(losses)),
+      best_trade: vals.length ? round(Math.max(...vals), 4) : null,
+      worst_trade: vals.length ? round(Math.min(...vals), 4) : null,
+      avg_hold_days: round(avg(rows.map(r => {
+        const start = String(r.date || '').slice(0, 10);
+        const end = String(r.paper_exit_at || r.actual_exit_at || r.exit_at || '').slice(0, 10);
+        if (!start || !end) return null;
+        const ms = new Date(end + 'T00:00:00Z').getTime() - new Date(start + 'T00:00:00Z').getTime();
+        return Number.isFinite(ms) ? Math.max(0, ms / 86400000) : null;
+      }).filter(v => v != null)), 1),
+      max_drawdown_r: round(maxDrawdown),
+      max_win_streak: maxWinStreak,
+      max_loss_streak: maxLossStreak,
+      sharpe_annual: null,
+      sortino: null,
+      calmar: maxDrawdown ? round(stats.total_r / maxDrawdown, 2) : null,
+      rating_flags: [
+        ['ProfitFactor', typeof stats.profit_factor === 'number' && stats.profit_factor >= 1.3 ? 'MEETS_BAR' : 'BELOW_BAR'],
+        ['SampleSize', stats.count >= 200 ? 'MEETS_BAR' : 'BELOW_BAR'],
+        ['Expectancy', Number(stats.avg_r) > 0 ? 'MEETS_BAR' : 'BELOW_BAR'],
+      ],
+      by_regime: byGroup(r => String(r.market_regime || r.regime || '').trim().toUpperCase() || 'unknown'),
+      by_setup_type: byGroup(r => r.setup_type || r.setupType || r.setup || 'unknown'),
+      equity_curve: equityCurve,
+      stale_artifact_note: 'The previous data/performance_metrics.json artifact is no longer used for this endpoint.',
+    };
+  }
+
+  function peadDriftStatsPayload() {
+    ensure();
+    if (!Array.isArray(db.data.pead_drift_paper)) db.data.pead_drift_paper = [];
+    const rows = db.data.pead_drift_paper
+      .filter(r => r && String(r.strategy || '').toUpperCase() === 'PEAD_DRIFT')
+      .sort((a, b) => String(b.earnings_date || b.date || '').localeCompare(String(a.earnings_date || a.date || '')));
+    const resolved = rows.filter(r => numericOrNull(r.canonical_r) != null && String(r.paper_status || '').toUpperCase() !== 'OPEN');
+    const open = rows.filter(r => String(r.paper_status || '').toUpperCase() === 'OPEN');
+    const vals = resolved.map(r => numericOrNull(r.canonical_r)).filter(v => v != null);
+    const wins = vals.filter(v => v > 0);
+    const losses = vals.filter(v => v < 0);
+    const grossWin = wins.reduce((s, v) => s + v, 0);
+    const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+    const avg = arr => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
+    const sortedVals = vals.slice().sort((a, b) => a - b);
+    const median = sortedVals.length
+      ? (sortedVals.length % 2 ? sortedVals[(sortedVals.length - 1) / 2] : (sortedVals[sortedVals.length / 2 - 1] + sortedVals[sortedVals.length / 2]) / 2)
+      : null;
+    const round = (v, d = 3) => v == null || !Number.isFinite(Number(v)) ? null : Number(Number(v).toFixed(d));
+    const binDefs = [
+      ['<= -1R', v => v <= -1],
+      ['-1R to 0R', v => v > -1 && v < 0],
+      ['0R to +1R', v => v >= 0 && v < 1],
+      ['+1R to +3R', v => v >= 1 && v < 3],
+      ['> +3R', v => v >= 3],
+    ];
+    const distribution = binDefs.map(([label, fn]) => ({ label, count: vals.filter(fn).length }));
+    return {
+      ok: true,
+      enabled: String(process.env.PEAD_DRIFT_ENABLED || 'false').toLowerCase() === 'true',
+      strategy: 'PEAD_DRIFT',
+      paper_only: true,
+      source: 'fund.json pead_drift_paper',
+      generated_at: new Date().toISOString(),
+      config: {
+        surprise_min_pct: 52.54,
+        reaction_filter: 'reaction_close_gt_prior_close',
+        entry_slippage_pct: 0.001,
+        stop_atr_multiple: 2.0,
+        hold_trading_days: 60,
+        min_resolved_for_judgment: 40,
+      },
+      warning: 'PAPER ONLY. Low win-rate, fat-tail drift strategy. Most trades lose; winners are large. Separate from PMF. Do not judge until >=40-60 resolved 60-day trades.',
+      total: rows.length,
+      open_count: open.length,
+      resolved_count: resolved.length,
+      stats: {
+        win_rate: vals.length ? round(wins.length / vals.length * 100, 1) : null,
+        avg_r: round(avg(vals)),
+        median_r: round(median),
+        total_r: vals.length ? round(vals.reduce((s, v) => s + v, 0)) : 0,
+        profit_factor: grossLoss ? round(grossWin / grossLoss, 2) : (grossWin ? 'infinity' : null),
+      },
+      distribution,
+      rows: rows.slice(0, 200),
+    };
+  }
+
   app.get('/api/score/performance-metrics', adminOnly, (req, res) => {
-    sendDataArtifact(res, 'performance_metrics.json', { trade_count: 0, message: 'No performance metrics yet' });
+    res.json(canonicalPerformanceMetricsPayload());
   });
 
   app.get('/api/system2/performance-metrics', adminOnly, (req, res) => {
-    sendDataArtifact(res, 'performance_metrics.json', { trade_count: 0, message: 'No performance metrics yet' });
+    res.json(canonicalPerformanceMetricsPayload());
+  });
+
+  app.get('/api/system2/pead-drift', adminOnly, (req, res) => {
+    res.json(peadDriftStatsPayload());
+  });
+
+  app.get('/api/system2/pmf-source-tally', adminOnly, (req, res) => {
+    res.json(pmfSourceTallyPayload());
   });
 
   app.get('/api/score/scoreboard', adminOnly, (req, res) => {
@@ -2853,8 +3922,11 @@ module.exports = function attachScoring(app, db, deps) {
         ticker: i.ticker,
         idea_stream: i.idea_stream || 'swing_momentum',
         hold_period: i.hold_period || '3-10 day',
-        r: resolvedActualR(i) ?? i.r_3d ?? null,
-        actual_r: resolvedActualR(i),
+        r: canonicalResolvedR(i),
+        actual_r: canonicalResolvedR(i),
+        canonical_r: canonicalResolvedR(i),
+        canonical_r_quarantined: i.canonical_r_quarantined === true || isCanonicalRQuarantined(i),
+        canonical_r_quarantine_reasons: i.canonical_r_quarantine_reasons || canonicalQuarantineReasons(i),
         true_r: i.true_r,
         realistic_entry: i.realistic_entry,
         realistic_exit: i.realistic_exit,
@@ -2866,15 +3938,388 @@ module.exports = function attachScoring(app, db, deps) {
         exit_reason: i.exit_reason || i.paper_exit_reason || i.hit || null,
         paper_status: i.paper_status,
         hit: i.paper_outcome || i.hit || null,
-        pre_market_favourable: i.pre_market_gap_favourable === true,
+        pre_market_favourable: isPreMarketFavourable(i),
         council_tier: i.council_final_verdict || i.council_tier || i.council_verdict || null,
         options_verdict: i.options_verdict || null,
         rs_rank: i.rs_rank ?? null,
         sector_strength_rank: i.sector_strength_rank ?? null,
-        pre_market_gap_favourable: i.pre_market_gap_favourable === true,
+        pre_market_gap_favourable: isPreMarketFavourable(i),
+        intake_source_layer: intakeSourceLayer(i),
         paper_exit_reason: i.paper_exit_reason || null,
       }));
     res.json(rows);
+  });
+
+
+  function alpacaPaperFillStats() {
+    ensure();
+    const alpacaRows = db.data.ideas.filter(i => i.fill_source === 'alpaca_paper' || i.real_r_fill_source === 'alpaca_paper' || i.alpaca_order_id);
+    const rows = alpacaRows.filter(i => i.pmf_confirmed_at_fill === true && i.test_order !== true);
+    const entries = rows.filter(i => numericOrNull(i.actual_entry_price) != null);
+    const exits = rows.filter(i => numericOrNull(i.actual_exit_price) != null || numericOrNull(i.real_r) != null);
+    const vals = exits.map(i => numericOrNull(i.real_r)).filter(v => v != null);
+    const wins = vals.filter(v => v > 0);
+    const losses = vals.filter(v => v < 0);
+    const grossWin = wins.reduce((s, v) => s + v, 0);
+    const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+    return {
+      target: 30,
+      order_count: rows.length,
+      all_alpaca_paper_order_count: alpacaRows.length,
+      excluded_without_pmf_at_fill_count: alpacaRows.length - rows.length,
+      entry_fill_count: entries.length,
+      exit_fill_count: exits.length,
+      real_r_count: vals.length,
+      win_rate: vals.length ? Number((wins.length / vals.length * 100).toFixed(1)) : null,
+      avg_real_r: vals.length ? Number((vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(3)) : null,
+      profit_factor: grossLoss ? Number((grossWin / grossLoss).toFixed(2)) : (grossWin ? 'infinity' : null),
+      source: 'alpaca_paper_pmf_confirmed_at_fill',
+      cohort_rule: 'fill_source=alpaca_paper AND immutable pmf_confirmed_at_fill=true; test_order rows excluded.',
+    };
+  }
+
+  const oneGlanceProtectionCache = { at: 0, data: null };
+
+  function isoDateKey(value = new Date()) {
+    const d = value instanceof Date ? value : new Date(value);
+    return Number.isFinite(d.getTime()) ? d.toISOString().slice(0, 10) : null;
+  }
+
+  function firstTimestamp(row, keys) {
+    for (const key of keys) {
+      const raw = row?.[key];
+      if (!raw) continue;
+      const d = new Date(raw);
+      if (Number.isFinite(d.getTime())) return d.toISOString();
+      const s = String(raw);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return `${s}T00:00:00.000Z`;
+    }
+    return null;
+  }
+
+  function oneGlanceStats(rows) {
+    const vals = rows.map(r => numericOrNull(r.real_r)).filter(v => v != null);
+    const wins = vals.filter(v => v > 0);
+    const losses = vals.filter(v => v < 0);
+    const grossWin = wins.reduce((s, v) => s + v, 0);
+    const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+    return {
+      n: rows.length,
+      resolved: vals.length,
+      win_rate: vals.length ? Number((wins.length / vals.length * 100).toFixed(1)) : null,
+      avg_real_r: vals.length ? Number((vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(3)) : null,
+      median_real_r: vals.length ? Number(vals.slice().sort((a, b) => a - b)[Math.floor(vals.length / 2)].toFixed(3)) : null,
+      profit_factor: grossLoss ? Number((grossWin / grossLoss).toFixed(2)) : (grossWin ? 'infinity' : null),
+    };
+  }
+
+  function cohortConfigIntegrity(rows) {
+    const groups = new Map();
+    for (const row of rows) {
+      const hash = row.config_hash || 'missing_config_hash';
+      if (!groups.has(hash)) groups.set(hash, []);
+      groups.get(hash).push(row);
+    }
+    const hashes = [...groups.entries()].map(([hash, group]) => {
+      const dates = group
+        .map(r => firstTimestamp(r, ['actual_entry_time', 'actual_entry_at', 'auto_exec_at', 'date']))
+        .filter(Boolean)
+        .map(t => t.slice(0, 10))
+        .sort();
+      return {
+        hash,
+        n: group.length,
+        resolved: group.filter(r => numericOrNull(r.real_r) != null).length,
+        open: group.filter(r => numericOrNull(r.actual_exit_price) == null && numericOrNull(r.real_r) == null).length,
+        first_fill_date: dates[0] || null,
+        last_fill_date: dates[dates.length - 1] || null,
+        snapshot_ref: group.find(r => r.config_snapshot_ref)?.config_snapshot_ref || null,
+        changed_mid_experiment: false,
+      };
+    }).sort((a, b) => String(a.first_fill_date || '').localeCompare(String(b.first_fill_date || '')) || a.hash.localeCompare(b.hash));
+    const changed = hashes.length > 1 || hashes.some(h => h.hash === 'missing_config_hash');
+    return {
+      distinct_config_hashes: hashes.length,
+      fills: rows.length,
+      status: changed ? 'CONFIG_SPLIT_REQUIRED' : 'CONFIG_CONSTANT',
+      note: changed
+        ? 'Rules changed or config hash is missing; report Cohort B grouped by hash, not as one blended sample.'
+        : 'All Cohort B fills currently share one config hash.',
+      hashes: hashes.map(h => ({ ...h, changed_mid_experiment: changed })),
+    };
+  }
+
+  function oneGlanceRealPerformance() {
+    ensure();
+    const alpacaRows = db.data.ideas.filter(i => (
+      (i.fill_source === 'alpaca_paper' || i.real_r_fill_source === 'alpaca_paper' || i.alpaca_order_id) &&
+      i.pmf_confirmed_at_fill === true &&
+      i.test_order !== true
+    ));
+    const entryRows = alpacaRows.filter(i => numericOrNull(i.actual_entry_price) != null);
+    const cohortB = entryRows.filter(i => {
+      const t = firstTimestamp(i, ['actual_entry_time', 'actual_entry_at', 'filled_at', 'entry_filled_at', 'alpaca_filled_at']);
+      const mode = String(i.bracket_mode || i.pmf_bracket_mode || i.execution_regime || '').toLowerCase();
+      return (t && t.slice(0, 10) >= '2026-07-23') || mode.includes('recalibrated');
+    });
+    const cohortA = entryRows.filter(i => !cohortB.includes(i) && (numericOrNull(i.actual_exit_price) != null || numericOrNull(i.real_r) != null));
+    const slips = entryRows.map(i => numericOrNull(i.entry_slippage_vs_model)).filter(v => v != null);
+    const canonical = canonicalStatsObject()?.resolved_v2_clean || {};
+    return {
+      label: 'REAL FILLS (Alpaca paper, actual prices)',
+      cohort_b_headline: {
+        label: 'Cohort B (recalibrated geometry, GTC exits)',
+        ...oneGlanceStats(cohortB),
+        open: cohortB.filter(i => numericOrNull(i.actual_exit_price) == null && numericOrNull(i.real_r) == null).length,
+        config_integrity: cohortConfigIntegrity(cohortB),
+      },
+      cohort_a_reference: {
+        label: 'Cohort A "old broken brackets — reference only"',
+        ...oneGlanceStats(cohortA),
+      },
+      avg_entry_slippage_pct: slips.length ? Number((slips.reduce((s, v) => s + v, 0) / slips.length).toFixed(2)) : null,
+      progress_to_verdict: {
+        resolved_cohort_b: cohortB.filter(i => numericOrNull(i.real_r) != null).length,
+        needed: 15,
+      },
+      modeled_baseline_not_achievable: {
+        label: 'Modeled-entry baseline (NOT achievable)',
+        n: 79,
+        win_rate: 84.8,
+        avg_r: 1.964,
+        current_clean_n: canonical.count ?? null,
+        current_clean_win_rate: canonical.win_rate ?? null,
+        current_clean_avg_r: canonical.avg_r ?? null,
+      },
+    };
+  }
+
+  function oneGlanceToday() {
+    ensure();
+    const today = isoDateKey();
+    const rows = db.data.ideas || [];
+    const pmfs = rows.filter(i => isPrimaryPmf(i) && firstTimestamp(i, ['pmf_stamp_time', 'pre_market_checked_at', 'date'])?.slice(0, 10) === today);
+    const entries = rows.filter(i => (i.fill_source === 'alpaca_paper' || i.alpaca_order_id) && firstTimestamp(i, ['actual_entry_time', 'actual_entry_at', 'filled_at', 'entry_filled_at'])?.slice(0, 10) === today && i.test_order !== true);
+    const closed = rows.filter(i => (i.real_r_fill_source === 'alpaca_paper' || i.alpaca_order_id) && firstTimestamp(i, ['actual_exit_time', 'actual_exit_at', 'exit_filled_at'])?.slice(0, 10) === today && i.test_order !== true);
+    const symbols = new Map();
+    for (const r of [...pmfs, ...entries, ...closed]) {
+      const ticker = String(r.ticker || r.symbol || '').toUpperCase();
+      if (!ticker) continue;
+      const cur = symbols.get(ticker) || { ticker };
+      if (pmfs.includes(r)) {
+        cur.pmf_confirmed = true;
+        cur.gap_pct = numericOrNull(r.pre_market_gap_pct);
+        cur.atr_multiple = numericOrNull(r.pmf_atr_multiple_at_stamp ?? r.pre_market_gap_atr_multiple);
+      }
+      if (entries.includes(r)) {
+        cur.filled = true;
+        cur.fill_price = numericOrNull(r.actual_entry_price);
+        cur.slippage_pct = numericOrNull(r.entry_slippage_vs_model);
+        cur.oco_stop = numericOrNull(r.recalibrated_stop ?? r.oco_stop_price ?? r.stop);
+        cur.oco_target = numericOrNull(r.recalibrated_target ?? r.oco_target_price ?? r.target);
+      }
+      if (closed.includes(r)) {
+        cur.closed = true;
+        cur.exit_price = numericOrNull(r.actual_exit_price);
+        cur.exit_reason = r.actual_exit_reason || r.paper_exit_reason || r.hit || null;
+        cur.real_r = numericOrNull(r.real_r);
+      }
+      cur.status = cur.closed ? 'CLOSED' : cur.filled ? 'OPEN' : 'PMF';
+      symbols.set(ticker, cur);
+    }
+    const dailyCap = Number(process.env.PMF_AUTO_EXEC_DAILY_CAP || readEnvValue('PMF_AUTO_EXEC_DAILY_CAP') || 3);
+    return {
+      date: today,
+      pmf_confirmed: pmfs.length,
+      orders_placed: entries.length,
+      cap_reached: dailyCap > 0 ? entries.length >= dailyCap : false,
+      closed: closed.length,
+      rows: [...symbols.values()].sort((a, b) => (b.gap_pct || -999) - (a.gap_pct || -999)),
+    };
+  }
+
+  function fileMtimeIso(file) {
+    try { return fs.statSync(file).mtime.toISOString(); }
+    catch { return null; }
+  }
+
+  function recentLogStatus(name, file, maxAgeHours) {
+    const last = fileMtimeIso(file);
+    const ageHours = last ? (Date.now() - new Date(last).getTime()) / 3600000 : null;
+    return {
+      name,
+      file,
+      last,
+      ok: ageHours != null && ageHours <= maxAgeHours,
+      age_hours: ageHours == null ? null : Number(ageHours.toFixed(2)),
+    };
+  }
+
+  function oneGlanceHealth() {
+    const jobs = [
+      recentLogStatus('nightly pipeline', path.join(logDir, 'cron_set2.log'), 42),
+      recentLogStatus('PMF gap check', path.join(logDir, 'cron_gap_check.log'), 30),
+      recentLogStatus('open confirmation', path.join(logDir, 'open-confirmation.log'), 30),
+      recentLogStatus('PMF_LATE', path.join(logDir, 'cron_gap_check_late.log'), 30),
+      recentLogStatus('PEAD tracker', path.join(logDir, 'pead_drift_tracker.log'), 42),
+      recentLogStatus('auto-exec sync', path.join(logDir, 'pmf_auto_exec_sync.log'), 2),
+      recentLogStatus('validated backup', '/root/system2-core/backups/fund-validated/cron.log', 30),
+      recentLogStatus('intraday recorder', path.join(logDir, 'intraday_bar_recorder.log'), 30),
+      recentLogStatus('drift checker', path.join(logDir, 'crontab_drift_check.log'), 30),
+    ];
+    const latestRun = latestScheduledNightlyRun();
+    const latestManual = latestManualRun();
+    const backupLog = '/root/system2-core/backups/fund-validated/backup.log';
+    const alertFiles = [
+      path.join(logDir, 'fund_integrity_alert.log'),
+      path.join(logDir, 'crontab_drift_alert.txt'),
+      path.join(logDir, 'pmf_risk_breaker_alert.json'),
+    ].map(file => ({ file, present: fs.existsSync(file), last: fileMtimeIso(file) }));
+    const issues = [];
+    const pipelineStatus = phaseRunStatus(latestRun);
+    const manualStatus = phaseRunStatus(latestManual);
+    const manualRun = latestManual ? {
+      file: latestManual.file || null,
+      status: manualStatus,
+      generated_at: latestManual.generated_at || latestManual.completed_at || latestManual.finished_at || latestManual.runFinishedAt || null,
+      run_started_at: latestManual.runStartedAt || null,
+      note: manualStatus === 'SUCCESS'
+        ? `manual run ${String(latestManual.runStartedAt || latestManual.runFinishedAt || '').slice(11, 16)}Z: SUCCESS`
+        : `manual run ${String(latestManual.runStartedAt || latestManual.runFinishedAt || '').slice(11, 16)}Z: ${manualStatus} (guard worked, finalists unaffected)`,
+    } : null;
+    for (const job of jobs) if (!job.ok) issues.push(`${job.name} stale or missing`);
+    if (pipelineStatus !== 'SUCCESS') issues.push(`pipeline status is ${pipelineStatus}`);
+    for (const a of alertFiles) if (a.present) issues.push(path.basename(a.file));
+    return {
+      state: issues.length ? 'red' : 'ok',
+      issues,
+      cron: {
+        required: jobs.length,
+        ok: jobs.filter(j => j.ok).length,
+        jobs,
+        last: jobs.map(j => j.last).filter(Boolean).sort().slice(-1)[0] || null,
+      },
+      pipeline: {
+        scope: 'latest scheduled 02:15 UTC run',
+        file: latestRun?.file || null,
+        status: pipelineStatus,
+        generated_at: latestRun?.generated_at || latestRun?.completed_at || latestRun?.finished_at || latestRun?.runFinishedAt || null,
+        run_started_at: latestRun?.runStartedAt || null,
+      },
+      manual_run: manualRun,
+      backup: {
+        log: backupLog,
+        cron_log: '/root/system2-core/backups/fund-validated/cron.log',
+        last: fileMtimeIso(backupLog),
+      },
+      alerts: alertFiles,
+    };
+  }
+
+  async function alpacaPaperGet(pathname) {
+    const key = process.env.ALPACA_PAPER_API_KEY || readEnvValue('ALPACA_PAPER_API_KEY');
+    const secret = process.env.ALPACA_PAPER_API_SECRET || readEnvValue('ALPACA_PAPER_API_SECRET');
+    const base = (process.env.ALPACA_PAPER_BASE_URL || readEnvValue('ALPACA_PAPER_BASE_URL') || 'https://paper-api.alpaca.markets/v2').replace(/\/$/, '');
+    if (!base.includes('paper')) throw new Error('Alpaca paper base URL assertion failed');
+    if (!key || !secret) throw new Error('Alpaca paper credentials missing');
+    const r = await fetch(base + pathname, { headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret } });
+    if (!r.ok) throw new Error(`Alpaca ${pathname} -> ${r.status}`);
+    return r.json();
+  }
+
+  async function oneGlanceProtection(req) {
+    if (req?.query?.simulate === 'alpaca_fail') throw new Error('simulated Alpaca protection failure');
+    const nowMs = Date.now();
+    if (oneGlanceProtectionCache.data && nowMs - oneGlanceProtectionCache.at < 60000) {
+      return { ...oneGlanceProtectionCache.data, cache: { hit: true, ttl_seconds: 60 } };
+    }
+    ensure();
+    const [positions, orders] = await Promise.all([
+      alpacaPaperGet('/positions'),
+      alpacaPaperGet('/orders?status=open&limit=500&nested=true'),
+    ]);
+    const livePositions = Array.isArray(positions) ? positions : [];
+    const openOrders = Array.isArray(orders) ? orders : [];
+    const localOpen = db.data.ideas.filter(i => (
+      (i.fill_source === 'alpaca_paper' || i.alpaca_order_id) &&
+      i.test_order !== true &&
+      numericOrNull(i.actual_entry_price) != null &&
+      numericOrNull(i.actual_exit_price) == null &&
+      numericOrNull(i.real_r) == null
+    ));
+    const wanted = new Map();
+    for (const p of livePositions) {
+      const sym = String(p.symbol || '').toUpperCase();
+      if (sym) wanted.set(sym, { ticker: sym, alpaca_qty: numericOrNull(p.qty), current_price: numericOrNull(p.current_price), source: 'alpaca_position' });
+    }
+    for (const r of localOpen) {
+      const sym = String(r.ticker || r.symbol || '').toUpperCase();
+      if (!sym) continue;
+      wanted.set(sym, { ...(wanted.get(sym) || { ticker: sym }), local_row_id: r.id, entry_price: numericOrNull(r.actual_entry_price), source: wanted.has(sym) ? 'alpaca_and_fund' : 'fund_open' });
+    }
+    const rows = [...wanted.values()].map(item => {
+      const symbolOrders = openOrders.filter(o => String(o.symbol || '').toUpperCase() === item.ticker || (o.legs || []).some(l => String(l.symbol || '').toUpperCase() === item.ticker));
+      const sellOrders = [];
+      for (const o of symbolOrders) {
+        if (String(o.side || '').toLowerCase() === 'sell') sellOrders.push(o);
+        for (const leg of o.legs || []) if (String(leg.side || '').toLowerCase() === 'sell') sellOrders.push({ ...leg, parent_order_class: o.order_class });
+      }
+      const liveSell = sellOrders.filter(o => ['new', 'accepted', 'pending_new', 'partially_filled', 'held'].includes(String(o.status || '').toLowerCase()));
+      const gtc = liveSell.some(o => String(o.time_in_force || '').toLowerCase() === 'gtc');
+      const limit = liveSell.find(o => String(o.type || '').toLowerCase() === 'limit');
+      const stop = liveSell.find(o => String(o.type || '').toLowerCase().includes('stop'));
+      return {
+        ...item,
+        exit_order_live: liveSell.length > 0,
+        tif: gtc ? 'gtc' : (liveSell[0]?.time_in_force || null),
+        order_count: liveSell.length,
+        target: numericOrNull(limit?.limit_price),
+        stop: numericOrNull(stop?.stop_price || stop?.limit_price),
+        status: liveSell.length ? 'PROTECTED' : 'NAKED',
+      };
+    }).sort((a, b) => a.ticker.localeCompare(b.ticker));
+    const data = {
+      state: rows.some(r => !r.exit_order_live) ? 'red' : 'ok',
+      open_auto_positions: rows.length,
+      naked_count: rows.filter(r => !r.exit_order_live).length,
+      rows,
+      risk_breakers: {
+        armed: envFlag('PMF_RISK_BREAKERS_ENABLED', false),
+        alert_file_present: fs.existsSync(path.join(logDir, 'pmf_risk_breaker_alert.json')),
+      },
+      alpaca_calls: 2,
+      cache: { hit: false, ttl_seconds: 60 },
+    };
+    oneGlanceProtectionCache.at = nowMs;
+    oneGlanceProtectionCache.data = data;
+    return data;
+  }
+
+  async function buildOneGlancePayload(req) {
+    const blocks = {};
+    for (const [name, fn] of Object.entries({
+      today: () => oneGlanceToday(),
+      health: () => oneGlanceHealth(),
+      real_performance: () => oneGlanceRealPerformance(),
+      protection: () => oneGlanceProtection(req),
+    })) {
+      try {
+        blocks[name] = await fn();
+      } catch (e) {
+        blocks[name] = { state: 'unknown', error: e.message };
+      }
+    }
+    const red = blocks.protection?.state === 'red' || blocks.health?.state === 'red';
+    return { ok: true, generated_at: new Date().toISOString(), state: red ? 'red' : 'ok', ...blocks };
+  }
+
+  app.get('/api/system2/one-glance', adminOnly, async (req, res) => {
+    try {
+      ensure();
+      res.json(await buildOneGlancePayload(req));
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
   });
 
   app.get('/api/system2/track-record-readiness', adminOnly, (req, res) => {
@@ -2883,9 +4328,10 @@ module.exports = function attachScoring(app, db, deps) {
     const resolvedRows = cleanResolvedRows();
     const cleanStats = statsFromR(resolvedRows);
     const trueRStats = statsFromTrueR(resolvedRows);
-    const pmfRows = resolvedRows.filter(r => r.pre_market_gap_favourable === true);
+    const pmfRows = resolvedRows.filter(isPrimaryPmf);
     const pmfStats = statsFromR(pmfRows);
     const pmfTrueStats = statsFromTrueR(pmfRows);
+    const pmfMarkout5dStats = statsFromNumericField(pmfRows, 'would_be_r_markout_5d');
     const tradeCount = cleanStats.count;
     const stage = tradeCount >= 200 ? 'SELLABLE' : tradeCount >= 100 ? 'STATISTICAL' : tradeCount >= 30 ? 'INITIAL_SAMPLE' : tradeCount >= 1 ? 'BUILDING' : 'NOT_STARTED';
     const regimeCoverage = regimeCoverageFromRows(resolvedRows);
@@ -2904,12 +4350,14 @@ module.exports = function attachScoring(app, db, deps) {
       true_profit_factor: trueRStats.profit_factor || 0,
       profit_factor: cleanStats.profit_factor || 0,
       total_r: cleanStats.total_r || 0,
-      best_r: resolvedRows.map(r => resolvedActualR(r) ?? r.r_3d).filter(v => v != null).sort((a,b)=>b-a)[0] ?? null,
-      worst_r: resolvedRows.map(r => resolvedActualR(r) ?? r.r_3d).filter(v => v != null).sort((a,b)=>a-b)[0] ?? null,
+      best_r: resolvedRows.map(r => canonicalResolvedR(r)).filter(v => v != null).sort((a,b)=>b-a)[0] ?? null,
+      worst_r: resolvedRows.map(r => canonicalResolvedR(r)).filter(v => v != null).sort((a,b)=>a-b)[0] ?? null,
       metrics: { ...perf, clean_v2: cleanStats },
       canonical_stats: canonicalStats,
       true_r_comparison: trueRComparison(resolvedRows),
-      pre_market_favourable: { count: pmfStats.count, target: 30, win_rate: pmfStats.win_rate, avg_r: pmfStats.avg_r, profit_factor: pmfStats.profit_factor, true_win_rate: pmfTrueStats.win_rate, true_avg_r: pmfTrueStats.avg_r, true_profit_factor: pmfTrueStats.profit_factor, true_total_r: pmfTrueStats.total_r },
+      pre_market_favourable: { label: 'Strict PMF', definition: 'pmf_confirmed_at_stamp === true (immutable stamp-time cohort)', count: pmfStats.count, target: 30, win_rate: pmfStats.win_rate, avg_r: pmfStats.avg_r, profit_factor: pmfStats.profit_factor, true_win_rate: pmfTrueStats.win_rate, true_avg_r: pmfTrueStats.avg_r, true_profit_factor: pmfTrueStats.profit_factor, true_total_r: pmfTrueStats.total_r, markout_5d_count: pmfMarkout5dStats.count, markout_5d_win_rate: pmfMarkout5dStats.win_rate, markout_5d_avg_r: pmfMarkout5dStats.avg_r, markout_5d_profit_factor: pmfMarkout5dStats.profit_factor },
+      pmf_by_source: pmfSourceTallyPayload(),
+      alpaca_paper_fills: alpacaPaperFillStats(),
       regimes_traded: regimeCoverage.regimes_traded,
       regime_coverage: regimeCoverage.regime_coverage,
       weekly_snapshots: snaps.snapshots || snaps.weeks || snaps,
@@ -3040,14 +4488,46 @@ module.exports = function attachScoring(app, db, deps) {
   }
 
   function swingAgreementScore(row) {
-    const options = String(row.options_verdict || '').toUpperCase();
-    const chronos = String(row.chronos_dir || row.forecastDecision || '').toUpperCase();
+    return measuredSupportPillars(row).filter(p => p.positive).length;
+  }
+
+  function measuredSupportPillars(row) {
     const council = String(row.council_final_verdict || row.council_tier || row.council_verdict || '').toUpperCase();
     return [
-      options.includes('CONFIRM') || options === 'BULLISH_CONFIRM',
-      ['UP', 'STRONG_UP', 'BULLISH', 'APPROVE'].includes(chronos),
-      ['TIER1', 'TIER2', 'UPGRADE', 'APPROVE'].includes(council),
-    ].filter(Boolean).length;
+      {
+        key: 'pre_market_favourable',
+        label: 'Pre-market favourable',
+        positive: isPreMarketFavourable(row),
+      },
+      {
+        key: 'council',
+        label: 'Council tier',
+        positive: ['TIER1', 'TIER2', 'UPGRADE'].includes(council),
+      },
+    ];
+  }
+
+  function contextualSignalNotes(row) {
+    const options = String(row.options_verdict || '').toUpperCase();
+    const chronos = String(row.chronos_dir || row.forecastDecision || '').toUpperCase();
+    return [
+      {
+        key: 'options',
+        value: options || null,
+        counted_positive: false,
+        note: options.includes('CONFIRM') || options === 'BULLISH_CONFIRM'
+          ? 'Options CONFIRM is under review/inverse in measured data; context only, not positive support.'
+          : 'Options context only.',
+      },
+      {
+        key: 'chronos',
+        value: chronos || null,
+        counted_positive: false,
+        note: chronos
+          ? 'Chronos direction is logged for context only; not counted as positive support.'
+          : 'No Chronos context.',
+      },
+    ];
   }
 
   function displayableSwingIdeas() {
@@ -3060,7 +4540,7 @@ module.exports = function attachScoring(app, db, deps) {
   }
 
   function resolvedRForStats(row) {
-    return numericOrNull(resolvedActualR(row) ?? row.actual_r ?? row.paper_exit_r ?? row.r);
+    return canonicalResolvedR(row);
   }
 
   function compareConfluencePerformance(rows, flaggedTickers) {
@@ -3092,7 +4572,9 @@ module.exports = function attachScoring(app, db, deps) {
         const ticker = tickerOf(row);
         const optionHit = optionsByTicker.get(ticker);
         const cross = Boolean(optionHit);
-        if (score >= 3 || cross) {
+        const supportPillars = measuredSupportPillars(row);
+        const contextSignals = contextualSignalNotes(row);
+        if (score >= 2) {
           const date = String(row.date || '').slice(0, 10);
           flaggedKeys.add(`${date}|${ticker}`);
           alerts.push({
@@ -3100,9 +4582,15 @@ module.exports = function attachScoring(app, db, deps) {
             date,
             idea_stream: 'swing_momentum',
             swing_confluence_score: score,
-            swing_3_of_3: score >= 3,
+            measured_support_score: score,
+            measured_support_total: supportPillars.length,
+            measured_support_label: `${score}/${supportPillars.length} measured support`,
+            support_pillars: supportPillars,
+            context_signals: contextSignals,
+            swing_3_of_3: false,
+            swing_full_measured_support: score >= supportPillars.length,
             cross_stream_confluence: cross,
-            badge: cross ? 'DOUBLE SIGNAL' : '3/3 SWING',
+            badge: `${score}/${supportPillars.length} MEASURED SUPPORT`,
             rarity_score: (cross ? 10 : 0) + score,
             setup_type: row.setup_type || row.setup || null,
             council_tier: row.council_final_verdict || row.council_tier || row.council_verdict || null,
@@ -3113,8 +4601,23 @@ module.exports = function attachScoring(app, db, deps) {
           });
         }
       }
-      alerts.sort((a, b) => (b.rarity_score - a.rarity_score) || String(b.date).localeCompare(String(a.date)));
-      res.json({ ok: true, days: Number(req.query.days || 7), since, count: alerts.length, alerts, performance: compareConfluencePerformance(displayableSwingIdeas(), flaggedKeys) });
+      alerts.sort((a, b) => (Number(b.support_pillars?.[0]?.positive === true) - Number(a.support_pillars?.[0]?.positive === true)) || (b.rarity_score - a.rarity_score) || String(b.date).localeCompare(String(a.date)));
+      const performance = compareConfluencePerformance(displayableSwingIdeas(), flaggedKeys);
+      const c = performance.confluence || {};
+      const n = performance.non_confluence || {};
+      const underReview = c.avg_r != null && n.avg_r != null && c.avg_r <= n.avg_r;
+      res.json({
+        ok: true,
+        days: Number(req.query.days || 7),
+        since,
+        count: alerts.length,
+        definition: 'Measured support counts only pre-market favourable gap/PMF and council tier. Options CONFIRM and Chronos are context-only until their measured value improves.',
+        header_note: underReview
+          ? `Moments when measured-supportive signals agreed. Under review: flagged confluence has not outperformed in the resolved sample (${c.win_rate ?? '-'}% win, ${c.avg_r ?? '-'}R avg vs non-flagged ${n.win_rate ?? '-'}% win, ${n.avg_r ?? '-'}R avg).`
+          : `Moments when measured-supportive signals agreed (${c.count || 0} resolved flagged samples). Options and Chronos are context-only.`,
+        alerts,
+        performance,
+      });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }

@@ -1,0 +1,75 @@
+# Canonical crontab for system2-core.
+# This file is the reference for required scheduled jobs. The live crontab
+# should contain each required job signature below; /root/system2-core/check_crontab.py
+# alerts on drift but never modifies the live crontab.
+# Updated by Prompt 52 after re-adding the intraday recorder and drift checker.
+
+0 2 * * * /root/fund-system/backup-fund.sh >> /root/fund-system/backups/backup.log 2>&1
+CRON_TZ=UTC
+15 2 * * 2-6 /root/system2-core/run_phase_b_core_baseline.sh
+0 14-21 * * 1-5 /root/system2-core/run_system2_paper_monitor.sh
+# System2 PMF check - proven definition: FMP price vs planned entry, >=1.5x ATR, historically stamped around 14:00 UTC.
+# NOTE: keep this at 14:00 UTC to preserve like-for-like PMF track-record consistency. A true pre-market/open-gap signal must be tested separately with its own label and track record.
+CRON_TZ=UTC
+0 14 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pre-market-gap/run-local >> /root/system2-core/logs/cron_gap_check.log 2>&1
+# System2 PMF_LATE check - same >=1.5x ATR rule as proven PMF, second snapshot only; writes PMF_LATE cohort separately.
+30 15 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pre-market-gap/run-local -H 'Content-Type: application/json' -d '{"cohort":"late"}' >> /root/system2-core/logs/cron_gap_check_late.log 2>&1
+# System2 open confirmation, one hour after PMF gap check
+0 15 * * 1-5 /root/system2-core/run_open_confirmation.sh
+30 1 * * 2-6 cd /root/system2-core && .venv/bin/python implied_options_scraper.py >> /root/system2-core/logs/cron_implied_options.log 2>&1
+# Barchart UOA scraper
+15 0 * * 1-5 /root/system2-core/.venv/bin/python /root/system2-core/barchart_uoa_scraper.py >> /root/system2-core/logs/barchart_uoa.log 2>&1
+# System2 Tape Reader ? start before market open (09:30 ET = 14:30 BST = 13:25 UTC), stop after close (16:00 ET = 21:00 BST = 20:05 UTC)
+25 13 * * 1-5 /usr/local/bin/pm2 start tape_reader
+05 20 * * 1-5 /usr/local/bin/pm2 stop tape_reader
+30 0 * * 1-5 cd /root/system2-core && .venv/bin/python stockanalysis_scraper.py >> /root/system2-core/logs/stockanalysis_scraper.log 2>&1
+
+# Danelfin AI score sync
+0 1 * * 1-5 cd /root/system2-core && .venv/bin/python danelfin_sync.py >> /root/system2-core/logs/danelfin_sync.log 2>&1
+
+# FlashAlpha GEX proxy
+45 1 * * 1-5 cd /root/system2-core && .venv/bin/python flashalpha_gex.py >> /root/system2-core/logs/flashalpha_gex.log 2>&1
+
+# Set 2 Options Flow universe builder
+50 1 * * 1-5 cd /root/system2-core && .venv/bin/python set2_options_flow_universe.py >> /root/system2-core/logs/cron_set2.log 2>&1
+
+# System2 nightly learning loop
+CRON_TZ=UTC
+30 23 * * 1-5 cd /root/system2-core && .venv/bin/python nightly_learning.py >> logs/nightly_learning.log 2>&1
+*/5 * * * * /root/fund-system/health-monitor.sh
+0 2 * * 2-6 cd /root/system2-core && .venv/bin/python news_catalyst_scraper.py >> logs/news_catalyst.log 2>&1
+30 0 * * 1-5 cd /root/system2-core && .venv/bin/python finra_ats_scraper.py >> logs/finra_ats.log 2>&1
+45 0 * * 1-5 cd /root/system2-core && .venv/bin/python openinsider_scraper.py >> logs/openinsider.log 2>&1
+50 0 * * 1-5 cd /root/system2-core && .venv/bin/python congress_scraper.py >> logs/congress_scraper.log 2>&1
+45 13 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/morning-brief-live/run-local >> /root/system2-core/logs/cron_morning_brief_live.log 2>&1
+# ApeWisdom + social discovery
+40 0 * * 1-5 cd /root/system2-core && .venv/bin/python social_scraper.py >> /root/system2-core/logs/social_scraper.log 2>&1
+# Finviz new highs + unusual volume
+55 0 * * 1-5 cd /root/system2-core && .venv/bin/python finviz_scraper.py >> /root/system2-core/logs/finviz_scraper.log 2>&1
+0 12 * * 0 curl -fsS -X POST http://127.0.0.1:3210/api/system2/weekly-snapshot/generate >> /root/system2-core/logs/cron_weekly_snapshot.log 2>&1
+30 21 * * 1-5 cd /root/system2-core && .venv/bin/python performance_metrics.py >> logs/performance_metrics.log 2>&1
+5 1 * * 1-5 cd /root/system2-core && .venv/bin/python earnings_drift_scraper.py >> logs/earnings_drift.log 2>&1
+10 1 * * 1-5 cd /root/system2-core && .venv/bin/python finnhub_scraper.py >> logs/finnhub.log 2>&1
+0 23 * * 1-5 cd /root/system2-core && .venv/bin/python discovery_feedback.py >> /root/system2-core/logs/discovery_feedback.log 2>&1
+0 14 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
+0 18 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
+45 23 * * 1-5 cd /root/system2-core && .venv/bin/python signal_learning.py >> /root/system2-core/logs/signal_learning.log 2>&1
+0 6 * * 1-5 cd /root/system2-core && .venv/bin/python continuous_discovery.py >> /root/system2-core/logs/continuous_discovery.log 2>&1
+
+
+# PEAD_DRIFT paper tracker - additive separate cohort; logs strict PEAD setups and resolves open PEAD rows only.
+10 3 * * 2-6 cd /root/system2-core && PEAD_DRIFT_ENABLED=true .venv/bin/python pead_drift_tracker.py --write --lookback-days 14 >> logs/pead_drift_tracker.log 2>&1
+
+# PMF Alpaca paper auto-exec exit sync - syncs bracket entry/exit fills only; PMF_AUTO_EXEC_ENABLED remains controlled by env.
+*/15 14-21 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-auto-exec/sync-local >> /root/system2-core/logs/pmf_auto_exec_sync.log 2>&1
+
+# Validated rotating fund.json backup - persistent, parse-checked, row-drop guarded. Does not touch trading data.
+20 4 * * * cd /root/system2-core && .venv/bin/python validated_fund_backup.py >> /root/system2-core/backups/fund-validated/cron.log 2>&1
+
+# Intraday bar recorder - additive raw bars only; no fund.json writes, PMF setter, auto-exec, selection, scoring, gates, or sizing changes.
+45 15 * * 1-5 cd /root/system2-core && .venv/bin/python intraday_bar_recorder.py --window-minutes 120 >> logs/intraday_bar_recorder.log 2>&1
+
+0 5 * * * cd /root/system2-core && .venv/bin/python check_crontab.py >> /root/system2-core/logs/crontab_drift_check.log 2>&1
+
+# Daily PMF progress report - Telegram, reporting only; Cohort B progress first, no trading logic.
+5 22 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1

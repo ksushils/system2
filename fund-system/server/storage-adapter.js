@@ -16,14 +16,102 @@ const DUAL_WRITE = process.env.DUAL_WRITE === 'true';
 const PG_URL     = process.env.DATABASE_URL;
 
 let pool = null;
+let hotPool = null;
+let saveQueue = Promise.resolve();
 // Lazy-load pg ONLY when Postgres is enabled, so the server runs fine on
 // fund.json without the pg package installed.
 async function getPool() {
   if (!USE_PG) return null;
   if (pool) return pool;
   const pg = (await import('pg')).default;
-  pool = new pg.Pool({ connectionString: PG_URL, max: 10 });
+  pool = new pg.Pool({ connectionString: PG_URL, max: Number(process.env.PG_POOL_MAX || 20), application_name: 'fund-system-full-save' });
   return pool;
+}
+async function getHotPool() {
+  if (!USE_PG) return null;
+  if (hotPool) return hotPool;
+  const pg = (await import('pg')).default;
+  hotPool = new pg.Pool({ connectionString: PG_URL, max: Number(process.env.PG_HOT_POOL_MAX || 5), application_name: 'fund-system-hot-path' });
+  return hotPool;
+}
+
+export async function upsertHeartbeatPostgres(scanner, heartbeat) {
+  if (!USE_PG) return false;
+  const pool = await getHotPool();
+  await pool.query(
+    `INSERT INTO heartbeats(scanner,ts,status,msg)
+     VALUES($1,$2,$3,$4)
+     ON CONFLICT(scanner) DO UPDATE SET ts=$2,status=$3,msg=$4,updated_at=now()`,
+    [scanner, heartbeat.ts, heartbeat.status, heartbeat.msg]
+  );
+  return true;
+}
+
+export async function insertPingPostgres(ping) {
+  if (!USE_PG) return false;
+  const pool = await getHotPool();
+  await pool.query(
+    `INSERT INTO pings(id,scanner,data) VALUES($1,$2,$3) ON CONFLICT(id) DO NOTHING`,
+    [ping.id, ping.scanner, ping]
+  );
+  return true;
+}
+
+
+export async function insertSignalPostgres(signal) {
+  if (!USE_PG) return false;
+  const pool = await getHotPool();
+  await pool.query(
+    `INSERT INTO signals(id,scanner,ticker,data) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO NOTHING`,
+    [signal.id, signal.scanner, signal.ticker, signal]
+  );
+  return true;
+}
+
+export async function insertRejectionPostgres(rejection) {
+  if (!USE_PG) return false;
+  const pool = await getHotPool();
+  await pool.query(
+    `INSERT INTO rejections(id,scanner,ticker,data) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO NOTHING`,
+    [rejection.id, rejection.scanner, rejection.ticker, rejection]
+  );
+  return true;
+}
+
+export async function insertUpdatePostgres(update) {
+  if (!USE_PG) return false;
+  const pool = await getHotPool();
+  await pool.query(
+    `INSERT INTO updates(id,scanner,ticker,deal_id,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(id) DO NOTHING`,
+    [update.id, update.scanner, update.ticker, update.deal_id || null, update]
+  );
+  return true;
+}
+
+export async function upsertTradePostgres(t) {
+  if (!USE_PG || !t) return false;
+  const pool = await getHotPool();
+  await pool.query(`INSERT INTO trades(id,scanner,ticker,deal_id,direction,setup_type,status,entry,sl,tp1,tp2,close_price,pnl,risk_amount,quality_score,rsi,volume_ratio,htf_bias,spy_regime,vix_level,gap_pct,data,opened_at,closed_at,max_favorable,max_adverse,mae_r,mfe_r,intended_entry,initial_sl,fill_slippage_pct,excluded_from_expectancy)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)
+    ON CONFLICT(id) DO UPDATE SET status=$7,close_price=$12,pnl=$13,closed_at=$24,data=$22,max_favorable=$25,max_adverse=$26,mae_r=$27,mfe_r=$28,intended_entry=$29,initial_sl=$30,fill_slippage_pct=$31,excluded_from_expectancy=$32,sl=$9,tp1=$10,tp2=$11`,
+    [t.id,t.scanner,t.ticker,t.deal_id||null,t.direction||null,t.setup_type||t.trade_type||null,t.status||null,
+     t.entry??t.entry_price??null,t.sl??t.stop_loss??null,t.tp1??t.take_profit_1??null,t.tp2??t.take_profit_2??null,
+     t.close_price??null,t.pnl??null,t.risk_amount??t.risk_usd??null,t.quality_score??t.signal_score??null,t.rsi??null,
+     t.volume_ratio??null,t.htf_bias||null,t.spy_regime||null,t.vix_level??null,t.gap_pct??null,t,t.opened_at||t.ts||null,t.closed_at||null,
+     t.max_favorable??null,t.max_adverse??null,t.mae_r??null,t.mfe_r??null,t.intended_entry??null,t.initial_sl??t.open_sl??t.sl??null,t.fill_slippage_pct??null,t.excluded_from_expectancy===true]
+  );
+  return true;
+}
+
+
+export async function insertBrainPostgres(b) {
+  if (!USE_PG || !b) return false;
+  const pool = await getHotPool();
+  await pool.query(`INSERT INTO trade_brain(id,scanner,setup_type,direction,ticker,deal_id,features,win,r_multiple,pnl,recorded_at)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT(id) DO NOTHING`,
+    [b.id,b.scanner,b.setup_type,b.direction,b.ticker,b.deal_id||null,b.features,b.outcome?.win,b.outcome?.r_multiple,b.outcome?.pnl,b.recorded_at]
+  );
+  return true;
 }
 
 // Load the entire dataset from Postgres into the in-memory shape the server expects
@@ -67,10 +155,17 @@ export async function loadFromPostgres() {
 // Uses upserts so it's idempotent and safe under concurrency.
 export async function saveToPostgres(data) {
   if (!USE_PG) return;
+  saveQueue = saveQueue.catch(() => {}).then(() => saveToPostgresNow(data));
+  return saveQueue;
+}
+
+async function saveToPostgresNow(data) {
   const pool = await getPool();
   const c = await pool.connect();
   try {
     await c.query('BEGIN');
+    await c.query("SET LOCAL lock_timeout = '5s'");
+    await c.query("SET LOCAL statement_timeout = '30s'");
     await c.query(`INSERT INTO fund_config(id,data) VALUES(1,$1) ON CONFLICT(id) DO UPDATE SET data=$1,updated_at=now()`, [data.fund||{}]);
     await c.query(`INSERT INTO scanner_config(id,data) VALUES(1,$1) ON CONFLICT(id) DO UPDATE SET data=$1,updated_at=now()`, [data.scanner_config||{}]);
 
@@ -81,13 +176,14 @@ export async function saveToPostgres(data) {
 
     // Trades — hot columns + payload
     for (const t of data.trades||[])
-      await c.query(`INSERT INTO trades(id,scanner,ticker,deal_id,direction,setup_type,status,entry,sl,tp1,tp2,close_price,pnl,risk_amount,quality_score,rsi,volume_ratio,htf_bias,spy_regime,vix_level,gap_pct,data,opened_at,closed_at)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
-        ON CONFLICT(id) DO UPDATE SET status=$7,close_price=$12,pnl=$13,closed_at=$24,data=$22`,
+      await c.query(`INSERT INTO trades(id,scanner,ticker,deal_id,direction,setup_type,status,entry,sl,tp1,tp2,close_price,pnl,risk_amount,quality_score,rsi,volume_ratio,htf_bias,spy_regime,vix_level,gap_pct,data,opened_at,closed_at,max_favorable,max_adverse,mae_r,mfe_r,intended_entry,initial_sl,fill_slippage_pct,excluded_from_expectancy)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)
+        ON CONFLICT(id) DO UPDATE SET status=$7,close_price=$12,pnl=$13,closed_at=$24,data=$22,max_favorable=$25,max_adverse=$26,mae_r=$27,mfe_r=$28,intended_entry=$29,initial_sl=$30,fill_slippage_pct=$31,excluded_from_expectancy=$32`,
         [t.id,t.scanner,t.ticker,t.deal_id||null,t.direction||null,t.setup_type||t.trade_type||null,t.status||null,
          t.entry??t.entry_price??null,t.sl??t.stop_loss??null,t.tp1??t.take_profit_1??null,t.tp2??t.take_profit_2??null,
          t.close_price??null,t.pnl??null,t.risk_amount??null,t.quality_score??t.signal_score??null,t.rsi??null,
-         t.volume_ratio??null,t.htf_bias||null,t.spy_regime||null,t.vix_level??null,t.gap_pct??null,t,t.opened_at||t.ts||null,t.closed_at||null]);
+         t.volume_ratio??null,t.htf_bias||null,t.spy_regime||null,t.vix_level??null,t.gap_pct??null,t,t.opened_at||t.ts||null,t.closed_at||null,
+         t.max_favorable??null,t.max_adverse??null,t.mae_r??null,t.mfe_r??null,t.intended_entry??null,t.initial_sl??t.open_sl??t.sl??null,t.fill_slippage_pct??null,t.excluded_from_expectancy===true]);
 
     // Brain
     for (const b of data.trade_brain||[])

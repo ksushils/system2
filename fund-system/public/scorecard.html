@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Scanner Scorecard — Trading Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap');
+  :root{--bg:#080c10;--panel:#0d1218;--border:#1a2332;--accent:#00e5ff;--green:#00e676;--red:#ff1744;--amber:#ffab00;--text:#e0eaf5;--muted:#4a6278;--font-ui:'Syne',sans-serif;--font-mono:'IBM Plex Mono',monospace}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100vh;background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(0,229,255,.06),transparent 70%),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(26,35,50,.5) 39px,rgba(26,35,50,.5) 40px),repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(26,35,50,.5) 39px,rgba(26,35,50,.5) 40px)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:rgba(13,18,24,.9);position:sticky;top:0;z-index:5}
+  h1{font-size:1.05rem;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;margin:0} a{color:var(--muted);text-decoration:none} a:hover{color:var(--accent)}
+  .container{max-width:1600px;margin:0 auto;padding:28px 20px}.toolbar{display:flex;gap:12px;align-items:center;margin-bottom:18px}.btn{border:1px solid var(--border);background:#101821;color:var(--text);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:.75rem;cursor:pointer}.btn:hover{border-color:var(--accent)}.status{font-family:var(--font-mono);color:var(--muted);font-size:.78rem}
+  table{width:100%;border-collapse:separate;border-spacing:0 10px} th{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);text-align:left;padding:0 10px} td{background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 10px;vertical-align:top;font-size:.82rem} td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px} td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
+  .scanner{font-weight:800;color:var(--accent);font-size:.9rem}.pill{display:inline-block;border:1px solid var(--border);border-radius:99px;padding:3px 8px;font-family:var(--font-mono);font-size:.68rem;margin:2px}.ok{color:var(--green);border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.08)}.bad{color:var(--red);border-color:rgba(255,23,68,.35);background:rgba(255,23,68,.08)}.warn{color:var(--amber);border-color:rgba(255,171,0,.35);background:rgba(255,171,0,.08)}
+  .mono{font-family:var(--font-mono)}.muted{color:var(--muted)}.params{max-width:520px}.param{display:inline-flex;gap:5px;align-items:center;margin:2px 4px 2px 0;border:1px solid var(--border);border-radius:7px;padding:4px 6px;background:#0a1016;font-family:var(--font-mono);font-size:.68rem}.param button{all:unset;cursor:pointer;color:var(--accent)}.grid{display:grid;gap:5px}.small{font-size:.7rem}
+  dialog{border:1px solid var(--border);border-radius:12px;background:#0d1218;color:var(--text);padding:20px;min-width:360px} dialog::backdrop{background:rgba(0,0,0,.7)} input,textarea{width:100%;background:#080c10;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-family:var(--font-mono);margin:7px 0 12px} label{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Scanner Scorecard</h1>
+  <nav><a href="/">Dashboard</a> · <a href="/analytics.html">Analytics</a></nav>
+</header>
+<div class="container">
+  <div class="toolbar">
+    <button class="btn" onclick="load()">Refresh</button>
+    <span id="status" class="status">Loading...</span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Scanner</th><th>Heartbeat</th><th>Productivity</th><th>30-trade expectancy</th><th>Top rejection 7d</th><th>Params</th><th>Last change</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<dialog id="editDialog">
+  <form method="dialog" onsubmit="saveParam(event)">
+    <h2>Edit Parameter</h2>
+    <input type="hidden" id="editScanner"/>
+    <input type="hidden" id="editParam"/>
+    <label>Parameter</label>
+    <input id="editLabel" disabled/>
+    <label>New value</label>
+    <input id="editValue" required/>
+    <label>Reason</label>
+    <textarea id="editReason" rows="3" required placeholder="Required: why this threshold change is approved"></textarea>
+    <button class="btn" type="submit">Save</button>
+    <button class="btn" type="button" onclick="editDialog.close()">Cancel</button>
+  </form>
+</dialog>
+
+<script>
+const token = localStorage.getItem('fund_token') || '';
+let currentRows = [];
+function cls(state){ return state === 'ALIVE' || state === 'ok' ? 'ok' : state === 'STALE' || state === 'insufficient' ? 'warn' : 'bad'; }
+function age(v){ return v == null ? 'never' : `${v}m ago`; }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function api(path, opts={}){
+  const headers = { 'Content-Type':'application/json', 'x-token': token, ...(opts.headers || {}) };
+  const r = await fetch(path, { ...opts, headers });
+  const data = await r.json().catch(()=>({}));
+  if (!r.ok) throw new Error(data.error || `${r.status} ${r.statusText}`);
+  return data;
+}
+async function load(){
+  document.getElementById('status').textContent = 'Loading...';
+  try {
+    const data = await api('/api/scorecard');
+    currentRows = data.rows || [];
+    document.getElementById('rows').innerHTML = currentRows.map(rowHtml).join('');
+    document.getElementById('status').textContent = `${currentRows.length} scanners · ${data.generated_at}`;
+  } catch (e) {
+    document.getElementById('status').textContent = `Error: ${e.message}. Login on the dashboard first.`;
+  }
+}
+function rowHtml(r){
+  const ex = r.expectancy_30 || {};
+  const rej = r.top_rejection_reason_7d;
+  return `<tr>
+    <td><div class="scanner">${esc(r.scanner)}</div><div class="pill ${r.params_source==='server'?'ok':'warn'}">${esc(r.params_source)}</div></td>
+    <td><span class="pill ${cls(r.heartbeat.state)}">${esc(r.heartbeat.state)}</span><div class="small muted">${age(r.heartbeat.age_minutes)}</div></td>
+    <td class="mono small grid">
+      <span>signal: ${age(r.productivity.last_signal_age_minutes)}</span>
+      <span>trade: ${age(r.productivity.last_trade_age_minutes)}</span>
+      <span>reject: ${age(r.productivity.last_rejection_age_minutes)}</span>
+    </td>
+    <td>${ex.status === 'ok' ? `<span class="pill ok">£${esc(ex.expectancy)}</span><div class="small muted">${esc(ex.win_rate_pct)}% win · n=${esc(ex.count)}</div>` : `<span class="pill warn">insufficient</span><div class="small muted">n=${esc(ex.count || 0)}/30</div>`}</td>
+    <td>${rej ? `<div>${esc(rej.reason)}</div><div class="small muted">${esc(rej.count)} rows</div>` : '<span class="muted">none</span>'}</td>
+    <td class="params">${(r.params || []).map(p => `<span class="param"><b>${esc(p.param)}</b>=<button onclick="edit('${esc(r.scanner)}','${esc(p.param)}','${esc(p.raw_value)}')">${esc(p.raw_value)}</button></span>`).join('') || '<span class="muted">local defaults</span>'}</td>
+    <td class="small">${r.last_param_change ? `<div>${esc(r.last_param_change.parameter || '')}</div><div class="muted">${esc(r.last_param_change.reason || '')}</div>` : '<span class="muted">none</span>'}</td>
+  </tr>`;
+}
+function edit(scanner,param,value){
+  editScanner.value = scanner;
+  editParam.value = param;
+  editLabel.value = `${scanner}.${param}`;
+  editValue.value = value;
+  editReason.value = '';
+  editDialog.showModal();
+}
+async function saveParam(e){
+  e.preventDefault();
+  try {
+    await api('/api/params', {
+      method: 'POST',
+      body: JSON.stringify({ scanner: editScanner.value, param: editParam.value, value: editValue.value, reason: editReason.value })
+    });
+    editDialog.close();
+    await load();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+load();
+</script>
+</body>
+</html>

@@ -1,46 +1,37 @@
 {
   "stage": "B4",
-  "createdAt": "2026-06-14T21:17:39.135121+00:00",
-  "rawTop40Count": 50,
-  "contradictionRejectedCount": 31,
+  "createdAt": "2026-07-23T02:44:33.746456+00:00",
+  "rawTop40Count": 34,
+  "contradictionRejectedCount": 22,
   "contradictionRejectedSymbols": [
-    "RVMD",
-    "MCHP",
-    "D",
-    "AEG",
-    "DHT",
-    "ED",
-    "BANC",
-    "ZIM",
-    "PNW",
-    "TEVA",
-    "GLPI",
-    "INDV",
-    "SNDK",
-    "BG",
-    "TWST",
-    "VTRS",
-    "BCS",
-    "WRB",
-    "TXN",
-    "CDW",
-    "ZM",
-    "ZETA",
-    "WAY",
-    "EPAM",
-    "SWKS",
-    "APLE",
-    "CUZ",
-    "EXR",
-    "MIAX",
+    "EQT",
+    "KSS",
+    "WAL",
+    "FCX",
     "BAC",
-    "MFC"
+    "NUVB",
+    "MUR",
+    "ED",
+    "TFC",
+    "GEO",
+    "DOCN",
+    "CIFR",
+    "NRG",
+    "COGT",
+    "YETI",
+    "NI",
+    "SN",
+    "JPM",
+    "FFBC",
+    "SFNC",
+    "USB",
+    "WSBC"
   ],
   "inputPath": "/root/system2-core/stage6_council_enriched.json",
   "optionsRideAlongCarriedThrough": false,
   "confluenceRankingCarriedThrough": false,
-  "clusteredSurvivorCount": 19,
-  "clusterRejectedCount": 31,
+  "clusteredSurvivorCount": 12,
+  "clusterRejectedCount": 22,
   "riskRulesUnchanged": {
     "accountSize": 25000.0,
     "riskPctPerPosition": 0.01,
@@ -84,188 +75,132 @@
     ],
     "topSixOrder": [
       {
-        "symbol": "EMBJ",
-        "score": 65.94,
-        "volumeRatio": 2.369,
-        "rsVsSpy": 2.292
+        "symbol": "UGP",
+        "score": 93.51,
+        "volumeRatio": 3.934,
+        "rsVsSpy": 2.121
       },
       {
-        "symbol": "CXW",
-        "score": 75.36,
-        "volumeRatio": 4.218,
-        "rsVsSpy": 1.245
+        "symbol": "PM",
+        "score": 90.51,
+        "volumeRatio": 4.366,
+        "rsVsSpy": 2.974
       },
       {
-        "symbol": "JNJ",
-        "score": 65.22,
-        "volumeRatio": 3.852,
-        "rsVsSpy": 0.215
+        "symbol": "BNY",
+        "score": 87.16,
+        "volumeRatio": 5.47,
+        "rsVsSpy": 1.368
       },
       {
-        "symbol": "CB",
-        "score": 69.57,
-        "volumeRatio": 4.875,
-        "rsVsSpy": 0.853
+        "symbol": "FBP",
+        "score": 91.33,
+        "volumeRatio": 6.831,
+        "rsVsSpy": 2.325
       },
       {
-        "symbol": "DAN",
-        "score": 66.67,
-        "volumeRatio": 2.023,
-        "rsVsSpy": 4.698
+        "symbol": "JPM",
+        "score": 79.91,
+        "volumeRatio": 3.997,
+        "rsVsSpy": 0.586
       },
       {
-        "symbol": "SBUX",
-        "score": 60.87,
-        "volumeRatio": 5.022,
-        "rsVsSpy": 0.079
+        "symbol": "RPRX",
+        "score": 76.12,
+        "volumeRatio": 3.436,
+        "rsVsSpy": 0.272
       }
     ]
   },
   "portfolioHeatPreview": {
     "ifExistingRiskEngineTakesMaxTrades": 3,
     "previewSymbols": [
-      "EMBJ",
-      "CXW",
-      "JNJ"
+      "UGP",
+      "PM",
+      "BNY"
     ],
-    "previewActualRiskDollars": 449.2,
-    "previewHeatPct": 1.797,
+    "previewActualRiskDollars": 368.42,
+    "previewHeatPct": 1.474,
     "withinMaxPortfolioHeat": true
   },
   "clusters": [
     {
-      "sector": "Industrials",
-      "etf": "XLI",
-      "sectorCapUsed": 3,
-      "rawCount": 3,
-      "keptCount": 3,
-      "rejectedCount": 0,
-      "keptSymbols": [
-        "EMBJ",
-        "VSNT",
-        "HWM"
-      ],
-      "rejectedSymbols": [],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 249.99,
-      "actualRiskDollars": 241.27,
-      "riskWithinOnePosition": true,
-      "bestScore": 65.94
-    },
-    {
-      "sector": "Real Estate",
-      "etf": "XLRE",
-      "sectorCapUsed": 2,
-      "rawCount": 5,
-      "keptCount": 2,
-      "rejectedCount": 3,
-      "keptSymbols": [
-        "CXW",
-        "BNL"
-      ],
-      "rejectedSymbols": [
-        "APLE",
-        "CUZ",
-        "EXR"
-      ],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 248.12,
-      "riskWithinOnePosition": true,
-      "bestScore": 75.36
-    },
-    {
-      "sector": "Healthcare",
-      "etf": "XLV",
-      "sectorCapUsed": 2,
-      "rawCount": 1,
-      "keptCount": 1,
-      "rejectedCount": 0,
-      "keptSymbols": [
-        "JNJ"
-      ],
-      "rejectedSymbols": [],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 243.3,
-      "riskWithinOnePosition": true,
-      "bestScore": 65.22
-    },
-    {
-      "sector": "Financial Services",
-      "etf": "XLF",
-      "sectorCapUsed": 2,
-      "rawCount": 5,
-      "keptCount": 2,
-      "rejectedCount": 3,
-      "keptSymbols": [
-        "CB",
-        "MUFG"
-      ],
-      "rejectedSymbols": [
-        "MIAX",
-        "BAC",
-        "MFC"
-      ],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 245.49,
-      "riskWithinOnePosition": true,
-      "bestScore": 69.57
-    },
-    {
-      "sector": "Consumer Cyclical",
-      "etf": "XLY",
-      "sectorCapUsed": 3,
-      "rawCount": 3,
-      "keptCount": 3,
-      "rejectedCount": 0,
-      "keptSymbols": [
-        "DAN",
-        "SBUX",
-        "BYD"
-      ],
-      "rejectedSymbols": [],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 249.99,
-      "actualRiskDollars": 242.47,
-      "riskWithinOnePosition": true,
-      "bestScore": 66.67
-    },
-    {
-      "sector": "Consumer Defensive",
-      "etf": "XLP",
-      "sectorCapUsed": 3,
-      "rawCount": 1,
-      "keptCount": 1,
-      "rejectedCount": 0,
-      "keptSymbols": [
-        "BUD"
-      ],
-      "rejectedSymbols": [],
-      "clusterRiskBudget": 250.0,
-      "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 248.44,
-      "riskWithinOnePosition": true,
-      "bestScore": 58.7
-    },
-    {
-      "sector": "Communication Services",
-      "etf": "XLC",
+      "sector": "Energy",
+      "etf": "XLE",
       "sectorCapUsed": 2,
       "rawCount": 2,
       "keptCount": 2,
       "rejectedCount": 0,
       "keptSymbols": [
-        "VOD",
-        "EA"
+        "UGP",
+        "LNG"
       ],
       "rejectedSymbols": [],
       "clusterRiskBudget": 250.0,
       "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 249.03,
+      "actualRiskDollars": 246.4,
       "riskWithinOnePosition": true,
-      "bestScore": 57.25
+      "bestScore": 93.51
+    },
+    {
+      "sector": "Consumer Defensive",
+      "etf": "XLP",
+      "sectorCapUsed": 3,
+      "rawCount": 2,
+      "keptCount": 2,
+      "rejectedCount": 0,
+      "keptSymbols": [
+        "PM",
+        "CHD"
+      ],
+      "rejectedSymbols": [],
+      "clusterRiskBudget": 250.0,
+      "allocatedRiskDollars": 250.0,
+      "actualRiskDollars": 244.9,
+      "riskWithinOnePosition": true,
+      "bestScore": 90.51
+    },
+    {
+      "sector": "Financial Services",
+      "etf": "XLF",
+      "sectorCapUsed": 2,
+      "rawCount": 7,
+      "keptCount": 2,
+      "rejectedCount": 5,
+      "keptSymbols": [
+        "BNY",
+        "FBP"
+      ],
+      "rejectedSymbols": [
+        "JPM",
+        "FFBC",
+        "SFNC",
+        "USB",
+        "WSBC"
+      ],
+      "clusterRiskBudget": 250.0,
+      "allocatedRiskDollars": 250.0,
+      "actualRiskDollars": 247.83,
+      "riskWithinOnePosition": true,
+      "bestScore": 87.16
+    },
+    {
+      "sector": "Healthcare",
+      "etf": "XLV",
+      "sectorCapUsed": 2,
+      "rawCount": 2,
+      "keptCount": 2,
+      "rejectedCount": 0,
+      "keptSymbols": [
+        "RPRX",
+        "JNJ"
+      ],
+      "rejectedSymbols": [],
+      "clusterRiskBudget": 250.0,
+      "allocatedRiskDollars": 250.0,
+      "actualRiskDollars": 242.65,
+      "riskWithinOnePosition": true,
+      "bestScore": 76.12
     },
     {
       "sector": "Utilities",
@@ -275,50 +210,49 @@
       "keptCount": 2,
       "rejectedCount": 0,
       "keptSymbols": [
-        "EIX",
-        "ATO"
+        "DUK",
+        "PEG"
       ],
       "rejectedSymbols": [],
       "clusterRiskBudget": 250.0,
       "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 248.35,
+      "actualRiskDollars": 245.83,
       "riskWithinOnePosition": true,
-      "bestScore": 73.91
+      "bestScore": 76.86
     },
     {
-      "sector": "Technology",
-      "etf": "XLK",
-      "sectorCapUsed": 2,
-      "rawCount": 2,
-      "keptCount": 2,
+      "sector": "Consumer Cyclical",
+      "etf": "XLY",
+      "sectorCapUsed": 3,
+      "rawCount": 1,
+      "keptCount": 1,
       "rejectedCount": 0,
       "keptSymbols": [
-        "WIX",
-        "DOCU"
+        "ROST"
       ],
       "rejectedSymbols": [],
       "clusterRiskBudget": 250.0,
       "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 245.12,
+      "actualRiskDollars": 246.85,
       "riskWithinOnePosition": true,
-      "bestScore": 65.94
+      "bestScore": 78.31
     },
     {
-      "sector": "Energy",
-      "etf": "XLE",
+      "sector": "Communication Services",
+      "etf": "XLC",
       "sectorCapUsed": 2,
       "rawCount": 1,
       "keptCount": 1,
       "rejectedCount": 0,
       "keptSymbols": [
-        "RRC"
+        "AMX"
       ],
       "rejectedSymbols": [],
       "clusterRiskBudget": 250.0,
       "allocatedRiskDollars": 250.0,
-      "actualRiskDollars": 249.96,
+      "actualRiskDollars": 249.98,
       "riskWithinOnePosition": true,
-      "bestScore": 57.97
+      "bestScore": 76.81
     }
   ],
   "clusterWarnings": [],

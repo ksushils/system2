@@ -39,6 +39,17 @@ POSITIVE_KEYWORDS = [
     "fda approval", "clearance", "launch", "milestone",
 ]
 
+COMPANY_SUFFIXES = {
+    "inc", "inc.", "corp", "corp.", "corporation", "co", "co.", "company",
+    "ltd", "ltd.", "plc", "holdings", "holding", "group", "class", "common",
+    "ordinary", "shares", "stock", "the",
+}
+ENGLISH_HINT_WORDS = {
+    "the", "and", "for", "with", "from", "this", "that", "stock", "shares",
+    "market", "company", "after", "before", "investor", "investors", "earnings",
+    "price", "target", "upgrade", "downgrade", "announces", "reports",
+}
+
 MAX_WORKERS = 4
 DAYS_LOOKBACK_NEWS = 2
 DAYS_LOOKBACK_ANALYST = 7
@@ -46,6 +57,46 @@ DAYS_LOOKBACK_ANALYST = 7
 
 def text(value: Any) -> str:
     return str(value or "").strip()
+
+
+def is_english_like(value: str) -> bool:
+    """Conservative language check for US-ticker news attribution."""
+    s = text(value)
+    if not s:
+        return False
+    letters = re.findall(r"[A-Za-z]", s)
+    if len(letters) < 12:
+        return True
+    ascii_chars = sum(1 for c in s if ord(c) < 128)
+    ascii_ratio = ascii_chars / max(len(s), 1)
+    words = re.findall(r"[A-Za-z]{2,}", s.lower())
+    hint_hits = sum(1 for w in words if w in ENGLISH_HINT_WORDS)
+    return ascii_ratio >= 0.94 and (hint_hits > 0 or len(words) <= 6)
+
+
+def company_tokens(company_name: str) -> set[str]:
+    tokens = {
+        t.lower()
+        for t in re.findall(r"[A-Za-z0-9]+", text(company_name))
+        if len(t) >= 4 and t.lower() not in COMPANY_SUFFIXES
+    }
+    return tokens
+
+
+def article_matches_symbol(item: dict, symbol: str, company_name: str = "") -> bool:
+    """Require exact ticker or meaningful company-name evidence before attribution."""
+    sym = text(symbol).upper()
+    hay = " ".join(text(item.get(k)) for k in ["title", "text", "content"])
+    hay_l = hay.lower()
+    if sym and re.search(rf"(?<![A-Z0-9]){re.escape(sym)}(?![A-Z0-9])", hay, flags=re.I):
+        return True
+    tokens = company_tokens(company_name)
+    if not tokens:
+        return False
+    hits = {tok for tok in tokens if re.search(rf"\b{re.escape(tok)}\b", hay_l)}
+    if len(tokens) >= 2:
+        return len(hits) >= 2
+    return bool(hits)
 
 
 def fmp_key() -> str:
@@ -60,16 +111,26 @@ def fmp_get(path: str, params: dict[str, str] | None = None) -> list | dict:
         return {"error": str(e)}
 
 
-def analyze_news(items: list[dict]) -> dict[str, Any]:
+def analyze_news(items: list[dict], symbol: str = "", company_name: str = "") -> dict[str, Any]:
     """Analyze FMP stock-news items for risk flags and sentiment."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS_LOOKBACK_NEWS)
     recent = []
+    excluded_non_english = 0
+    excluded_mismatch = 0
     for item in items:
         pub = item.get("publishedDate") or item.get("date") or ""
         try:
             dt = datetime.fromisoformat(pub.replace("Z", "+00:00"))
-            if dt >= cutoff:
-                recent.append(item)
+            if dt < cutoff:
+                continue
+            body = " ".join(text(item.get(k)) for k in ["title", "text", "content"])
+            if not is_english_like(body):
+                excluded_non_english += 1
+                continue
+            if not article_matches_symbol(item, symbol, company_name):
+                excluded_mismatch += 1
+                continue
+            recent.append(item)
         except Exception:
             continue
 
@@ -116,6 +177,8 @@ def analyze_news(items: list[dict]) -> dict[str, Any]:
         "recent_negative_news": recent_negative_news,
         "news_summary": first_headline,
         "news_items_checked": len(recent),
+        "news_items_excluded_non_english": excluded_non_english,
+        "news_items_excluded_mismatch": excluded_mismatch,
         "news_hard_reject": news_flag_count >= 3 or (recent_negative_news and news_flag_count >= 2),
     }
 
@@ -214,7 +277,7 @@ def analyze_earnings(surprises: list[dict]) -> dict[str, Any]:
     }
 
 
-def enrich_symbol(sym: str) -> dict[str, Any]:
+def enrich_symbol(sym: str, company_name: str = "") -> dict[str, Any]:
     """Fetch and analyze all three FMP endpoints for one symbol."""
     sym = sym.upper()
     result: dict[str, Any] = {"symbol": sym}
@@ -222,7 +285,7 @@ def enrich_symbol(sym: str) -> dict[str, Any]:
     # A. Stock news
     news_raw = fmp_get(f"stable/stock-news", {"symbol": sym, "limit": "5"})
     if isinstance(news_raw, list):
-        result.update(analyze_news(news_raw))
+        result.update(analyze_news(news_raw, sym, company_name))
     else:
         result.update({
             "news_risk": "UNKNOWN",
@@ -231,6 +294,8 @@ def enrich_symbol(sym: str) -> dict[str, Any]:
             "recent_negative_news": False,
             "news_summary": "",
             "news_items_checked": 0,
+            "news_items_excluded_non_english": 0,
+            "news_items_excluded_mismatch": 0,
             "news_hard_reject": False,
             "news_fetch_error": text(news_raw.get("error")) if isinstance(news_raw, dict) else "unknown",
         })
@@ -269,12 +334,16 @@ def enrich_symbol(sym: str) -> dict[str, Any]:
 def main() -> None:
     rows = json.loads(INPUT_PATH.read_text(encoding="utf-8-sig"))
     symbols = [text(row.get("symbol") or row.get("ticker")).upper() for row in rows]
+    company_by_symbol = {
+        text(row.get("symbol") or row.get("ticker")).upper(): text(row.get("companyName") or row.get("company_name") or row.get("name"))
+        for row in rows
+    }
 
     enriched_by_symbol: dict[str, dict] = {}
     errors: list[str] = []
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(enrich_symbol, sym): sym for sym in symbols}
+        futures = {executor.submit(enrich_symbol, sym, company_by_symbol.get(sym, "")): sym for sym in symbols}
         for future in as_completed(futures):
             sym = futures[future]
             try:
@@ -290,6 +359,8 @@ def main() -> None:
 
     # Metadata
     hard_rejects = sum(1 for r in rows if r.get("news_hard_reject"))
+    excluded_non_english = sum(int(r.get("news_items_excluded_non_english") or 0) for r in rows)
+    excluded_mismatch = sum(int(r.get("news_items_excluded_mismatch") or 0) for r in rows)
     analyst_positive = sum(1 for r in rows if r.get("analyst_signal") == "POSITIVE")
     analyst_negative = sum(1 for r in rows if r.get("analyst_signal") == "NEGATIVE")
     consistent_beaters = sum(1 for r in rows if r.get("consistent_beater"))
@@ -300,6 +371,8 @@ def main() -> None:
         "inputCount": len(rows),
         "outputCount": len(rows),
         "hard_rejects": hard_rejects,
+        "excluded_non_english": excluded_non_english,
+        "excluded_mismatch": excluded_mismatch,
         "analyst_positive": analyst_positive,
         "analyst_negative": analyst_negative,
         "consistent_beaters": consistent_beaters,

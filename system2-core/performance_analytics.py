@@ -51,6 +51,44 @@ def safe_div(a: float, b: float) -> float | None:
     return a / b if b and b != 0 else None
 
 
+def measurement_population(row: dict) -> str:
+    return "ENTERED_TRADE" if row.get("trade_entered") is True else "WATCHLIST_UNENTERED"
+
+
+def avg_field(rows: list[dict], field: str) -> float | None:
+    vals = [num(r.get(field)) for r in rows if r.get(field) is not None]
+    return round(sum(vals) / len(vals), 3) if vals else None
+
+
+def count_field(rows: list[dict], field: str) -> int:
+    return sum(1 for r in rows if r.get(field) is not None)
+
+
+def compute_measurement_populations(ideas: list[dict]) -> dict[str, Any]:
+    entered = [i for i in ideas if measurement_population(i) == "ENTERED_TRADE"]
+    watchlist = [i for i in ideas if measurement_population(i) == "WATCHLIST_UNENTERED"]
+    return {
+        "entered_trades": {
+            "count": len(entered),
+            "legacy_avg_canonical_r": avg_field(entered, "canonical_r"),
+            "legacy_avg_r_3d": avg_field(entered, "r_3d"),
+            "avg_trade_r_net": avg_field(entered, "trade_r_net"),
+        },
+        "watchlist_unentered": {
+            "count": len(watchlist),
+            "legacy_avg_canonical_r": avg_field(watchlist, "canonical_r"),
+            "legacy_avg_r_3d": avg_field(watchlist, "r_3d"),
+            "would_be_r_markout_3d_count": count_field(watchlist, "would_be_r_markout_3d"),
+            "avg_would_be_r_markout_3d": avg_field(watchlist, "would_be_r_markout_3d"),
+            "would_be_r_markout_5d_count": count_field(watchlist, "would_be_r_markout_5d"),
+            "avg_would_be_r_markout_5d": avg_field(watchlist, "would_be_r_markout_5d"),
+            "would_be_r_markout_10d_count": count_field(watchlist, "would_be_r_markout_10d"),
+            "avg_would_be_r_markout_10d": avg_field(watchlist, "would_be_r_markout_10d"),
+        },
+        "note": "Entered trade R and unentered directional mark-outs are reported separately and are not averaged together.",
+    }
+
+
 def compute_scanner_quality(ideas: list[dict]) -> dict[str, Any]:
     total = len(ideas)
     resolved = [i for i in ideas if i.get("idea_r") is not None]
@@ -395,6 +433,7 @@ def main() -> None:
     council = compute_council_calibration(ideas)
     gate_audit = compute_gate_audit(all_ideas)
     portfolio = compute_portfolio_exposure(ideas)
+    measurement_populations = compute_measurement_populations(ideas)
 
     metrics = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -407,6 +446,7 @@ def main() -> None:
         "council": council,
         "gate_audit": gate_audit,
         "portfolio_exposure": portfolio,
+        "measurement_populations": measurement_populations,
     }
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

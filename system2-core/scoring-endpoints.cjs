@@ -139,6 +139,34 @@ module.exports = function attachScoring(app, db, deps) {
       : null;
   }
 
+  function hasRecordedEntry(row) {
+    return row && row.trade_entered === true;
+  }
+
+  function measurementPopulation(row) {
+    return hasRecordedEntry(row) ? 'ENTERED_TRADE' : 'WATCHLIST_UNENTERED';
+  }
+
+  function markoutR(row, price) {
+    return rValue(row.entry, row.risk_per_share, price);
+  }
+
+  function stampMeasurementPopulation(row) {
+    row.measurement_population = measurementPopulation(row);
+    if (!hasRecordedEntry(row)) {
+      row.would_be_measurement = 'DIRECTIONAL_MARKOUT';
+    }
+  }
+
+  function setWouldBeMarkout(row, days, price) {
+    if (hasRecordedEntry(row)) return;
+    stampMeasurementPopulation(row);
+    row[`would_be_r_markout_${days}d`] = markoutR(row, price);
+    row[`would_be_return_pct_${days}d`] = row.entry
+      ? Number((((Number(price) - Number(row.entry)) / Number(row.entry)) * 100).toFixed(2))
+      : null;
+  }
+
   function simulatedLongExit(row, window, fallbackClose, timeoutHit) {
     const entry = Number(row.entry);
     const stop = row.stop != null ? Number(row.stop) : null;
@@ -178,6 +206,11 @@ module.exports = function attachScoring(app, db, deps) {
       const bar = afterEntry[m.days - 1];
       const px = Number(bar.close);
       row[m.field] = px;
+      stampMeasurementPopulation(row);
+      setWouldBeMarkout(row, m.days, px);
+      if (m.days >= 10 && afterEntry.length >= 5 && row.would_be_r_markout_5d == null) {
+        setWouldBeMarkout(row, 5, Number(afterEntry[4].close));
+      }
       const window = afterEntry.slice(0, m.days);
       const highs = window.map(h => Number(h.high));
       const lows = window.map(h => Number(h.low));
@@ -472,6 +505,26 @@ module.exports = function attachScoring(app, db, deps) {
     return Object.fromEntries(Object.entries(groups).map(([key, vals]) => [key, cohortStats(vals, rfield)]));
   }
 
+  function measurementStats(rows) {
+    const entered = rows.filter(hasRecordedEntry);
+    const watchlist = rows.filter(r => !hasRecordedEntry(r));
+    const markoutStats = (field) => cohortStats(watchlist, field, 1);
+    return {
+      entered_trades: {
+        count: entered.length,
+        legacy_r_3d: cohortStats(entered, 'r_3d', 1),
+      },
+      watchlist_unentered: {
+        count: watchlist.length,
+        legacy_r_3d: cohortStats(watchlist, 'r_3d', 1),
+        would_be_r_markout_3d: markoutStats('would_be_r_markout_3d'),
+        would_be_r_markout_5d: markoutStats('would_be_r_markout_5d'),
+        would_be_r_markout_10d: markoutStats('would_be_r_markout_10d'),
+      },
+      note: 'Entered trade R and unentered directional mark-outs are reported separately and are not averaged together.',
+    };
+  }
+
   function verdict(withStats, withoutStats) {
     if (!withStats.ready || !withoutStats.ready) {
       const n = Math.min(withStats.count, withoutStats.count);
@@ -599,6 +652,7 @@ module.exports = function attachScoring(app, db, deps) {
         '3d': cohortStats(rows, 'r_3d'),
         '10d': cohortStats(rows, 'r_10d'),
       },
+      measurement_populations: measurementStats(rows),
       by_sector: groupStats(rows, r => r.sector || 'unknown', 'r_3d'),
       by_regime: groupStats(rows, r => r.market_regime || r.regime || 'untagged', 'r_3d'),
       distribution: histogram(scoredValues),
@@ -787,6 +841,14 @@ module.exports = function attachScoring(app, db, deps) {
         paper_exit_at: null,
         paper_exit_price: null,
         paper_exit_r: null,
+        measurement_population: 'WATCHLIST_UNENTERED',
+        would_be_measurement: 'DIRECTIONAL_MARKOUT',
+        would_be_r_markout_3d: null,
+        would_be_r_markout_5d: null,
+        would_be_r_markout_10d: null,
+        would_be_return_pct_3d: null,
+        would_be_return_pct_5d: null,
+        would_be_return_pct_10d: null,
         current_price: null,
         unrealized_r: null,
         current_gain_pct: null,
@@ -886,6 +948,12 @@ module.exports = function attachScoring(app, db, deps) {
       const scored = db.data.ideas.filter(i => i.r_3d != null);
       const n = scored.length;
       const avg = (arr) => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+      const enteredScored = scored.filter(hasRecordedEntry);
+      const watchlistScored = scored.filter(i => !hasRecordedEntry(i));
+      const avgField = (rows, field) => {
+        const values = rows.map(i => i[field]).filter(v => v != null && Number.isFinite(Number(v))).map(Number);
+        return values.length ? Number(avg(values).toFixed(3)) : null;
+      };
 
       const r3 = scored.map(i => i.r_3d);
       const wins = r3.filter(r => r > 0).length;
@@ -910,6 +978,20 @@ module.exports = function attachScoring(app, db, deps) {
         scored_3d: n,
         win_rate_3d: n ? Math.round((wins/n)*100) : null,
         avg_r_3d: n ? Number(avg(r3).toFixed(3)) : null,
+        measurement_populations: {
+          entered_trades: {
+            count: enteredScored.length,
+            legacy_avg_r_3d: avgField(enteredScored, 'r_3d'),
+          },
+          watchlist_unentered: {
+            count: watchlistScored.length,
+            legacy_avg_r_3d: avgField(watchlistScored, 'r_3d'),
+            avg_would_be_r_markout_3d: avgField(watchlistScored, 'would_be_r_markout_3d'),
+            avg_would_be_r_markout_5d: avgField(watchlistScored, 'would_be_r_markout_5d'),
+            avg_would_be_r_markout_10d: avgField(watchlistScored, 'would_be_r_markout_10d'),
+          },
+          note: 'Entered trade R and unentered directional mark-outs are reported separately and are not averaged together.',
+        },
         chronos_accuracy: (() => {
           const c = scored.filter(i => i.chronos_helped != null);
           return c.length ? Math.round((c.filter(i=>i.chronos_helped).length / c.length)*100) : null;

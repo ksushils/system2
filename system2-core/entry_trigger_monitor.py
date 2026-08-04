@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import fmp_bandwidth
 import requests
 import threading
 
@@ -112,7 +113,14 @@ def fmp_get(endpoint: str, params: dict[str, str] | None = None) -> Any:
         headers={"Accept": "application/json", "User-Agent": "system2-entry-monitor/1.0"},
     )
     with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.loads(resp.read().decode("utf-8", "ignore"))
+        raw = resp.read()
+        fmp_bandwidth.record(
+            endpoint,
+            len(raw),
+            status=getattr(resp, "status", None),
+            source="entry_trigger_monitor",
+        )
+        return json.loads(raw.decode("utf-8", "ignore"))
 
 
 def get_watchlist() -> list[dict[str, Any]]:
@@ -211,6 +219,12 @@ def get_intraday_bars(ticker: str, interval: str = INTRADAY_INTERVAL) -> list[di
             f"https://financialmodelingprep.com/stable/historical-chart/{interval}",
             params={"symbol": ticker, "apikey": FMP_KEY},
             timeout=12,
+        )
+        fmp_bandwidth.record(
+            f"stable/historical-chart/{interval}",
+            len(resp.content or b""),
+            status=resp.status_code,
+            source="entry_trigger_monitor",
         )
         if resp.status_code != 200:
             return []

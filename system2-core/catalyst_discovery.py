@@ -28,6 +28,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import fmp_bandwidth
+
 
 ROOT = Path(__file__).resolve().parent
 DOWNLOADS = Path.home() / "Downloads"
@@ -151,8 +153,16 @@ class FmpClient:
                     headers={"Accept": "application/json", "User-Agent": "system2-catalyst-discovery/1.0"},
                 )
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    return json.loads(resp.read().decode("utf-8", "ignore"))
+                    raw = resp.read()
+                    fmp_bandwidth.record(
+                        endpoint,
+                        len(raw),
+                        status=getattr(resp, "status", None),
+                        source="catalyst_discovery",
+                    )
+                    return json.loads(raw.decode("utf-8", "ignore"))
             except urllib.error.HTTPError as exc:
+                fmp_bandwidth.record(endpoint, 0, status=exc.code, source="catalyst_discovery")
                 if exc.code == 429 and attempt < 2:
                     time.sleep(2.0 * (attempt + 1))
                     continue

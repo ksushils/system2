@@ -16,6 +16,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import fmp_bandwidth
+
 FMP_BASE = "https://financialmodelingprep.com"
 
 
@@ -72,9 +74,16 @@ def get(endpoint: str, params: dict[str, str] | None = None, api_key: str | None
                 },
             )
             with urllib.request.urlopen(req, timeout=30) as resp:
-                raw = resp.read().decode("utf-8", "ignore")
-                return json.loads(raw)
+                raw = resp.read()
+                fmp_bandwidth.record(
+                    endpoint,
+                    len(raw),
+                    status=getattr(resp, "status", None),
+                    source="fmp_api",
+                )
+                return json.loads(raw.decode("utf-8", "ignore"))
         except urllib.error.HTTPError as exc:
+            fmp_bandwidth.record(endpoint, 0, status=exc.code, source="fmp_api")
             if exc.code == 429 and attempt < 3:
                 time.sleep(2.0 * (attempt + 1))
                 continue

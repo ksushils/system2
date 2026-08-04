@@ -1,687 +1,704 @@
 [
   {
-    "ticker": "ADBE",
-    "symbol": "ADBE",
+    "ticker": "TXN",
+    "symbol": "TXN",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "analyst|earnings",
     "sub_types": [
-      "analyst"
+      "analyst",
+      "earnings"
     ],
-    "catalyst_summary": "Adobe price target lowered to $230 from $285 at BMO Capital; Adobe price target lowered to $240 from $280 at Piper Sandler; Adobe price target lowered to $190 from $220 at Goldman Sachs; Adobe price target lowered to $379 from $447 at Bernstein; Adobe price target lowered to $230 from $270 at Baird; Adobe price target lowered to $195 from $235 at KeyBanc; Ad",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:50:04+00:00",
-    "catalyst_score": 12.0,
+    "catalyst_summary": "Texas Instruments price target raised to $380 from $350 at UBS; Texas Instruments price target raised to $305 from $300 at Mizuho; Texas Instruments price target raised to $385 from $300 at Baird; Texas Instruments price target raised to $330 from $316 at Evercore ISI; Texas Instruments price target raised to $300 from $278 at Truist; Texas Instruments price",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:40:35+00:00",
+    "catalyst_score": 21.204,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370076",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
-    "price_target": 230,
-    "price_when_posted": 218.8,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "CASY",
-    "symbol": "CASY",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Casey's General Stores price target raised to $975 from $900 at Stephens; Casey's General Stores price target raised to $990 from $915 at Evercore ISI; Casey's General Stores price target raised to $975 from $719 at JPMorgan",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T12:14:23+00:00",
-    "catalyst_score": 6.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370104",
-    "publisher": "TheFly",
-    "analyst_company": "Stephens",
-    "price_target": 975,
-    "price_when_posted": 902.12,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "LLY",
-    "symbol": "LLY",
-    "source": "catalyst",
-    "sub_type": "fda",
-    "sub_types": [
-      "fda"
-    ],
-    "catalyst_summary": "Lilly's Jaypirca (pirtobrutinib) significantly reduced the risk of disease progression or death by 45% when added to a venetoclax time-limited regimen in people with previously treated CLL/SLL [binary biotech/FDA risk]; Lilly to present initial clinical data for first-in-class type II JAK2 inhibitor in patients with previously treated myelofibrosis at the 20",
-    "catalyst_date": "2026-06-14",
-    "catalyst_datetime": "2026-06-14T03:15:00+00:00",
-    "catalyst_score": 4.0,
-    "catalyst_sources": [
-      "stable/news/press-releases-latest",
-      "stable/news/stock-latest"
-    ],
-    "news_url": "https://www.prnewswire.com/news-releases/lillys-jaypirca-pirtobrutinib-significantly-reduced-the-risk-of-disease-progression-or-death-by-45-when-added-to-a-venetoclax-time-limited-regimen-in-people-with-previously-treated-cllsll-302799348.html",
-    "publisher": "PRNewsWire",
-    "binary_event_risk": true,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "MH",
-    "symbol": "MH",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "McGraw Hill price target lowered to $14 from $17 at UBS; McGraw Hill price target lowered to $16 from $22 at Deutsche Bank; McGraw Hill price target lowered to $16 from $19 at Baird; McGraw Hill price target lowered to $17 from $19 at Goldman Sachs",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:41:55+00:00",
-    "catalyst_score": 4.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370065",
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391129",
     "publisher": "TheFly",
     "analyst_company": "UBS",
-    "price_target": 14,
-    "price_when_posted": 12.36,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "price_target": 380,
+    "price_when_posted": 284.02,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "RH",
-    "symbol": "RH",
+    "ticker": "GOOGL",
+    "symbol": "GOOGL",
+    "source": "catalyst",
+    "sub_type": "earnings|analyst",
+    "sub_types": [
+      "earnings",
+      "analyst"
+    ],
+    "catalyst_summary": "EPS beat +217.4% (9.11 vs 2.87); Alphabet price target raised to $465 from $455 at BMO Capital; Alphabet price target raised to $440 from $435 at Roth Capital; Alphabet price target raised to $425 from $405 at Barclays; Alphabet price target raised to $475 from $470 at Pivotal Research; Alphabet price target lowered to $350 from $375 at DA Davidson; Alphabet",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:01:00+00:00",
+    "catalyst_score": 18.0,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "earnings_surprise_pct": 217.42,
+    "earnings_actual": 9.11,
+    "earnings_estimate": 2.87,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "CSX",
+    "symbol": "CSX",
     "source": "catalyst",
     "sub_type": "analyst",
     "sub_types": [
       "analyst"
     ],
-    "catalyst_summary": "RH price target raised to $150 from $125 at Baird; RH price target raised to $175 from $160 at Wells Fargo",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T10:37:32+00:00",
-    "catalyst_score": 4.0,
+    "catalyst_summary": "CSX price target raised to $54 from $51 at RBC Capital; Benchmark Reiterates Buy Rating on CSX (CSX) as FY Revenue Growth Target Raised; CSX price target raised to $52 from $49 at BMO Capital; CSX price target raised to $51 from $47 at Evercore ISI; CSX price target raised to $60 from $55 at Barclays",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:47:37+00:00",
+    "catalyst_score": 10.0,
     "catalyst_sources": [
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4369992",
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391134",
     "publisher": "TheFly",
-    "analyst_company": "Robert W. Baird",
-    "price_target": 150,
-    "price_when_posted": 159.82,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "COGT",
-    "symbol": "COGT",
-    "source": "catalyst",
-    "sub_type": "fda",
-    "sub_types": [
-      "fda"
-    ],
-    "catalyst_summary": "Cogent Biosciences: A Pre-Commercial Biotech With Commercial-Stage Leverage [binary biotech/FDA risk]",
-    "catalyst_date": "2026-06-14",
-    "catalyst_datetime": "2026-06-14T09:13:38+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/news/stock-latest"
-    ],
-    "news_url": "https://seekingalpha.com/article/4914866-cogent-biosciences-stock-pre-commercial-biotech-with-commercial-stage-leverage",
-    "publisher": "Seeking Alpha",
-    "binary_event_risk": true,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "PTEN",
-    "symbol": "PTEN",
-    "source": "catalyst",
-    "sub_type": "fda",
-    "sub_types": [
-      "fda"
-    ],
-    "catalyst_summary": "TRUQAP\u00ae (capivasertib) combination approved in the US as first and only targeted treatment for PTEN-deficient metastatic hormone-sensitive prostate cancer [binary biotech/FDA risk]",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T18:44:00+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/news/press-releases-latest"
-    ],
-    "news_url": "https://www.businesswire.com/news/home/20260612633536/en/TRUQAP%C2%AE-capivasertib-combination-approved-in-the-US-as-first-and-only-targeted-treatment-for-PTEN-deficient-metastatic-hormone-sensitive-prostate-cancer/",
-    "publisher": "Business Wire",
-    "binary_event_risk": true,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "DAVE",
-    "symbol": "DAVE",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Dave price target raised to $310 from $290 at Barrington",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T14:57:21+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370241",
-    "publisher": "TheFly",
-    "analyst_company": "Barrington",
-    "price_target": 310,
-    "price_when_posted": 287.34,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "FUN",
-    "symbol": "FUN",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Six Flags price target raised to $28 from $27 at Truist",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T13:53:32+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370197",
-    "publisher": "TheFly",
-    "analyst_company": "Truist Financial",
-    "price_target": 28,
-    "price_when_posted": 24.185,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "UBER",
-    "symbol": "UBER",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Uber price target raised to $115 from $110 at Tigress Financial",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T13:26:50+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370174",
-    "publisher": "TheFly",
-    "analyst_company": "Tigress Financial",
-    "price_target": 115,
-    "price_when_posted": 68.39,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "SEI",
-    "symbol": "SEI",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Solaris Energy price target raised to $104 from $86 at Northland",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T12:45:22+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370147",
-    "publisher": "TheFly",
-    "analyst_company": "Northland Securities",
-    "price_target": 104,
-    "price_when_posted": 77.61,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "CECO",
-    "symbol": "CECO",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Ceco Environmental price target raised to $118 from $90 at Northland",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T12:41:37+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370143",
-    "publisher": "TheFly",
-    "analyst_company": "Northland Securities",
-    "price_target": 118,
-    "price_when_posted": 97.355,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "DDOG",
-    "symbol": "DDOG",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Datadog price target raised to $260 from $220 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T12:03:24+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370096",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
-    "price_target": 260,
-    "price_when_posted": 235.545,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "RHP",
-    "symbol": "RHP",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Ryman Hospitality price target raised to $137 from $125 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T12:00:02+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370091",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
-    "price_target": 137,
-    "price_when_posted": 122.25,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "PK",
-    "symbol": "PK",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Park Hotels & Resorts price target raised to $14 from $11 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:59:24+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370088",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
-    "price_target": 14,
-    "price_when_posted": 14.465,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "HST",
-    "symbol": "HST",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Host Hotels price target raised to $27 from $24 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:59:09+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370087",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
-    "price_target": 27,
-    "price_when_posted": 24.78,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "ARE",
-    "symbol": "ARE",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Alexandria Real Estate price target raised to $54 from $52 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:58:08+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370085",
-    "publisher": "TheFly",
-    "analyst_company": "BMO Capital",
+    "analyst_company": "RBC Capital",
     "price_target": 54,
-    "price_when_posted": 53.18,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "price_when_posted": 52.68,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "APLE",
-    "symbol": "APLE",
+    "ticker": "TSLA",
+    "symbol": "TSLA",
+    "source": "catalyst",
+    "sub_type": "earnings|analyst",
+    "sub_types": [
+      "earnings",
+      "analyst"
+    ],
+    "catalyst_summary": "EPS miss -34.0% (0.33 vs 0.5); Tesla price target lowered to $385 from $442 at UBS; Tesla price target lowered to $450 from $480 at Mizuho; Tesla price target lowered to $370 from $430 at Truist; Tesla price target lowered to $485 from $510 at Cantor Fitzgerald; Tesla price target lowered to $410 from $450 at Canaccord; BofA Securities Reiterates Buy Rating ",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:41:30+00:00",
+    "catalyst_score": 9.4,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "earnings_surprise_pct": -34.0,
+    "earnings_actual": 0.33,
+    "earnings_estimate": 0.5,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "RPM",
+    "symbol": "RPM",
     "source": "catalyst",
     "sub_type": "analyst",
     "sub_types": [
       "analyst"
     ],
-    "catalyst_summary": "Apple Hospitality REIT price target raised to $16 from $14 at BMO Capital",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:56:27+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "RPM price target raised to $145 from $140 at Seaport Research; RPM price target raised to $142 from $130 at UBS; RPM price target raised to $128 from $126 at RBC Capital; RPM price target raised to $151 from $143 at BMO Capital; RPM price target lowered to $117 from $121 at Morgan Stanley",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T14:25:27+00:00",
+    "catalyst_score": 9.0,
     "catalyst_sources": [
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370084",
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391174",
+    "publisher": "TheFly",
+    "analyst_company": "Seaport Global",
+    "price_target": 145,
+    "price_when_posted": 103.14,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "NOW",
+    "symbol": "NOW",
+    "source": "catalyst",
+    "sub_type": "analyst",
+    "sub_types": [
+      "analyst"
+    ],
+    "catalyst_summary": "ServiceNow price target raised to $118 from $115 at BMO Capital; ServiceNow price target raised to $160 from $150 at Evercore ISI; ServiceNow price target raised to $248 from $236 at Bernstein; ServiceNow price target raised to $140 from $135 at Jefferies; ServiceNow price target lowered to $110 from $115 at UBS",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T12:12:20+00:00",
+    "catalyst_score": 9.0,
+    "catalyst_sources": [
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4390892",
     "publisher": "TheFly",
     "analyst_company": "BMO Capital",
-    "price_target": 16,
-    "price_when_posted": 16.265,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "price_target": 118,
+    "price_when_posted": 97.33,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "VLO",
-    "symbol": "VLO",
+    "ticker": "MCO",
+    "symbol": "MCO",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "analyst|earnings",
     "sub_types": [
-      "analyst"
+      "analyst",
+      "earnings"
     ],
-    "catalyst_summary": "Valero price target raised to $255 from $232 at Morgan Stanley",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:55:36+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "Moody's price target raised to $505 from $490 at UBS; Moody's price target raised to $572 from $557 at Baird; Moody's price target raised to $597 from $590 at Wells Fargo; Moody's price target raised to $512 from $496 at Morgan Stanley; EPS beat +9.9% (4.68 vs 4.26)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:38:54+00:00",
+    "catalyst_score": 8.986,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370082",
-    "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 255,
-    "price_when_posted": 255.6,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "MPC",
-    "symbol": "MPC",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Marathon Petroleum price target raised to $265 from $233 at Morgan Stanley",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:55:34+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370081",
-    "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 265,
-    "price_when_posted": 260.81,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "PSX",
-    "symbol": "PSX",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Phillips 66 price target raised to $196 from $180 at Morgan Stanley",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:55:32+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370080",
-    "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 196,
-    "price_when_posted": 178.1,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "DINO",
-    "symbol": "DINO",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "HF Sinclair price target raised to $78 from $69 at Morgan Stanley",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:55:31+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370079",
-    "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 78,
-    "price_when_posted": 69.9,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "DK",
-    "symbol": "DK",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Delek US price target raised to $45 from $41 at Morgan Stanley",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:55:29+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370078",
-    "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 45,
-    "price_when_posted": 47.07,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "ROKU",
-    "symbol": "ROKU",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Roku price target raised to $185 from $160 at Evercore ISI",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:48:30+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370073",
-    "publisher": "TheFly",
-    "analyst_company": "Evercore ISI",
-    "price_target": 185,
-    "price_when_posted": 119.64,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "HBAN",
-    "symbol": "HBAN",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Huntington Bancshares price target raised to $20 from $19 at Evercore ISI",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:46:48+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370072",
-    "publisher": "TheFly",
-    "analyst_company": "Evercore ISI",
-    "price_target": 20,
-    "price_when_posted": 17.21,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
-  },
-  {
-    "ticker": "BEP",
-    "symbol": "BEP",
-    "source": "catalyst",
-    "sub_type": "analyst",
-    "sub_types": [
-      "analyst"
-    ],
-    "catalyst_summary": "Brookfield Renewable Partners price target raised to $40 from $39 at UBS",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:42:23+00:00",
-    "catalyst_score": 2.0,
-    "catalyst_sources": [
-      "stable/price-target-latest-news"
-    ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370069",
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391121",
     "publisher": "TheFly",
     "analyst_company": "UBS",
-    "price_target": 40,
-    "price_when_posted": 35.38,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "price_target": 505,
+    "price_when_posted": 473.95001,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "UE",
-    "symbol": "UE",
+    "ticker": "PHM",
+    "symbol": "PHM",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "analyst|earnings",
     "sub_types": [
-      "analyst"
+      "analyst",
+      "earnings"
     ],
-    "catalyst_summary": "Urban Edge price target raised to $25 from $23 at BTIG",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:27:46+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "PulteGroup price target raised to $166 from $162 at UBS; PulteGroup price target raised to $116 from $115 at RBC Capital; PulteGroup price target raised to $162 from $151 at Evercore ISI; PulteGroup price target raised to $124 from $123 at Barclays; EPS beat +5.1% (2.48 vs 2.36)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:39:06+00:00",
+    "catalyst_score": 8.508,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370051",
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391122",
     "publisher": "TheFly",
-    "analyst_company": "BTIG",
-    "price_target": 25,
-    "price_when_posted": 23.78,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "analyst_company": "UBS",
+    "price_target": 166,
+    "price_when_posted": 123.25,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "REG",
-    "symbol": "REG",
+    "ticker": "GEV",
+    "symbol": "GEV",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "earnings|analyst",
     "sub_types": [
+      "earnings",
       "analyst"
     ],
-    "catalyst_summary": "Regency Centers price target raised to $85 from $79 at BTIG",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:27:22+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "EPS miss -22.1% (2.47 vs 3.17); GE Vernova price target raised to $1,225 from $1,195 at RBC Capital; GE Vernova price target raised to $1,338 from $1,303 at Oppenheimer; GE Vernova price target raised to $1,298 from $1,206 at Bernstein",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:32:47+00:00",
+    "catalyst_score": 8.208,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370049",
-    "publisher": "TheFly",
-    "analyst_company": "BTIG",
-    "price_target": 85,
-    "price_when_posted": 80.69,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "earnings_surprise_pct": -22.08,
+    "earnings_actual": 2.47,
+    "earnings_estimate": 3.17,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "MS",
-    "symbol": "MS",
+    "ticker": "LVS",
+    "symbol": "LVS",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "earnings|analyst",
     "sub_types": [
+      "earnings",
       "analyst"
     ],
-    "catalyst_summary": "Morgan Stanley price target raised to $187 from $179 at JPMorgan",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:25:28+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "EPS miss -22.1% (0.59 vs 0.757); Las Vegas Sands price target lowered to $61 from $67 at Mizuho; Las Vegas Sands price target lowered to $62 from $72 at CBRE; Las Vegas Sands price target lowered to $60 from $74 at Stifel; Las Vegas Sands price target lowered to $55 from $63 at Goldman Sachs; Las Vegas Sands price target lowered to $59 from $63 at Barclays; ",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T12:35:52+00:00",
+    "catalyst_score": 8.206,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370046",
+    "earnings_surprise_pct": -22.06,
+    "earnings_actual": 0.59,
+    "earnings_estimate": 0.757,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "T",
+    "symbol": "T",
+    "source": "catalyst",
+    "sub_type": "analyst|earnings",
+    "sub_types": [
+      "analyst",
+      "earnings"
+    ],
+    "catalyst_summary": "AT&T price target raised to $27 from $25 at Morgan Stanley; AT&T price target raised to $20 from $18 at Wells Fargo; AT&T upgraded to Outperform from Peer Perform at Wolfe Research; EPS beat +10.2% (0.65 vs 0.59); AT&T price target lowered to $30 from $34 at Goldman Sachs",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T10:57:01+00:00",
+    "catalyst_score": 8.017,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4390682",
     "publisher": "TheFly",
     "analyst_company": "Morgan Stanley",
-    "price_target": 187,
-    "price_when_posted": 212.66,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "price_target": 27,
+    "price_when_posted": 23.04,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   },
   {
-    "ticker": "GS",
-    "symbol": "GS",
+    "ticker": "GOOG",
+    "symbol": "GOOG",
     "source": "catalyst",
-    "sub_type": "analyst",
+    "sub_type": "earnings|analyst",
     "sub_types": [
+      "earnings",
       "analyst"
     ],
-    "catalyst_summary": "Goldman Sachs price target raised to $900 from $826 at JPMorgan",
-    "catalyst_date": "2026-06-12",
-    "catalyst_datetime": "2026-06-12T11:25:16+00:00",
-    "catalyst_score": 2.0,
+    "catalyst_summary": "EPS beat +217.4% (9.11 vs 2.87); Canaccord Reiterates Buy Rating on Alphabet (GOOGL); Rosenblatt Reiterates Neutral Rating on Alphabet (GOOGL); Wolfe Research Reiterates Outperform Rating on Alphabet (GOOGL)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T11:25:00+00:00",
+    "catalyst_score": 8.0,
     "catalyst_sources": [
+      "stable/earnings-calendar",
       "stable/price-target-latest-news"
     ],
-    "news_url": "https://thefly.com/ajax/news_get.php?id=4370045",
+    "earnings_surprise_pct": 217.42,
+    "earnings_actual": 9.11,
+    "earnings_estimate": 2.87,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "COCO",
+    "symbol": "COCO",
+    "source": "catalyst",
+    "sub_type": "earnings|analyst",
+    "sub_types": [
+      "earnings",
+      "analyst"
+    ],
+    "catalyst_summary": "EPS beat +47.5% (0.82 vs 0.556); Vita Coco price target raised to $90 from $81 at Goldman Sachs",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T22:35:18+00:00",
+    "catalyst_score": 6.748,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "earnings_surprise_pct": 47.48,
+    "earnings_actual": 0.82,
+    "earnings_estimate": 0.556,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "MEDP",
+    "symbol": "MEDP",
+    "source": "catalyst",
+    "sub_type": "analyst|earnings",
+    "sub_types": [
+      "analyst",
+      "earnings"
+    ],
+    "catalyst_summary": "Medpace price target raised to $600 from $450 at Barclays; Medpace price target raised to $620 from $515 at Leerink; Medpace price target raised to $535 from $480 at Deutsche Bank; EPS beat +6.8% (4.25 vs 3.98)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T19:36:23+00:00",
+    "catalyst_score": 6.678,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391319",
     "publisher": "TheFly",
-    "analyst_company": "Morgan Stanley",
-    "price_target": 900,
-    "price_when_posted": 1035.64,
-    "_system2_run_id": "20260614T204315Z-d8d5fe58",
-    "_system2_generated_at": "2026-06-14T20:43:46.069389+00:00"
+    "analyst_company": "Barclays",
+    "price_target": 600,
+    "price_when_posted": 605.82,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "WAB",
+    "symbol": "WAB",
+    "source": "catalyst",
+    "sub_type": "analyst|earnings",
+    "sub_types": [
+      "analyst",
+      "earnings"
+    ],
+    "catalyst_summary": "Wabtec price target raised to $340 from $308 at KeyBanc; Wabtec price target raised to $340 from $305 at Susquehanna; Wabtec price target raised to $355 from $318 at Morgan Stanley; EPS beat +6.2% (2.76 vs 2.6)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T11:15:51+00:00",
+    "catalyst_score": 6.615,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4390762",
+    "publisher": "TheFly",
+    "analyst_company": "KeyBanc",
+    "price_target": 340,
+    "price_when_posted": 289.98,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "IMAX",
+    "symbol": "IMAX",
+    "source": "catalyst",
+    "sub_type": "earnings|analyst",
+    "sub_types": [
+      "earnings",
+      "analyst"
+    ],
+    "catalyst_summary": "EPS beat +45.8% (0.43 vs 0.295); Imax price target raised to $42 from $40 at Goldman Sachs",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T22:50:47+00:00",
+    "catalyst_score": 6.576,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "earnings_surprise_pct": 45.76,
+    "earnings_actual": 0.43,
+    "earnings_estimate": 0.295,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "KNX",
+    "symbol": "KNX",
+    "source": "catalyst",
+    "sub_type": "earnings|analyst",
+    "sub_types": [
+      "earnings",
+      "analyst"
+    ],
+    "catalyst_summary": "EPS beat +22.6% (0.63 vs 0.514); Knight-Swift price target raised to $85 from $84 at Evercore ISI; Knight-Swift price target raised to $88 from $85 at Stifel",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T12:05:28+00:00",
+    "catalyst_score": 6.257,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "earnings_surprise_pct": 22.57,
+    "earnings_actual": 0.63,
+    "earnings_estimate": 0.514,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "SEIC",
+    "symbol": "SEIC",
+    "source": "catalyst",
+    "sub_type": "analyst|earnings",
+    "sub_types": [
+      "analyst",
+      "earnings"
+    ],
+    "catalyst_summary": "SEI Investments price target raised to $125 from $120 at UBS; SEI Investments price target raised to $120 from $114 at Piper Sandler; EPS beat +15.3% (1.66 vs 1.44)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T13:39:47+00:00",
+    "catalyst_score": 5.528,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391124",
+    "publisher": "TheFly",
+    "analyst_company": "UBS",
+    "price_target": 125,
+    "price_when_posted": 96.74,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "DGX",
+    "symbol": "DGX",
+    "source": "catalyst",
+    "sub_type": "analyst|earnings",
+    "sub_types": [
+      "analyst",
+      "earnings"
+    ],
+    "catalyst_summary": "Quest Diagnostics price target raised to $250 from $230 at Barclays; Quest Diagnostics price target raised to $245 from $225 at Jefferies; EPS beat +10.6% (3.12 vs 2.82)",
+    "catalyst_date": "2026-07-23",
+    "catalyst_datetime": "2026-07-23T19:37:11+00:00",
+    "catalyst_score": 5.064,
+    "catalyst_sources": [
+      "stable/earnings-calendar",
+      "stable/price-target-latest-news"
+    ],
+    "news_url": "https://thefly.com/ajax/news_get.php?id=4391321",
+    "publisher": "TheFly",
+    "analyst_company": "Barclays",
+    "price_target": 250,
+    "price_when_posted": 227.9,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "LPRO",
+    "symbol": "LPRO",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.107096+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "SOBO",
+    "symbol": "SOBO",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.107081+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "SUNC",
+    "symbol": "SUNC",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.107053+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "MRVI",
+    "symbol": "MRVI",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106962+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "BLFS",
+    "symbol": "BLFS",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106956+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "URI",
+    "symbol": "URI",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106949+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "AMBP",
+    "symbol": "AMBP",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106906+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "FTRE",
+    "symbol": "FTRE",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106899+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "NVCR",
+    "symbol": "NVCR",
+    "source": "catalyst",
+    "sub_type": "finviz_new_high",
+    "sub_types": [
+      "finviz_new_high"
+    ],
+    "catalyst_summary": "Breaking to new 52wk high",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106889+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "finviz_screener"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "finviz_new_52wk_high",
+    "catalyst_quality_score": 50,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "FTS",
+    "symbol": "FTS",
+    "source": "danelfin_discovery",
+    "sub_type": "bypass",
+    "sub_types": [
+      "bypass"
+    ],
+    "catalyst_summary": "Danelfin AI 9/10, Low Risk 7/10",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.106152+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "danelfin_discovery"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "danelfin_highest_conviction",
+    "bypass_technical": true,
+    "vetted": false,
+    "aiscore": 9.0,
+    "low_risk": 7.0,
+    "fundamental": 6,
+    "technical": 9,
+    "sentiment": 8,
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
+  },
+  {
+    "ticker": "META",
+    "symbol": "META",
+    "source": "congress_discovery",
+    "sub_type": "congressional_buy",
+    "sub_types": [
+      "congressional_buy"
+    ],
+    "catalyst_summary": "2 politician(s) bought",
+    "catalyst_date": "2026-07-24",
+    "catalyst_datetime": "2026-07-24T02:15:31.105436+00:00",
+    "catalyst_score": 5.0,
+    "catalyst_sources": [
+      "congress_discovery"
+    ],
+    "bypasses_technical": true,
+    "bypass_reason": "congressional_cluster",
+    "bypass_technical": true,
+    "vetted": false,
+    "congress_buy_count": 2,
+    "congress_politician_count": 2,
+    "congress_total_amount": 16001.0,
+    "congress_signal": "MODERATE",
+    "politicians": [
+      "John McGuire",
+      "Rohit Khanna"
+    ],
+    "chambers": [
+      "house"
+    ],
+    "_system2_run_id": "20260724T021502Z-9a51ab14",
+    "_system2_generated_at": "2026-07-24T02:15:31.131689+00:00"
   }
 ]

@@ -2,25 +2,25 @@
   "regime": "NORMAL",
   "verdict": "NORMAL",
   "reason": "VIX below 20",
-  "spy_1d_pct": 0.541,
-  "qqq_1d_pct": 0.588,
-  "vix_current": 17.68,
-  "vix_1d_chg": -9.053,
+  "spy_1d_pct": -1.235,
+  "qqq_1d_pct": -1.898,
+  "vix_current": 18.7,
+  "vix_1d_chg": 12.38,
   "position_size_multiplier": 1.0,
   "source_dates": {
     "SPY": {
-      "today": "2026-06-12",
-      "previous": "2026-06-11"
+      "today": "2026-07-23",
+      "previous": "2026-07-22"
     },
     "QQQ": {
-      "today": "2026-06-12",
-      "previous": "2026-06-11"
+      "today": "2026-07-23",
+      "previous": "2026-07-22"
     },
     "VIX": {
-      "today": "2026-06-12",
-      "previous": "2026-06-11"
+      "today": "2026-07-23",
+      "previous": "2026-07-22"
     }
   },
   "mode": "integrated_live_safety_check",
-  "checked_at": "2026-06-14T20:43:19.056258+00:00"
+  "checked_at": "2026-07-24T02:15:06.153958+00:00"
 }

@@ -95,10 +95,16 @@ def run_step(name: str, args: list[str], env: dict[str, str]) -> dict:
     }
 
 
+def json_safe(value):
+    if isinstance(value, set):
+        return sorted(value)
+    raise TypeError(f"Object of type {value.__class__.__name__} is not JSON serializable")
+
+
 def post_json(url: str, payload: dict, timeout: int = 60) -> dict:
     req = urllib.request.Request(
         url,
-        data=json.dumps(payload).encode("utf-8"),
+        data=json.dumps(payload, default=json_safe).encode("utf-8"),
         method="POST",
         headers={"Content-Type": "application/json", "User-Agent": "system2-regime-runner/1.0"},
     )

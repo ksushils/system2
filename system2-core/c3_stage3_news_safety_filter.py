@@ -24,6 +24,8 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import fmp_bandwidth
+
 
 ROOT = Path(__file__).resolve().parent
 DOWNLOADS = Path.home() / "Downloads"
@@ -56,8 +58,8 @@ LANdMINE_PATTERNS = {
     "halt": [r"\btrading halt\b", r"\bhalted\b", r"\bsuspended trading\b"],
     "going_concern": [r"\bgoing concern\b", r"\bsubstantial doubt\b"],
     "fraud_investigation": [
-        r"\bfraud\b", r"\binvestigation\b", r"\bSEC investigation\b",
-        r"\bDOJ\b", r"\bclass action\b", r"\bwhistleblower\b",
+        r"\bfraud\b", r"\bsecurities fraud\b", r"\bSEC investigation\b",
+        r"\bDOJ\b", r"\bcriminal investigation\b", r"\bsubpoena\b",
     ],
     "major_litigation": [
         r"\blawsuit\b", r"\blitigation\b", r"\bsued\b", r"\bsettlement\b",
@@ -73,6 +75,17 @@ ANALYST_PATTERNS = [
     r"\bupgrade[ds]?\b", r"\bdowngrade[ds]?\b", r"\bprice target\b",
     r"\braises target\b", r"\blowers target\b", r"\binitiates coverage\b",
 ]
+
+COMPANY_SUFFIXES = {
+    "inc", "inc.", "corp", "corp.", "corporation", "co", "co.", "company",
+    "ltd", "ltd.", "plc", "holdings", "holding", "group", "class", "common",
+    "ordinary", "shares", "stock", "the",
+}
+ENGLISH_HINT_WORDS = {
+    "the", "and", "for", "with", "from", "this", "that", "stock", "shares",
+    "market", "company", "after", "before", "investor", "investors", "earnings",
+    "price", "target", "upgrade", "downgrade", "announces", "reports",
+}
 
 
 def load_dotenv() -> None:
@@ -119,8 +132,21 @@ class FmpClient:
                     headers={"Accept": "application/json", "User-Agent": "system2-stage3-news-safety/1.0"},
                 )
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    return json.loads(resp.read().decode("utf-8", "ignore"))
+                    raw = resp.read()
+                    fmp_bandwidth.record(
+                        endpoint,
+                        len(raw),
+                        status=getattr(resp, "status", None),
+                        source="c3_stage3_news_safety_filter",
+                    )
+                    return json.loads(raw.decode("utf-8", "ignore"))
             except urllib.error.HTTPError as exc:
+                fmp_bandwidth.record(
+                    endpoint,
+                    0,
+                    status=exc.code,
+                    source="c3_stage3_news_safety_filter",
+                )
                 if exc.code == 429 and attempt < 2:
                     time.sleep(2 * (attempt + 1))
                     continue
@@ -161,6 +187,45 @@ def row_text(row: dict) -> str:
     return " ".join(str(row.get(k) or "") for k in ["title", "text", "content", "site", "symbol"]).strip()
 
 
+def is_english_like(value: str) -> bool:
+    """Conservative language check for US-ticker news attribution."""
+    s = str(value or "").strip()
+    if not s:
+        return False
+    letters = re.findall(r"[A-Za-z]", s)
+    if len(letters) < 12:
+        return True
+    ascii_chars = sum(1 for c in s if ord(c) < 128)
+    ascii_ratio = ascii_chars / max(len(s), 1)
+    words = re.findall(r"[A-Za-z]{2,}", s.lower())
+    hint_hits = sum(1 for w in words if w in ENGLISH_HINT_WORDS)
+    return ascii_ratio >= 0.94 and (hint_hits > 0 or len(words) <= 6)
+
+
+def company_tokens(company_name: str) -> set[str]:
+    return {
+        t.lower()
+        for t in re.findall(r"[A-Za-z0-9]+", str(company_name or ""))
+        if len(t) >= 4 and t.lower() not in COMPANY_SUFFIXES
+    }
+
+
+def article_matches_symbol(row: dict, symbol: str, company_name: str = "") -> bool:
+    """Require exact ticker or meaningful company-name evidence before attribution."""
+    sym = str(symbol or "").upper()
+    hay = " ".join(str(row.get(k) or "") for k in ["title", "text", "content"]).strip()
+    hay_l = hay.lower()
+    if sym and re.search(rf"(?<![A-Z0-9]){re.escape(sym)}(?![A-Z0-9])", hay, flags=re.I):
+        return True
+    tokens = company_tokens(company_name)
+    if not tokens:
+        return False
+    hits = {tok for tok in tokens if re.search(rf"\b{re.escape(tok)}\b", hay_l)}
+    if len(tokens) >= 2:
+        return len(hits) >= 2
+    return bool(hits)
+
+
 def match_patterns(text: str, patterns: list[str]) -> bool:
     return any(re.search(pattern, text, flags=re.I) for pattern in patterns)
 
@@ -170,15 +235,13 @@ def summarize(row: dict) -> str:
     return re.sub(r"\s+", " ", title)[:220]
 
 
-def inspect_symbol(client: FmpClient, symbol: str, cutoff: datetime) -> dict:
+def inspect_symbol(client: FmpClient, symbol: str, cutoff: datetime, company_name: str = "") -> dict:
     quoted = urllib.parse.quote(symbol)
     endpoint_groups = [
         [
-            f"api/v3/stock_news?tickers={quoted}&limit=10",
             f"stable/news/stock?symbols={quoted}&limit=10",
         ],
         [
-            f"api/v3/press-releases/{quoted}?limit=10",
             f"stable/news/press-releases?symbols={quoted}&limit=10",
         ],
     ]
@@ -208,10 +271,24 @@ def inspect_symbol(client: FmpClient, symbol: str, cutoff: datetime) -> dict:
             "analyst_change": None,
             "news_items": [],
             "recent_items_checked": 0,
+            "recent_items_excluded_non_english": 0,
+            "recent_items_excluded_mismatch": 0,
             "endpoint_errors": endpoint_errors,
         }
 
-    recent_rows = [row for row in rows if recent(row, cutoff)]
+    recent_raw = [row for row in rows if recent(row, cutoff)]
+    excluded_non_english = 0
+    excluded_mismatch = 0
+    recent_rows = []
+    for row in recent_raw:
+        body = row_text(row)
+        if not is_english_like(body):
+            excluded_non_english += 1
+            continue
+        if not article_matches_symbol(row, symbol, company_name):
+            excluded_mismatch += 1
+            continue
+        recent_rows.append(row)
     news_items = [
         {
             "title": summarize(row),
@@ -252,6 +329,8 @@ def inspect_symbol(client: FmpClient, symbol: str, cutoff: datetime) -> dict:
             "analyst_change": analyst_changes[0] if analyst_changes else None,
             "news_items": news_items,
             "recent_items_checked": len(recent_rows),
+            "recent_items_excluded_non_english": excluded_non_english,
+            "recent_items_excluded_mismatch": excluded_mismatch,
             "endpoint_errors": endpoint_errors,
         }
 
@@ -263,6 +342,8 @@ def inspect_symbol(client: FmpClient, symbol: str, cutoff: datetime) -> dict:
         "analyst_change": analyst_changes[0] if analyst_changes else None,
         "news_items": news_items,
         "recent_items_checked": len(recent_rows),
+        "recent_items_excluded_non_english": excluded_non_english,
+        "recent_items_excluded_mismatch": excluded_mismatch,
         "endpoint_errors": endpoint_errors,
     }
 
@@ -313,7 +394,8 @@ def main() -> None:
 
     for row in finalists:
         symbol = row.get("symbol") or row.get("ticker")
-        result = inspect_symbol(client, symbol, cutoff)
+        company_name = row.get("companyName") or row.get("company_name") or row.get("name") or ""
+        result = inspect_symbol(client, symbol, cutoff, company_name)
         catalyst_danger = news_catalyst_dangers.get(str(symbol).upper(), False)
         enriched = {
             **row,
@@ -321,6 +403,8 @@ def main() -> None:
             "news_safety_mode": "LIVE",
             "news_safety_checked_at": datetime.now(timezone.utc).isoformat(),
             "news_recent_items_checked": result["recent_items_checked"],
+            "news_items_excluded_non_english": result.get("recent_items_excluded_non_english", 0),
+            "news_items_excluded_mismatch": result.get("recent_items_excluded_mismatch", 0),
             "news_endpoint_errors": result["endpoint_errors"],
             "hard_landmine": result["hard_landmine"],
             "news_catalyst_danger": catalyst_danger,
@@ -352,6 +436,8 @@ def main() -> None:
         "noDataCount": len(no_data),
         "noDataTickers": no_data,
         "analystChangeCount": analyst_change_count,
+        "excludedNonEnglishCount": sum(int(r.get("news_items_excluded_non_english") or 0) for r in kept + removed),
+        "excludedMismatchCount": sum(int(r.get("news_items_excluded_mismatch") or 0) for r in kept + removed),
         "fmpCallCount": client.calls,
         "fmpErrorCount": len(client.errors),
         "fmpErrorsSample": client.errors[:20],
@@ -372,6 +458,8 @@ def main() -> None:
         "reasonCounts": metadata["reasonCounts"],
         "noDataCount": metadata["noDataCount"],
         "analystChangeCount": metadata["analystChangeCount"],
+        "excludedNonEnglishCount": metadata["excludedNonEnglishCount"],
+        "excludedMismatchCount": metadata["excludedMismatchCount"],
         "fmpCallCount": metadata["fmpCallCount"],
         "mode": "LIVE",
     }, indent=2))

@@ -40,6 +40,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import fmp_cache
+import fmp_bandwidth
 
 try:
     from scoring_engine import has_pending_fda_event
@@ -168,12 +169,24 @@ class FmpClient:
                     },
                 )
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    raw = resp.read().decode("utf-8", "ignore")
-                    data = json.loads(raw)
+                    raw = resp.read()
+                    fmp_bandwidth.record(
+                        endpoint,
+                        len(raw),
+                        status=getattr(resp, "status", None),
+                        source="b3_surgical_strike_stage2",
+                    )
+                    data = json.loads(raw.decode("utf-8", "ignore"))
                     if use_daily_cache:
                         fmp_cache.set_daily(endpoint, data)
                     return data
             except urllib.error.HTTPError as exc:
+                fmp_bandwidth.record(
+                    endpoint,
+                    0,
+                    status=exc.code,
+                    source="b3_surgical_strike_stage2",
+                )
                 if exc.code == 429 and attempt < 3:
                     time.sleep(2.0 * (attempt + 1))
                     continue

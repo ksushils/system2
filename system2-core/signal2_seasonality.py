@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import fmp_cache
+import fmp_bandwidth
 
 
 ROOT = Path(__file__).resolve().parent
@@ -64,11 +65,19 @@ class FmpClient:
             try:
                 req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "system2-signal2/1.0"})
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
-                    data = json.loads(resp.read().decode("utf-8", "ignore"))
+                    raw = resp.read()
+                    fmp_bandwidth.record(
+                        endpoint,
+                        len(raw),
+                        status=getattr(resp, "status", None),
+                        source="signal2_seasonality",
+                    )
+                    data = json.loads(raw.decode("utf-8", "ignore"))
                     if use_daily_cache:
                         fmp_cache.set_daily(endpoint, data)
                     return data
             except urllib.error.HTTPError as exc:
+                fmp_bandwidth.record(endpoint, 0, status=exc.code, source="signal2_seasonality")
                 if exc.code == 429 and attempt < 2:
                     time.sleep(2.0 * (attempt + 1))
                     continue

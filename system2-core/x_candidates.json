@@ -1,7 +1,26 @@
 {
-  "date": "2026-06-14",
-  "generated_at": "2026-06-14T20:43:19.113521+00:00",
+  "date": "2026-07-24",
+  "generated_at": "2026-07-24T02:15:06.222312+00:00",
   "source": "GetXAPI",
-  "count": 0,
-  "candidates": []
+  "count": 2,
+  "candidates": [
+    {
+      "symbol": "GOOGL",
+      "source": "X",
+      "sub_type": "X",
+      "catalyst_summary": "mentioned by 3 trusted X authors across 3 posts",
+      "post_count": 3,
+      "sentiment_score": 50,
+      "catalyst_date": "2026-07-24"
+    },
+    {
+      "symbol": "INTC",
+      "source": "X",
+      "sub_type": "X",
+      "catalyst_summary": "mentioned by 2 trusted X authors across 2 posts",
+      "post_count": 2,
+      "sentiment_score": 55,
+      "catalyst_date": "2026-07-24"
+    }
+  ]
 }

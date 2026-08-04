@@ -1,1 +1,8 @@
-{"self_learning_enabled": true}
+{
+  "self_learning_enabled": true,
+  "universe": {
+    "liquid_midcap_pad_mode": "fallback_only",
+    "options_expansion_enabled": false,
+    "implied_options_discovery_enabled": false
+  }
+}
