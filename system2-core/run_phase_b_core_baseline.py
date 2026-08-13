@@ -102,11 +102,15 @@ def json_safe(value):
 
 
 def post_json(url: str, payload: dict, timeout: int = 60) -> dict:
+    headers = {"Content-Type": "application/json", "User-Agent": "system2-regime-runner/1.0"}
+    scanner_key = os.environ.get("SCANNER_API_KEY")
+    if scanner_key:
+        headers["X-Scanner-Key"] = scanner_key
     req = urllib.request.Request(
         url,
         data=json.dumps(payload, default=json_safe).encode("utf-8"),
         method="POST",
-        headers={"Content-Type": "application/json", "User-Agent": "system2-regime-runner/1.0"},
+        headers=headers,
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read().decode("utf-8", "ignore")
@@ -413,6 +417,13 @@ def main() -> None:
 
         result = run_step(name, args, env)
         results.append(result)
+
+        # Finalists are the primary output. Metadata is secondary reporting and
+        # must never invalidate or discard finalists that were already posted.
+        if not result["ok"] and name == "Record run metadata":
+            result["warning"] = "metadata_recording_failed_after_finalist_persistence"
+            print("[WARNING] Run metadata recording failed after finalists were persisted; continuing.")
+            result["ok"] = True
 
         # Non-fatal: FMP news + analyst signals 401
         if not result["ok"] and name == "FMP news + analyst signals":

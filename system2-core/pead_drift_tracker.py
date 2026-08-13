@@ -14,6 +14,7 @@ import math
 import os
 import time
 import urllib.parse
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -101,8 +102,20 @@ def fmp_get(endpoint: str, params: dict[str, Any] | None = None) -> Any:
     query = urllib.parse.urlencode({**params, "apikey": fmp_key()})
     url = f"{FMP_BASE}/{endpoint}?{query}"
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "system2-pead-drift/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        raw = resp.read()
+    raw = None
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                raw = resp.read()
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 or attempt == 3:
+                raise
+            retry_after = exc.headers.get("Retry-After")
+            delay = float(retry_after) if retry_after and retry_after.isdigit() else 2 ** attempt
+            time.sleep(min(delay, 30))
+    if raw is None:
+        raise RuntimeError("FMP request produced no response")
     METRICS.fmp_calls += 1
     METRICS.fmp_bytes_observed += len(raw)
     data = json.loads(raw.decode("utf-8", "ignore"))
@@ -345,9 +358,25 @@ def run(write: bool, lookback_days: int) -> dict[str, Any]:
     if write and PEAD_DRIFT_ENABLED:
         rows.extend(candidates)
         for row in rows:
-            if isinstance(row, dict) and update_open_row(row):
-                updated += 1
-        FUND_PATH.write_text(json.dumps(fund, indent=2), encoding="utf-8")
+            if not isinstance(row, dict):
+                continue
+            try:
+                if update_open_row(row):
+                    updated += 1
+            except urllib.error.HTTPError as exc:
+                if exc.code != 429:
+                    raise
+        body = json.dumps({"rows": rows}).encode("utf-8")
+        req = urllib.request.Request(
+            "http://127.0.0.1:3210/api/system2/pead-drift/upsert-local",
+            data=body,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            persistence = json.loads(resp.read().decode("utf-8", "ignore"))
+        if not persistence.get("ok"):
+            raise RuntimeError(f"PEAD persistence failed: {persistence}")
 
     return {
         "ok": True,

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +47,14 @@ def fmp_key() -> str:
 
 
 def get_json(url: str, *, allow_http_error: bool = False) -> Any:
-    response = requests.get(url, timeout=25)
+    response = None
+    for attempt in range(4):
+        response = requests.get(url, timeout=25)
+        if response.status_code != 429:
+            break
+        retry_after = response.headers.get("Retry-After")
+        delay = float(retry_after) if retry_after and retry_after.isdigit() else 2 ** attempt
+        time.sleep(min(delay, 30))
     if allow_http_error and response.status_code >= 400:
         return []
     response.raise_for_status()

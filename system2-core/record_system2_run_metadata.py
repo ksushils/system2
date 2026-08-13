@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,6 +33,9 @@ def load_json(name: str, fallback):
 def post_json(url: str, payload: dict, retries: int = 5, backoff: float = 3.0) -> dict:
     data = json.dumps(payload).encode("utf-8")
     headers = {"Content-Type": "application/json", "User-Agent": "system2-run-recorder/1.0"}
+    scanner_key = os.environ.get("SCANNER_API_KEY")
+    if scanner_key:
+        headers["X-Scanner-Key"] = scanner_key
     last_exc = None
     for attempt in range(1, retries + 1):
         req = urllib.request.Request(url, data=data, method="POST", headers=headers)

@@ -19,14 +19,19 @@ if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "503" ]; then
 fi
 
 # Parse health JSON
-STATUS=$(curl -s "$URL" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get(status,unknown))" 2>/dev/null || echo "unknown")
-ISSUES=$(curl -s "$URL" | python3 -c "import sys,json; d=json.load(sys.stdin); print(,.join(d.get(issues,[])))" 2>/dev/null || echo "unknown")
+HEALTH_JSON=$(curl -s "$URL")
+STATUS=$(printf '%s' "$HEALTH_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
+ISSUES=$(printf '%s' "$HEALTH_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(','.join(d.get('issues',[])))" 2>/dev/null || echo "unknown")
 
 if [ "$STATUS" = "degraded" ]; then
   echo "[$TS] WARNING: degraded — $ISSUES" >> "$LOG"
 else
   echo "[$TS] OK: $STATUS" >> "$LOG"
 fi
+
+# System2 production heartbeat. It owns its own alert throttle and never
+# changes trading data or decisions.
+/root/system2-core/.venv/bin/python /root/system2-core/system2_heartbeat_alert.py >> "$LOG" 2>&1
 
 # Rotate log if > 10MB
 if [ -f "$LOG" ] && [ $(stat -f%z "$LOG" 2>/dev/null || stat -c%s "$LOG" 2>/dev/null || echo 0) -gt 10485760 ]; then

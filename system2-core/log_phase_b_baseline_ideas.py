@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -52,7 +53,7 @@ STAGE5_INPUT = ROOT / "stage5_news_safe_finalists.json"
 STAGE7_INPUT = ROOT / "stage7_clustered_survivors.json"
 DEFAULT_INPUT = STAGE5_INPUT if STAGE5_INPUT.exists() else STAGE7_INPUT
 DEFAULT_OUTPUT = ROOT / "phase_b_baseline_idea_log_results.json"
-DEFAULT_URL = "http://72.62.134.167:3210/api/idea"
+DEFAULT_URL = "http://127.0.0.1:3210/api/idea"
 
 # Confluence overlay — family_scores etc. are computed in confluence_scoring.py
 # but B4 reads council data first, so stage7 may be missing them.
@@ -128,14 +129,18 @@ def load_danelfin_lookup() -> dict[str, dict]:
 
 def post_json(url: str, payload: dict, timeout: int = 30) -> dict:
     body = json.dumps(payload).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "system2-phase-b-baseline-logger/1.0",
+    }
+    scanner_key = os.environ.get("SCANNER_API_KEY")
+    if scanner_key:
+        headers["X-Scanner-Key"] = scanner_key
     req = urllib.request.Request(
         url,
         data=body,
         method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "User-Agent": "system2-phase-b-baseline-logger/1.0",
-        },
+        headers=headers,
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read().decode("utf-8", "ignore")
@@ -651,6 +656,14 @@ def main() -> None:
         "quality_idea_count": len(quality_ideas),
         "tickers": [r["ticker"] for r in results],
     }, indent=2))
+
+    if not args.dry_run and summary["postedCount"] != summary["inputCount"]:
+        print(
+            f"Finalist persistence incomplete: posted {summary['postedCount']} "
+            f"of {summary['inputCount']}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 
