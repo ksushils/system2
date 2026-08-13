@@ -1,25 +1,24 @@
 {
   "stage": "STAGE3_NEWS_SAFETY",
-  "createdAt": "2026-07-24T02:30:13.643072+00:00",
+  "createdAt": "2026-08-13T02:24:04.808537+00:00",
   "mode": "LIVE",
-  "inputCount": 45,
-  "outputCount": 35,
-  "removedCount": 10,
-  "reasonCounts": {
-    "offering": 9,
-    "major_litigation": 1
-  },
+  "inputCount": 0,
+  "outputCount": 0,
+  "removedCount": 0,
+  "reasonCounts": {},
   "noDataCount": 0,
   "noDataTickers": [],
-  "analystChangeCount": 2,
+  "analystChangeCount": 0,
   "excludedNonEnglishCount": 0,
-  "excludedMismatchCount": 28,
-  "fmpCallCount": 91,
-  "fmpErrorCount": 0,
-  "fmpErrorsSample": [],
+  "excludedMismatchCount": 0,
+  "fmpCallCount": 1,
+  "fmpErrorCount": 1,
+  "fmpErrorsSample": [
+    "stable/price-target-latest-news?page=0&limit=200: HTTP 429"
+  ],
   "lookbackHours": 72,
   "failSafe": "NO_DATA keeps ticker; only explicit fresh hard landmines force-skip.",
   "selectionLogicChanged": "safety kill-filter only",
   "paperOnly": true,
-  "runtimeSeconds": 35.75
+  "runtimeSeconds": 7.08
 }

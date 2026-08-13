@@ -1,10 +1,10 @@
 {
   "stage": "B3",
-  "createdAt": "2026-07-24T02:28:32.714567+00:00",
-  "inputStage1Count": 618,
+  "createdAt": "2026-08-13T02:23:57.451091+00:00",
+  "inputStage1Count": 0,
   "blockedTickersRemoved": [],
-  "scoredTickerCount": 618,
-  "keptTopN": 45,
+  "scoredTickerCount": 0,
+  "keptTopN": 0,
   "config": {
     "topN": 50,
     "configuredDefaultTopN": 40,
@@ -21,183 +21,70 @@
     "maxWorkers": 4
   },
   "fmpCalls": {
-    "batchQuoteCalls": 7,
+    "batchQuoteCalls": 0,
     "spyIntradayCalls": 1,
     "sectorEtfIntradayCalls": 11,
-    "tickerIntradayCalls": 618,
-    "dailyHistoryCallsStage1": 618,
+    "tickerIntradayCalls": 0,
+    "dailyHistoryCallsStage1": 0,
     "dailyHistoryCallsSpyAndSectorEtfs": 12,
     "dailyAtrCallsTop40": 0,
-    "total": 1267
+    "total": 24
   },
-  "dailyOhlcvBarsStored": {
-    "CB": 126,
-    "VLY": 126,
-    "AMGN": 126,
-    "ELS": 126,
-    "AME": 126,
-    "PAGP": 126,
-    "KN": 126,
-    "HALO": 126,
-    "IMAX": 126,
-    "MRK": 126,
-    "OUT": 126,
-    "BYD": 126,
-    "SFL": 126,
-    "BRKR": 126,
-    "AUB": 126,
-    "IBKR": 126,
-    "LSCC": 126,
-    "PKG": 126,
-    "CBSH": 126,
-    "WEX": 126,
-    "GMAB": 126,
-    "FIBK": 126,
-    "CAH": 126,
-    "GBCI": 126,
-    "HON": 126,
-    "MPLX": 126,
-    "SYY": 126,
-    "NVCR": 126,
-    "COR": 126,
-    "SGHC": 126,
-    "JNJ": 126,
-    "QGEN": 126,
-    "HUT": 126,
-    "CFG": 126,
-    "FULT": 126,
-    "CSX": 126,
-    "BLFS": 126,
-    "CRL": 126,
-    "ALL": 126,
-    "CBRS": 48,
-    "RTX": 126,
-    "CATY": 126,
-    "HSIC": 126,
-    "PFS": 126,
-    "PFGC": 126
-  },
-  "trackAFailCount": 16,
-  "trackAFailSymbols": [
-    "VLY",
-    "OUT",
-    "BYD",
-    "IBKR",
-    "GMAB",
-    "FIBK",
-    "CAH",
-    "GBCI",
-    "SYY",
-    "COR",
-    "SGHC",
-    "CFG",
-    "FULT",
-    "ALL",
-    "HSIC",
-    "PFGC"
+  "dailyOhlcvBarsStored": {},
+  "trackAFailCount": 0,
+  "trackAFailSymbols": [],
+  "fmpErrorCount": 24,
+  "fmpErrorsSample": [
+    "stable/historical-chart/5min?symbol=SPY: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLK: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLC: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLY: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLP: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLF: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLV: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLI: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLE: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLU: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLRE: HTTP 429",
+    "stable/historical-chart/5min?symbol=XLB: HTTP 429",
+    "stable/historical-price-eod/full?symbol=SPY&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLK&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLC&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLY&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLP&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLF&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLV&timeseries=126: HTTP 429",
+    "stable/historical-price-eod/full?symbol=XLI&timeseries=126: HTTP 429"
   ],
-  "fmpErrorCount": 0,
-  "fmpErrorsSample": [],
   "dailyAtrErrorCount": 0,
   "dailyAtrErrorsSample": [],
-  "enrichmentRejectionCount": 5,
-  "enrichmentRejectionBreakdown": {
-    "earnings_too_close_6d": 4,
-    "earnings_too_close_7d": 1
-  },
-  "spyTodayReturnPct": -0.165,
-  "sectorReturnsPct": {
-    "Basic Materials": -0.867,
-    "Communication Services": -1.376,
-    "Consumer Cyclical": -1.199,
-    "Consumer Defensive": -0.138,
-    "Energy": -1.304,
-    "Financial Services": 0.314,
-    "Healthcare": 1.001,
-    "Industrials": 1.258,
-    "Real Estate": 0.067,
-    "Technology": -0.229,
-    "Utilities": 1.283
-  },
+  "enrichmentRejectionCount": 0,
+  "enrichmentRejectionBreakdown": {},
+  "spyTodayReturnPct": 0.0,
+  "sectorReturnsPct": {},
   "qualitySignals": {
     "spyReturnsPct": {
-      "1m": 0.627,
-      "3m": 3.792,
+      "1m": null,
+      "3m": null,
       "6m": null
     },
-    "rsRankCoverage": 616,
-    "sectorStrengthRankings": [
-      {
-        "sector": "Energy",
-        "rank": 1,
-        "oneMonthVsSpyPct": 8.407
-      },
-      {
-        "sector": "Healthcare",
-        "rank": 2,
-        "oneMonthVsSpyPct": 5.458
-      },
-      {
-        "sector": "Financial Services",
-        "rank": 3,
-        "oneMonthVsSpyPct": 2.992
-      },
-      {
-        "sector": "Utilities",
-        "rank": 4,
-        "oneMonthVsSpyPct": 1.858
-      },
-      {
-        "sector": "Industrials",
-        "rank": 5,
-        "oneMonthVsSpyPct": 1.5
-      },
-      {
-        "sector": "Real Estate",
-        "rank": 6,
-        "oneMonthVsSpyPct": 0.067
-      },
-      {
-        "sector": "Consumer Defensive",
-        "rank": 7,
-        "oneMonthVsSpyPct": -1.236
-      },
-      {
-        "sector": "Basic Materials",
-        "rank": 8,
-        "oneMonthVsSpyPct": -1.767
-      },
-      {
-        "sector": "Communication Services",
-        "rank": 9,
-        "oneMonthVsSpyPct": -2.389
-      },
-      {
-        "sector": "Technology",
-        "rank": 10,
-        "oneMonthVsSpyPct": -3.743
-      },
-      {
-        "sector": "Consumer Cyclical",
-        "rank": 11,
-        "oneMonthVsSpyPct": -5.022
-      }
-    ],
-    "breakoutPullbackCount": 15
+    "rsRankCoverage": 0,
+    "sectorStrengthRankings": [],
+    "breakoutPullbackCount": 0
   },
   "scoreDistribution": {
-    "count_ok": 186,
-    "score_80_100": 15,
-    "score_70_79": 49,
-    "score_60_69": 83,
-    "score_50_59": 39,
+    "count_ok": 0,
+    "score_80_100": 0,
+    "score_70_79": 0,
+    "score_60_69": 0,
+    "score_50_59": 0,
     "score_40_49": 0,
     "score_below_40": 0,
-    "min": 55.07,
-    "median": 65.22,
-    "max": 91.51
+    "min": null,
+    "median": null,
+    "max": null
   },
-  "runtimeSeconds": 439.32,
+  "runtimeSeconds": 322.35,
   "notes": [
     "No artificial Stage 1 ranking cut was added.",
     "STRC removed because it is a preferred stock, not common equity.",
@@ -207,6 +94,6 @@
     "VWMA is a volume-weighted moving average over candles, not intraday VWAP.",
     "Stage 2 enrichment integrations applied: Earnings Date Gate, Danelfin Scores, FMP Insider Buying, FMP Shares Float + StockAnalysis Short Interest fallback."
   ],
-  "_system2_run_id": "20260724T021502Z-9a51ab14",
-  "_system2_generated_at": "2026-07-24T02:28:33.264259+00:00"
+  "_system2_run_id": "20260813T021502Z-36a66d0a",
+  "_system2_generated_at": "2026-08-13T02:23:57.476881+00:00"
 }

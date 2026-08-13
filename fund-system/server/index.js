@@ -5,19 +5,78 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
+import * as fmpStore from './fmp-budget.js';
 import attachScoring from './scoring-endpoints.cjs';
 import {
   attachParamStore,
+  getConfigHash,
   getScannerParams,
-  initParamStore
+  initParamStore,
+  recordStampViolation, recordConfigChangelog
+  ,validateParamValue, SCANNER_ORDER, logChangelogRow
 } from './param-store.js';
 import {
   applyTradePricePath,
   attachLayer1,
+  capitalLogin,
   computeFillSlippage,
   finalizeTradePath,
+  invalidateCapitalSession,
+  unlabeledOutcomeCount,
+  outcomeBacklogCounts,
   initLayer1
 } from './layer1.js';
+import {
+  attachLayer2,
+  initLayer2
+} from './layer2.js';
+import {
+  brainShadowStats,
+  brainStatsText,
+  brainFeatureVector,
+  similarOutcomeVerdict
+} from './brain.js';
+import {
+  classifyAssetClass,
+  cleanLayer3Artifacts,
+  correlationHeat,
+  drawdownState,
+  initLayer3,
+  insertSimEquity,
+  latestStrategyHealth,
+  maybeAlertRiskMult,
+  runEquityCurve,
+  runStrategyHealth,
+  startLayer3Jobs
+} from './layer3.js';
+import {
+  attachLayer4,
+  initLayer4,
+  latestRegimeSnapshots,
+  startLayer4Jobs
+} from './layer4.js';
+import { shapeRegimeLatest } from './regime-latest.js';
+import { computeFleetState, readActualFleet, fleetWarnings } from './fleet-state.js';
+import { reconcilePositions } from './position-reconcile.js';
+import { getFleetExpected, initFleetStore } from './fleet-store.js';
+import { attachBrokerResolve } from './broker-resolve.js';
+import { resolveCloseEconomics } from './close-economics.js';
+import { attachScoreboard, buildScoreboard, scannerDigestLines } from './scoreboard.js';
+import { attachAccountSize } from './account-size.js';
+import { telemetryGaps } from './telemetry-gap.js';
+import { computeParamConnectivity, connectivityCacheAge } from './param-connectivity.js';
+import {
+  attachLayer5,
+  initLayer5,
+  startLayer5Jobs
+} from './layer5.js';
+import { attachEarningsGuard, guardResult, initEarningsGuard, startEarningsGuardJobs } from './earnings-guard.js';
+import { attachExperiments, initExperiments, startExperimentJobs } from './intelligence-experiments.js';
+import { attachPositionWatchdog, startPositionWatchdogs } from './position-watchdog.js';
+import { computeNetPnl, financingDigestLines, initFinancing, runFinancing, startFinancingJob } from './financing.js';
+import { attachEventJournal, initEventJournal, journalEvent, scannerErrorStats } from './event-journal.js';
+import { startLatencyMonitor } from './latency-monitor.js';
+import { findTradeForMutation } from './trade-match.js';
 import {
   loadFromPostgres,
   saveToPostgres,
@@ -29,13 +88,18 @@ import {
   insertRejectionPostgres,
   insertUpdatePostgres,
   upsertTradePostgres,
-  insertBrainPostgres
+  insertBrainPostgres,
+  insertReservationPostgres,
+  sweepExpiredReservationsPostgres,
+  openPositionPostgres,
+  closePositionPostgres
 } from './storage-adapter.js';
 import fundIntegrity from './fund-integrity.cjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
 const PORT = process.env.PORT || 3210;
+if (!process.env.ADMIN_PIN) throw new Error('ADMIN_PIN is required; refusing to boot with a default PIN');
 
 const corsOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
@@ -49,6 +113,19 @@ app.use(cors(corsOrigins.length ? {
 } : undefined));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));
+app.use((req,res,next)=>{
+  if (!/(stats|scorecard|intelligence)/i.test(req.path)) return next();
+  const original=res.json.bind(res);
+  const stamp=value=>{
+    if(Array.isArray(value))return value.map(stamp);
+    if(!value||typeof value!=='object')return value;
+    const out=Object.fromEntries(Object.entries(value).map(([k,v])=>[k,stamp(v)]));
+    const n=[out.n,out.count,out.samples,out.n_labeled,out.window_trades].find(Number.isFinite);
+    if(n!==undefined)out.too_thin=Number(n)<30;
+    return out;
+  };
+  res.json=payload=>original(stamp(payload));next();
+});
 
 // ── Request logging ──────────────────────────────────────────
 app.use((req, res, next) => {
@@ -191,6 +268,11 @@ for (const [key, value] of Object.entries(defaultData)) {
 // ── Storage mode: Postgres / JSON / dual-write ──
 // If USE_POSTGRES=true, load the dataset from Postgres into the in-memory db.data
 // that the rest of the server already uses. Falls back to JSON on any error.
+// Set for the LIFE OF THE PROCESS when the Postgres load falls back to JSON.
+// It never clears: a fallback that happened at boot is still true an hour
+// later, and the mirror stays the in-memory source until the next restart.
+let postgresLoadFailure = null;
+let postgresLoadAlerted = false;
 if (postgresEnabled) {
   try {
     const pgData = await loadFromPostgres();
@@ -202,6 +284,12 @@ if (postgresEnabled) {
       if (dualWriteEnabled) console.log('  (dual-write ON — also writing fund.json as safety net)');
     }
   } catch (e) {
+    // Silent fallback was the real defect here, not the missing column. The
+    // app switched from source-of-truth to mirror and only err.log knew.
+    // NOT now(): this catch runs during module evaluation, before the `now`
+    // helper is initialised, and calling it threw a TDZ ReferenceError that
+    // CRASHED the process on the very path meant to survive a failure.
+    postgresLoadFailure = { at: new Date().toISOString(), error: String(e.message || e).slice(0, 300) };
     console.error('⚠ Postgres load failed, falling back to fund.json:', e.message);
   }
 }
@@ -220,6 +308,47 @@ try {
   console.error('Layer 1 intelligence init failed:', e.message);
 }
 
+try {
+  await initLayer2();
+  console.log('Layer 2 filter verdicts ready');
+} catch (e) {
+  console.error('Layer 2 filter verdicts init failed:', e.message);
+}
+
+try {
+  await initLayer3();
+  console.log('Layer 3 strategy health ready');
+} catch (e) {
+  console.error('Layer 3 init failed:', e.message);
+}
+
+try {
+  await initLayer4();
+  console.log('Layer 4 regime snapshots ready');
+} catch (e) {
+  console.error('Layer 4 init failed:', e.message);
+}
+
+try {
+  await initLayer5();
+  console.log('Layer 5 weekly analyst ready');
+} catch (e) {
+  console.error('Layer 5 init failed:', e.message);
+}
+
+try {
+  await initEarningsGuard();
+  console.log('Earnings calendar guard ready');
+} catch (e) {
+  console.error('Earnings guard init failed:', e.message);
+}
+try { await initExperiments(); console.log('Change attribution and challenger harness ready'); }
+catch(e) { console.error('Experiment engine init failed:',e.message); }
+try { await initFinancing(); console.log('Cost-complete financing ready'); }
+catch (e) { console.error('Financing init failed:', e.message); }
+try { await initEventJournal(); console.log('Append-only event journal ready'); }
+catch (e) { console.error('Event journal init failed:', e.message); }
+
 // Seed IDs
 const ids = {};
 ['investors','stakes','allocations','risk_settings','trades','signals',
@@ -235,14 +364,25 @@ const isToday = ts => ts && ts.startsWith(today());
 // save() persistence strategy:
 //   - Postgres OFF  → write fund.json (original behaviour)
 //   - Postgres ON   → write Postgres (primary). Also write fund.json if DUAL_WRITE=true.
-// Postgres write failures are caught inside saveToPostgres so they never crash a request;
-// the in-memory data stays intact and the JSON file remains a fallback.
+// Primary persistence failures must fail the request. A memory-only risk/config
+// mutation is not success and would disappear on restart.
 const save = async () => {
-  if (postgresEnabled) {
-    await saveToPostgres(db.data);
-    if (dualWriteEnabled) { try { await db.write(); } catch(e){ console.error('dual-write json failed:', e.message); } }
-  } else {
-    await db.write();
+  try {
+    const openTrades=(db.data.trades||[]).filter(t=>['OPEN','PARTIAL'].includes(t.status));
+    const closedTrades=(db.data.trades||[]).filter(t=>!['OPEN','PARTIAL'].includes(t.status)).sort((a,b)=>new Date(b.closed_at||b.ts||0)-new Date(a.closed_at||a.ts||0)).slice(0,5000);
+    db.data.trades=[...openTrades,...closedTrades];
+    db.data.updates=(db.data.updates||[]).slice(0,5000);
+    db.data.sessions=(db.data.sessions||[]).filter(s=>s.expires>Date.now()).slice(-500);
+    if (postgresEnabled) {
+      await saveToPostgres(db.data);
+      if (dualWriteEnabled) { try { await db.write(); } catch(e){ console.error('dual-write json failed:', e.message); } }
+    } else {
+      await db.write();
+    }
+  } catch (error) {
+    console.error('[PERSISTENCE_FAILURE]', error.message);
+    await sendTelegramAlert(`PERSISTENCE FAILURE: ${error.message}. Request rejected; inspect Postgres immediately.`).catch(()=>{});
+    throw error;
   }
 };
 
@@ -313,6 +453,53 @@ const mkToken  = () => crypto.randomBytes(28).toString('hex');
 const SESSION_TTL = 14 * 24 * 60 * 60 * 1000;
 const SCANNER_API_KEY = process.env.SCANNER_API_KEY || '';
 const loginAttempts = new Map();
+const rejectionRates = new Map();
+// R2 helper: the ET calendar date for a timestamp. Trade timestamps are stored
+// as UTC ISO strings; slicing them yields the UTC date, which diverges from the
+// ET date between 00:00-04:00 UTC. Returns '' for missing/unparseable input so
+// such rows never accidentally match today.
+const ET_DATE_FMT = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+function etDateOf(ts) {
+  if (!ts) return '';
+  const d = ts instanceof Date ? ts : new Date(ts);
+  return Number.isFinite(d.getTime()) ? ET_DATE_FMT.format(d) : '';
+}
+const scannerErrorRates = new Map();      // `${scanner}:${minute}` -> {count, dropped}
+const scannerErrorTelegramAt = new Map(); // `${scanner}:${stage}` -> epoch ms of last TIMEOUT alert
+// Restart-safe. A bare Map re-armed the 30-minute window on every restart,
+// which is how duplicate TIMEOUT Telegrams fired. Seeded from db.data on
+// first read and written back on every send. The watchdog's own throttle is
+// already persistent (position-watchdog.js alertOnce) and is not touched.
+function throttleStore() {
+  db.data.scanner_config = db.data.scanner_config || {};
+  db.data.scanner_config.alert_throttle_ms = db.data.scanner_config.alert_throttle_ms || {};
+  return db.data.scanner_config.alert_throttle_ms;
+}
+function throttleLastAt(key) {
+  if (scannerErrorTelegramAt.has(key)) return scannerErrorTelegramAt.get(key);
+  const persisted = Number(throttleStore()[key] || 0) || 0;
+  scannerErrorTelegramAt.set(key, persisted);
+  return persisted;
+}
+function throttleMark(key, at) {
+  scannerErrorTelegramAt.set(key, at);
+  const store = throttleStore();
+  store[key] = at;
+  // Keep it bounded: drop anything older than a day. Without this the map
+  // grows one key per scanner+stage pair seen, forever.
+  const cutoff = at - 24 * 60 * 60_000;
+  for (const k of Object.keys(store)) if (Number(store[k] || 0) < cutoff) delete store[k];
+}
+const SCANNER_ERROR_CLASSES = new Set(['TIMEOUT', 'HTTP_ERROR', 'PARSE', 'OTHER']);
+const SCANNER_ERROR_RATE_LIMIT = 20; // per scanner per minute -- real failures, not high-frequency telemetry
+let riskGateTail = Promise.resolve();
+async function serializeRiskGate(req,res,next){
+  let release; const mine=new Promise(resolve=>{release=resolve;}); const prior=riskGateTail; riskGateTail=mine;
+  await prior; let done=false; const unlock=()=>{if(!done){done=true;release();}};
+  res.once('finish',unlock); res.once('close',unlock); next();
+}
+const CONFIG_PUBLIC_KEYS = ['account_size','max_global_heat_pct','max_open_positions','kill_switch','paper_only','gemini_model','updated_at'];
+const CONFIG_WRITE_KEYS = new Set(['account_size','max_global_heat_pct','max_open_positions','kill_switch','paper_only','gemini_model']);
 
 const SCANNERS = ['fmp', 'forex', 'comm', 'pa', 'vp', 'fb', 'main', 'all'];
 
@@ -502,9 +689,10 @@ function calcInvestorBalance(inv) {
 
 app.post('/api/auth/admin', loginRateLimit, async (req,res)=>{
   const { pin } = req.body;
-  const adminPin = process.env.ADMIN_PIN || '1234';
+  const adminPin = process.env.ADMIN_PIN;
   if (hashPin(pin) !== hashPin(adminPin)) return res.status(401).json({ error:'Wrong PIN' });
   const token = mkToken();
+  db.data.sessions = (db.data.sessions||[]).filter(s=>s.expires>Date.now());
   db.data.sessions.push({ token, investor_id:'admin', is_admin:true, expires:Date.now()+SESSION_TTL, ts:now() });
   await save(); res.json({ token, role:'admin', name:'Admin' });
 });
@@ -720,10 +908,12 @@ app.post('/api/signal', scannerAuth, async (req,res)=>{
     const b=req.body;
     if (!validTicker(b.ticker||b.pair||b.asset)) return res.status(400).json({status:'error',message:'valid ticker required (1-20 chars, alphanumeric)'});
     if (b.entry != null && !validNumber(b.entry, 0.0001, 1000000)) return res.status(400).json({status:'error',message:'entry must be 0.0001-1000000'});
-    const signal = { id:nid('signals'), ts:b.ts||now(), scanner:b.scanner||'unknown', type:b.type||'skip', ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null };
+    const scanner = b.scanner||'unknown';
+    const signal = { id:nid('signals'), ts:b.ts||now(), scanner, type:b.type||'skip', ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null, config_hash:await getConfigHash(scanner, db.data.scanner_config||{}) };
     db.data.signals.unshift(signal);
     if(db.data.signals.length>1000) db.data.signals=db.data.signals.slice(0,1000);
     await saveSignalHot(signal); res.json({status:'ok'});
+    await journalEvent('signal', signal).catch(()=>{});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -737,30 +927,95 @@ app.post('/api/trade/open', scannerAuth, async (req,res)=>{
     if (b.sl != null && !validNumber(b.sl, 0.0001, 1000000)) return res.status(400).json({status:'error',message:'sl must be 0.0001-1000000'});
     if (b.size != null && !validNumber(b.size, 1, 1000000)) return res.status(400).json({status:'error',message:'size must be 1-1000000'});
     if (b.risk_usd != null && !validNumber(b.risk_usd, 0.01, 100000)) return res.status(400).json({status:'error',message:'risk_usd must be 0.01-100000'});
-    const dealId = b.deal_id || b.dealId || null;
-    if (dealId && dealId !== 'UNKNOWN') {
+    const dealId = String(b.deal_id || b.dealId || '').trim();
+    if (!dealId || ['UNKNOWN','FAILED'].includes(dealId.toUpperCase())) return res.status(400).json({status:'error',reason:'NO_BROKER_CONFIRMATION',message:'valid confirmed broker deal_id required'});
+    if (dealId) {
       const existing = (db.data.trades || []).find(t => t.deal_id === dealId && ['OPEN','PARTIAL'].includes(t.status));
-      if (existing) return res.json({status:'ok', duplicate:true, trade_id:existing.id});
+      if (existing) {
+        const attempted = { setup_type:b.setup_type||b.type||'', intended_entry:b.intended_entry??b.intendedEntry??null, initial_sl:b.sl??b.stop_loss??null, scanner:b.scanner||'unknown', opened_at:b.ts||null };
+        for (const [field,value] of Object.entries(attempted)) {
+          if (value != null && String(existing[field] ?? '') !== String(value)) {
+            const violation = await recordStampViolation({ trade:existing, field, attemptedValue:value, payload:b });
+            if (violation?.alert_needed) {
+              await sendTelegramAlert(`WRITE-ONCE STAMP VIOLATION: ${existing.ticker} ${field} mutation rejected.`).catch(()=>{});
+            }
+            return res.status(409).json({status:'error',reason:'WRITE_ONCE_STAMP',field});
+          }
+        }
+        return res.json({status:'ok', duplicate:true, trade_id:existing.id});
+      }
     }
     const entry = b.entry ?? b.entry_price ?? null;
     const intendedEntry = b.intended_entry ?? b.intendedEntry ?? null;
     const initialSl = b.sl ?? b.stop_loss ?? null;
-    const trade = { id:nid('trades'), ts:b.ts||now(), scanner:b.scanner||'unknown', ticker:(b.ticker||b.epic).toUpperCase(), deal_id:b.deal_id||b.dealId||null, direction:String(b.direction).toUpperCase(), setup_type:b.setup_type||b.type||'', entry, intended_entry:intendedEntry, fill_slippage_pct:computeFillSlippage(b.direction, entry, intendedEntry), sl:initialSl, initial_sl:initialSl, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, status:'OPEN', close_price:null, pnl:null, max_favorable:entry, max_adverse:entry, mae_r:null, mfe_r:null, opened_at:b.ts||now(), closed_at:null };
+    const scanner = b.scanner||'unknown';
+    const size=Number(b.size??0),bid=Number(b.bid),ask=Number(b.ask);
+    const spreadCost=b.spread_cost==null?(Number.isFinite(bid)&&Number.isFinite(ask)&&size>0?Math.max(0,(ask-bid)*size):null):Number(b.spread_cost);
+    const signalTime=new Date(b.signal_ts||b.signal_time||b.ts||Date.now()),orderTime=b.order_ts||b.order_time||b.order_placed_at?new Date(b.order_ts||b.order_time||b.order_placed_at):null,fillTime=new Date(b.fill_ts||b.fill_time||b.filled_at||Date.now());
+    const signalToOrderMs=orderTime&&Number.isFinite(signalTime.getTime())&&Number.isFinite(orderTime.getTime())?Math.max(0,orderTime-signalTime):null;
+    const orderToFillMs=orderTime&&Number.isFinite(fillTime.getTime())&&Number.isFinite(orderTime.getTime())?Math.max(0,fillTime-orderTime):null;
+    const trade = { id:nid('trades'), ts:b.ts||now(), scanner, ticker:(b.ticker||b.epic).toUpperCase(), deal_id:dealId, direction:String(b.direction).toUpperCase(), setup_type:b.setup_type||b.type||'',
+      // NEW field, never folded into setup_type: that is a matching key with
+      // exact-equality semantics in the Trade Brain. Null until a scanner sends it.
+      engine_branch:b.engine_branch||b.branch||null, entry, intended_entry:intendedEntry, fill_slippage_pct:computeFillSlippage(b.direction, entry, intendedEntry), sl:initialSl, initial_sl:initialSl, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, spread_cost:spreadCost, commission:Number(b.commission??0), financing_accrued:0, pnl_gross:null, pnl_net:null, signal_to_order_ms:signalToOrderMs, order_to_fill_ms:orderToFillMs, bracket_mode:b.bracket_mode||null, fill_drift_pct:b.fill_drift_pct==null?null:Number(b.fill_drift_pct), measurement_population:b.measurement_population||'ENTERED', config_hash:await getConfigHash(scanner, db.data.scanner_config||{}), status:'OPEN', close_price:null, pnl:null, max_favorable:entry, max_adverse:entry, mae_r:null, mfe_r:null, opened_at:b.fill_ts||b.fill_time||b.filled_at||b.ts||now(), closed_at:null };
     db.data.trades.unshift(trade);
-    await saveTradeHot(trade); res.json({status:'ok'});
+    await saveTradeHot(trade);
+    if (orderTime) await journalEvent('order_placed', trade).catch(()=>{});
+    await journalEvent('trade_open', trade).catch(()=>{});
+    res.json({status:'ok'});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
 app.post('/api/trade/close', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
-    const t=(db.data.trades||[]).find(t=>(b.deal_id&&t.deal_id===b.deal_id)||(b.ticker&&t.ticker===b.ticker&&['OPEN','PARTIAL'].includes(t.status)));
+    const t=findTradeForMutation(db.data.trades,b);
     if(t){
-      const closePrice = b.close_price??b.closePrice??b.current_price??null;
-      applyTradePricePath(t, closePrice);
+      let closePrice = b.close_price??b.closePrice??b.current_price??null;
+      let grossIn    = b.pnl_gross??b.pnl??b.pnl_realised??null;
+
+      // An economics-free close is refused, not recorded. If the caller
+      // supplied neither a price nor a pnl, ask Capital; if Capital
+      // cannot answer either, 422 and leave the trade OPEN for retry.
+      // Recording CLOSED with nulls loses the money permanently.
+      if (closePrice == null && grossIn == null) {
+        const resolved = await resolveCloseEconomics({
+          deal_id: t.deal_id, epic: t.ticker, direction: t.direction,
+          size: t.size ?? b.size, opened_at: t.opened_at
+        }, { login: capitalLogin, invalidate: invalidateCapitalSession }).catch(e => ({ ok:false, error:e.message }));
+
+        if (!resolved.ok) {
+          await journalEvent('scanner_error', {
+            scanner: b.scanner || t.scanner || null, ticker: t.ticker || null,
+            payload: { scanner: b.scanner || t.scanner || null, stage: 'trade_close_economics',
+                       error_class: 'OTHER', reason: 'CLOSE_ECONOMICS_UNRESOLVED',
+                       message: resolved.error || 'unresolved', deal_id: t.deal_id,
+                       occurred_at: now() }
+          }).catch(()=>{});
+          return res.status(422).json({
+            status:'error', reason:'CLOSE_ECONOMICS_UNRESOLVED',
+            message:'close carried no price and no pnl, and Capital could not resolve them; trade left OPEN for retry',
+            trade_id: t.id, deal_id: t.deal_id, detail: resolved.error || null
+          });
+        }
+        closePrice = resolved.close_price;
+        t.close_source = resolved.close_source;
+        t.close_resolved_from = 'capital /history/activity detailed=true';
+        const dir = String(t.direction||'').toUpperCase();
+        const isLong = dir === 'BUY' || dir === 'LONG';
+        const sz = Number(t.size ?? b.size);
+        const entry = Number(t.entry);
+        if (Number.isFinite(sz) && Number.isFinite(entry)) {
+          grossIn = +(((isLong ? closePrice - entry : entry - closePrice)) * sz).toFixed(2);
+        }
+      }
+      applyTradePricePath(t, closePrice, onPriceTickRejected('trade/close'));
       t.status=b.action==='PARTIAL_EXIT'?'PARTIAL':'CLOSED';
       t.close_price=closePrice;
-      t.pnl=b.pnl??b.pnl_realised??null;
+      t.pnl_gross=grossIn;
+      t.commission=Number(t.commission||0)+Number(b.commission||0);
+      t.pnl_net=t.pnl_gross==null?null:computeNetPnl(t);
+      t.pnl=t.pnl_net;
       if(t.status==='CLOSED') {
         t.closed_at=b.ts||now();
         finalizeTradePath(t);
@@ -793,6 +1048,7 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
     }
 
     if (t) await saveTradeHot(t);
+    if (t?.status === 'CLOSED') await journalEvent(b.external_close ? 'external_close' : 'trade_close', t).catch(()=>{});
     await saveUpdateHot(update);
     res.json({status:'ok',found:!!t});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
@@ -801,9 +1057,9 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
 app.post('/api/trade/update', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
-    const t=(db.data.trades||[]).find(t=>(b.deal_id&&t.deal_id===b.deal_id)||(b.ticker&&t.ticker===b.ticker&&['OPEN','PARTIAL'].includes(t.status)));
+    const t=findTradeForMutation(db.data.trades,b);
     if(t&&b.new_sl) t.sl=b.new_sl;
-    if(t) applyTradePricePath(t, b.current_price);
+    if(t) applyTradePricePath(t, b.current_price, onPriceTickRejected('trade/update'));
     const update = { id:nid('updates'), ts:b.ts||now(), deal_id:b.deal_id||null, ticker:b.ticker||null, scanner:b.scanner||null, action:'UPDATE_SL', old_sl:b.old_sl||null, new_sl:b.new_sl||null, current_price:b.current_price??null };
     db.data.updates.unshift(update);
     if (t) await saveTradeHot(t);
@@ -814,13 +1070,17 @@ app.post('/api/trade/update', scannerAuth, async (req,res)=>{
 
 app.post('/api/rejection', scannerAuth, async (req,res)=>{
   try {
-    const b=req.body;
+    const b=req.body||{};
+    const scanner=String(b.scanner||'').trim().toLowerCase(), ticker=String(b.ticker||'').trim().toUpperCase();
+    if(!SCANNER_ORDER.includes(scanner)) return res.status(400).json({error:'valid scanner required'});
+    const minute=Math.floor(Date.now()/60000), rateKey=`${scanner}:${minute}`, count=(rejectionRates.get(rateKey)||0)+1;
+    rejectionRates.set(rateKey,count); for(const k of rejectionRates.keys())if(!k.endsWith(`:${minute}`))rejectionRates.delete(k);
+    if(count>120) return res.status(429).json({error:'rejection rate limit exceeded'});
+    if(!/^[A-Z0-9.^_-]{1,30}$/.test(ticker)||ticker==='UNKNOWN') return res.status(400).json({error:'valid ticker required'});
     const rejection = {
-      ...b,
       id:nid('rejections'),
       ts:b.ts||now(),
-      scanner:b.scanner||'unknown',
-      ticker:b.ticker||'UNKNOWN',
+      scanner,ticker,
       reason:b.reason||'UNKNOWN',
       detail:b.detail||b.message||'',
       direction:b.direction||'',
@@ -833,11 +1093,73 @@ app.post('/api/rejection', scannerAuth, async (req,res)=>{
       risk_response:b.risk_response??null,
       item_keys:b.item_keys??null,
       score:b.score??null
+      ,measurement_population:'NEVER_ENTERED', config_hash:b.config_hash??null,
+      source_type:b.source_type??'rejection', setup_type:b.setup_type??null,
+      signal_ts:b.signal_ts??null, order_ts:b.order_ts??null
     };
     db.data.rejections.unshift(rejection);
     if(db.data.rejections.length>500) db.data.rejections=db.data.rejections.slice(0,500);
     await saveRejectionHot(rejection); res.json({status:'ok'});
+    await journalEvent('rejection', rejection).catch(()=>{});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
+});
+
+// Scanner-side failure reporter. The 44% of production risk/close calls that
+// exceeded the scanner timeout for two months produced zero rows anywhere --
+// this is the receiver so the next silent scanner-side failure is not
+// equally invisible. Deliberately narrow: named fields only, no `...b`
+// spread (the /api/rejection defect), unknown scanner rejected outright.
+app.post('/api/scanner/error', scannerAuth, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const scanner = String(b.scanner || '').trim().toLowerCase();
+    if (!SCANNER_ORDER.includes(scanner)) return res.status(400).json({ error: 'valid scanner required' });
+
+    const minute = Math.floor(Date.now() / 60000);
+    const rateKey = `${scanner}:${minute}`;
+    const entry = scannerErrorRates.get(rateKey) || { count: 0, dropped: 0 };
+    entry.count++;
+    for (const k of scannerErrorRates.keys()) if (!k.endsWith(`:${minute}`)) scannerErrorRates.delete(k);
+    if (entry.count > SCANNER_ERROR_RATE_LIMIT) {
+      entry.dropped++;
+      scannerErrorRates.set(rateKey, entry);
+      console.warn(`[scanner-error] rate limit hit for ${scanner}: ${entry.dropped} dropped this minute`);
+      return res.status(202).json({ status: 'dropped', reason: 'rate_limited', dropped: entry.dropped });
+    }
+    scannerErrorRates.set(rateKey, entry);
+
+    const stage = String(b.stage || '').trim().slice(0, 60) || 'unknown';
+    const errorClass = SCANNER_ERROR_CLASSES.has(String(b.error_class || '').toUpperCase())
+      ? String(b.error_class).toUpperCase() : 'OTHER';
+    const httpStatus = Number.isFinite(Number(b.http_status)) ? Number(b.http_status) : null;
+    const durationMs = Number.isFinite(Number(b.duration_ms)) ? Number(b.duration_ms) : null;
+    const dealId = b.deal_id != null ? String(b.deal_id).slice(0, 80) : null;
+    const ticker = b.ticker != null ? String(b.ticker).trim().toUpperCase().slice(0, 20) : null;
+    const message = b.message != null ? String(b.message).slice(0, 500) : '';
+    const occurredAt = b.occurred_at || now();
+
+    const event = await journalEvent('scanner_error', {
+      scanner, ticker,
+      payload: { scanner, stage, error_class: errorClass, http_status: httpStatus,
+        duration_ms: durationMs, deal_id: dealId, ticker, message, occurred_at: occurredAt, received_at: now() }
+    }).catch(e => { console.error('[scanner-error] journal write failed:', e.message); return null; });
+
+    if (errorClass === 'TIMEOUT') {
+      const throttleKey = `${scanner}:${stage}`;
+      const lastAt = throttleLastAt(throttleKey);
+      if (Date.now() - lastAt >= 30 * 60_000) {
+        throttleMark(throttleKey, Date.now());
+        sendTelegramAlert(
+          `SCANNER ERROR: ${scanner}/${stage} TIMEOUT` +
+          (durationMs != null ? ` after ${durationMs}ms` : '') +
+          (dealId ? ` deal_id=${dealId}` : '') +
+          (message ? ` -- ${message.slice(0, 200)}` : '')
+        ).catch(() => {});
+      }
+    }
+
+    res.json({ status: 'ok', recorded: !!event });
+  } catch (e) { res.status(500).json({ status: 'error', message: e.message }); }
 });
 
 app.post('/api/rejection-analysis', scannerAuth, async (req,res)=>{
@@ -1356,25 +1678,36 @@ app.post('/api/reconcile', adminOnly, async (req,res)=>{
       return res.status(400).json({ error: 'positions array required' });
     }
     let updated = 0, unmatched = 0;
+    const touched = [];
     positions.forEach(pos => {
       const dealId   = pos.dealId || pos.deal_id || '';
       const ticker   = (pos.epic || pos.ticker || '').toUpperCase();
       const pnl      = parseFloat(pos.pnl || pos.profit || 0);
       const closePrice = parseFloat(pos.closeLevel || pos.close_price || 0);
       const closedAt   = pos.createdDateUtc || pos.closed_at || now();
-      // Match by dealId first, then ticker + open status
-      let trade = (db.data.trades||[]).find(t =>
-        (dealId && t.deal_id === dealId) ||
-        (ticker && t.ticker === ticker && ['OPEN','PARTIAL'].includes(t.status))
-      );
+      // Same matcher as close and update. The previous predicate was an
+      // OR, so a supplied-but-unmatched deal_id fell through to ticker +
+      // OPEN status and could close a different trade.
+      const trade = findTradeForMutation(db.data.trades, { deal_id: dealId, ticker });
       if (trade) {
         trade.status      = 'CLOSED';
+        // Capital's reconcile payload is GROSS. Keep trade.pnl as-is for
+        // anything reading it directly, but name it and derive net, so
+        // `pnl_net ?? pnl` no longer resolves to a gross figure.
         trade.pnl         = pnl;
+        trade.pnl_gross   = pnl;
+        trade.pnl_net     = computeNetPnl(trade);
         trade.close_price = closePrice;
         trade.closed_at   = closedAt;
+        touched.push(trade);
         updated++;
       } else { unmatched++; }
     });
+    // saveTradeHot -> upsertTradePostgres is the ONLY write path whose
+    // column list includes pnl_gross/pnl_net. save() -> saveToPostgres
+    // omits them, and loadFromPostgres then overwrites the jsonb copies
+    // with the NULL columns, erasing the values on the next restart.
+    for (const t of touched) await saveTradeHot(t);
     await save();
     res.json({ status:'ok', updated, unmatched, total: positions.length });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -1386,7 +1719,13 @@ app.patch('/api/trades/:id/pnl', adminOnly, async (req,res)=>{
     const trade = (db.data.trades||[]).find(t => t.id == req.params.id);
     if (!trade) return res.status(404).json({ error: 'Not found' });
     const { pnl, close_price, closed_at, status } = req.body;
-    if (pnl       != null) trade.pnl         = parseFloat(pnl);
+    // A manually supplied pnl is treated as GROSS, consistent with the
+    // reconcile payload it exists to correct.
+    if (pnl       != null) {
+      trade.pnl       = parseFloat(pnl);
+      trade.pnl_gross = parseFloat(pnl);
+      trade.pnl_net   = computeNetPnl(trade);
+    }
     if (close_price!= null) trade.close_price = parseFloat(close_price);
     if (closed_at)          trade.closed_at   = closed_at;
     if (status)             trade.status      = status;
@@ -1410,6 +1749,7 @@ app.patch('/api/trades/:id/pnl', adminOnly, async (req,res)=>{
       if (rec.deal_id) db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
       db.data.trade_brain.push(rec);
     }
+    await saveTradeHot(trade);
     await save();
     res.json({ status:'ok', trade });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -1449,7 +1789,7 @@ app.get('/api/intelligence', adminOnly, (req,res)=>{
     // ── By hour of day (ET) ──
     const byHour = {};
     trades.forEach(t => {
-      const h = new Date(t.ts).toLocaleString('en-US',{timeZone:'America/New_York',hour:'numeric',hour12:false});
+      const h = new Date(t.ts).toLocaleString('en-US',{timeZone:'America/New_York',hour:'2-digit',hour12:false,hourCycle:'h23'});
       const k = `${h}:00`;
       if (!byHour[k]) byHour[k] = { trades:0, wins:0, total_pnl:0 };
       byHour[k].trades++;
@@ -1597,6 +1937,34 @@ app.get('/api/positions/live', adminOnly, (req,res)=>{
 const fmpCache = new Map();
 const fmpQueue = [];
 const fmpStats = { requests: 0, hits: 0, misses: 0, outbound: 0, errors: 0, rate_limited: 0 };
+
+// Price ticks refused by the entry/5..entry*5 sanity band. Without this
+// the band was doing its job silently, so a feed emitting decimal-shifted
+// prices looked identical to a feed that was fine.
+const tickRejections = { total: 0, last: null, by_ticker: {} };
+function onPriceTickRejected(source) {
+  return (r) => {
+    tickRejections.total++;
+    tickRejections.last = { ...r, source };
+    const k = r.ticker || r.trade_id || 'unknown';
+    tickRejections.by_ticker[k] = Number(tickRejections.by_ticker[k] || 0) + 1;
+    console.warn(`[price-tick] REJECTED source=${source} trade=${r.trade_id} ticker=${r.ticker} ` +
+      `price=${r.price} entry=${r.entry} reason=${r.reason}`);
+    // The counters above are process-lifetime, so a bad feed is invisible
+    // after any restart -- and this process has restarted ~198 times. The
+    // journal is append-only and survives. Fire-and-forget: a journal
+    // failure must never break the price path that called us.
+    // 'price_tick_rejected' is on the KINDS whitelist in event-journal.js;
+    // without it journalEvent returns null and the write vanishes silently.
+    journalEvent('price_tick_rejected', {
+      scanner: r.scanner || null,
+      ticker: r.ticker || null,
+      payload: { source, trade_id: r.trade_id ?? null, ticker: r.ticker ?? null,
+        price: r.price ?? null, entry: r.entry ?? null, reason: r.reason ?? null,
+        occurred_at: now() }
+    }).catch(() => {});
+  };
+}
 let fmpProcessing = false;
 let fmpBackoffUntil = 0;
 let fmpBackfillPausedUntil = Date.parse(process.env.FMP_BACKFILL_PAUSED_UNTIL || readLocalEnvValue('FMP_BACKFILL_PAUSED_UNTIL') || '') || 0;
@@ -1606,37 +1974,72 @@ const FMP_MIN_INTERVAL_MS = Math.ceil(60_000 / 250);
 const FMP_STALE_MAX_MS = 15 * 60_000;
 const FMP_QUOTE_TTL_MS = 3 * 60_000;
 
+// ── CALLER TAGGING ──────────────────────────────────────────
+// Every proxy call is attributed to a named caller so FMP quota can be
+// split by scanner/job. Untagged HTTP calls are rejected EXCEPT on the
+// paths below, which have live callers mid-migration:
+//   /api/proxy/fmp/quote   mean_reversion via n8n 172.18.0.3 (431 calls in retained logs)
+//   /api/proxy/fmp/raw     internal/manual callers (3 calls)
+//   /api/proxy/fmp/regime  internal (1 call)
+// /api/proxy/fmp/candles has ZERO observed traffic, so the tag is
+// enforced there. /api/proxy/fmp/stats makes no upstream call: exempt.
+const FMP_GRANDFATHERED_PATHS = new Set([
+  '/api/proxy/fmp/quote',
+  '/api/proxy/fmp/raw',
+  '/api/proxy/fmp/regime'
+]);
+
+function fmpCallerTag(req) {
+  const raw = String(req.query.caller || req.get('x-fmp-caller') || '').trim().toLowerCase();
+  return /^[a-z0-9][a-z0-9_.:-]{0,39}$/.test(raw) ? raw : '';
+}
+
+// Returns the caller tag, or null after having already sent a 400.
+function requireFmpCaller(req, res) {
+  const tag = fmpCallerTag(req);
+  if (tag) return tag;
+  if (FMP_GRANDFATHERED_PATHS.has(req.path)) return 'legacy_untagged:' + req.path.split('/').pop();
+  res.status(400).json({
+    error: 'MISSING_CALLER_TAG',
+    message: 'FMP proxy requires a caller tag. Add ?caller=<scanner_or_job_name> or the x-fmp-caller header.',
+    example: req.path + '?caller=volume',
+    grandfathered_paths: [...FMP_GRANDFATHERED_PATHS]
+  });
+  return null;
+}
+
+// Internal (non-HTTP) callers are identified by cache-key prefix, so
+// layer1.js and earnings-guard.js need no change at all.
+function fmpResolveCaller(cacheKey, explicit) {
+  if (explicit) return explicit;
+  const k = String(cacheKey || '');
+  if (k.startsWith('l1:')) return 'layer1_backfill';
+  if (k.startsWith('earnings-calendar:')) return 'earnings_guard';
+  if (k.startsWith('regime')) return 'layer4_regime';
+  return 'untagged_internal';
+}
+
 function fmpDayKey(ts = new Date()) {
   return ts.toISOString().slice(0, 10);
 }
 
 function loadFmpBudget() {
-  try {
-    if (!existsSync(FMP_BUDGET_PATH)) return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null };
-    const parsed = JSON.parse(readFileSync(FMP_BUDGET_PATH, 'utf8'));
-    if (parsed.day !== fmpDayKey()) return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: parsed.reset_observed_at || null };
-    return { outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null, ...parsed };
-  } catch (e) {
-    console.error('[fmp-budget] load failed:', e.message);
-    return { day: fmpDayKey(), outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: null };
-  }
+  // Archives the previous day before resetting, so a restart across
+  // midnight no longer destroys that day's attribution.
+  return fmpStore.loadBudget(FMP_BUDGET_PATH);
 }
 
 let fmpBudget = loadFmpBudget();
 
 function persistFmpBudget() {
-  try {
-    mkdirSync(path.dirname(FMP_BUDGET_PATH), { recursive: true });
-    writeFileSync(FMP_BUDGET_PATH, JSON.stringify(fmpBudget, null, 2));
-  } catch (e) {
-    console.error('[fmp-budget] persist failed:', e.message);
-  }
+  fmpStore.persistBudget(FMP_BUDGET_PATH, fmpBudget);
 }
 
 function refreshFmpBudgetDay() {
   const day = fmpDayKey();
   if (fmpBudget.day !== day) {
-    fmpBudget = { day, outbound: 0, backfill_outbound: 0, live_outbound: 0, rate_limited: 0, reset_observed_at: fmpBudget.reset_observed_at || null };
+    fmpStore.archiveDay(FMP_BUDGET_PATH, fmpBudget);
+    fmpBudget = fmpStore.emptyBudget(day, fmpBudget.reset_observed_at || null);
     persistFmpBudget();
   }
 }
@@ -1703,6 +2106,7 @@ function runFmpQueue() {
       fmpBudget.outbound = Number(fmpBudget.outbound || 0) + 1;
       if (job.traffic === 'backfill') fmpBudget.backfill_outbound = Number(fmpBudget.backfill_outbound || 0) + 1;
       else fmpBudget.live_outbound = Number(fmpBudget.live_outbound || 0) + 1;
+      fmpStore.bumpCaller(fmpBudget, job.caller || 'untagged_internal', 'outbound');
       persistFmpBudget();
       const response = await fetch(job.url, { headers: { Accept: 'application/json' } });
       const text = await response.text();
@@ -1730,15 +2134,19 @@ function runFmpQueue() {
   }, wait);
 }
 
-function queueFmp(url, traffic = 'live') {
+function queueFmp(url, traffic = 'live', caller = 'untagged_internal') {
   return new Promise((resolve, reject) => {
-    fmpQueue.push({ url, traffic, resolve, reject });
+    fmpQueue.push({ url, traffic, caller, resolve, reject });
     runFmpQueue();
   });
 }
 
-async function fmpProxyFetch(cacheKey, ttlMs, endpoint) {
+async function fmpProxyFetch(cacheKey, ttlMs, endpoint, caller) {
+  const callerTag = fmpResolveCaller(cacheKey, caller);
   fmpStats.requests++;
+  refreshFmpBudgetDay();
+  fmpStore.bumpCaller(fmpBudget, callerTag, 'requests');
+  persistFmpBudget();
   const cached = fmpCacheGet(cacheKey);
   if (cached) return { ...cached, cache: 'HIT' };
   refreshFmpBackfillPause();
@@ -1776,7 +2184,7 @@ async function fmpProxyFetch(cacheKey, ttlMs, endpoint) {
   }
   const sep = endpoint.includes('?') ? '&' : '?';
   const url = `https://financialmodelingprep.com/${endpoint}${sep}apikey=${encodeURIComponent(key)}`;
-  const result = await queueFmp(url, isBackfill ? 'backfill' : 'live');
+  const result = await queueFmp(url, isBackfill ? 'backfill' : 'live', callerTag);
   if (result.status === 429) {
     fmpBackfillPausedUntil = Math.max(fmpBackfillPausedUntil, Date.now() + 30 * 60_000);
     if (isBackfill) persistFmpBudget();
@@ -1792,20 +2200,116 @@ async function fmpProxyFetch(cacheKey, ttlMs, endpoint) {
   return { ...result, cache: 'MISS' };
 }
 
+function fmpFirst(body) {
+  if (Array.isArray(body)) return body[0] || null;
+  if (Array.isArray(body?.historical)) return body.historical[0] || null;
+  return body || null;
+}
+
+function fmpNumber(body, ...keys) {
+  const row = fmpFirst(body);
+  for (const key of keys) {
+    const value = Number(row?.[key]);
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+function isoDateOffset(days) {
+  const d = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 10);
+}
+
+async function fetchFmpRegimeBundle() {
+  if (fmpBackoffUntil && Date.now() < fmpBackoffUntil) {
+    return {
+      ok: false,
+      status: 429,
+      error: 'FMP proxy is in upstream backoff',
+      backoff_until: new Date(fmpBackoffUntil).toISOString(),
+      statuses: { spy: 429, vix: 429, dxy: 429, spy_history: 429 }
+    };
+  }
+  const from = isoDateOffset(45);
+  const to = isoDateOffset(0);
+  const [spy, vix, dxy, spyHistory] = await Promise.all([
+    fmpProxyFetch('quote:SPY', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=SPY', 'layer4_regime'),
+    fmpProxyFetch('quote:%5EVIX', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=%5EVIX', 'layer4_regime'),
+    fmpProxyFetch('quote:DXY', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=DXY', 'layer4_regime'),
+    fmpProxyFetch(`regime:spy-eod:${from}:${to}`, 10 * 60_000, `stable/historical-price-eod/full?symbol=SPY&from=${from}&to=${to}`, 'layer4_regime')
+  ]);
+  const failures = [spy, vix, dxy, spyHistory].filter(r => r?.status && Number(r.status) >= 400);
+  const spyPrice = fmpNumber(spy.body, 'price', 'close');
+  const vixValue = fmpNumber(vix.body, 'price', 'close');
+  const dxyValue = fmpNumber(dxy.body, 'price', 'close');
+  const history = Array.isArray(spyHistory.body) ? spyHistory.body : (Array.isArray(spyHistory.body?.historical) ? spyHistory.body.historical : []);
+  const closes = history.map(r => Number(r.close ?? r.price)).filter(Number.isFinite);
+  const base20 = closes.length >= 20 ? closes[19] : null;
+  const spyVs20dPct = spyPrice && base20 ? +(((spyPrice - base20) / base20) * 100).toFixed(6) : null;
+  const ok = !!(spyPrice || vixValue || dxyValue || spyVs20dPct) && failures.length < 4;
+  return {
+    ok,
+    status: ok ? 200 : (failures[0]?.status || 'failed'),
+    cache: [spy.cache, vix.cache, dxy.cache, spyHistory.cache].filter(Boolean).join(','),
+    spy_price: spyPrice,
+    vix: vixValue,
+    dxy: dxyValue,
+    spy_vs_20d_pct: spyVs20dPct,
+    spy: fmpFirst(spy.body),
+    vix_quote: fmpFirst(vix.body),
+    dxy_quote: fmpFirst(dxy.body),
+    statuses: {
+      spy: spy.status,
+      vix: vix.status,
+      dxy: dxy.status,
+      spy_history: spyHistory.status
+    }
+  };
+}
+
 function sendFmpProxy(res, result) {
   res.set('X-FMP-Proxy-Cache', result.cache);
   for (const [k, v] of Object.entries(result.headers || {})) res.set(`X-FMP-${k}`, String(v));
   res.status(result.status || 200).json(result.body);
 }
 
+async function fetchYahooQuote(ticker) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=1d&interval=1m`;
+  const response = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'fund-system/1.0' } });
+  const payload = await response.json().catch(() => null);
+  const result = payload?.chart?.result?.[0];
+  const meta = result?.meta;
+  const closes = result?.indicators?.quote?.[0]?.close || [];
+  const price = [...closes].reverse().find(Number.isFinite) ?? Number(meta?.regularMarketPrice);
+  if (!response.ok || !Number.isFinite(price)) throw new Error(`Yahoo quote unavailable (${response.status})`);
+  const previousClose = Number(meta?.chartPreviousClose ?? meta?.previousClose);
+  return [{ symbol: ticker, price, previousClose: Number.isFinite(previousClose) ? previousClose : null,
+    change: Number.isFinite(previousClose) ? +(price - previousClose).toFixed(6) : null,
+    changesPercentage: Number.isFinite(previousClose) && previousClose !== 0 ? +((price - previousClose) / previousClose * 100).toFixed(6) : null,
+    timestamp: Number(meta?.regularMarketTime) || Math.floor(Date.now() / 1000), source: 'YAHOO' }];
+}
+
 app.get('/api/proxy/fmp/quote', scannerAuth, async (req, res) => {
   try {
     const ticker = String(req.query.ticker || '').trim().toUpperCase();
     if (!/^[A-Z0-9.^-]{1,20}$/.test(ticker)) return res.status(400).json({ error: 'valid ticker required' });
-    const result = await fmpProxyFetch(`quote:${ticker}`, FMP_QUOTE_TTL_MS, `stable/quote?symbol=${encodeURIComponent(ticker)}`);
+    const caller = requireFmpCaller(req, res);
+    if (!caller) return;
+    const result = await fmpProxyFetch(`quote:${ticker}`, FMP_QUOTE_TTL_MS, `stable/quote?symbol=${encodeURIComponent(ticker)}`, caller);
+    if (Number(result.status) === 429 && !fmpCacheGetStale(`quote:${ticker}`)) {
+      res.set('X-Quote-Source', 'YAHOO');
+      return res.json(await fetchYahooQuote(ticker));
+    }
+    res.set('X-Quote-Source', 'FMP');
     sendFmpProxy(res, result);
   } catch (e) {
-    res.status(e.statusCode || 500).json({ error: e.message });
+    try {
+      const ticker = String(req.query.ticker || '').trim().toUpperCase();
+      res.set('X-Quote-Source', 'YAHOO');
+      res.json(await fetchYahooQuote(ticker));
+    } catch (fallbackError) {
+      res.status(e.statusCode || 500).json({ error: e.message, fallback_error: fallbackError.message });
+    }
   }
 });
 
@@ -1816,8 +2320,10 @@ app.get('/api/proxy/fmp/candles', scannerAuth, async (req, res) => {
     const allowed = new Set(['1min', '5min', '15min', '30min', '1hour', '4hour']);
     if (!/^[A-Z0-9.^-]{1,20}$/.test(ticker)) return res.status(400).json({ error: 'valid ticker required' });
     if (!allowed.has(resKey)) return res.status(400).json({ error: 'unsupported res; use 1min,5min,15min,30min,1hour,4hour' });
+    const caller = requireFmpCaller(req, res);
+    if (!caller) return;
     const endpoint = `stable/historical-chart/${encodeURIComponent(resKey)}?symbol=${encodeURIComponent(ticker)}`;
-    const result = await fmpProxyFetch(`candles:${ticker}:${resKey}`, 5 * 60_000, endpoint);
+    const result = await fmpProxyFetch(`candles:${ticker}:${resKey}`, 5 * 60_000, endpoint, caller);
     sendFmpProxy(res, result);
   } catch (e) {
     res.status(e.statusCode || 500).json({ error: e.message });
@@ -1826,6 +2332,11 @@ app.get('/api/proxy/fmp/candles', scannerAuth, async (req, res) => {
 
 app.get('/api/proxy/fmp/regime', scannerAuth, async (req, res) => {
   try {
+    const caller = requireFmpCaller(req, res);
+    if (!caller) return;
+    refreshFmpBudgetDay();
+    fmpStore.bumpCaller(fmpBudget, caller, 'requests');
+    persistFmpBudget();
     const cached = fmpCacheGet('regime');
     if (cached) {
       res.set('X-FMP-Proxy-Cache', 'HIT');
@@ -1833,12 +2344,19 @@ app.get('/api/proxy/fmp/regime', scannerAuth, async (req, res) => {
     }
     fmpStats.requests++;
     fmpStats.misses++;
-    const [spy, vix] = await Promise.all([
-      fmpProxyFetch('quote:SPY', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=SPY'),
-      fmpProxyFetch('quote:%5EVIX', FMP_QUOTE_TTL_MS, 'stable/quote?symbol=%5EVIX')
-    ]);
-    const body = { spy: Array.isArray(spy.body) ? spy.body[0] : spy.body, vix: Array.isArray(vix.body) ? vix.body[0] : vix.body };
-    fmpCacheSet('regime', 10 * 60_000, { status: 200, ok: true, headers: { ...spy.headers, ...vix.headers }, body });
+    const bundle = await fetchFmpRegimeBundle();
+    if (!bundle.ok) return res.status(Number(bundle.status) || 502).json({ error: 'FMP regime unavailable', statuses: bundle.statuses });
+    const body = {
+      spy: bundle.spy,
+      vix: bundle.vix_quote,
+      dxy: bundle.dxy_quote,
+      spy_price: bundle.spy_price,
+      vix_value: bundle.vix,
+      dxy_value: bundle.dxy,
+      spy_vs_20d_pct: bundle.spy_vs_20d_pct,
+      statuses: bundle.statuses
+    };
+    fmpCacheSet('regime', 10 * 60_000, { status: 200, ok: true, headers: {}, body });
     res.set('X-FMP-Proxy-Cache', 'MISS');
     res.json(body);
   } catch (e) {
@@ -1848,6 +2366,8 @@ app.get('/api/proxy/fmp/regime', scannerAuth, async (req, res) => {
 
 app.get('/api/proxy/fmp/raw', scannerAuth, async (req, res) => {
   try {
+    const caller = requireFmpCaller(req, res);
+    if (!caller) return;
     let rawPath = String(req.query.path || '').trim();
     if (!rawPath) return res.status(400).json({ error: 'path required' });
     rawPath = rawPath.replace(/^\/+/, '');
@@ -1856,7 +2376,40 @@ app.get('/api/proxy/fmp/raw', scannerAuth, async (req, res) => {
       return res.status(400).json({ error: 'path must be an FMP stable/ or api/v3 path; prefer stable/ paths' });
     }
     if (/apikey=/i.test(rawPath)) return res.status(400).json({ error: 'do not include apikey in path' });
-    const result = await fmpProxyFetch(`raw:${rawPath}`, 5 * 60_000, rawPath);
+
+    // Upstream params may arrive as SEPARATE query params rather than
+    // baked into `path`. n8n expressions cannot survive being encoded
+    // into one path string, which is what blocked mean_reversion and
+    // volume from migrating. Both forms are supported; `path` carrying
+    // its own ?query keeps working byte-for-byte.
+    const extras = [];
+    for (const [k, v] of Object.entries(req.query || {})) {
+      if (k === 'path' || k === 'caller') continue;
+      if (!/^[A-Za-z0-9_.-]{1,40}$/.test(k)) {
+        return res.status(400).json({ error: `invalid param name: ${k}` });
+      }
+      if (/^apikey$/i.test(k)) {
+        return res.status(400).json({ error: 'do not supply apikey; the proxy injects it' });
+      }
+      for (const one of (Array.isArray(v) ? v : [v])) {
+        if (typeof one !== 'string') {
+          return res.status(400).json({ error: `param ${k} must be a scalar string` });
+        }
+        if (one.length > 200) {
+          return res.status(400).json({ error: `param ${k} exceeds 200 chars` });
+        }
+        extras.push(`${encodeURIComponent(k)}=${encodeURIComponent(one)}`);
+      }
+    }
+    // Sorted so param order does not fragment the cache. With no extras
+    // the endpoint is identical to the legacy single-path form, and so
+    // is its cache key.
+    extras.sort();
+    const endpoint = extras.length
+      ? rawPath + (rawPath.includes('?') ? '&' : '?') + extras.join('&')
+      : rawPath;
+
+    const result = await fmpProxyFetch(`raw:${endpoint}`, 5 * 60_000, endpoint, caller);
     sendFmpProxy(res, result);
   } catch (e) {
     res.status(e.statusCode || 500).json({ error: e.message });
@@ -1873,10 +2426,283 @@ app.get('/api/proxy/fmp/stats', serviceOrAdmin, (req, res) => {
     backoff_until: fmpBackoffUntil ? new Date(fmpBackoffUntil).toISOString() : null,
     backfill_paused_until: fmpBackfillPausedUntil ? new Date(fmpBackfillPausedUntil).toISOString() : null,
     daily_budget: fmpBudgetSnapshot(),
+    history: fmpStore.readHistory(FMP_BUDGET_PATH).slice(-7),
+    grandfathered_paths: [...FMP_GRANDFATHERED_PATHS],
     cache_hit_rate_pct: total ? +(fmpStats.hits / total * 100).toFixed(1) : 0,
     fmp_key_configured: !!fmpApiKey()
   });
 });
+
+// Newest Layer 4 regime snapshot, for scanners that need the regime
+// without each of them recomputing it (and re-spending FMP quota).
+// 503 when none exists — never a fabricated row.
+app.get('/api/regime/latest', scannerAuth, async (req, res) => {
+  try {
+    const rows = await latestRegimeSnapshots(1);
+    const { status, body } = shapeRegimeLatest(rows && rows[0], new Date());
+    res.status(status).json(body);
+  } catch (e) {
+    res.status(503).json({ error: 'REGIME_LOOKUP_FAILED', message: e.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// FLEET DRIFT — expected vs ACTUAL n8n state
+//
+// Actual state is read from n8n (read-only); nothing here activates,
+// deactivates or imports a workflow. Sampling spawns a short-lived
+// python reader, so health reads a cached sample rather than paying
+// that cost on every request.
+// ════════════════════════════════════════════════════════════
+let fleetCache = { state: null, at: 0, error: null };
+const FLEET_CACHE_TTL_MS = 60_000;
+const FLEET_ALERT_THROTTLE_MS = 30 * 60_000;
+const fleetAlertSent = new Map();
+// Last delivery outcome, so "we alerted" can be distinguished from "we
+// tried to alert and it went nowhere".
+let fleetAlertDelivery = null;
+
+async function refreshFleetState() {
+  const [expected, actual] = await Promise.all([getFleetExpected(), readActualFleet()]);
+  const heartbeats = {};
+  for (const [k, v] of Object.entries(db.data.heartbeats || {})) {
+    const ts = Number(v && v.ts);
+    if (Number.isFinite(ts)) heartbeats[k] = ts;
+  }
+  const state = computeFleetState({ expected, actual, heartbeats, now: new Date() });
+  fleetCache = { state, at: Date.now(), error: null };
+  await fireFleetDriftAlerts(state);
+  return state;
+}
+
+async function fireFleetDriftAlerts(state) {
+  const now = Date.now();
+  for (const a of state.alerts) {
+    const last = fleetAlertSent.get(a.scanner) || 0;
+    if (now - last < FLEET_ALERT_THROTTLE_MS) continue;
+    fleetAlertSent.set(a.scanner, now);
+    const lines = [
+      'FLEET DRIFT',
+      `scanner:  ${a.scanner}`,
+      `expected: ${a.expected}`,
+      `actual:   ${a.actual}`,
+      ...a.reasons.map(r => `- ${r}`)
+    ];
+    try {
+      const r = await sendTelegramAlert(lines.join('\n'));
+      const ok = !!(r && r.ok === true);
+      fleetAlertDelivery = {
+        ok,
+        detail: ok ? null : String((r && (r.skipped || r.status)) || 'unknown'),
+        scanner: a.scanner,
+        at: new Date().toISOString()
+      };
+      if (!ok) console.error('[fleet] drift alert NOT delivered:', JSON.stringify(fleetAlertDelivery));
+    } catch (e) {
+      fleetAlertDelivery = { ok: false, detail: e.message, scanner: a.scanner, at: new Date().toISOString() };
+      console.error('[fleet] telegram threw:', e.message);
+    }
+  }
+}
+
+app.get('/api/fleet/state', adminOnly, async (req, res) => {
+  try {
+    const fresh = String(req.query.fresh || '') === '1';
+    if (fresh || !fleetCache.state || Date.now() - fleetCache.at > FLEET_CACHE_TTL_MS) {
+      await refreshFleetState();
+    }
+    res.json({
+      ...fleetCache.state,
+      alert_delivery: fleetAlertDelivery,
+      cached_age_s: Math.round((Date.now() - fleetCache.at) / 1000)
+    });
+  } catch (e) {
+    fleetCache = { ...fleetCache, error: e.message };
+    res.status(503).json({ error: 'FLEET_STATE_UNAVAILABLE', message: e.message });
+  }
+});
+
+// Background sample so health has something to report without paying
+// the sampling cost inline.
+setInterval(() => {
+  refreshFleetState().catch(e => {
+    fleetCache = { ...fleetCache, error: e.message };
+    console.error('[fleet] refresh failed:', e.message);
+  });
+}, 10 * 60_000).unref?.();
+// ════════════════════════════════════════════════════════════
+// LIVE POSITION REFRESH
+//
+// POST /api/positions/live is documented as "updated by n8n every 60s",
+// but its only callers are 13 inactive workflow copies whose 1-minute
+// trigger also runs /api/reconcile. Rather than activate those, the
+// refresh runs here: Capital login, GET positions, write the same
+// snapshot that endpoint writes. It never touches /api/reconcile,
+// /api/eod, or any scanner workflow.
+// ════════════════════════════════════════════════════════════
+// 180s, not 60s. The staleness threshold is 600s, so this still
+// tolerates two consecutive failures before the feed reads stale, while
+// cutting cycles -- and therefore exposure to transient stalls -- by 2/3.
+const LIVE_POS_REFRESH_MS = Number(process.env.LIVE_POS_REFRESH_MS || 180_000);
+const LIVE_POS_MAX_BACKOFF_MS = 15 * 60_000;
+let livePosFailures = 0;
+let livePosReauths = 0;
+let livePosLastError = null;
+let livePosBackoffUntil = 0;
+let livePosLastOk = null;
+
+function livePosHeaders(session) {
+  return {
+    'X-CAP-API-KEY': session.apiKey,
+    CST: session.cst,
+    'X-SECURITY-TOKEN': session.token,
+    Accept: 'application/json'
+  };
+}
+
+async function refreshLivePositionsOnce() {
+  // Shared cached session from layer1.js. Base URL still comes from
+  // config there, never hardcoded to the demo host.
+  let session = await capitalLogin();
+  if (!session.ok) throw new Error(`capital login ${session.status || ''} ${session.error || ''}`.trim());
+
+  let r = await fetch(`${session.baseUrl}/api/v1/positions`,
+    { headers: livePosHeaders(session), signal: AbortSignal.timeout(12000) });
+
+  // EXACTLY ONE re-authentication. An expired CST must not become a
+  // login loop, so this never retries a second time.
+  if (r.status === 401) {
+    invalidateCapitalSession();
+    session = await capitalLogin();
+    if (!session.ok) throw new Error(`capital re-login ${session.status || ''} ${session.error || ''}`.trim());
+    livePosReauths++;
+    r = await fetch(`${session.baseUrl}/api/v1/positions`,
+      { headers: livePosHeaders(session), signal: AbortSignal.timeout(12000) });
+  }
+  const ct = r.headers.get('content-type') || '';
+  if (!ct.includes('json')) throw new Error(`positions returned non-JSON (${r.status} ${ct})`);
+  const body = await r.json();
+  if (!Array.isArray(body?.positions)) throw new Error('positions payload has no array');
+
+  // Only a SUCCESSFUL fetch touches the snapshot. A failure must never
+  // write a fresh updated_at, or the staleness guard silently stops working.
+  db.data.live_positions = { positions: body.positions, updated_at: now() };
+  await save();
+  return body.positions.length;
+}
+
+// ════════════════════════════════════════════════════════════
+// BROKER BALANCE — observed, never authoritative.
+//
+// scanner_config.account_size is typed by hand and has never been
+// reconciled against the account. Every scanner sizes from it via
+// GET /api/config and every heat figure divides by it, so a divergence
+// oversizes positions and under-reports heat by the same proportion.
+//
+// This only OBSERVES. Overwriting account_size would resize every
+// position in the fleet without a human deciding, so the divergence is
+// surfaced as a warning and the number stays the owner's.
+// ════════════════════════════════════════════════════════════
+const BROKER_BAL_REFRESH_MS = Number(process.env.BROKER_BAL_REFRESH_MS || 15 * 60_000);
+const BROKER_BAL_MAX_BACKOFF_MS = 60 * 60_000;
+const ACCOUNT_SIZE_DIVERGENCE_PCT = 5;
+let brokerBalFailures = 0, brokerBalBackoffUntil = 0, brokerBalLastError = null;
+
+async function refreshBrokerBalanceOnce() {
+  const session = await capitalLogin();
+  if (!session?.ok) throw new Error(`capital login ${session?.status ?? ''} ${session?.error ?? ''}`.trim());
+  const r = await fetch(`${session.baseUrl}/api/v1/accounts`, {
+    headers: {
+      'X-CAP-API-KEY': session.apiKey, CST: session.cst,
+      'X-SECURITY-TOKEN': session.token, Accept: 'application/json'
+    },
+    signal: AbortSignal.timeout(10_000)
+  });
+  if (r.status === 401) { invalidateCapitalSession(); throw new Error('capital 401 on /accounts'); }
+  if (!r.ok) throw new Error(`accounts http ${r.status}`);
+  const body = await r.json();
+  const accounts = Array.isArray(body?.accounts) ? body.accounts : [];
+  const preferred = accounts.find(a => a.preferred) || accounts[0];
+  const balance = Number(preferred?.balance?.balance);
+  if (!Number.isFinite(balance)) throw new Error('no finite balance in /accounts payload');
+
+  // Only a SUCCESSFUL fetch stamps the time. A failure must never make a
+  // stale figure look fresh -- the same rule the live-position poller
+  // follows for its snapshot.
+  db.data.broker_balance = {
+    balance,
+    currency: preferred?.currency ?? null,
+    available: Number(preferred?.balance?.available) || null,
+    account_id: preferred?.accountId ?? null,
+    observed_at: now()
+  };
+  await save();
+  return balance;
+}
+
+setInterval(() => {
+  if (Date.now() < brokerBalBackoffUntil) return;
+  refreshBrokerBalanceOnce()
+    .then(() => { brokerBalFailures = 0; brokerBalLastError = null; brokerBalBackoffUntil = 0; })
+    .catch(e => {
+      brokerBalFailures++;
+      brokerBalLastError = e.message;
+      const backoff = Math.min(BROKER_BAL_MAX_BACKOFF_MS,
+        BROKER_BAL_REFRESH_MS * Math.pow(2, Math.min(brokerBalFailures, 3)));
+      brokerBalBackoffUntil = Date.now() + backoff;
+      console.error(`[broker-balance] refresh failed (${brokerBalFailures}): ${e.message} — retrying in ${Math.round(backoff / 1000)}s`);
+    });
+}, BROKER_BAL_REFRESH_MS).unref?.();
+
+// Compare the typed figure against the observed one. Exported shape is
+// used by /api/health and the Controls panel.
+function accountSizeDivergence() {
+  const cfg = db.data.scanner_config || {};
+  const bb = db.data.broker_balance || null;
+  const configured = Number(cfg.account_size) || null;
+  const observed = bb && Number.isFinite(Number(bb.balance)) ? Number(bb.balance) : null;
+  if (!configured || !observed) {
+    return { configured, observed, observed_at: bb?.observed_at ?? null,
+             divergence_pct: null, stale: true,
+             reason: !observed ? 'broker balance not yet observed' : 'account_size not configured' };
+  }
+  const pct = +(((configured - observed) / observed) * 100).toFixed(2);
+  const ageMs = Date.now() - Date.parse(bb.observed_at);
+  return {
+    configured, observed, currency: bb.currency ?? null,
+    observed_at: bb.observed_at,
+    observation_age_minutes: Number.isFinite(ageMs) ? Math.round(ageMs / 60000) : null,
+    divergence_pct: pct,
+    divergent: Math.abs(pct) > ACCOUNT_SIZE_DIVERGENCE_PCT,
+    stale: !Number.isFinite(ageMs) || ageMs > 6 * 60 * 60_000,
+    risk_per_trade_at_configured: null,   // filled by the caller which knows RISK_PCT
+    note: 'account_size is authoritative for sizing and heat; broker_balance is observed only and never overwrites it'
+  };
+}
+
+setInterval(() => {
+  if (Date.now() < livePosBackoffUntil) return;
+  refreshLivePositionsOnce()
+    .then(n => {
+      if (livePosFailures) console.log(`[live-positions] recovered after ${livePosFailures} failure(s)`);
+      livePosFailures = 0; livePosLastError = null; livePosBackoffUntil = 0;
+      livePosLastOk = new Date().toISOString();
+    })
+    .catch(e => {
+      livePosFailures++;
+      livePosLastError = e.message;
+      // Back off rather than hammer, but never stop permanently: the cap
+      // means a Capital outage delays the feed, it does not disable it.
+      const backoff = Math.min(LIVE_POS_MAX_BACKOFF_MS,
+        LIVE_POS_REFRESH_MS * Math.pow(2, Math.min(livePosFailures, 4)));
+      livePosBackoffUntil = Date.now() + backoff;
+      console.error(`[live-positions] refresh failed (${livePosFailures}): ${e.message} — retrying in ${Math.round(backoff / 1000)}s`);
+    });
+}, LIVE_POS_REFRESH_MS).unref?.();
+
+initFleetStore()
+  .then(() => refreshFleetState())
+  .catch(e => console.error('[fleet] init failed:', e.message));
 
 // ════════════════════════════════════════════════════════════
 // CENTRALIZED CONFIG — single source of truth for all scanners
@@ -1886,36 +2712,45 @@ app.get('/api/proxy/fmp/stats', serviceOrAdmin, (req, res) => {
 // Public (no auth) so n8n can fetch without credentials.
 app.get('/api/config', async (req, res) => {
   const base = { ...(db.data.scanner_config || {}) };
+  const safeBase=Object.fromEntries(CONFIG_PUBLIC_KEYS.filter(k=>Object.hasOwn(base,k)).map(k=>[k,base[k]]));
   const scanner = req.query.scanner ? String(req.query.scanner) : '';
-  if (!scanner) return res.json(base);
+  if (!scanner) return res.json(safeBase);
+  if (!SCANNER_ORDER.includes(scanner)) return res.status(404).json({error:'unknown scanner'});
   try {
     const merged = await getScannerParams(scanner);
     res.json({
-      ...base,
+      ...safeBase,
       params: merged.params,
       params_updated_at: merged.params_updated_at,
-      params_source: Object.keys(merged.params || {}).length ? 'server' : 'local'
+      params_source: Object.keys(merged.params || {}).length ? 'server' : 'local',
+      config_hash: await getConfigHash(scanner, base)
     });
   } catch (e) {
-    res.json({
-      ...base,
-      params: {},
-      params_updated_at: null,
-      params_source: 'local',
-      params_error: e.message
-    });
+    res.status(503).json({ status:'error', reason:'PARAM_STORE_UNAVAILABLE', scanner, params_error:e.message });
   }
 });
 
 // Admin updates config from dashboard Settings
 app.post('/api/config', adminOnly, async (req, res) => {
+  const updates=Object.fromEntries(Object.entries(req.body||{}).filter(([k])=>CONFIG_WRITE_KEYS.has(k)));
   db.data.scanner_config = {
     ...db.data.scanner_config,
-    ...req.body,
+    ...updates,
     updated_at: new Date().toISOString()
   };
   await save();
-  res.json({ status: 'ok', config: db.data.scanner_config });
+  res.json({ status: 'ok', config: Object.fromEntries(CONFIG_PUBLIC_KEYS.filter(k=>Object.hasOwn(db.data.scanner_config,k)).map(k=>[k,db.data.scanner_config[k]])) });
+});
+
+app.post('/api/admin/paper-only', adminOnly, async(req,res)=>{
+  const reason=String(req.body?.reason||'').trim();
+  if(!reason)return res.status(400).json({error:'reason required'});
+  const next=req.body?.paper_only;
+  if(typeof next!=='boolean')return res.status(400).json({error:'paper_only boolean required'});
+  const old=db.data.scanner_config?.paper_only===true;
+  db.data.scanner_config={...(db.data.scanner_config||{}),paper_only:next,updated_at:now()};
+  await recordConfigChangelog({parameter:'paper_only',old_value:old,new_value:next,reason});
+  await save(); res.json({status:'ok',paper_only:next,old_value:old,reason});
 });
 
 // ════════════════════════════════════════════════════════════
@@ -1924,9 +2759,241 @@ app.post('/api/config', adminOnly, async (req, res) => {
 
 // Scanner calls this BEFORE placing an order. Returns allowed:true/false.
 // Enforces: master kill switch, paper-only, max global heat %, max positions.
-app.post('/api/risk/check', scannerAuth, async (req, res) => {
+app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => {
   const cfg = db.data.scanner_config || {};
-  const { scanner, ticker, risk_amount = 0 } = req.body || {};
+  const body = req.body || {};
+  const { scanner, ticker, risk_amount = 0 } = body;
+  let brain = { verdict: 'INSUFFICIENT', n: 0, pct_won: null, avg_ret_1d: null, sample_ids: [] };
+  let brainVetoEnabled = false;
+  let scannerParams = {};
+  try {
+    brain = await similarOutcomeVerdict(body);
+    const params = scanner ? await getScannerParams(scanner) : { params: {} };
+    scannerParams = params.params || {};
+    brainVetoEnabled = scannerParams.BRAIN_VETO_ENABLED === true;
+  } catch (e) {
+    brain = { verdict: 'ERROR', n: 0, pct_won: null, avg_ret_1d: null, sample_ids: [], error: e.message };
+  }
+  const withBrain = (payload) => res.json({ ...payload, brain });
+  const brainReason = () => `BRAIN_VETO: ${brainStatsText(brain)}`;
+  const drawdown = await maybeAlertRiskMult(sendTelegramAlert).catch(e => ({ risk_mult: 1, drawdown_pct: 0, error: e.message }));
+  const withLayer3 = (payload) => ({
+    risk_mult: drawdown.risk_mult,
+    drawdown_pct: drawdown.drawdown_pct,
+    risk_mult_alert_sent: drawdown.sent === true,
+    ...payload
+  });
+  const blockBreaker = async (code, detail) => {
+    const reason=`SYSTEM_BREAKER:${code}`;
+    const rejection = { id:nid('rejections'), ts:now(), scanner:scanner||'unknown', ticker:ticker||'UNKNOWN', reason, detail, measurement_population:'NEVER_ENTERED', config_hash:await getConfigHash(scanner||'unknown', cfg) };
+    db.data.rejections.unshift(rejection);
+    await saveRejectionHot(rejection);
+    await journalEvent('breaker_trip', rejection).catch(()=>{});
+    return withBrain(withLayer3({ allowed:false, reason, paper_only:cfg.paper_only===true }));
+  };
+
+  if (cfg.kill_switch === true) {
+    return withBrain(withLayer3({ allowed: false, reason: 'KILL_SWITCH active - all new orders blocked', paper_only: false }));
+  }
+
+  // R1: risk_amount was destructured with a default of 0 and never validated.
+  // Omitted -> heat never rises (0 added to currentRisk). Non-numeric ->
+  // NaN > maxHeat is FALSE, so the cap silently passes. Reject both here,
+  // before risk_amount reaches any arithmetic below.
+  const riskAmountNum = Number(risk_amount);
+  if (!Number.isFinite(riskAmountNum) || riskAmountNum < 0) {
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: 'INVALID_RISK_AMOUNT: risk_amount must be a finite, non-negative number',
+      paper_only: cfg.paper_only === true
+    }));
+  }
+
+  // R2: etDay is an ET calendar date, but timestamps are stored as UTC ISO
+  // strings, so slice(0,10) yielded the UTC date. Between 00:00-04:00 UTC the
+  // two disagree, which reset MAX_ORDERS_PER_DAY and MAX_DAILY_LOSS_R at
+  // ~20:00 ET -- mid-session. Convert each trade's timestamp to ET before
+  // comparing, rather than slicing the raw string.
+  const etDay = etDateOf(new Date());
+  const scannerTrades = (db.data.trades||[]).filter(t => String(t.scanner||'').toLowerCase()===String(scanner||'').toLowerCase());
+  const openedToday = scannerTrades.filter(t => etDateOf(t.opened_at||t.ts)===etDay);
+  const maxOrders = Number(scannerParams.MAX_ORDERS_PER_DAY ?? 3);
+  if (openedToday.length >= maxOrders) return blockBreaker('MAX_ORDERS_PER_DAY',`${openedToday.length}/${maxOrders}`);
+  const closedToday = scannerTrades.filter(t => t.status==='CLOSED' && etDateOf(t.closed_at)===etDay);
+  const lossR = Math.abs(closedToday.reduce((s,t) => {
+    const risk=Number(t.risk_amount??t.risk_usd??0), pnl=Number(t.pnl??0); return s+(risk>0&&pnl<0?pnl/risk:0);
+  },0));
+  const maxLossR = Number(scannerParams.MAX_DAILY_LOSS_R ?? 3);
+  if (lossR >= maxLossR) return blockBreaker('MAX_DAILY_LOSS_R',`${lossR.toFixed(2)}/${maxLossR}`);
+  const resetAt = cfg.loss_halt_reset_at?.[String(scanner||'').toLowerCase()] || '';
+  const recentClosed = scannerTrades.filter(t=>t.status==='CLOSED'&&(!resetAt||new Date(t.closed_at)>new Date(resetAt))).sort((a,b)=>new Date(b.closed_at)-new Date(a.closed_at));
+  // R3: a null-pnl close used to reset this streak. Number(null) is 0, which is
+  // not < 0, so the loop hit `else break` and the streak read zero -- un-halting
+  // a scanner that had genuinely lost N in a row. FAIL OPEN. A close with no
+  // recorded pnl is an UNKNOWN outcome, not a win: skip it and keep counting.
+  // NOTE: Number(null) === 0, which IS finite -- so a bare Number.isFinite()
+  // guard does NOT catch a null pnl. null/undefined must be tested before
+  // coercion, or the exact bug this fixes survives the fix.
+  let consecutiveLosses=0;
+  for (const t of recentClosed) {
+    if (t.pnl === null || t.pnl === undefined) continue;  // unknown outcome
+    const pnl = Number(t.pnl);
+    if (!Number.isFinite(pnl)) continue;                  // NaN / Infinity / junk
+    if (pnl < 0) consecutiveLosses++; else break;          // 0 = breakeven, correctly ends the streak
+  }
+  const lossHalt = Number(scannerParams.CONSECUTIVE_LOSS_HALT ?? 5);
+  if (consecutiveLosses >= lossHalt) return blockBreaker('CONSECUTIVE_LOSS_HALT',`${consecutiveLosses}/${lossHalt}; manual reset required`);
+
+  const ledger = db.data.risk_ledger || [];
+  const acct = cfg.account_size || 10000;
+  const assetClass=classifyAssetClass(ticker,scanner);
+  let gapMult=Number(scannerParams.GAP_MULT ?? (assetClass==='index'?1.5:assetClass==='commodity'?1.5:assetClass==='forex'?1.2:assetClass==='crypto'?1.3:2));
+  if(assetClass==='us_stock'){try{const eg=await guardResult(String(ticker||'').toUpperCase());if(eg.blocked)gapMult=Math.max(gapMult,2);}catch{}}
+  const isOvernight=p=>p.overnight===true||String(p.opened_at||'').slice(0,10)<now().slice(0,10);
+  const currentRisk = Number(ledger.reduce((s, p) => s + (Number(p.risk_amount) || 0)*(isOvernight(p)?Number(p.gap_mult||({index:1.5,commodity:1.5,forex:1.2,crypto:1.3,us_stock:2}[classifyAssetClass(p.ticker,p.scanner)]||1)):1), 0)) || 0;
+  const worstCaseRisk=riskAmountNum*gapMult;
+  const currentHeatPct = (currentRisk / acct) * 100;
+  const newHeatPct = ((currentRisk + (body.overnight===true?worstCaseRisk:riskAmountNum)) / acct) * 100;
+  const maxHeat = cfg.max_global_heat_pct || 20;
+  const maxPos = cfg.max_open_positions || 10;
+  const heat = correlationHeat(ledger, body, acct);
+
+  if (ledger.length >= maxPos) {
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: `Max global positions reached (${ledger.length}/${maxPos})`,
+      current_heat_pct: +currentHeatPct.toFixed(2),
+      effective_heat_pct: heat.effective_heat_pct,
+      class_direction_count: heat.class_direction_count,
+      paper_only: cfg.paper_only === true
+    }));
+  }
+
+  if (heat.class_direction_count >= 5) {
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: `CONCENTRATION: 5 ${heat.direction.toLowerCase()} ${heat.asset_class} already open`,
+      current_heat_pct: +currentHeatPct.toFixed(2),
+      projected_heat_pct: +newHeatPct.toFixed(2),
+      effective_heat_pct: heat.effective_heat_pct,
+      class_direction_count: heat.class_direction_count,
+      paper_only: cfg.paper_only === true
+    }));
+  }
+
+  if (newHeatPct > maxHeat) {
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: `Global heat ${newHeatPct.toFixed(1)}% would exceed ${maxHeat}% cap (current ${currentHeatPct.toFixed(1)}%)`,
+      current_heat_pct: +currentHeatPct.toFixed(2),
+      effective_heat_pct: heat.effective_heat_pct,
+      class_direction_count: heat.class_direction_count,
+      paper_only: cfg.paper_only === true
+    }));
+  }
+
+  if (heat.effective_heat_pct > maxHeat) {
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: `CORRELATION_HEAT: effective heat ${heat.effective_heat_pct.toFixed(1)}% would exceed ${maxHeat}% cap`,
+      current_heat_pct: +currentHeatPct.toFixed(2),
+      projected_heat_pct: +newHeatPct.toFixed(2),
+      effective_heat_pct: heat.effective_heat_pct,
+      class_direction_count: heat.class_direction_count,
+      paper_only: cfg.paper_only === true
+    }));
+  }
+
+  if (brain.verdict === 'VETO' && brainVetoEnabled) {
+    await journalEvent('brain_veto', { scanner, ticker, payload:{ mode:'enforced', brain } }).catch(()=>{});
+    return withBrain(withLayer3({
+      allowed: false,
+      reason: brainReason(),
+      paper_only: false,
+      current_heat_pct: +currentHeatPct.toFixed(2),
+      projected_heat_pct: +newHeatPct.toFixed(2),
+      effective_heat_pct: heat.effective_heat_pct,
+      class_direction_count: heat.class_direction_count,
+      open_positions: ledger.length,
+      brain_veto_enabled: true
+    }));
+  }
+
+  if (brain.verdict === 'VETO' && !brainVetoEnabled) {
+    try {
+      const shadowRejection = {
+        id: nid('rejections'),
+        ts: now(),
+        scanner: scanner || 'unknown',
+        ticker: ticker || 'UNKNOWN',
+        reason: `BRAIN_SHADOW_VETO: ${brainStatsText(brain)}`,
+        detail: 'Shadow mode only; risk/check allowed value was not changed.',
+        direction: body.direction || '',
+        intended_entry: body.intended_entry ?? body.entry ?? null,
+        intended_sl: body.intended_sl ?? body.sl ?? null,
+        intended_tp1: body.intended_tp1 ?? body.tp1 ?? body.tp ?? null,
+        intended_tp2: body.intended_tp2 ?? body.tp2 ?? null,
+        rejected_price: body.rejected_price ?? body.entry ?? body.intended_entry ?? null,
+        rejected_time: body.ts || now(),
+        score: body.score ?? body.quality_score ?? null,
+        brain_response: brain,
+        shadow_mode: true
+        ,measurement_population: 'NEVER_ENTERED'
+      };
+      db.data.rejections.unshift(shadowRejection);
+      if (db.data.rejections.length > 500) db.data.rejections = db.data.rejections.slice(0, 500);
+      await saveRejectionHot(shadowRejection);
+      await journalEvent('brain_veto', { scanner, ticker, payload:{ mode:'shadow', brain } }).catch(()=>{});
+    } catch (e) {
+      console.error('BRAIN_SHADOW_VETO log failed:', e.message);
+    }
+  }
+
+  if(body.probe_only===true&&scanner==='test_harness'&&String(ticker||'').startsWith('ZZ'))return withBrain(withLayer3({allowed:true,probe_only:true,gap_mult:gapMult,worst_case_risk:+worstCaseRisk.toFixed(2),paper_only:cfg.paper_only===true,current_heat_pct:+currentHeatPct.toFixed(2),projected_heat_pct:+newHeatPct.toFixed(2),effective_heat_pct:heat.effective_heat_pct,class_direction_count:heat.class_direction_count,open_positions:ledger.length,brain_veto_enabled:brainVetoEnabled}));
+  const reservationId=`risk_${crypto.randomUUID()}`, expiresAt=new Date(Date.now()+60000).toISOString();
+  const reservation={scanner,ticker,deal_id:reservationId,reservation_id:reservationId,risk_amount:Number(risk_amount),direction:body.direction||'LONG',asset_class:assetClass,opened_at:now(),status:'PENDING',expires_at:expiresAt,gap_mult:gapMult,overnight:body.overnight===true};
+  ledger.push(reservation);
+  // Targeted single-row insert, NOT save(). save() syncs every collection in one
+  // transaction and holds a DELETE lock on risk_ledger; measured at 3.1s per call
+  // and serializing concurrent checks to 15.6s at 5-way. The scanner timeout is 3s.
+  try { await insertReservationPostgres(reservation); }
+  catch (e) {
+    ledger.splice(ledger.indexOf(reservation),1);   // do not hand out a slot we failed to record
+    console.error('[PERSISTENCE_FAILURE] reservation', e.message);
+    await sendTelegramAlert(`PERSISTENCE FAILURE: risk reservation could not be written (${e.message}). Gate rejected the request.`).catch(()=>{});
+    return res.status(500).json({status:'error',reason:'PERSISTENCE_FAILURE',message:e.message});
+  }
+  return withBrain(withLayer3({
+    allowed: true,
+    reservation_id: reservationId,
+    reservation_expires_at: expiresAt,
+    gap_mult: gapMult,
+    worst_case_risk: +worstCaseRisk.toFixed(2),
+    paper_only: cfg.paper_only === true,
+    current_heat_pct: +currentHeatPct.toFixed(2),
+    projected_heat_pct: +newHeatPct.toFixed(2),
+    effective_heat_pct: heat.effective_heat_pct,
+    class_direction_count: heat.class_direction_count,
+    open_positions: ledger.length,
+    brain_veto_enabled: brainVetoEnabled
+  }));
+});
+
+app.post('/api/risk/check-legacy', scannerAuth, async (req, res) => {
+  const cfg = db.data.scanner_config || {};
+  const body = req.body || {};
+  const { scanner, ticker, risk_amount = 0 } = body;
+  let brain = { verdict: 'INSUFFICIENT', n: 0, pct_won: null, avg_ret_1d: null, sample_ids: [] };
+  let brainVetoEnabled = false;
+  try {
+    brain = await similarOutcomeVerdict(body);
+    const params = scanner ? await getScannerParams(scanner) : { params: {} };
+    brainVetoEnabled = params.params?.BRAIN_VETO_ENABLED === true;
+  } catch (e) {
+    brain = { verdict: 'ERROR', n: 0, pct_won: null, avg_ret_1d: null, sample_ids: [], error: e.message };
+  }
+  const withBrain = (payload) => res.json({ ...payload, brain });
+  const brainReason = () => `BRAIN_VETO: ${brainStatsText(brain)}`;
 
   // Master kill switch
   if (cfg.kill_switch === true) {
@@ -1972,31 +3039,124 @@ app.post('/api/risk/check', scannerAuth, async (req, res) => {
 
 // Scanner registers an opened position into the ledger
 app.post('/api/risk/open', scannerAuth, async (req, res) => {
-  const { scanner, ticker, deal_id, risk_amount = 0 } = req.body || {};
+ try {
+  const { scanner, ticker, deal_id, direction = 'LONG' } = req.body || {};
   if (!deal_id || deal_id === 'UNKNOWN') return res.status(400).json({ error: 'valid deal_id required' });
+
+  // No default. A missing risk_amount used to become 0, and a zero row is
+  // a position the heat cap cannot see -- it consumes a slot while
+  // contributing nothing to heat.
+  //
+  // null/undefined are tested BEFORE coercion on purpose: Number(null) is
+  // 0 and IS finite, so Number.isFinite() alone would pass a missing
+  // value straight through as zero, which is the bug being removed.
+  const rawRisk = req.body?.risk_amount;
+  if (rawRisk === undefined || rawRisk === null || rawRisk === '') {
+    return res.status(400).json({
+      status: 'error', reason: 'MISSING_RISK_AMOUNT',
+      message: 'risk_amount is required on risk/open; a reservation of unknown size cannot be counted against heat',
+      scanner: scanner ?? null, ticker: ticker ?? null, deal_id
+    });
+  }
+  const riskNum = Number(rawRisk);
+  if (!Number.isFinite(riskNum) || riskNum <= 0) {
+    return res.status(400).json({
+      status: 'error', reason: 'INVALID_RISK_AMOUNT',
+      message: `risk_amount must be a positive finite number on risk/open; received ${JSON.stringify(rawRisk)}. Zero remains valid on risk/check, where it means "no position, nothing to reserve".`,
+      scanner: scanner ?? null, ticker: ticker ?? null, deal_id
+    });
+  }
   db.data.risk_ledger = db.data.risk_ledger || [];
-  // Avoid duplicate by deal_id
-  db.data.risk_ledger = db.data.risk_ledger.filter(p => p.deal_id !== deal_id);
-  db.data.risk_ledger.push({
+  const requested=String(req.body?.reservation_id||'');
+  const pending=db.data.risk_ledger.find(p=>p.status==='PENDING'&&new Date(p.expires_at)>new Date()&&((requested&&p.reservation_id===requested)||(!requested&&p.scanner===scanner&&p.ticker===ticker)));
+  const snapshot = db.data.risk_ledger;                       // for fail-closed rollback
+  const position = {
     scanner, ticker, deal_id,
-    risk_amount: Number(risk_amount),
-    opened_at: new Date().toISOString()
-  });
-  await save();
+    risk_amount: riskNum,
+    direction,
+    asset_class: classifyAssetClass(ticker, scanner),
+    opened_at: new Date().toISOString(), status:'OPEN', expires_at:null, reservation_id:pending?.reservation_id||requested||null
+  };
+  db.data.risk_ledger = db.data.risk_ledger.filter(p => p.deal_id !== deal_id && p!==pending);
+  db.data.risk_ledger.push(position);
+  // Targeted DELETE+UPSERT, NOT save(). save() syncs every collection in one
+  // transaction holding a DELETE lock on risk_ledger; measured 2026-08-08 under
+  // a concurrent scanner cycle at p50 5601ms / p95 7189ms on this endpoint,
+  // which also blocked /api/risk/check to p95 3198ms.
+  try { await openPositionPostgres(position, pending?.deal_id || null); }
+  catch (e) {
+    db.data.risk_ledger = snapshot;                           // never consume a reservation we failed to record
+    console.error('[PERSISTENCE_FAILURE] risk/open', e.message);
+    await sendTelegramAlert(`PERSISTENCE FAILURE: risk/open could not record ${deal_id} (${e.message}). Position NOT registered; ledger unchanged.`).catch(()=>{});
+    return res.status(500).json({ status:'error', reason:'PERSISTENCE_FAILURE', message:e.message });
+  }
   res.json({ status: 'ok', open_positions: db.data.risk_ledger.length });
+ } catch(error) { res.status(500).json({ status:'error', reason:'PERSISTENCE_FAILURE', message:error.message }); }
 });
+
+// Reservation watchdog. Separate from the sweeper so it still fires when the
+// sweeper cannot clear rows. Telegram is throttled to once per 30 min per
+// condition so a stuck ledger does not spam.
+let lastReservationAlertAt = 0;
+setInterval(async () => {
+  try {
+    const h = await buildHealthPayload();
+    const bad = [...(h.issues||[]), ...(h.warnings||[])]
+      .filter(i => i === 'pending_reservations_high' || i === 'reservation_stuck');
+    if (!bad.length) { lastReservationAlertAt = 0; return; }
+    if (Date.now() - lastReservationAlertAt < 30 * 60_000) return;
+    lastReservationAlertAt = Date.now();
+    const msg = `RISK RESERVATION ALERT: ${bad.join(', ')} — pending=${h.counts.pending_reservations}, ` +
+      `oldest=${h.counts.oldest_reservation_age_s}s, open_positions=${h.counts.risk_positions}/` +
+      `${db.data.scanner_config?.max_open_positions ?? 10}. Reservations hold position slots; ` +
+      `if they are not converting, scanners will be blocked.`;
+    console.error('[reservation-watchdog]', msg);
+    await sendTelegramAlert(msg).catch(() => {});
+  } catch (e) { console.error('[reservation-watchdog]', e.message); }
+}, 60_000).unref?.();
+
+setInterval(async()=>{
+  try {
+    const before=(db.data.risk_ledger||[]).length;
+    db.data.risk_ledger=(db.data.risk_ledger||[]).filter(p=>p.status!=='PENDING'||new Date(p.expires_at)>new Date());
+    // Targeted DELETE rather than save(), same reason as the reservation write.
+    const swept=await sweepExpiredReservationsPostgres();
+    if(swept.length||db.data.risk_ledger.length!==before)
+      console.log('[risk-reservation-sweeper] released',swept.length,'reservation(s)');
+  } catch(e){ console.error('[risk-reservation-sweeper]',e.message); }
+},15000).unref?.();
 
 // Scanner clears a closed position from the ledger
 app.post('/api/risk/close', scannerAuth, async (req, res) => {
+ try {
   const { deal_id } = req.body || {};
   if (!deal_id || deal_id === 'UNKNOWN') return res.status(400).json({ error: 'valid deal_id required' });
-  db.data.risk_ledger = (db.data.risk_ledger || []).filter(p => p.deal_id !== deal_id);
-  await save();
-  res.json({ status: 'ok', open_positions: db.data.risk_ledger.length });
+  const ledger = db.data.risk_ledger || [];
+  const existing = ledger.find(p => p.deal_id === deal_id);
+  // No match: skip the write entirely. A nonexistent deal_id previously paid
+  // the full save() (~3.2-3.9s isolated, measured up to 43s under organic
+  // production load) to change nothing. Confirmed no scanner or manager
+  // relies on this call ever mutating state when the id is unknown.
+  if (!existing) return res.json({ status: 'ok', open_positions: ledger.length, matched: false });
+  db.data.risk_ledger = ledger.filter(p => p !== existing);
+  // Targeted single-row delete, NOT save(). Same reasoning as risk/open: risk/close
+  // is the last save() on the risk path and organic risk/close latency (25 samples,
+  // 2026-06-10 to 2026-08-08 11:23Z, excludes this session's own test traffic) was
+  // p50=7437ms p95=42941ms max=43780ms, with 11/25 (44%) exceeding the scanners'
+  // 8000ms httpRequest timeout -- a real, currently-occurring exit-path failure mode.
+  try { await closePositionPostgres(deal_id); }
+  catch (e) {
+    db.data.risk_ledger = ledger;   // restore: never drop a position we failed to persist removing
+    console.error('[PERSISTENCE_FAILURE] risk/close', e.message);
+    await sendTelegramAlert(`PERSISTENCE FAILURE: risk/close could not remove ${deal_id} (${e.message}). Ledger unchanged; position still counted as open.`).catch(()=>{});
+    return res.status(500).json({ status:'error', reason:'PERSISTENCE_FAILURE', message:e.message });
+  }
+  res.json({ status: 'ok', open_positions: db.data.risk_ledger.length, matched: true });
+ } catch(error) { res.status(500).json({ status:'error', reason:'PERSISTENCE_FAILURE', message:error.message }); }
 });
 
 // Dashboard reads current global risk state
-app.get('/api/risk-status', (req, res) => {
+app.get('/api/risk-status', adminOnly, (req, res) => {
   const cfg = db.data.scanner_config || {};
   const ledger = db.data.risk_ledger || [];
   const acct = cfg.account_size || 10000;
@@ -2050,18 +3210,123 @@ app.get('/api/heartbeat/status', (req, res) => {
   res.json(out);
 });
 
-function buildHealthPayload() {
+async function buildHealthPayload() {
   const trades = db.data.trades || [];
   const tradeOpen = trades.filter(t => ['OPEN','PARTIAL'].includes(t.status)).length;
-  const riskOpen = (db.data.risk_ledger || []).length;
-  const liveOpen = Array.isArray(db.data.live_positions?.positions) ? db.data.live_positions.positions.length : 0;
+  const riskLedger = db.data.risk_ledger || [];
+  const pendingReservations = riskLedger.filter(p => p.status === 'PENDING').length;
+  const riskOpen = riskLedger.filter(p => p.status !== 'PENDING').length;
+  const livePositions = Array.isArray(db.data.live_positions?.positions) ? db.data.live_positions.positions : [];
+  const unmanagedPositionEpics = new Set(
+    String(process.env.UNMANAGED_POSITION_EPICS || '')
+      .split(',').map(v => v.trim().toUpperCase()).filter(Boolean)
+  );
+  const positionEpic = p => String(p?.market?.epic || p?.position?.epic || p?.epic || '').toUpperCase();
+  const unmanagedLive = livePositions.filter(p => unmanagedPositionEpics.has(positionEpic(p)));
+  const liveOpen = livePositions.length - unmanagedLive.length;
+  // Reconcile by EPIC, not by count. A count comparison masked an
+  // untracked unstopped RKLB for five days, then falsely alarmed on a
+  // stale US500 the broker had already closed.
+  const positionRecon = reconcilePositions({
+    trades,
+    livePositions,
+    unmanagedEpics: unmanagedPositionEpics,
+    updatedAt: db.data.live_positions?.updated_at || null,
+    now: new Date()
+  });
   const heartbeatCount = Object.keys(db.data.heartbeats || {}).length;
+  // Reservation health. A reservation is a 60s hold on a position slot taken by
+  // /api/risk/check. Sustained PENDING means risk/check is answering but
+  // /api/risk/open is not converting — the ledger fills and every scanner blocks.
+  const nowMs = Date.now();
+  const reservationAges = riskLedger
+    .filter(p => p.status === 'PENDING')
+    .map(p => (nowMs - new Date(p.opened_at || p.expires_at || nowMs).getTime()) / 1000)
+    .filter(Number.isFinite);
+  const oldestReservationAgeS = reservationAges.length ? Math.round(Math.max(...reservationAges)) : 0;
   const issues = [];
+  // ISSUE, not a warning: running on the mirror means Postgres is no longer
+  // the in-memory source, and the next save() writes the mirror back over it.
+  if (postgresLoadFailure) {
+    issues.push(`postgres_load_failed:${postgresLoadFailure.error}`);
+    if (!postgresLoadAlerted) {
+      postgresLoadAlerted = true;
+      sendTelegramAlert(`POSTGRES LOAD FAILED at ${postgresLoadFailure.at} — running from fund.json.\n` +
+        `${postgresLoadFailure.error}\n` +
+        `The mirror is now the in-memory source and save() will write it back to Postgres. Restart once the cause is fixed.`)
+        .catch(() => {});
+    }
+  }
   if (tradeOpen !== riskOpen) issues.push('trade_risk_position_mismatch');
-  if (tradeOpen !== liveOpen) issues.push('trade_live_position_mismatch');
+  // Set reconciliation replaces the count comparison. When the snapshot
+  // is stale the reconciler refuses to compare and emits a staleness
+  // warning instead of a verdict -- a dead feed must not look like a
+  // real discrepancy.
+  issues.push(...positionRecon.issues);
   if (heartbeatCount < 7) issues.push('missing_scanner_heartbeats');
   if (!SCANNER_API_KEY) issues.push('scanner_api_key_not_enforced');
   if (!corsOrigins.length) issues.push('cors_allowlist_not_configured');
+  // Only reservation_stuck is a health ISSUE (=> 503). Reservations expire at
+  // 60s, so >90s means the sweeper is failing — a real fault. A high pending
+  // count is normal during a concurrent scanner cycle and would flap health,
+  // so it is surfaced as a warning + Telegram rather than a 503.
+  if (oldestReservationAgeS > 90) issues.push('reservation_stuck');
+  // A halted fleet is not healthy: 503 is correct here, deliberately
+  // unlike the pending-reservation and drift warnings.
+  const haltCfg = db.data.scanner_config || {};
+  if (haltCfg.kill_switch === true) issues.push('kill_switch_active');
+  const warnings = [];
+  if (haltCfg.paper_only === true) warnings.push('paper_only_active');
+  // A failing refresh must be visible: without this the snapshot simply
+  // ages and only the staleness guard would eventually notice.
+  if (livePosFailures > 0) warnings.push(`live_positions_refresh_failures:${livePosFailures}`);
+  if (pendingReservations > 3) warnings.push('pending_reservations_high');
+  // scanner_errors_24h is a WARNING, never an issue -- a burst of reported
+  // scanner-side failures should not itself take the dashboard to 503.
+  const scannerErrors = await scannerErrorStats().catch(() => ({ total: 0, by_scanner_stage: [] }));
+  if (scannerErrors.total > 0) warnings.push('scanner_errors_present');
+
+  // Acting without recording. NOT "few rejections" -- a scanner may
+  // legitimately reject nothing. This fires only when the trading path
+  // ran and produced no signal, no rejection and no trade at all.
+  const tgap = await telemetryGaps().catch(() => null);
+  if (tgap?.gaps?.length) {
+    for (const g of (tgap.scanners||[]).filter(x=>x.gap)) warnings.push(`telemetry_gap:${g.scanner}:${g.gap_type}`);
+  }
+
+  // Name BOTH figures in the warning. "account_size_divergent" alone
+  // sends the reader hunting; the numbers are the point.
+  const acctDiv = accountSizeDivergence();
+  if (acctDiv.divergent) {
+    warnings.push(`account_size_divergent:configured=${acctDiv.configured} vs broker=${acctDiv.observed} (${acctDiv.divergence_pct > 0 ? '+' : ''}${acctDiv.divergence_pct}%)`);
+  }
+  if (acctDiv.stale && acctDiv.observed === null) warnings.push('broker_balance_never_observed');
+  else if (acctDiv.stale) warnings.push('broker_balance_stale');
+  if (brokerBalFailures > 0) warnings.push(`broker_balance_refresh_failures:${brokerBalFailures}`);
+  warnings.push(...positionRecon.warnings);
+  // Outcome rows that exist but were never labelled. A WARNING, never an
+  // issue: this must not flap health to 503.
+  try {
+    const bl = await outcomeBacklogCounts();
+    if (bl) {
+      if (bl.unlabeled_partial > 0) warnings.push(`unlabeled_partial:${bl.unlabeled_partial}`);
+      if (bl.parked_skips > 0)      warnings.push(`parked_skips:${bl.parked_skips}`);
+      if (bl.deferred_skips > 0)    warnings.push(`deferred_skips:${bl.deferred_skips}`);
+      if (bl.never_attempted > 0)   warnings.push(`never_attempted:${bl.never_attempted}`);
+    }
+  } catch (e) {
+    warnings.push('outcome_backlog_unavailable');
+  }
+  if (tickRejections.total > 0) warnings.push(`price_tick_rejections:${tickRejections.total}`);
+  // Fleet drift is a WARNING, never an issue: health must not flap to 503
+  // because a workflow version drifted. Weekend-awareness lives in
+  // computeFleetState, so a weekday-only scanner idle on Sunday is silent.
+  if (fleetCache.state) warnings.push(...fleetWarnings(fleetCache.state));
+  // An alert that cannot be delivered is not an alert.
+  if (fleetAlertDelivery && fleetAlertDelivery.ok === false) {
+    warnings.push(`fleet_alert_undelivered:${fleetAlertDelivery.detail}`);
+  }
+  else if (fleetCache.error) warnings.push('fleet_state_unavailable');
   return {
     status: issues.length ? 'degraded' : 'ok',
     timestamp: now(),
@@ -2070,15 +3335,32 @@ function buildHealthPayload() {
       trades: trades.length,
       open_trades: tradeOpen,
       risk_positions: riskOpen,
+      pending_reservations: pendingReservations,
+      oldest_reservation_age_s: oldestReservationAgeS,
       live_positions: liveOpen,
-      scanner_heartbeats: heartbeatCount
+      unmanaged_live_positions: unmanagedLive.length,
+      scanner_heartbeats: heartbeatCount,
+      scanner_errors_24h: scannerErrors.total,
+      price_tick_rejections: tickRejections.total
     },
+    unmanaged_position_epics: [...unmanagedPositionEpics],
+    kill_switch: haltCfg.kill_switch === true,
+    paper_only: haltCfg.paper_only === true,
+    halt_updated_by: haltCfg.halt_updated_by || null,
+    halt_reason: haltCfg.halt_reason || null,
+    account_size: accountSizeDivergence(),
+    telemetry_gap: await telemetryGaps().catch(e => ({ error: e.message })),
+    live_positions_last_ok: livePosLastOk,
+    live_positions_failures: livePosFailures,
+    live_positions_last_error: livePosLastError,
+    position_reconciliation: positionRecon,
+    warnings,
     issues
   };
 }
 
-app.get('/api/health', (req, res) => {
-  const payload = buildHealthPayload();
+app.get('/api/health', async (req, res) => {
+  const payload = await buildHealthPayload();
   res.status(payload.issues.length ? 503 : 200).json(payload);
 });
 
@@ -2197,59 +3479,13 @@ app.post('/api/brain/record', scannerAuth, async (req, res) => {
   res.json({ status: 'ok', total_memories: db.data.trade_brain.length });
 });
 
-// Query the brain: given a new signal, how did similar past trades go?
-app.post('/api/brain/similar', scannerAuth, (req, res) => {
-  const signal = req.body || {};
-  const qf = brainFeatures(signal);
-  const brain = db.data.trade_brain || [];
-  const MIN_SIM = Number(signal.min_similarity ?? 0.55);
-
-  const scored = brain.map(r => ({ r, sim: brainSimilarity(qf, r.features) }))
-    .filter(x => x.sim >= MIN_SIM)
-    .sort((a, b) => b.sim - a.sim);
-
-  const matches = scored.slice(0, 50);
-  const n = matches.length;
-  if (n === 0) {
-    return res.json({
-      samples: 0,
-      verdict: 'NO_DATA',
-      message: 'No similar past trades yet. Brain needs more closed trades to learn this setup.',
-      query_features: qf
-    });
+// Query the brain: signal_outcomes neighbor verdict for a new candidate.
+app.post('/api/brain/similar', scannerAuth, async (req, res) => {
+  try {
+    res.json(await similarOutcomeVerdict(req.body || {}));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
-  const wins = matches.filter(m => m.r.outcome.win).length;
-  const winRate = Math.round((wins / n) * 100);
-  const rVals = matches.map(m => m.r.outcome.r_multiple).filter(v => v !== null && !isNaN(v));
-  const avgR = rVals.length ? +(rVals.reduce((a, b) => a + b, 0) / rVals.length).toFixed(2) : null;
-  const totalPnl = +matches.reduce((a, m) => a + (m.r.outcome.pnl || 0), 0).toFixed(2);
-
-  // Verdict
-  let verdict = 'NEUTRAL';
-  if (n >= 5) {
-    if (winRate >= 60 && (avgR === null || avgR > 0.3)) verdict = 'STRONG_POSITIVE';
-    else if (winRate >= 52) verdict = 'POSITIVE';
-    else if (winRate <= 40 || (avgR !== null && avgR < -0.2)) verdict = 'NEGATIVE';
-  } else {
-    verdict = 'LOW_CONFIDENCE';
-  }
-
-  res.json({
-    samples: n,
-    win_rate: winRate,
-    avg_r: avgR,
-    total_pnl: totalPnl,
-    verdict,
-    confidence: n >= 20 ? 'HIGH' : n >= 8 ? 'MEDIUM' : 'LOW',
-    top_similarity: +(matches[0].sim).toFixed(2),
-    message: `${n} similar setups: ${wins}W/${n - wins}L (${winRate}%)${avgR !== null ? `, avg ${avgR}R` : ''}`,
-    examples: matches.slice(0, 5).map(m => ({
-      ticker: m.r.ticker, setup: m.r.setup_type, direction: m.r.direction,
-      win: m.r.outcome.win, r: m.r.outcome.r_multiple, pnl: m.r.outcome.pnl,
-      similarity: +(m.sim).toFixed(2), when: m.r.recorded_at
-    })),
-    query_features: qf
-  });
 });
 
 // Brain stats — overview of what the brain has learned, broken down
@@ -2286,6 +3522,52 @@ app.get('/api/brain/stats', (req, res) => {
       return f === null ? null : f < 1 ? 'First hour' : f < 3 ? 'Mid-morning' : f < 5 ? 'Midday' : 'Afternoon';
     })
   });
+});
+
+app.get('/api/intelligence/brain/stats', adminOnly, async (_req, res) => {
+  try {
+    res.json({
+      mode: 'shadow',
+      metric: 'BRAIN_SHADOW_VETO rows joined to signal_outcomes; actually_lost means ret_1d < 0',
+      ...(await brainShadowStats())
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/intelligence/strategy-health/run', adminOnly, async (_req, res) => {
+  try {
+    res.json(await runStrategyHealth(db, { sendTelegramAlert, save }));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/intelligence/strategy-health', adminOnly, async (_req, res) => {
+  try {
+    res.json(await latestStrategyHealth());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/intelligence/equity/run', adminOnly, async (_req, res) => {
+  try {
+    const equity = await runEquityCurve(db);
+    const throttle = await maybeAlertRiskMult(sendTelegramAlert);
+    res.json({ equity, throttle });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/intelligence/equity/throttle', adminOnly, async (_req, res) => {
+  try {
+    res.json(await drawdownState());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── Serve frontend ───────────────────────────────────────────
@@ -2470,6 +3752,7 @@ app.get('/api/analytics/daily-limit-check', (req, res) => {
 
 attachScoring(app, db, {
   adminOnly,
+  serviceOrAdmin,
   now,
   fmpKey: process.env.FMP_API_KEY,
   httpGet: async (url) => {
@@ -2479,8 +3762,45 @@ attachScoring(app, db, {
 });
 
 // ── Kill switch endpoints ────────────────────────────────────
-attachParamStore(app, db, { adminOnly });
-attachLayer1(app, db, { adminOnly, fmpProxyFetch });
+// Shared deal-id resolver. Only indices resolved POSITION ids correctly;
+// building it once server-side means the other five need a one-node
+// change rather than five bespoke ports of the same logic.
+attachBrokerResolve(app, { scannerAuth, capitalLogin, invalidateCapitalSession, journalEvent });
+
+// Proving-window scoreboard. Reuses the connectivity cache so a scanner
+// whose params are NO_RUNTIME_READ says so on its own row -- its results
+// cannot be attributed to any parameter set.
+attachScoreboard(app, { adminOnly, computeParamConnectivity });
+
+// Correcting account_size drops equity without a trade occurring, so the
+// endpoint refuses to let that masquerade as a drawdown.
+attachAccountSize(app, { adminOnly, db, save, sendTelegramAlert, logChangelogRow });
+
+attachParamStore(app, db, { adminOnly, journalEvent, sendTelegramAlert });
+
+// Which dials actually reach a scanner? Derived from EXECUTED n8n run
+// data, never from workflow source -- a param present in source but
+// absent from run data is exactly what this exists to catch. Scanning
+// the 1.6 GB sqlite is slow, so ?refresh=1 is opt-in.
+app.get('/api/params/connectivity', adminOnly, async (req, res) => {
+  try {
+    const data = await computeParamConnectivity({ force: req.query.refresh === '1' });
+    res.json({ ...data, cache_age_s: connectivityCacheAge() });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+attachEventJournal(app, { adminOnly });
+attachLayer1(app, db, { adminOnly, fmpProxyFetch,
+  // Injected as a getter, not a value: the pause is armed long after this
+  // line runs, and refreshFmpBackfillPause re-reads it from disk so a pause
+  // written by another process is seen too.
+  backfillPausedUntil: () => { refreshFmpBackfillPause(); return fmpBackfillPausedUntil; } });
+attachLayer2(app, db, { adminOnly });
+attachLayer4(app, db, { adminOnly, fetchFmpRegime: fetchFmpRegimeBundle });
+attachLayer5(app, db, { adminOnly, sendTelegramAlert });
+attachEarningsGuard(app, { scannerAuth, adminOnly, fmpProxyFetch, sendTelegramAlert });
+attachExperiments(app, { adminOnly, getConfigHash, globalConfig:()=>db.data.scanner_config||{}, validateParamValue });
+attachPositionWatchdog(app, { adminOnly, db, sendTelegramAlert, save });
+app.post('/api/admin/financing/run',adminOnly,async(_req,res)=>{try{const result=await runFinancing(db);if(result.rows.length)await save();res.json(result);}catch(e){res.status(500).json({error:e.message});}});
 
 function eventMs(row) {
   const value = row?.ts || row?.rejected_time || row?.created_at || row?.iso;
@@ -2513,28 +3833,38 @@ function fleetActivitySince(cutoffMs) {
   return { signals: signalCount, rejections: rejectionCount, heartbeats: heartbeatCount, total: signalCount + rejectionCount + heartbeatCount };
 }
 
+function cryptoActivitySince(cutoffMs) {
+  const isCrypto = row => String(row?.scanner || row?.scanner_name || row?.data?.scanner || '').toLowerCase() === 'crypto';
+  const signals = (db.data.signals || []).filter(row => isCrypto(row) && eventMs(row) >= cutoffMs).length;
+  const rejections = (db.data.rejections || []).filter(row => isCrypto(row) && eventMs(row) >= cutoffMs).length;
+  const heartbeat = db.data.heartbeats?.crypto;
+  const heartbeats = heartbeat && eventMs(heartbeat) >= cutoffMs ? 1 : 0;
+  return { signals, rejections, heartbeats, total: signals + rejections + heartbeats };
+}
+
 let lastDeadmanAlertBucket = '';
 let lastHealthSignature = '';
 let healthPushPrimed = false;
 
 async function checkFleetDeadman({ simulate = false } = {}) {
-  if (!simulate && !isBerlinMarketHours()) return { ok: true, skipped: 'outside Berlin market-hours window' };
-  const cutoffMs = Date.now() - 30 * 60_000;
-  const activity = simulate ? { signals: 0, rejections: 0, heartbeats: 0, total: 0 } : fleetActivitySince(cutoffMs);
+  const marketHours = isBerlinMarketHours();
+  const windowMinutes = marketHours ? 30 : 60;
+  const cutoffMs = Date.now() - windowMinutes * 60_000;
+  const activity = simulate ? { signals: 0, rejections: 0, heartbeats: 0, total: 0 } : (marketHours ? fleetActivitySince(cutoffMs) : cryptoActivitySince(cutoffMs));
   if (activity.total > 0) return { ok: true, sent: false, activity };
-  const bucket = new Date(Math.floor(Date.now() / (30 * 60_000)) * 30 * 60_000).toISOString();
+  const bucket = `${marketHours ? 'fleet' : 'crypto'}:${new Date(Math.floor(Date.now() / (windowMinutes * 60_000)) * windowMinutes * 60_000).toISOString()}`;
   if (!simulate && lastDeadmanAlertBucket === bucket) {
     return { ok: true, sent: false, skipped: 'already alerted this silent bucket', activity };
   }
   const clock = berlinClockParts();
-  const message = `${simulate ? '[TEST] ' : ''}FLEET SILENT: zero signals + rejections + heartbeats in the last 30 minutes. Berlin ${clock.weekday} ${clock.hour}:${clock.minute}.`;
+  const message = `${simulate ? '[TEST] ' : ''}${marketHours ? 'FLEET' : 'CRYPTO'} SILENT: zero signals + rejections + heartbeats in the last ${windowMinutes} minutes. Berlin ${clock.weekday} ${clock.hour}:${clock.minute}.`;
   const telegram = await sendTelegramAlert(message);
   if (!simulate) lastDeadmanAlertBucket = bucket;
   return { ok: telegram.ok, sent: true, activity, message, telegram };
 }
 
 async function checkHealthChange({ simulate = false } = {}) {
-  const payload = buildHealthPayload();
+  const payload = await buildHealthPayload();
   const signature = JSON.stringify({
     status: simulate ? `test-${payload.status}` : payload.status,
     issues: [...(payload.issues || [])].sort()
@@ -2551,6 +3881,78 @@ async function checkHealthChange({ simulate = false } = {}) {
   if (!simulate) lastHealthSignature = signature;
   return { ok: telegram.ok, sent: true, message, health: payload, telegram };
 }
+
+let lastDigestLondonDay = '';
+function londonClockParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).formatToParts(date);
+  return Object.fromEntries(parts.map(p => [p.type, p.value]));
+}
+
+async function runDailyDigest({ force = false } = {}) {
+  const clock = londonClockParts();
+  const day = `${clock.year}-${clock.month}-${clock.day}`;
+  if (!force && (clock.hour !== '07' || lastDigestLondonDay === day)) return { ok: true, skipped: true };
+  const brain = await brainShadowStats();
+  const vetoes = Number(brain.overall?.total_shadow_vetoes ?? brain.shadow_vetoes ?? brain.vetoes ?? brain.total ?? 0);
+  const labeled = Number(brain.overall?.labeled ?? brain.labeled ?? brain.labeled_vetoes ?? 0);
+  const crypto = cryptoActivitySince(Date.now() - 12 * 60 * 60_000);
+  const fleet = fleetActivitySince(Date.now() - 60 * 60_000);
+  const budget = fmpBudgetSnapshot();
+  const health = await buildHealthPayload();
+  const newest = (db.data.filter_verdicts || [])[0] || null;
+  const financing = await financingDigestLines();
+  const scannerErrors = await scannerErrorStats().catch(() => ({ total: 0, by_scanner_stage: [] }));
+  const scannerErrorLines = scannerErrors.total
+    ? scannerErrors.by_scanner_stage.map(r => `  ${r.scanner}/${r.stage} (${r.error_class}): ${r.n}`)
+    : ['  none'];
+  const margin = db.data.binance_margin_status;
+  const priority = margin && Number(margin.margin_level) < 1.5 ? `CRITICAL: Binance cross-margin ${Number(margin.margin_level).toFixed(3)}` : null;
+  // Per-scanner block. buildScoreboard only reads, and scannerDigestLines is
+  // pure, so this adds no side effect to the digest.
+  let scannerLines;
+  try {
+    scannerLines = scannerDigestLines(await buildScoreboard({ days: 7 }));
+  } catch (e) {
+    scannerLines = [`  (scoreboard unavailable: ${e.message})`];
+  }
+  const message = [
+    ...(priority ? [priority] : []),
+    `PRIORITY: brain shadow — vetoes ${vetoes}, labeled ${labeled}, days-to-review ${Math.max(0, 30 - labeled)}`,
+    `Fleet 60m: ${fleet.total} events; overnight crypto: ${crypto.total}`,
+    `FMP budget runway: ${budget.backfill_remaining}/${budget.backfill_daily_cap}`,
+    `Newest verdict/evaluation: ${newest ? `${newest.scanner || '?'} ${newest.verdict || newest.reason || '?'}` : 'none'}`,
+    `Health: ${health.status}${health.issues?.length ? ` — ${health.issues.join(', ')}` : ''}`,
+    `Scanner errors (24h): ${scannerErrors.total}`,
+    ...scannerErrorLines,
+    'Per scanner (7d):',
+    ...scannerLines,
+    ...financing
+  ].join('\n');
+  const telegram = await sendTelegramAlert(message);
+  if (telegram.ok) lastDigestLondonDay = day;
+  return { ok: telegram.ok, day, message, telegram };
+}
+
+app.post('/api/admin/digest/run', adminOnly, async (_req, res) => {
+  try { res.json(await runDailyDigest({ force: true })); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/risk/reset-loss-halt', adminOnly, async (req,res) => {
+  const scanner=String(req.body?.scanner||'').toLowerCase();
+  if (!scanner) return res.status(400).json({error:'scanner required'});
+  db.data.scanner_config.loss_halt_reset_at ||= {};
+  db.data.scanner_config.loss_halt_reset_at[scanner]=now();
+  await save();
+  res.json({status:'ok',scanner,reset_at:db.data.scanner_config.loss_halt_reset_at[scanner]});
+});
+app.post('/api/admin/risk/breakers/test', adminOnly, (req,res) => {
+  const b=req.body||{}, maxOrders=Number(b.max_orders??3), maxLossR=Number(b.max_daily_loss_r??3), maxConsecutive=Number(b.consecutive_loss_halt??5);
+  let reason=null;
+  if(Number(b.orders_today||0)>=maxOrders) reason=`MAX_ORDERS_PER_DAY: ${b.orders_today}/${maxOrders}`;
+  else if(Number(b.daily_loss_r||0)>=maxLossR) reason=`MAX_DAILY_LOSS_R: ${Number(b.daily_loss_r).toFixed(2)}/${maxLossR}`;
+  else if(Number(b.consecutive_losses||0)>=maxConsecutive) reason=`CONSECUTIVE_LOSS_HALT: ${b.consecutive_losses}/${maxConsecutive}; manual reset required`;
+  res.json({allowed:!reason,reason,simulation:true});
+});
 
 app.post('/api/admin/alerts/deadman/test', adminOnly, async (req, res) => {
   try {
@@ -2575,23 +3977,74 @@ function startFleetMonitors() {
   const healthTimer = setInterval(() => {
     checkHealthChange().catch(e => console.error('health-change monitor failed', e));
   }, 60_000);
+  const digestTimer = setInterval(() => {
+    runDailyDigest().catch(e => console.error('daily digest failed', e));
+  }, 60_000);
   deadmanTimer.unref?.();
   healthTimer.unref?.();
+  digestTimer.unref?.();
   checkHealthChange().catch(e => console.error('health-change monitor prime failed', e));
 }
 
 app.get('/api/admin/kill-switch', adminOnly, (req, res) => {
   const cfg = db.data.scanner_config || {};
-  res.json({ kill_switch: cfg.kill_switch === true, paper_only: cfg.paper_only === true, updated_at: cfg.updated_at || null });
+  res.json({
+    kill_switch: cfg.kill_switch === true,
+    paper_only: cfg.paper_only === true,
+    updated_at: cfg.updated_at || null,
+    updated_by: cfg.halt_updated_by || null,
+    reason: cfg.halt_reason || null
+  });
 });
 app.post('/api/admin/kill-switch', adminOnly, async (req, res) => {
-  const { active, paper_only } = req.body || {};
+  const { active, paper_only, reason } = req.body || {};
+  // Leaving a halt must be at least as deliberate as entering one, so the
+  // reason is required in BOTH directions and for either field.
+  const why = String(reason || '').trim();
+  if (!why) return res.status(400).json({ error: 'reason required for any kill-switch or paper_only change' });
+  if (active === undefined && paper_only === undefined) {
+    return res.status(400).json({ error: 'nothing to change: supply active and/or paper_only' });
+  }
   db.data.scanner_config = db.data.scanner_config || {};
-  if (active !== undefined) db.data.scanner_config.kill_switch = active === true;
-  if (paper_only !== undefined) db.data.scanner_config.paper_only = paper_only === true;
-  db.data.scanner_config.updated_at = now();
+  const cfg = db.data.scanner_config;
+  const who = req.investorId || 'admin';
+  // Real previous values, captured before mutation -- never a literal.
+  const prevKill = cfg.kill_switch === true;
+  const prevPaper = cfg.paper_only === true;
+
+  if (active !== undefined) cfg.kill_switch = active === true;
+  if (paper_only !== undefined) cfg.paper_only = paper_only === true;
+  cfg.updated_at = now();
+  cfg.halt_updated_by = who;
+  cfg.halt_reason = why;
   await save();
-  res.json({ status: 'ok', kill_switch: db.data.scanner_config.kill_switch, paper_only: db.data.scanner_config.paper_only });
+
+  const transitions = [];
+  if (active !== undefined && cfg.kill_switch !== prevKill) transitions.push(['kill_switch', prevKill, cfg.kill_switch]);
+  if (paper_only !== undefined && cfg.paper_only !== prevPaper) transitions.push(['paper_only', prevPaper, cfg.paper_only]);
+
+  for (const [field, from, to] of transitions) {
+    // BOTH directions. Turning the fleet back ON previously left no record
+    // at all, which made the more dangerous action the unlogged one.
+    await journalEvent(field === 'kill_switch' ? (to ? 'halt' : 'resume') : 'paper_only_change', {
+      scanner: 'all',
+      payload: { field, old_value: from, new_value: to, reason: why, changed_by: who }
+    }).catch(() => {});
+    await logChangelogRow({
+      scanner: 'all', parameter: field, old_value: from, new_value: to,
+      reason: why, approved_by: `admin:${who}`
+    });
+    sendTelegramAlert(
+      `${field === 'kill_switch' ? (to ? 'FLEET HALTED' : 'FLEET RESUMED') : 'PAPER_ONLY ' + (to ? 'ON' : 'OFF')}\n` +
+      `field: ${field}\nfrom: ${from}\nto: ${to}\nby: ${who}\nreason: ${why}`
+    ).catch(() => {});
+  }
+
+  res.json({
+    status: 'ok', kill_switch: cfg.kill_switch, paper_only: cfg.paper_only,
+    transitions: transitions.map(([f, from, to]) => ({ field: f, from, to })),
+    updated_by: who, reason: why
+  });
 });
 
 // ── Request timeout ──────────────────────────────────────────
@@ -2619,4 +4072,12 @@ app.listen(PORT, () => {
   if (!corsOrigins.length) console.warn('WARNING: CORS_ORIGINS is unset; cross-origin requests are unrestricted.');
   if (!process.env.ADMIN_PIN || process.env.ADMIN_PIN === '1234') console.warn('WARNING: default ADMIN_PIN is active.');
   startFleetMonitors();
+  startLayer3Jobs(db, { sendTelegramAlert, save });
+  startLayer4Jobs({ fetchFmpRegime: fetchFmpRegimeBundle });
+  startLayer5Jobs({ sendTelegramAlert });
+  startEarningsGuardJobs({ fmpProxyFetch });
+  startExperimentJobs();
+  startPositionWatchdogs(db, { sendTelegramAlert, save, journalEvent });
+  startFinancingJob(db, { save });
+  startLatencyMonitor({ sendTelegramAlert });
 });

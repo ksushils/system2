@@ -14,6 +14,7 @@
   table{width:100%;border-collapse:separate;border-spacing:0 10px} th{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);text-align:left;padding:0 10px} td{background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 10px;vertical-align:top;font-size:.82rem} td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px} td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
   .scanner{font-weight:800;color:var(--accent);font-size:.9rem}.pill{display:inline-block;border:1px solid var(--border);border-radius:99px;padding:3px 8px;font-family:var(--font-mono);font-size:.68rem;margin:2px}.ok{color:var(--green);border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.08)}.bad{color:var(--red);border-color:rgba(255,23,68,.35);background:rgba(255,23,68,.08)}.warn{color:var(--amber);border-color:rgba(255,171,0,.35);background:rgba(255,171,0,.08)}
   .mono{font-family:var(--font-mono)}.muted{color:var(--muted)}.params{max-width:520px}.param{display:inline-flex;gap:5px;align-items:center;margin:2px 4px 2px 0;border:1px solid var(--border);border-radius:7px;padding:4px 6px;background:#0a1016;font-family:var(--font-mono);font-size:.68rem}.param button{all:unset;cursor:pointer;color:var(--accent)}.grid{display:grid;gap:5px}.small{font-size:.7rem}
+  .too-thin{opacity:.42;filter:grayscale(1)}
   dialog{border:1px solid var(--border);border-radius:12px;background:#0d1218;color:var(--text);padding:20px;min-width:360px} dialog::backdrop{background:rgba(0,0,0,.7)} input,textarea{width:100%;background:#080c10;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-family:var(--font-mono);margin:7px 0 12px} label{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 </style>
 </head>
@@ -29,7 +30,7 @@
   </div>
   <table>
     <thead><tr>
-      <th>Scanner</th><th>Heartbeat</th><th>Productivity</th><th>30-trade expectancy</th><th>Top rejection 7d</th><th>Params</th><th>Last change</th>
+      <th>Scanner</th><th>Heartbeat</th><th>Productivity</th><th>30-trade net expectancy</th><th>Price validation</th><th>Latency 24h</th><th>Top rejection 7d</th><th>Top filter verdict</th><th>Params</th><th>Last change</th><th>Evaluation</th><th>Challenger</th>
     </tr></thead>
     <tbody id="rows"></tbody>
   </table>
@@ -67,17 +68,39 @@ async function api(path, opts={}){
 async function load(){
   document.getElementById('status').textContent = 'Loading...';
   try {
-    const data = await api('/api/scorecard');
-    currentRows = data.rows || [];
+    const blocks = ['heartbeat','productivity','expectancy_30','price_validation_30d','latency_24h','top_rejection_reason_7d','top_filter_verdict','params','latest_change_evaluation','latest_challenger'];
+    const results = await Promise.allSettled(blocks.map(name => api(`/api/scorecard/block/${name}`)));
+    const merged = new Map();
+    results.forEach((result, i) => {
+      if (result.status !== 'fulfilled') return;
+      for (const row of result.value.rows || []) {
+        const target = merged.get(row.scanner) || { scanner: row.scanner };
+        if (blocks[i] === 'params') Object.assign(target, row.value || {}); else target[blocks[i]] = row.value;
+        merged.set(row.scanner, target);
+      }
+    });
+    currentRows = [...merged.values()];
     document.getElementById('rows').innerHTML = currentRows.map(rowHtml).join('');
+    [...document.querySelectorAll('#rows tr')].forEach((tr,i) => {
+      const row=currentRows[i];
+      if(row?.expectancy_30?.too_thin) tr.children[3]?.classList.add('too-thin');
+      if(row?.top_filter_verdict?.too_thin) tr.children[7]?.classList.add('too-thin');
+    });
+    const failed = results.map((r,i)=>r.status==='rejected'?blocks[i]:null).filter(Boolean);
+    const data = { generated_at: failed.length ? `degraded blocks: ${failed.join(', ')}` : 'all blocks current' };
     document.getElementById('status').textContent = `${currentRows.length} scanners · ${data.generated_at}`;
   } catch (e) {
     document.getElementById('status').textContent = `Error: ${e.message}. Login on the dashboard first.`;
   }
 }
 function rowHtml(r){
+  r.heartbeat ||= { state:'ERROR', age_minutes:null };
+  r.productivity ||= {};
   const ex = r.expectancy_30 || {};
   const rej = r.top_rejection_reason_7d;
+  const fv = r.top_filter_verdict;
+  const thin = Number(ex.count||0) < 30;
+  const pv=r.price_validation_30d||{},lat=r.latency_24h||{};
   return `<tr>
     <td><div class="scanner">${esc(r.scanner)}</div><div class="pill ${r.params_source==='server'?'ok':'warn'}">${esc(r.params_source)}</div></td>
     <td><span class="pill ${cls(r.heartbeat.state)}">${esc(r.heartbeat.state)}</span><div class="small muted">${age(r.heartbeat.age_minutes)}</div></td>
@@ -87,9 +110,14 @@ function rowHtml(r){
       <span>reject: ${age(r.productivity.last_rejection_age_minutes)}</span>
     </td>
     <td>${ex.status === 'ok' ? `<span class="pill ok">£${esc(ex.expectancy)}</span><div class="small muted">${esc(ex.win_rate_pct)}% win · n=${esc(ex.count)}</div>` : `<span class="pill warn">insufficient</span><div class="small muted">n=${esc(ex.count || 0)}/30</div>`}</td>
+    <td class="small ${pv.too_thin?'too-thin':''}">${pv.validated||0}/${pv.n||0} dual-source<div class="muted">divergence ${pv.divergence_rate_pct==null?'n/a':pv.divergence_rate_pct+'%'}</div></td>
+    <td class="small ${lat.too_thin?'too-thin':''}">p50 ${lat.p50_ms==null?'n/a':(lat.p50_ms/1000).toFixed(1)+'s'}<div class="muted">p90 ${lat.p90_ms==null?'n/a':(lat.p90_ms/1000).toFixed(1)+'s'} · n=${lat.n||0}</div></td>
     <td>${rej ? `<div>${esc(rej.reason)}</div><div class="small muted">${esc(rej.count)} rows</div>` : '<span class="muted">none</span>'}</td>
+    <td>${fv ? `<span class="pill ${fv.verdict === 'COSTING_YOU' ? 'bad' : fv.verdict === 'SAVING_YOU' ? 'ok' : 'warn'}">${esc(fv.verdict)}</span><div>${esc(fv.reason)}</div><div class="small muted">n=${esc(fv.n_labeled)} · upper-bound R=${fv.est_missed_r_upper_bound==null?'unknown':esc(Number(fv.est_missed_r_upper_bound).toFixed(2))}${fv.dq_flag ? ` · ${esc(fv.dq_flag)}` : ''}</div>` : '<span class="muted">none</span>'}</td>
     <td class="params">${(r.params || []).map(p => `<span class="param"><b>${esc(p.param)}</b>=<button onclick="edit('${esc(r.scanner)}','${esc(p.param)}','${esc(p.raw_value)}')">${esc(p.raw_value)}</button></span>`).join('') || '<span class="muted">local defaults</span>'}</td>
     <td class="small">${r.last_param_change ? `<div>${esc(r.last_param_change.parameter || '')}</div><div class="muted">${esc(r.last_param_change.reason || '')}</div>` : '<span class="muted">none</span>'}</td>
+    <td class="small">${r.latest_change_evaluation ? `${esc(r.latest_change_evaluation.parameter)} · ${esc(r.latest_change_evaluation.verdict||r.latest_change_evaluation.status)} · n=${esc(r.latest_change_evaluation.n_after||0)}` : '<span class="muted">none</span>'}</td>
+    <td class="small">${r.latest_challenger ? `${esc(r.latest_challenger.verdict)} · Δn=${esc(r.latest_challenger.n_disagreements)}` : '<span class="muted">none</span>'}</td>
   </tr>`;
 }
 function edit(scanner,param,value){

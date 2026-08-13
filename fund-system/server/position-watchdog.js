@@ -1,0 +1,54 @@
+import crypto from 'crypto';
+
+let nakedLastRun=0,driftLastRun=null,marginLastRun=0;
+const absence=new Map();
+function flatten(cache){return (cache?.positions||[]).map(x=>({...(x.position||x),market:x.market||{},broker:'capital',deal_id:(x.position||x).dealId||(x.position||x).deal_id,ticker:x.market?.epic||x.market?.symbol||(x.position||x).ticker,protected:Boolean((x.position||x).stopLevel||(x.position||x).stopPrice||(x.position||x).stopLoss||(x.position||x).ocoOrderId||(x.position||x).protective_order_id)}));}
+async function alertOnce(send,key,msg,db){const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());db.data.scanner_config=db.data.scanner_config||{};const throttle=db.data.scanner_config.alert_throttle=db.data.scanner_config.alert_throttle||{};for(const old of Object.keys(throttle))if(!old.startsWith(`${day}:`))delete throttle[old];const k=`${day}:${key}`;if(throttle[k])return {skipped:'already alerted'};const r=await send(msg);if(r?.ok)throttle[k]=new Date().toISOString();return r;}
+const cryptoSymbol=t=>String(t.symbol||t.ticker||'').replace(/[-/]/g,'').toUpperCase().replace(/USD$/,'USDT');
+async function binanceSigned(path,params={}){
+  const key=process.env.BINANCE_API_KEY,secret=process.env.BINANCE_API_SECRET;
+  if(!key||!secret)return {ok:false,error:'BINANCE_READ_ONLY_CREDENTIALS_MISSING'};
+  const qs=new URLSearchParams({...params,timestamp:String(Date.now()),recvWindow:'10000'}).toString();
+  const signature=crypto.createHmac('sha256',secret).update(qs).digest('hex');
+  const response=await fetch(`https://api.binance.com${path}?${qs}&signature=${signature}`,{headers:{'X-MBX-APIKEY':key},signal:AbortSignal.timeout(20000)});
+  const body=await response.json().catch(()=>null);
+  if(!response.ok)return {ok:false,status:response.status,error:body?.msg||'Binance request failed',code:body?.code};
+  return {ok:true,body};
+}
+export async function fetchBinanceWatchdogState(){
+  const [account,orders,isolatedAccount]=await Promise.all([binanceSigned('/sapi/v1/margin/account'),binanceSigned('/sapi/v1/margin/openOrders',{isIsolated:'FALSE'}),binanceSigned('/sapi/v1/margin/isolated/account')]);
+  if(!account.ok||!orders.ok)return {ok:false,account_error:account.ok?null:account,orders_error:orders.ok?null:orders};
+  const crossOrders=Array.isArray(orders.body)?orders.body:[];
+  const crossPositions=(account.body?.userAssets||[]).filter(a=>a.asset!=='USDT'&&(Number(a.borrowed)>0||Number(a.netAsset)<0)).map(a=>({broker:'binance',margin_mode:'cross',ticker:`${a.asset}USDT`,symbol:`${a.asset}USDT`,deal_id:null,borrowed:Number(a.borrowed||0),net_asset:Number(a.netAsset||0)}));
+  const isolatedPositions=[];const isolatedOrders=[];
+  if(isolatedAccount.ok){for(const item of isolatedAccount.body?.assets||[]){const symbol=String(item.symbol||'').toUpperCase();const base=item.baseAsset||{},quote=item.quoteAsset||{};if(Number(base.borrowed)>0||Number(base.netAsset)<0||Number(quote.borrowed)>0){isolatedPositions.push({broker:'binance',margin_mode:'isolated',ticker:symbol,symbol,deal_id:null,borrowed:Number(base.borrowed||quote.borrowed||0),net_asset:Number(base.netAsset||0)});const r=await binanceSigned('/sapi/v1/margin/openOrders',{symbol,isIsolated:'TRUE'});if(r.ok&&Array.isArray(r.body))isolatedOrders.push(...r.body.map(o=>({...o,isIsolated:true})));}}}
+  const allOrders=[...crossOrders,...isolatedOrders];
+  const positions=[...crossPositions,...isolatedPositions].map(pos=>{const exitSide=pos.borrowed>0&&pos.net_asset<=0?'BUY':'SELL';const quantity=Math.max(Math.abs(pos.net_asset),Math.abs(pos.borrowed));const matching=allOrders.filter(o=>String(o.symbol).toUpperCase()===pos.symbol&&/STOP/.test(String(o.type))&&String(o.side).toUpperCase()===exitSide&&Number(o.origQty||o.quantity||0)>=quantity*0.995);return {...pos,side:exitSide==='BUY'?'SHORT':'LONG',quantity,protected:matching.length>0,protective_order_ids:matching.map(o=>o.orderId)};});
+  return {ok:true,positions,open_orders:allOrders.length,cross_open_orders:crossOrders.length,isolated_open_orders:isolatedOrders.length,protective_symbols:[...new Set(positions.filter(p=>p.protected).map(p=>p.symbol))],margin_level:Number(account.body?.marginLevel||0)};
+}
+export async function runBinanceMarginCheck(db,{sendTelegramAlert,save}={}){const state=await fetchBinanceWatchdogState();if(!state.ok)return state;const level=Number(state.margin_level),severity=level<1.5?'CRITICAL':level<2?'WARNING':'OK';db.data.binance_margin_status={margin_level:level,severity,checked_at:new Date().toISOString()};if(level<2&&sendTelegramAlert)await sendTelegramAlert(`${severity}: Binance cross-margin level ${level.toFixed(3)}`);if(save)await save();return db.data.binance_margin_status;}
+async function binanceEntryOrderExists(trade){const r=await binanceSigned('/sapi/v1/margin/order',{symbol:cryptoSymbol(trade),orderId:String(trade.deal_id)});return r.ok&&r.body&&String(r.body.orderId)===String(trade.deal_id);}
+export async function runPositionWatchdog(db,{sendTelegramAlert,save,simulate}={}){
+  const capital=flatten(db.data.live_positions),binance=await fetchBinanceWatchdogState(),live=[...capital,...(binance.ok?binance.positions:[])],open=(db.data.trades||[]).filter(t=>['OPEN','PARTIAL'].includes(t.status));const actions=[];
+  for(const t of open){const isCrypto=String(t.scanner).toLowerCase()==='crypto';const pos=isCrypto?live.find(x=>x.broker==='binance'&&cryptoSymbol(x)===cryptoSymbol(t)):live.find(x=>x.broker==='capital'&&String(x.deal_id)===String(t.deal_id));if(pos&&!pos.protected){t.naked=true;actions.push({type:'NAKED',broker:pos.broker,ticker:t.ticker,deal_id:t.deal_id});await alertOnce(sendTelegramAlert,`naked:${pos.broker}:${t.deal_id}`,`NAKED POSITION ${t.ticker}`,db);}else if(pos)t.naked=false;}
+  for(const pos of binance.ok?binance.positions:[]){if(pos.protected)continue;if(open.some(t=>String(t.scanner).toLowerCase()==='crypto'&&cryptoSymbol(t)===cryptoSymbol(pos)))continue;actions.push({type:'NAKED',broker:'binance',ticker:pos.ticker,untracked:true});await alertOnce(sendTelegramAlert,`naked:binance:${pos.ticker}`,`NAKED POSITION ${pos.ticker}`,db);}
+  if(simulate?.naked){actions.push({type:'NAKED',ticker:simulate.ticker||'TEST'});await sendTelegramAlert(`NAKED POSITION ${simulate.ticker||'TEST'} [SIMULATION]`);}
+  if(actions.length)await save();return {capital_live_positions:capital.length,binance:{ok:binance.ok,positions:binance.positions?.length||0,open_orders:binance.open_orders??null,protective_symbols:binance.protective_symbols||[],error:binance.error||binance.account_error?.error||binance.orders_error?.error||null},open_trades:open.length,actions};
+}
+export async function runDealDrift(db,{sendTelegramAlert,save,simulate,journalEvent}={}){
+ const live=flatten(db.data.live_positions),ids=new Set(live.map(x=>String(x.deal_id))),allOpen=(db.data.trades||[]).filter(t=>['OPEN','PARTIAL'].includes(t.status)),open=allOpen.filter(t=>String(t.scanner).toLowerCase()!=='crypto'),cryptoOpen=allOpen.filter(t=>String(t.scanner).toLowerCase()==='crypto'),actions=[];
+ const feedAt=new Date(db.data.live_positions?.updated_at||0),feedAgeMs=Date.now()-feedAt.getTime();
+ if(!Number.isFinite(feedAgeMs)||feedAgeMs>10*60000||(open.length>0&&live.length===0)){const reason=!Number.isFinite(feedAgeMs)||feedAgeMs>10*60000?'STALE_LIVE_POSITIONS_FEED':'EMPTY_LIVE_POSITIONS_WITH_OPEN_TRADES';console.warn(`[deal-drift] refused: ${reason}`);await alertOnce(sendTelegramAlert,'drift-refused',`DEAL ID DRIFT REFUSED: ${reason}`,db);await save?.();return {refused:true,reason,feed_updated_at:db.data.live_positions?.updated_at||null,feed_age_minutes:Number.isFinite(feedAgeMs)?+(feedAgeMs/60000).toFixed(1):null,capital_live_ids:ids.size,open_capital_trades:open.length,actions:[]};}
+ for(const t of open){if(ids.has(String(t.deal_id))){absence.delete(String(t.deal_id));if(t.suspect)t.suspect=false;continue;}const age=Date.now()-new Date(t.opened_at||t.ts).getTime();if(age<180000)continue;const n=(absence.get(String(t.deal_id))||0)+1;absence.set(String(t.deal_id),n);t.suspect=true;actions.push({type:'DEAL_ID_DRIFT',ticker:t.ticker,deal_id:t.deal_id,consecutive_absences:n});await alertOnce(sendTelegramAlert,`drift:${t.deal_id}`,`DEAL ID DRIFT ${t.ticker}`,db);}
+ // `absence` only drops a key when that deal_id is seen PRESENT above, so a
+ // trade that closes while absent leaves its counter behind forever. Prune
+ // against the current open set, here, next to the loop that maintains it.
+ {const openIds=new Set(open.map(t=>String(t.deal_id)));for(const k of [...absence.keys()])if(!openIds.has(k))absence.delete(k);}
+ for(const t of cryptoOpen){if(await binanceEntryOrderExists(t)){if(t.suspect)t.suspect=false;continue;}t.suspect=true;actions.push({type:'DEAL_ID_DRIFT',broker:'binance',ticker:t.ticker,deal_id:t.deal_id});await alertOnce(sendTelegramAlert,`drift:binance:${t.deal_id}`,`DEAL ID DRIFT ${t.ticker}`,db);}
+ if(simulate?.mismatch){actions.push({type:'DEAL_ID_DRIFT',ticker:simulate.ticker||'TEST',simulated:true});await sendTelegramAlert(`DEAL ID DRIFT ${simulate.ticker||'TEST'} [SIMULATION]`);}
+ if(simulate?.external_closed){actions.push({type:'EXTERNAL_CLOSE',ticker:simulate.ticker||'TEST',simulated:true});await sendTelegramAlert(`EXTERNALLY CLOSED POSITION ${simulate.ticker||'TEST'} [SIMULATION]`);}
+ for(const action of actions){if(action.type==='DEAL_ID_DRIFT')await journalEvent?.('id_drift',{scanner:action.broker==='binance'?'crypto':null,ticker:action.ticker,payload:action});if(action.type==='EXTERNAL_CLOSE')await journalEvent?.('external_close',{ticker:action.ticker,payload:action});}
+ if(actions.length)await save();return {capital_live_ids:ids.size,open_capital_trades:open.length,open_binance_trades:cryptoOpen.length,actions};
+}
+export function attachPositionWatchdog(app,{adminOnly,db,sendTelegramAlert,save}){app.post('/api/admin/watchdog/naked/run',adminOnly,async(req,res)=>res.json(await runPositionWatchdog(db,{sendTelegramAlert,save,simulate:req.body?.simulate})));app.post('/api/admin/watchdog/drift/run',adminOnly,async(req,res)=>res.json(await runDealDrift(db,{sendTelegramAlert,save,simulate:req.body?.simulate})));}
+export function startPositionWatchdogs(db,deps){setInterval(()=>{const now=Date.now();if(now-nakedLastRun>=15*60000){nakedLastRun=now;runPositionWatchdog(db,deps).catch(e=>console.error('[naked-watchdog]',e.message));}const feedAt=new Date(db.data.live_positions?.updated_at||0);const fresh=Number.isFinite(feedAt.getTime())&&now-feedAt.getTime()<=10*60000;if(driftLastRun===null&&fresh)driftLastRun=now;if(driftLastRun!==null&&now-driftLastRun>=30*60000){driftLastRun=now;runDealDrift(db,deps).catch(e=>console.error('[deal-drift]',e.message));}if(now-marginLastRun>=4*3600000){marginLastRun=now;runBinanceMarginCheck(db,deps).catch(e=>console.error('[binance-margin]',e.message));}},60000).unref?.();}

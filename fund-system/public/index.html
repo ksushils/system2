@@ -281,6 +281,55 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .btn:hover{color:var(--text);border-color:var(--muted2)}
 .btn.primary{background:var(--acc);color:#000;border-color:var(--acc)}
 .btn.primary:hover{box-shadow:0 0 14px rgba(0,255,204,.4)}
+.cbadge{display:inline-block;font-family:'Oxanium',sans-serif;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.cb-ok{background:var(--green-g);color:var(--green);border:1px solid rgba(0,232,128,.3)}
+.cb-warn{background:var(--amber-g);color:var(--amber);border:1px solid rgba(255,170,0,.3)}
+.cb-bad{background:var(--red-g);color:var(--red);border:1px solid rgba(255,48,96,.3)}
+.cb-dead{background:var(--s3);color:var(--muted2);border:1px solid var(--border2)}
+.cb-indet{background:var(--blue-g);color:var(--blue);border:1px solid rgba(64,128,255,.35)}
+.cb-thin{background:var(--gold-g);color:var(--gold);border:1px solid rgba(255,208,96,.35)}
+.cgrp{margin-bottom:14px}
+.cgrp-hd{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:6px 6px 0 0}
+.cgrp-t{font-family:'Oxanium',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.cgrp-n{font-size:10px;color:var(--muted2)}
+.crow{display:grid;grid-template-columns:120px 1fr 130px 150px 70px;gap:10px;align-items:center;padding:7px 12px;border:1px solid var(--border);border-top:none;font-size:11px}
+.crow:hover{background:var(--acc-d)}
+.crow-sc{color:var(--muted2);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.crow-p{font-weight:600;color:var(--text)}
+.crow-v{font-family:ui-monospace,monospace;color:var(--acc)}
+.crow-b{font-size:9px;color:var(--muted2)}
+.cwarn{background:var(--red-g);border:1px solid rgba(255,48,96,.35);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--text);line-height:1.5}
+.cinfo{background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted2);line-height:1.5}
+.cok{background:var(--green-g);border:1px solid rgba(0,232,128,.3);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text);line-height:1.5}
+.cerr{background:var(--red-g);border:1px solid rgba(255,48,96,.35);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--red);line-height:1.5;font-family:ui-monospace,monospace}
+.cks{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cks-c{flex:1;min-width:200px;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px}
+.cks-l{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px}
+.cks-v{font-family:'Oxanium',sans-serif;font-size:16px;font-weight:800}
+.cks-m{font-size:10px;color:var(--muted2);margin-top:5px;line-height:1.5}
+.cstale{font-size:9px;color:var(--gold);margin-left:6px}
+.sb-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sb-name{font-family:'Oxanium',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc)}
+/* The refusal sits ABOVE the number, not under it. A P&L figure beside
+   n=6 reads as a result unless the reader is told otherwise first. */
+.sb-verdict{padding:8px 12px;font-size:11px;line-height:1.5;border-bottom:1px solid var(--border)}
+.sb-no{background:var(--red-g);color:var(--text);border-left:3px solid var(--red)}
+.sb-yes{background:var(--green-g);color:var(--text);border-left:3px solid var(--green)}
+.sb-no b,.sb-yes b{font-family:'Oxanium',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:10px}
+.sb-kpis{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--border)}
+.sb-k{flex:1;min-width:104px;padding:8px 12px;border-right:1px solid var(--border)}
+.sb-k:last-child{border-right:none}
+.sb-kl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.sb-kv{font-family:'Oxanium',sans-serif;font-size:15px;font-weight:800;margin-top:2px}
+.sb-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.sb-tbl th{text-align:right;padding:5px 8px;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap}
+.sb-tbl th:first-child,.sb-tbl td:first-child{text-align:left}
+.sb-tbl td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+.sb-tbl tr:hover td{background:var(--acc-d)}
+.sb-adopt{color:var(--gold)}
+.sb-warn-inline{font-size:9px;color:var(--red);margin-left:5px}
+.sb-note{font-size:10px;color:var(--muted2);line-height:1.6;padding:8px 12px}
 .btn.sm{font-size:8px;padding:3px 8px}
 .btn.danger{color:var(--red);border-color:rgba(255,48,96,.3)}
 .btn.gold{color:var(--gold);border-color:rgba(255,208,96,.3)}
@@ -368,6 +417,8 @@ canvas{max-width:100%}
       <div class="tn" onclick="nav('eod',this)">EOD Reports</div>
       <div class="tn" onclick="nav('brain',this)">🧠 Trade Brain</div>
       <div class="tn" onclick="nav('rejq',this)">Rejection Quality</div>
+      <div class="tn" onclick="nav('controls',this)">Controls</div>
+      <div class="tn" onclick="nav('scoreboard',this)">Scoreboard</div>
       <div class="tn" onclick="location.href='/scorecard.html'">Scorecard</div>
       <div class="tn" onclick="nav('settings',this)">Settings</div>
     </nav>
@@ -588,6 +639,41 @@ canvas{max-width:100%}
     </div>
 
     <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-scoreboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-family:'Oxanium',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc)">Proving-Window Scoreboard</div>
+          <div style="font-size:10px;color:var(--muted2);margin-top:3px" id="sb-asof">loading…</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="sb-days" onchange="loadScoreboard()" style="background:var(--s2);color:var(--text);border:1px solid var(--border2);border-radius:4px;padding:4px 8px;font-size:11px">
+            <option value="3">3 days</option><option value="7" selected>7 days</option><option value="14">14 days</option><option value="30">30 days</option>
+          </select>
+          <button class="btn" onclick="loadScoreboard()">Reload</button>
+        </div>
+      </div>
+      <div id="sb-scanners"></div>
+      <div id="sb-carry"></div>
+      <div id="sb-notes"></div>
+    </div>
+
+    <div class="page" id="page-controls">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-family:'Oxanium',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc)">Scanner Controls</div>
+          <div style="font-size:10px;color:var(--muted2);margin-top:3px" id="c-asof">loading…</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="loadControls(true)">Rescan evidence</button>
+          <button class="btn" onclick="loadControls(false)">Reload</button>
+        </div>
+      </div>
+      <div id="c-killswitch" class="cks"></div>
+      <div id="c-summary" class="cks"></div>
+      <div class="cinfo" id="c-legend"></div>
+      <div id="c-groups"></div>
+    </div>
+
     <div class="page" id="page-settings">
       <div class="g2">
         <div>
@@ -887,6 +973,27 @@ canvas{max-width:100%}
 <!-- ══ MODALS ══ -->
 
 <!-- Add Investor -->
+<div class="overlay" id="m-param">
+  <div class="modal" style="max-width:560px">
+    <div class="mhd"><div class="mhd-title" id="mp-title">Change parameter</div><button class="mhd-close" onclick="closeModal('param')">&#10005;</button></div>
+    <div class="mbody">
+      <div id="mp-warn"></div>
+      <div class="fg">
+        <div class="field"><label>Current value</label><input id="mp-old" disabled></div>
+        <div class="field"><label>New value</label><input id="mp-new" autocomplete="off"></div>
+      </div>
+      <div class="field"><label>Bounds (from the server, not the page)</label><input id="mp-bounds" disabled></div>
+      <div class="field"><label>Reason * (required by the server)</label><input id="mp-reason" placeholder="why this change" autocomplete="off"></div>
+      <div id="mp-confirm" style="display:none"></div>
+      <div id="mp-result" style="margin-top:12px"></div>
+    </div>
+    <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--s2)">
+      <button class="btn" onclick="closeModal('param')">Close</button>
+      <button class="btn primary" id="mp-save" onclick="saveParam(false)">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="m-add-inv">
   <div class="modal">
     <div class="mhd"><div class="mhd-title">Add Investor</div><button class="mhd-close" onclick="closeModal('add-inv')">✕</button></div>
@@ -2788,6 +2895,8 @@ function nav(pg, el) {
   if (pg==='eod')          loadEOD();
   if (pg==='brain')        loadBrain();
   if (pg==='rejq')         loadRejectionQuality();
+  if (pg==='controls')     loadControls(false);
+  if (pg==='scoreboard')   loadScoreboard();
   if (pg==='investors')    {} // already loaded
 }
 
@@ -2795,6 +2904,334 @@ function nav(pg, el) {
 setInterval(()=>{
   if (document.getElementById('page-intelligence')?.classList.contains('active')) loadIntelligence();
 }, 60000);
+
+// ── CONTROLS ──────────────────────────────────────────────────
+// Every row is editable, because refusing to write a parameter the
+// scanner may still read would be its own kind of lie. What changes by
+// status is how loudly the row says what will happen.
+let CONN = null, CBOUNDS = null, CEDITED = {}, MP = null;
+
+const CSTAT = {
+  CONNECTED:       {t:'CONNECTED',       c:'cb-ok'},
+  UNPROVEN:        {t:'UNPROVEN',        c:'cb-warn'},
+  NO_RUNTIME_READ: {t:'NO RUNTIME READ', c:'cb-bad'},
+  INDETERMINATE:   {t:'INDETERMINATE',    c:'cb-indet'},
+  NOT_WIRED:       {t:'NOT WIRED',       c:'cb-dead'}
+};
+const CORDER = ['CONNECTED','UNPROVEN','INDETERMINATE','NO_RUNTIME_READ','NOT_WIRED'];
+const CTHIN = 0.25;   // below this share of executions, CONNECTED is proven-once, not proven-continuously
+
+function cEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function cKey(p){return p.scanner+'|'+p.param;}
+function cThin(p){return p.status==='CONNECTED' && p.executions_examined>0 && (p.executions_with_param/p.executions_examined)<CTHIN;}
+
+// Bounds are grouped by (param,min,max) across scanners, so the same
+// param can carry different limits. Where it does, the page refuses to
+// guess and lets the server be the authority.
+function cBoundsFor(param){
+  if(!CBOUNDS||!CBOUNDS.bounds) return {text:'—',known:false};
+  const m=CBOUNDS.bounds.filter(b=>b.param===param);
+  if(!m.length) return {text:'unbounded (no limit stored)',known:true};
+  const uniq=[...new Set(m.map(b=>b.min_value+'|'+b.max_value))];
+  if(uniq.length>1) return {text:'varies by scanner — server decides',known:false};
+  const lo=m[0].min_value, hi=m[0].max_value;
+  return {text:(lo==null?'unbounded':lo)+'  …  '+(hi==null?'unbounded':hi),known:true};
+}
+
+function cBadge(p){
+  const m=CSTAT[p.status];
+  const ev=p.executions_examined?(p.executions_with_param+'/'+p.executions_examined):'no runs';
+  const thin=cThin(p);
+  const st=p.execution_state?(' | scanner '+p.execution_state+': '+(p.execution_note||'')):'';
+  return '<span class="cbadge '+(thin?'cb-thin':m.c)+'" title="'+cEsc(p.reason+st)+'">'+m.t+' '+ev+(thin?' &middot; THIN':'')+'</span>';
+}
+
+async function loadControls(rescan){
+  const asof=document.getElementById('c-asof');
+  asof.textContent=rescan?'rescanning n8n run data…':'loading…';
+  const [conn,bounds,ks]=await Promise.all([
+    api('GET','/api/params/connectivity'+(rescan?'?refresh=1':'')),
+    api('GET','/api/params/bounds'),
+    api('GET','/api/admin/kill-switch')
+  ]);
+  if(conn.error){asof.textContent='connectivity unavailable: '+conn.error;return;}
+  CONN=conn; CBOUNDS=bounds.error?null:bounds;
+  if(rescan) CEDITED={};
+  asof.textContent='evidence as of '+new Date(conn.as_of).toLocaleString()+
+    ' · '+conn.scan_window+' most recent executions per scanner · '+conn.total_rows+' store rows';
+  renderKillSwitch(ks);
+  renderCSummary(conn);
+  renderCGroups(conn);
+}
+
+// Displayed, never toggled. Changing it from here is out of scope and
+// three active scanners depend on the field.
+function renderKillSwitch(k){
+  const el=document.getElementById('c-killswitch');
+  if(!k||k.error){el.innerHTML='<div class="cks-c">kill switch unavailable</div>';return;}
+  const on=k.kill_switch===true, paper=k.paper_only===true;
+  el.innerHTML=
+    '<div class="cks-c"><div class="cks-l">Kill switch</div>'+
+      '<div class="cks-v" style="color:'+(on?'var(--red)':'var(--green)')+'">'+(on?'ACTIVE — trading halted':'inactive')+'</div>'+
+      '<div class="cks-m">'+(k.updated_by?'by '+cEsc(k.updated_by):'no author recorded')+
+      (k.updated_at?' &middot; '+new Date(k.updated_at).toLocaleString():'')+
+      '<br>'+(k.reason?'reason: '+cEsc(k.reason):'no reason recorded')+'</div></div>'+
+    '<div class="cks-c"><div class="cks-l">Paper only</div>'+
+      '<div class="cks-v" style="color:'+(paper?'var(--amber)':'var(--muted2)')+'">'+(paper?'ON — orders are simulated':'off')+'</div>'+
+      '<div class="cks-m">read-only here. Both are changed from the kill-switch endpoint, deliberately not from this panel.</div></div>';
+}
+
+function renderCSummary(c){
+  const el=document.getElementById('c-summary');
+  const col={CONNECTED:'var(--green)',UNPROVEN:'var(--amber)',INDETERMINATE:'var(--blue)',NO_RUNTIME_READ:'var(--red)',NOT_WIRED:'var(--muted2)'};
+  el.innerHTML=CORDER.map(k=>
+    '<div class="cks-c"><div class="cks-l">'+CSTAT[k].t+'</div>'+
+    '<div class="cks-v" style="color:'+col[k]+'">'+(c.summary[k]||0)+'</div>'+
+    '<div class="cks-m">'+Math.round((c.summary[k]||0)/c.total_rows*100)+'% of the store</div></div>').join('');
+  const nw=c.by_scanner||{};
+  const nwSc=Object.keys(nw).filter(s=>nw[s].NOT_WIRED>0);
+  document.getElementById('c-legend').innerHTML=
+    '<b>What the badges mean.</b> The count on each badge is executions carrying that parameter over executions examined, read from n8n run data — not from workflow source.<br>'+
+    '<b>CONNECTED</b> the stored value was observed in run data. <b>THIN</b> marks a CONNECTED proven on fewer than '+Math.round(CTHIN*100)+'% of executions: proven once, not proven continuously.<br>'+
+    '<b>UNPROVEN</b> too few retained executions to conclude either way. Absence of evidence is not evidence of absence.<br>'+
+    '<b>NO RUNTIME READ</b> zero appearances across a meaningful sample ('+c.meaningful_sample+'+ executions) <i>by a scanner that actually ran its trading path</i>. It ran, and did not read this value.<br>'+
+    '<b>INDETERMINATE</b> enough executions, but none reached the trading path — halted, or out of hours. This describes the state of the scanner, not the dial. A halted scanner sees its params decay out of CONNECTED with nothing having changed.<br>'+
+    '<b>NOT WIRED</b> no active workflow declares this scanner'+(nwSc.length?' — all '+(c.summary.NOT_WIRED||0)+' are '+nwSc.join(', '):'')+'.<br>'+
+    'Every row is editable. Writes go to the store; a scanner that does not read the store will not act on them.';
+}
+
+function renderCGroups(c){
+  const g={}; CORDER.forEach(k=>g[k]=[]);
+  c.pairs.forEach(p=>(g[p.status]||(g[p.status]=[])).push(p));
+  document.getElementById('c-groups').innerHTML=CORDER.map(st=>{
+    const rows=g[st]; if(!rows.length) return '';
+    rows.sort((a,b)=>a.scanner.localeCompare(b.scanner)||a.param.localeCompare(b.param));
+    const thin=rows.filter(cThin).length;
+    return '<div class="cgrp"><div class="cgrp-hd">'+
+      '<div class="cgrp-t" style="color:'+({CONNECTED:'var(--green)',UNPROVEN:'var(--amber)',INDETERMINATE:'var(--blue)',NO_RUNTIME_READ:'var(--red)',NOT_WIRED:'var(--muted2)'})[st]+'">'+CSTAT[st].t+'</div>'+
+      '<div class="cgrp-n">'+rows.length+' rows'+(thin?' &middot; '+thin+' on thin evidence':'')+'</div></div>'+
+      rows.map(p=>{
+        const b=cBoundsFor(p.param), st2=CEDITED[cKey(p)];
+        return '<div class="crow">'+
+          '<div class="crow-sc">'+cEsc(p.scanner)+'</div>'+
+          '<div class="crow-p">'+cEsc(p.param)+(st2?'<span class="cstale">changed '+st2+' — badge predates this change, rescan to re-verify</span>':'')+'</div>'+
+          '<div class="crow-v">'+cEsc(p.value)+'</div>'+
+          '<div>'+cBadge(p)+'<div class="crow-b">'+cEsc(b.text)+'</div></div>'+
+          '<div style="text-align:right"><button class="btn" onclick=\'openParam("'+cEsc(p.scanner)+'","'+cEsc(p.param)+'")\'>Edit</button></div>'+
+        '</div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+function openParam(scanner,param){
+  const p=CONN.pairs.find(x=>x.scanner===scanner&&x.param===param);
+  if(!p) return;
+  MP=p;
+  const b=cBoundsFor(param);
+  document.getElementById('mp-title').textContent=scanner+' · '+param;
+  document.getElementById('mp-old').value=p.value;
+  document.getElementById('mp-new').value=p.value;
+  document.getElementById('mp-bounds').value=b.text;
+  document.getElementById('mp-reason').value='';
+  document.getElementById('mp-confirm').style.display='none';
+  document.getElementById('mp-confirm').innerHTML='';
+  document.getElementById('mp-result').innerHTML='';
+  const save=document.getElementById('mp-save');
+  save.textContent='Save'; save.setAttribute('onclick','saveParam(false)');
+
+  // The whole point of the badge: the dialog has to say it out loud.
+  const w=document.getElementById('mp-warn');
+  if(p.status==='NO_RUNTIME_READ'){
+    w.innerHTML='<div class="cwarn"><b>Not observed — the scanner ran normally and never read this value.</b><br>'+
+      'Across '+p.executions_examined+' recent executions of the '+cEsc(scanner)+' workflow, '+p.trading_path_executions+' reached the trading path and '+cEsc(param)+' appeared '+p.executions_with_param+' times. '+
+      'The value will be saved to the store, but on this evidence the scanner will not act on it. Changing it here is unlikely to change how '+cEsc(scanner)+' trades.</div>';
+  } else if(p.status==='INDETERMINATE'){
+    // Deliberately NOT a warning: this is a statement about the scanner,
+    // not a negative finding about the parameter.
+    w.innerHTML='<div class="cinfo"><b>Not observed — but the scanner never reached its trading path in this window.</b><br>'+
+      cEsc(p.execution_note||'')+'. A parameter can only be seen if the code that reads it runs, so this is <b>indeterminate</b> rather than negative — it describes the state of '+cEsc(scanner)+', not the dial. Re-check when it is running normally.</div>';
+  } else if(p.status==='NOT_WIRED'){
+    w.innerHTML='<div class="cwarn"><b>No active workflow declares this scanner.</b><br>'+
+      'This scanner has not been observed reading this parameter, because it is not running. The value will be saved to the store and will sit there unread until the workflow is activated.</div>';
+  } else if(p.status==='UNPROVEN'){
+    w.innerHTML='<div class="cinfo">Only '+p.executions_examined+' executions are retained for '+cEsc(scanner)+' — too few to say whether this parameter is read at runtime. This is unknown, not negative.</div>';
+  } else if(cThin(p)){
+    w.innerHTML='<div class="cinfo"><b>Connected on thin evidence.</b> The stored value was observed in '+p.executions_with_param+' of '+p.executions_examined+' executions'+
+      (p.last_observed_at?', most recently '+cEsc(p.last_observed_at):'')+'. Proven once, not proven continuously.</div>';
+  } else {
+    w.innerHTML='<div class="cinfo">Observed in '+p.executions_with_param+' of '+p.executions_examined+' executions'+
+      (p.last_observed_at?', most recently '+cEsc(p.last_observed_at):'')+'. This dial reaches the scanner.</div>';
+  }
+}
+
+async function saveParam(confirm){
+  const val=document.getElementById('mp-new').value.trim();
+  const reason=document.getElementById('mp-reason').value.trim();
+  const out=document.getElementById('mp-result');
+  if(!reason){out.innerHTML='<div class="cerr">reason required</div>';return;}
+  out.innerHTML='<div class="cinfo">saving…</div>';
+  const body={scanner:MP.scanner,param:MP.param,value:val,reason:reason};
+  if(confirm) body.confirm=true;
+  const r=await api('POST','/api/params',body);
+
+  if(r&&r.error){
+    if(r.requires_confirm===true){ askRetype(r,val); return; }
+    // Rendered exactly as the server stated it, bound and all.
+    out.innerHTML='<div class="cerr">REJECTED BY SERVER: '+cEsc(r.error)+
+      (r.bound?'<br>bound: min '+cEsc(r.bound.min==null?'unbounded':r.bound.min)+' / max '+cEsc(r.bound.max==null?'unbounded':r.bound.max):'')+'</div>';
+    document.getElementById('mp-confirm').style.display='none';
+    return;
+  }
+
+  // intelligence_changelog stamps its row in a column called `date`, not
+  // created_at. Reading the wrong name fails silently as a plausible
+  // "now", so the panel would print a timestamp it never actually read.
+  const cl=r.changelog||{};
+  const when=cl.date?new Date(cl.date).toLocaleString():'(no timestamp returned)';
+  out.innerHTML='<div class="cok"><b>saved to server — scanner reads next cycle</b><br>'+
+    'params_updated_at: '+cEsc(when)+'<br>'+
+    'changelog #'+cEsc(cl.id||'?')+': '+cEsc(r.scanner)+' · '+cEsc(r.param)+' · '+cEsc(r.old_value)+' &rarr; '+cEsc(r.new_value)+
+    ' · by '+cEsc(cl.approved_by||'admin-api')+'<br>'+
+    'reason: '+cEsc(cl.reason||reason)+'</div>';
+  document.getElementById('mp-confirm').style.display='none';
+  // The badge was computed against the OLD value, so it is now evidence
+  // about a value that is no longer stored. Say so rather than let a
+  // stale CONNECTED vouch for a number it never saw.
+  CEDITED[cKey(MP)]=cEsc(r.old_value)+' → '+cEsc(r.new_value);
+  MP.value=r.new_value;
+  renderCGroups(CONN);
+}
+
+// Above the soft limit the server refuses once by design. Restate both
+// values and make the number be typed again, so a confirmation cannot be
+// collected by reflex.
+function askRetype(r,attempted){
+  const box=document.getElementById('mp-confirm');
+  box.style.display='block';
+  box.innerHTML='<div class="cwarn"><b>Above the soft limit — confirmation required.</b><br>'+
+    cEsc(r.error)+'<br><br>'+
+    '<b>'+cEsc(MP.scanner)+' · '+cEsc(MP.param)+'</b><br>'+
+    'current value: <b>'+cEsc(MP.value)+'</b><br>'+
+    'new value: <b>'+cEsc(attempted)+'</b><br><br>'+
+    'Re-type <b>'+cEsc(attempted)+'</b> below to confirm.</div>'+
+    '<div class="field"><label>Re-type the new value</label><input id="mp-retype" autocomplete="off" placeholder="'+cEsc(attempted)+'"></div>'+
+    '<div id="mp-retype-msg" style="font-size:10px;color:var(--muted2)"></div>';
+  document.getElementById('mp-result').innerHTML='';
+  const save=document.getElementById('mp-save');
+  save.textContent='Confirm and save';
+  save.setAttribute('onclick','confirmRetype()');
+}
+
+// ── SCOREBOARD ────────────────────────────────────────────────
+// The honesty fields lead. A number without its n is an invitation to
+// conclude something the sample cannot support.
+let SB = null;
+
+function sbNum(v, dp){ return (v === null || v === undefined) ? '—' : Number(v).toFixed(dp === undefined ? 2 : dp); }
+function sbMoney(v){ if (v === null || v === undefined) return '—'; const n = Number(v); return (n < 0 ? '-£' : '£') + Math.abs(n).toFixed(2); }
+function sbCol(v){ if (v === null || v === undefined || Number(v) === 0) return 'var(--muted2)'; return Number(v) > 0 ? 'var(--green)' : 'var(--red)'; }
+
+async function loadScoreboard(){
+  const days = document.getElementById('sb-days').value || 7;
+  document.getElementById('sb-asof').textContent = 'loading…';
+  const d = await api('GET', `/api/scoreboard/daily?days=${days}`);
+  if (!d || d.error){ document.getElementById('sb-asof').textContent = 'scoreboard unavailable: ' + (d && d.error); return; }
+  SB = d;
+  document.getElementById('sb-asof').textContent =
+    `generated ${new Date(d.generated_at).toLocaleString()} · ${d.window_days}-day window · verdict needs n≥${d.min_n_for_verdict}`
+    + (d.exec_reader_error ? ` · execution counts unavailable: ${cEsc(d.exec_reader_error)}` : '');
+  renderScoreboard(d);
+}
+
+function renderScoreboard(d){
+  const byScanner = {};
+  d.rows.forEach(r => (byScanner[r.scanner] ||= []).push(r));
+
+  // Scanners with closed trades first: those are the only ones with a
+  // P&L that could mislead.
+  const order = Object.keys(byScanner).sort((a,b) =>
+    ((d.scanners[b]||{}).closed_trades||0) - ((d.scanners[a]||{}).closed_trades||0) || a.localeCompare(b));
+
+  document.getElementById('sb-scanners').innerHTML = order.map(s => {
+    const v = d.scanners[s] || {};
+    const rows = byScanner[s].filter(r => r.executions || r.signals || r.rejections || r.trades_opened || r.trades_closed || r.adopted_closed);
+    if (!rows.length && !v.closed_trades) return '';
+
+    // THE REFUSAL, FIRST.
+    const verdict = v.verdict_available
+      ? `<div class="sb-verdict sb-yes"><b>Verdict available</b> — n=${v.n} meets the ${d.min_n_for_verdict}-trade minimum.</div>`
+      : `<div class="sb-verdict sb-no"><b>No verdict — this is a description, not an edge</b><br>${cEsc(v.reason || ('n=' + (v.n ?? 0) + ' is below the ' + d.min_n_for_verdict + '-trade minimum'))}</div>`;
+
+    const pc = v.param_connectivity;
+    const conn = pc ? `${pc.connected}/${pc.total} params CONNECTED${pc.note ? ' — ' + cEsc(pc.note) : ''}` : 'connectivity unknown';
+
+    return `<div class="sb-card">
+      <div class="sb-hd">
+        <div class="sb-name">${cEsc(s)}</div>
+        <div style="font-size:10px;color:var(--muted2)">${conn}</div>
+      </div>
+      ${verdict}
+      <div class="sb-kpis">
+        <div class="sb-k"><div class="sb-kl">closed trades</div><div class="sb-kv">${v.closed_trades ?? 0}</div></div>
+        <div class="sb-k"><div class="sb-kl">total R</div><div class="sb-kv" style="color:${sbCol(v.total_r)}">${sbNum(v.total_r, 3)}</div></div>
+        <div class="sb-k"><div class="sb-kl">trades / day</div><div class="sb-kv">${sbNum(v.trades_per_trading_day, 2)}</div></div>
+        <div class="sb-k"><div class="sb-kl">days to n=${d.min_n_for_verdict}</div><div class="sb-kv" style="color:var(--gold)">${v.trading_days_to_n30 ?? '—'}</div></div>
+        <div class="sb-k"><div class="sb-kl">outcome coverage</div><div class="sb-kv">${v.outcome_coverage_pct === null || v.outcome_coverage_pct === undefined ? '—' : v.outcome_coverage_pct + '%'}</div></div>
+        <div class="sb-k"><div class="sb-kl">adopted (excluded)</div><div class="sb-kv sb-adopt">${v.adopted_closed ?? 0}</div></div>
+      </div>
+      <table class="sb-tbl">
+        <tr><th>date</th><th>exec</th><th>trading&nbsp;path</th><th>beat&nbsp;only</th><th>signals</th><th>rejects</th><th>opens</th><th>closes</th><th>gross</th><th>carry</th><th>net</th><th>R</th><th>adopted</th></tr>
+        ${rows.map(r => `<tr>
+          <td>${r.date}</td>
+          <td>${r.executions}</td>
+          <td>${r.trading_path_executions}</td>
+          <td style="color:var(--muted2)">${r.heartbeat_only_executions}</td>
+          <td>${r.signals}</td><td>${r.rejections}</td>
+          <td>${r.trades_opened}</td><td>${r.trades_closed}</td>
+          <td>${sbMoney(r.pnl_gross)}</td>
+          <td style="color:var(--gold)">${sbMoney(r.carry)}</td>
+          <td style="color:${sbCol(r.pnl_net)}">${sbMoney(r.pnl_net)}${r.trades_closed && !v.verdict_available ? '<span class="sb-warn-inline">n=' + (v.n ?? 0) + '</span>' : ''}</td>
+          <td style="color:${sbCol(r.pnl_r)}">${sbNum(r.pnl_r, 3)}</td>
+          <td class="sb-adopt">${r.adopted_closed ? r.adopted_closed + ' (' + sbMoney(r.adopted_pnl_net) + ')' : '—'}</td>
+        </tr>`).join('')}
+      </table>
+    </div>`;
+  }).join('') || '<div class="cinfo">no activity in this window</div>';
+
+  // Carry per trade, as a share of THAT trade's risk.
+  const cd = (d.carry_detail || []).filter(c => c.carry > 0);
+  document.getElementById('sb-carry').innerHTML = !cd.length ? '' : `<div class="sb-card">
+    <div class="sb-hd"><div class="sb-name">Carry per closed trade</div>
+      <div style="font-size:10px;color:var(--muted2)">as a share of that trade's own risk — the starker figure</div></div>
+    <table class="sb-tbl">
+      <tr><th>trade</th><th>scanner</th><th>ticker</th><th>risk</th><th>carry</th><th>carry % of risk</th><th>net</th><th>R</th><th>basis</th></tr>
+      ${cd.map(c => `<tr>
+        <td>${c.trade_id}${c.adopted ? '<span class="sb-adopt"> adopted</span>' : ''}</td>
+        <td>${cEsc(c.scanner)}</td><td>${cEsc(c.ticker)}</td>
+        <td>${sbMoney(c.risk)}</td>
+        <td style="color:var(--gold)">${sbMoney(c.carry)}</td>
+        <td style="color:${c.carry_pct_of_risk > 25 ? 'var(--red)' : 'var(--gold)'};font-weight:700">${c.carry_pct_of_risk === null ? '—' : c.carry_pct_of_risk + '%'}</td>
+        <td style="color:${sbCol(c.pnl_net)}">${sbMoney(c.pnl_net)}</td>
+        <td style="color:${sbCol(c.pnl_r)}">${sbNum(c.pnl_r, 3)}</td>
+        <td style="font-size:9px;color:var(--muted2)">${cEsc(c.carry_basis)}</td>
+      </tr>`).join('')}
+    </table></div>`;
+
+  document.getElementById('sb-notes').innerHTML =
+    `<div class="sb-card"><div class="sb-note">${(d.notes || []).map(n => '• ' + cEsc(n)).join('<br>')}</div></div>`;
+}
+
+function confirmRetype(){
+  const typed=(document.getElementById('mp-retype')||{value:''}).value.trim();
+  const want=document.getElementById('mp-new').value.trim();
+  const msg=document.getElementById('mp-retype-msg');
+  if(typed!==want){
+    msg.innerHTML='<span style="color:var(--red)">does not match '+cEsc(want)+' — not sent</span>';
+    return;
+  }
+  msg.textContent='';
+  saveParam(true);
+}
 
 </script>
 </body>

@@ -1,31 +1,61 @@
 {
   "stage": "CatalystDiscovery",
-  "createdAt": "2026-07-24T02:15:31.110308+00:00",
+  "createdAt": "2026-08-13T02:17:58.057014+00:00",
   "lookbackHours": 72,
-  "universeCount": 1543,
+  "universeCount": 71,
   "rawCatalystCounts": {
-    "earnings": 91,
-    "analyst": 201,
-    "insider": 5,
-    "corporate": 4,
-    "fda": 3,
-    "finviz": 18,
-    "bypass": 92
+    "earnings": 0,
+    "analyst": 0,
+    "insider": 0,
+    "corporate": 0,
+    "fda": 0,
+    "finviz": 63,
+    "bypass": 152
   },
   "dedupedCatalystCount": 30,
-  "candidatePoolCount": 1552,
-  "bypassCandidateCount": 92,
-  "fmpCallCount": 19,
+  "candidatePoolCount": 101,
+  "bypassCandidateCount": 152,
+  "fmpCallCount": 23,
   "fmpCallsByType": {
     "earnings": 1,
-    "analyst": 3,
+    "analyst": 7,
     "insider": 3,
     "corporate": 6,
     "fda": 6
   },
-  "fmpErrorCount": 0,
-  "fmpErrorsByType": {},
-  "runtimeSeconds": 12.24,
+  "fmpErrorCount": 23,
+  "fmpErrorsByType": {
+    "earnings": [
+      "stable/earnings-calendar?from=2026-08-08&to=2026-08-13: HTTP 429"
+    ],
+    "analyst": [
+      "stable/price-target-latest-news?page=0&limit=100: HTTP 429",
+      "stable/price-target-latest-news?page=1&limit=100: HTTP 429",
+      "stable/price-target-latest-news?page=2&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=0&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=1&limit=100: HTTP 429"
+    ],
+    "insider": [
+      "stable/insider-trading/latest?page=0&limit=100: HTTP 429",
+      "stable/insider-trading/latest?page=1&limit=100: HTTP 429",
+      "stable/insider-trading/latest?page=2&limit=100: HTTP 429"
+    ],
+    "corporate": [
+      "stable/news/stock-latest?page=0&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=1&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=2&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=3&limit=100: HTTP 429",
+      "stable/news/press-releases-latest?page=0&limit=100: HTTP 429"
+    ],
+    "fda": [
+      "stable/news/stock-latest?page=0&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=1&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=2&limit=100: HTTP 429",
+      "stable/news/stock-latest?page=3&limit=100: HTTP 429",
+      "stable/news/press-releases-latest?page=0&limit=100: HTTP 429"
+    ]
+  },
+  "runtimeSeconds": 163.03,
   "rideAlongOnly": true,
   "selectionLogicChanged": false
 }
