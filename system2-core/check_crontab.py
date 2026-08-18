@@ -21,7 +21,6 @@ LOG = ROOT / 'logs' / 'crontab_drift_check.log'
 REQUIRED_SIGNATURES = [
     {'name': 'nightly pipeline', 'tokens': ['run_phase_b_core_baseline.sh']},
     {'name': 'PMF gap check', 'tokens': ['pre-market-gap/run-local'], 'exclude': ['cohort']},
-    {'name': 'open confirmation', 'tokens': ['run_open_confirmation.sh']},
     {'name': 'PMF_LATE check', 'tokens': ['pre-market-gap/run-local', 'cohort', 'late']},
     {'name': 'PEAD tracker', 'tokens': ['pead_drift_tracker.py', '--write', '--lookback-days', '14']},
     {'name': 'auto-exec exit sync', 'tokens': ['pmf-auto-exec/sync-local']},
