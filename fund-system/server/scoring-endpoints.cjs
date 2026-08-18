@@ -223,6 +223,13 @@ module.exports = function attachScoring(app, db, deps) {
     if (isInvalidTicker(row.ticker) || row.r_calculation_suspect) {
       return { status: 'INVALID', outcome: 'INVALID' };
     }
+    if (numericOrNull(row.actual_entry_price) != null && numericOrNull(row.actual_exit_price) == null) {
+      return { status: 'OPEN', outcome: null };
+    }
+    if (numericOrNull(row.actual_exit_price) != null) {
+      const realR = numericOrNull(row.real_r);
+      return { status: 'CLOSED', outcome: realR > 0 ? 'WIN' : realR < 0 ? 'LOSS' : row.paper_outcome || null };
+    }
     if (row.paper_exit_reason === 'TARGET' || row.hit === 'TARGET') {
       return { status: 'CLOSED', outcome: 'WIN' };
     }
@@ -1339,6 +1346,9 @@ module.exports = function attachScoring(app, db, deps) {
 
   function formatSyncAlertMessage(result, idea) {
     const ticker = result.ticker || idea?.ticker || idea?.symbol || 'UNKNOWN';
+    if (result.external_close && (result.account === 'dedicated' || idea?.account === 'dedicated')) {
+      return `⚠ EXTERNAL CLOSE DETECTED — experiment contaminated | ${ticker} was closed outside its stored OCO in the dedicated account`;
+    }
     if (String(result.action || '').startsWith('updated_exit')) {
       return `CLOSED: ${ticker} @ ${fmtPrice(idea?.actual_exit_price || result.exit_price)} | ${idea?.actual_exit_reason || 'ALPACA_EXIT'} | real R ${idea?.real_r != null ? `${Number(idea.real_r) >= 0 ? '+' : ''}${Number(idea.real_r).toFixed(2)}` : 'n/a'}`;
     }
@@ -1354,6 +1364,9 @@ module.exports = function attachScoring(app, db, deps) {
     const placed = rows.filter(r => String(r.auto_exec_at || '').slice(0, 10) === today && r.fill_source === 'alpaca_paper' && !r.test_order);
     const closed = rows.filter(r => String(r.actual_exit_time || '').slice(0, 10) === today && r.fill_source === 'alpaca_paper' && !r.test_order);
     const open = rows.filter(r => r.fill_source === 'alpaca_paper' && !r.test_order && r.actual_entry_price && !r.actual_exit_price);
+    const cleanB = rows.filter(r => r.cohort_label === 'B_CLEAN' && r.test_order !== true && numericOrNull(r.actual_entry_price) != null);
+    const cleanBResolved = cleanB.filter(r => numericOrNull(r.actual_exit_price) != null && numericOrNull(r.real_r) != null);
+    const contaminatedB = rows.filter(r => r.cohort_label === 'B_CONTAMINATED_MANUAL_EXITS');
     const totalR = closed.reduce((s, r) => s + (Number(r.real_r) || 0), 0);
     const peadRows = Array.isArray(db.data.pead_drift_paper) ? db.data.pead_drift_paper : [];
     const peadResolved = peadRows.filter(row => String(row.paper_status || '').toUpperCase() === 'RESOLVED').length;
@@ -1383,7 +1396,9 @@ module.exports = function attachScoring(app, db, deps) {
     } catch {}
     const pmfLine = `Today: ${confirmed.length} PMF confirmed, ${placed.length} orders placed, ${closed.length} closed (${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)}R), ${open.length} open | jobs OK`;
     const peadLine = `PEAD: n=${peadRows.length} (${peadResolved} resolved) · newest: ${peadNewest?.ticker || 'none'} · next check ${peadCheck}`;
-    return `${pmfLine}\n${peadLine}`;
+    const cohortLine = `Cohort B clean: ${cleanBResolved.length}/15 resolved, ${cleanB.length - cleanBResolved.length} open`;
+    const contaminatedLine = `B-contaminated (manual exits, not a system test): n=${contaminatedB.length}, excluded`;
+    return `${pmfLine}\n${cohortLine}\n${contaminatedLine}\n${peadLine}`;
   }
 
   async function runPreMarketGapCheck(opts = {}) {
@@ -1641,7 +1656,8 @@ module.exports = function attachScoring(app, db, deps) {
       const stop = effectiveStop(idea);
       if (target != null && px >= target) wouldExit = 'TARGET';
       if (stop != null && px <= stop) wouldExit = 'STOP';
-      if (wouldExit && !idea.paper_exit_reason) {
+      const brokerManagedOpen = numericOrNull(idea.actual_entry_price) != null && numericOrNull(idea.actual_exit_price) == null && (idea.fill_source === 'alpaca_paper' || idea.alpaca_order_id);
+      if (wouldExit && !idea.paper_exit_reason && !brokerManagedOpen) {
         idea.paper_exit_reason = wouldExit;
         idea.paper_exit_at = at;
         idea.paper_exit_price = px;
@@ -3130,8 +3146,10 @@ module.exports = function attachScoring(app, db, deps) {
           const msg = formatSyncAlertMessage(row, idea);
           if (!msg) continue;
           const closed = String(row.action || '').startsWith('updated_exit');
-          const queued = queuePmfTelegramAlert(msg, { event: closed ? 'position_closed' : 'auto_exec_failure', ticker: row.ticker, action: row.action }, closed ? 'positionClosed' : 'failures');
-          alertEvents.push({ type: closed ? 'position_closed' : 'auto_exec_failure', ticker: row.ticker, ...queued });
+          const external = row.external_close && row.account === 'dedicated';
+          const event = external ? 'external_close_detected' : (closed ? 'position_closed' : 'auto_exec_failure');
+          const queued = queuePmfTelegramAlert(msg, { event, ticker: row.ticker, action: row.action, account: row.account }, external ? 'failures' : (closed ? 'positionClosed' : 'failures'));
+          alertEvents.push({ type: event, ticker: row.ticker, ...queued });
         }
       }
       if (!result.dryRun) await db.write();
@@ -3947,12 +3965,9 @@ module.exports = function attachScoring(app, db, deps) {
       i.test_order !== true
     ));
     const entryRows = alpacaRows.filter(i => numericOrNull(i.actual_entry_price) != null);
-    const cohortB = entryRows.filter(i => {
-      const t = firstTimestamp(i, ['actual_entry_time', 'actual_entry_at', 'filled_at', 'entry_filled_at', 'alpaca_filled_at']);
-      const mode = String(i.bracket_mode || i.pmf_bracket_mode || i.execution_regime || '').toLowerCase();
-      return (t && t.slice(0, 10) >= '2026-07-23') || mode.includes('recalibrated');
-    });
-    const cohortA = entryRows.filter(i => !cohortB.includes(i) && (numericOrNull(i.actual_exit_price) != null || numericOrNull(i.real_r) != null));
+    const cohortB = entryRows.filter(i => i.cohort_label === 'B_CLEAN');
+    const contaminatedB = entryRows.filter(i => i.cohort_label === 'B_CONTAMINATED_MANUAL_EXITS');
+    const cohortA = entryRows.filter(i => !cohortB.includes(i) && !contaminatedB.includes(i) && (numericOrNull(i.actual_exit_price) != null || numericOrNull(i.real_r) != null));
     const slips = entryRows.map(i => numericOrNull(i.entry_slippage_vs_model)).filter(v => v != null);
     const canonical = canonicalStatsObject()?.resolved_v2_clean || {};
     return {
@@ -3965,6 +3980,11 @@ module.exports = function attachScoring(app, db, deps) {
       cohort_a_reference: {
         label: 'Cohort A "old broken brackets — reference only"',
         ...oneGlanceStats(cohortA),
+      },
+      cohort_b_contaminated_reference: {
+        label: 'B-contaminated (manual exits, not a system test)',
+        ...oneGlanceStats(contaminatedB),
+        excluded: true,
       },
       avg_entry_slippage_pct: slips.length ? Number((slips.reduce((s, v) => s + v, 0) / slips.length).toFixed(2)) : null,
       progress_to_verdict: {
@@ -4105,10 +4125,14 @@ module.exports = function attachScoring(app, db, deps) {
     };
   }
 
-  async function alpacaPaperGet(pathname) {
-    const key = process.env.ALPACA_PAPER_API_KEY || readEnvValue('ALPACA_PAPER_API_KEY');
-    const secret = process.env.ALPACA_PAPER_API_SECRET || readEnvValue('ALPACA_PAPER_API_SECRET');
-    const base = (process.env.ALPACA_PAPER_BASE_URL || readEnvValue('ALPACA_PAPER_BASE_URL') || 'https://paper-api.alpaca.markets/v2').replace(/\/$/, '');
+  async function alpacaPaperGet(pathname, account = 'primary') {
+    const legacy = account === 'legacy_shared';
+    const keyName = legacy ? 'ALPACA_LEGACY_SHARED_API_KEY' : 'ALPACA_PAPER_API_KEY';
+    const secretName = legacy ? 'ALPACA_LEGACY_SHARED_API_SECRET' : 'ALPACA_PAPER_API_SECRET';
+    const baseName = legacy ? 'ALPACA_LEGACY_SHARED_BASE_URL' : 'ALPACA_PAPER_BASE_URL';
+    const key = process.env[keyName] || readEnvValue(keyName);
+    const secret = process.env[secretName] || readEnvValue(secretName);
+    const base = (process.env[baseName] || readEnvValue(baseName) || (legacy ? '' : 'https://paper-api.alpaca.markets/v2')).replace(/\/$/, '');
     if (!base.includes('paper')) throw new Error('Alpaca paper base URL assertion failed');
     if (!key || !secret) throw new Error('Alpaca paper credentials missing');
     const r = await fetch(base + pathname, { headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret } });
@@ -4123,12 +4147,14 @@ module.exports = function attachScoring(app, db, deps) {
       return { ...oneGlanceProtectionCache.data, cache: { hit: true, ttl_seconds: 60 } };
     }
     ensure();
-    const [positions, orders] = await Promise.all([
-      alpacaPaperGet('/positions'),
-      alpacaPaperGet('/orders?status=open&limit=500&nested=true'),
-    ]);
-    const livePositions = Array.isArray(positions) ? positions : [];
-    const openOrders = Array.isArray(orders) ? orders : [];
+    const dedicatedEnabled = envFlag('ALPACA_DEDICATED_ACCOUNT_ENABLED', false);
+    const accounts = [{ tag: dedicatedEnabled ? 'dedicated' : 'legacy_shared', source: 'primary' }];
+    if (dedicatedEnabled && (process.env.ALPACA_LEGACY_SHARED_API_KEY || readEnvValue('ALPACA_LEGACY_SHARED_API_KEY'))) accounts.push({ tag: 'legacy_shared', source: 'legacy_shared' });
+    const brokerData = await Promise.all(accounts.map(async account => ({
+      ...account,
+      positions: await alpacaPaperGet('/positions', account.source),
+      orders: await alpacaPaperGet('/orders?status=open&limit=500&nested=true', account.source),
+    })));
     const localOpen = db.data.ideas.filter(i => (
       (i.fill_source === 'alpaca_paper' || i.alpaca_order_id) &&
       i.test_order !== true &&
@@ -4137,16 +4163,21 @@ module.exports = function attachScoring(app, db, deps) {
       numericOrNull(i.real_r) == null
     ));
     const wanted = new Map();
-    for (const p of livePositions) {
-      const sym = String(p.symbol || '').toUpperCase();
-      if (sym) wanted.set(sym, { ticker: sym, alpaca_qty: numericOrNull(p.qty), current_price: numericOrNull(p.current_price), source: 'alpaca_position' });
+    for (const account of brokerData) {
+      for (const p of Array.isArray(account.positions) ? account.positions : []) {
+        const sym = String(p.symbol || '').toUpperCase();
+        if (sym) wanted.set(`${account.tag}:${sym}`, { ticker: sym, account: account.tag, alpaca_qty: numericOrNull(p.qty), current_price: numericOrNull(p.current_price), source: 'alpaca_position' });
+      }
     }
     for (const r of localOpen) {
       const sym = String(r.ticker || r.symbol || '').toUpperCase();
       if (!sym) continue;
-      wanted.set(sym, { ...(wanted.get(sym) || { ticker: sym }), local_row_id: r.id, entry_price: numericOrNull(r.actual_entry_price), source: wanted.has(sym) ? 'alpaca_and_fund' : 'fund_open' });
+      const account = r.account || (dedicatedEnabled ? 'dedicated' : 'legacy_shared');
+      const key = `${account}:${sym}`;
+      wanted.set(key, { ...(wanted.get(key) || { ticker: sym, account }), local_row_id: r.id, entry_price: numericOrNull(r.actual_entry_price), source: wanted.has(key) ? 'alpaca_and_fund' : 'fund_open' });
     }
     const rows = [...wanted.values()].map(item => {
+      const openOrders = brokerData.find(account => account.tag === item.account)?.orders || [];
       const symbolOrders = openOrders.filter(o => String(o.symbol || '').toUpperCase() === item.ticker || (o.legs || []).some(l => String(l.symbol || '').toUpperCase() === item.ticker));
       const sellOrders = [];
       for (const o of symbolOrders) {

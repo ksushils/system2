@@ -68,7 +68,17 @@ function loadConfig(readEnvValue) {
     riskConsecutiveLossHalt: Number(readEnv('PMF_RISK_CONSECUTIVE_LOSS_HALT', readEnvValue) || DEFAULT_CONSECUTIVE_LOSS_HALT),
     riskConsecutiveLossResetAt: readEnv('PMF_RISK_CONSECUTIVE_LOSS_RESET_AT', readEnvValue) || null,
     system2Root: readEnv('SYSTEM2_CORE_DIR', readEnvValue) || '/root/system2-core',
+    accountTag: envFlag('ALPACA_DEDICATED_ACCOUNT_ENABLED', readEnvValue, false) ? 'dedicated' : 'legacy_shared',
   };
+}
+
+function loadLegacyConfig(readEnvValue) {
+  const baseUrl = String(readEnv('ALPACA_LEGACY_SHARED_BASE_URL', readEnvValue) || '').replace(/\/+$/, '');
+  const apiKey = readEnv('ALPACA_LEGACY_SHARED_API_KEY', readEnvValue);
+  const apiSecret = readEnv('ALPACA_LEGACY_SHARED_API_SECRET', readEnvValue);
+  if (!baseUrl || !apiKey || !apiSecret) return null;
+  if (!baseUrl.toLowerCase().includes('paper')) throw new Error('Legacy Alpaca endpoint assertion failed: ALPACA_LEGACY_SHARED_BASE_URL must contain "paper".');
+  return { ...loadConfig(readEnvValue), baseUrl, apiKey, apiSecret, accountTag: 'legacy_shared' };
 }
 
 function stableNormalize(value) {
@@ -142,6 +152,7 @@ function frozenConfigSnapshot(config, readEnvValue, extra = {}) {
     PMF_RISK_MAX_POSITIONS_PER_SECTOR: Number(config.riskMaxPositionsPerSector),
     PMF_RISK_CONSECUTIVE_LOSS_HALT: Number(config.riskConsecutiveLossHalt),
     PMF_RISK_CONSECUTIVE_LOSS_RESET_AT: config.riskConsecutiveLossResetAt || null,
+    ALPACA_DEDICATED_ACCOUNT_ENABLED: config.accountTag === 'dedicated',
   };
   const snapshot = {
     snapshot_version: CONFIG_SNAPSHOT_VERSION,
@@ -705,6 +716,8 @@ function writeEntryFill(idea, order, preview, nowFn) {
   idea.auto_exec_order_class = preview?.model?.order_flow === 'entry_then_recalibrated_oco' ? 'entry_then_oco' : 'bracket';
   idea.auto_exec_qty = DEFAULT_QTY;
   idea.fill_source = 'alpaca_paper';
+  idea.account = preview?.accountTag || idea.account || 'legacy_shared';
+  idea.cohort_label = 'B_CLEAN';
   if (filled != null) {
     const modelEntry = effectiveEntry(idea);
     idea.actual_entry_price = filled;
@@ -727,6 +740,12 @@ function persistRecalibratedBracket(idea, exitPreview, exitOrder) {
   idea.recalibrated_oco_order_id = exitOrder?.id || idea.recalibrated_oco_order_id || null;
   idea.recalibrated_oco_client_order_id = exitOrder?.client_order_id || exitPreview.payload.client_order_id;
   idea.auto_exec_order_class = 'entry_then_oco';
+  const orders = [exitOrder, ...(Array.isArray(exitOrder?.legs) ? exitOrder.legs : [])].filter(Boolean);
+  const stopOrder = orders.find(order => String(order?.type || '').toLowerCase().startsWith('stop') || order?.stop_price);
+  const targetOrder = orders.find(order => order?.id && order?.id !== stopOrder?.id && (String(order?.type || '').toLowerCase() === 'limit' || order?.limit_price));
+  idea.recalibrated_oco_leg_ids = orders.map(order => order?.id).filter(Boolean);
+  idea.recalibrated_oco_stop_order_id = stopOrder?.id || idea.recalibrated_oco_stop_order_id || null;
+  idea.recalibrated_oco_target_order_id = targetOrder?.id || idea.recalibrated_oco_target_order_id || null;
 }
 
 function markBracketAttachFailed(idea, error) {
@@ -738,6 +757,32 @@ function markBracketAttachFailed(idea, error) {
   loudAutoExecAlert(idea, `entry filled but recalibrated OCO attach failed: ${reason}`, { alert: NAKED_POSITION_ALERT, reason });
 }
 
+function ocoOrderIds(idea, parentOrder) {
+  const parentMatchesStoredOco = parentOrder?.id && parentOrder.id === idea?.recalibrated_oco_order_id;
+  const ids = new Set([
+    idea?.recalibrated_oco_order_id,
+    idea?.recalibrated_oco_stop_order_id,
+    idea?.recalibrated_oco_target_order_id,
+    ...(Array.isArray(idea?.recalibrated_oco_leg_ids) ? idea.recalibrated_oco_leg_ids : []),
+    ...(parentMatchesStoredOco ? [parentOrder.id] : []),
+    ...(parentMatchesStoredOco && Array.isArray(parentOrder?.legs) ? parentOrder.legs.map(leg => leg?.id) : []),
+  ].filter(Boolean));
+  return ids;
+}
+
+function classifyExitOrder(idea, leg, parentOrder = null) {
+  const storedOcoId = idea?.recalibrated_oco_order_id;
+  const ids = ocoOrderIds(idea, parentOrder);
+  const orderId = leg?.id;
+  if (storedOcoId || ids.size) {
+    if (!orderId || !ids.has(orderId)) return { reason: 'EXTERNAL_SELL', attribution: 'external_order_id', externalClose: true };
+    const type = String(leg?.type || '').toLowerCase();
+    if (orderId === idea?.recalibrated_oco_stop_order_id || type.startsWith('stop') || leg?.stop_price) return { reason: 'STOP', attribution: 'oco_leg_id', externalClose: false };
+    return { reason: 'TARGET', attribution: 'oco_leg_id', externalClose: false };
+  }
+  return { reason: inferExitReason(leg) || 'ALPACA_SELL', attribution: 'inferred_legacy', externalClose: false };
+}
+
 function writeExitFill(idea, parentOrder, leg, nowFn) {
   const exitPrice = num(leg?.filled_avg_price || leg?.limit_price || leg?.stop_price);
   if (exitPrice == null) return false;
@@ -746,8 +791,10 @@ function writeExitFill(idea, parentOrder, leg, nowFn) {
   const isShort = effectiveTarget(idea) < effectiveEntry(idea);
   idea.actual_exit_price = exitPrice;
   idea.actual_exit_time = leg?.filled_at || leg?.updated_at || isoNow(nowFn);
-  const legType = String(leg?.type || '').toLowerCase();
-  idea.actual_exit_reason = leg?.exit_reason || (legType === 'stop' || leg?.stop_price ? 'STOP' : (legType === 'limit' ? 'TARGET' : 'ALPACA_SELL'));
+  const classification = classifyExitOrder(idea, leg, parentOrder);
+  idea.actual_exit_reason = classification.reason;
+  idea.exit_attribution = classification.attribution;
+  idea.external_close = classification.externalClose;
   idea.alpaca_exit_order_id = leg?.id || null;
   idea.auto_exec_status = 'exit_filled';
   idea.real_r_fill_source = 'alpaca_paper';
@@ -755,7 +802,12 @@ function writeExitFill(idea, parentOrder, leg, nowFn) {
     const raw = isShort ? (entry - exitPrice) / risk : (exitPrice - entry) / risk;
     idea.real_r = Number(raw.toFixed(3));
   }
-  appendAudit(idea, { event: 'exit_filled', parent_order_id: parentOrder?.id, exit_order_id: leg?.id, reason: idea.actual_exit_reason, price: exitPrice });
+  appendAudit(idea, { event: 'exit_filled', parent_order_id: parentOrder?.id, exit_order_id: leg?.id, reason: idea.actual_exit_reason, exit_attribution: idea.exit_attribution, external_close: idea.external_close, price: exitPrice });
+  if (classification.externalClose && idea.account === 'dedicated') {
+    idea.auto_exec_alert = 'EXTERNAL_CLOSE_DETECTED';
+    idea.auto_exec_alert_at = isoNow(nowFn);
+    loudAutoExecAlert(idea, 'EXTERNAL CLOSE DETECTED — experiment contaminated', { alert: 'EXTERNAL_CLOSE_DETECTED', exit_order_id: leg?.id });
+  }
   return true;
 }
 
@@ -837,6 +889,7 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
         continue;
       }
       const preview = buildEntryOrder(idea, config);
+      preview.accountTag = config.accountTag;
       idea.pmf_cap_selected = true;
       idea.pmf_cap_block_reason = null;
       appendAudit(idea, { event: 'ranked_cap_selected', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE });
@@ -844,7 +897,7 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
         const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
         let simulatedOco = null;
         if (simulatedFill > 0) simulatedOco = buildOcoExitOrder(idea, config, simulatedFill, config.qty);
-        results.push({ ticker, action: 'would_place_entry_then_recalibrated_oco', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE, endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: isoNow(now) });
+        results.push({ ticker, action: 'would_place_entry_then_recalibrated_oco', account: config.accountTag, cohort_label: 'B_CLEAN', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE, endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: isoNow(now) });
         placedToday += 1;
         continue;
       }
@@ -876,7 +929,7 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
         }
       }
       placedToday += 1;
-      results.push({ ticker, action: 'placed', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || null, status: idea.auto_exec_status, actual_entry_price: idea.actual_entry_price || null, bracket_mode: idea.bracket_mode || null, recalibrated_stop: idea.recalibrated_stop || null, recalibrated_target: idea.recalibrated_target || null });
+      results.push({ ticker, action: 'placed', account: idea.account, cohort_label: idea.cohort_label, order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || null, status: idea.auto_exec_status, actual_entry_price: idea.actual_entry_price || null, bracket_mode: idea.bracket_mode || null, recalibrated_stop: idea.recalibrated_stop || null, recalibrated_target: idea.recalibrated_target || null });
     } catch (e) {
       appendAudit(idea, { event: 'skipped_or_failed', reason: e.message });
       idea.auto_exec_last_error = e.message;
@@ -888,17 +941,33 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
 }
 
 async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun = false } = {}) {
-  const config = loadConfig(readEnvValue);
+  const primaryConfig = loadConfig(readEnvValue);
+  const legacyConfig = loadLegacyConfig(readEnvValue);
   const rows = (allIdeas || []).filter(row => row.alpaca_order_id && row.fill_source === 'alpaca_paper' && !row.actual_exit_price);
   const results = [];
-  if (!config.apiKey || !config.apiSecret) return { ok: false, checked: 0, updated: 0, error: 'Missing ALPACA_PAPER_API_KEY / ALPACA_PAPER_API_SECRET' };
-  const allOrders = await alpacaGet(config, '/orders?status=all&limit=500&direction=desc&nested=true');
-  const positions = await alpacaGet(config, '/positions');
-  const livePositionSymbols = new Set((positions || []).map(position => String(position?.symbol || '').toUpperCase()).filter(Boolean));
+  if (!primaryConfig.apiKey || !primaryConfig.apiSecret) return { ok: false, checked: 0, updated: 0, error: 'Missing ALPACA_PAPER_API_KEY / ALPACA_PAPER_API_SECRET' };
+  const accountCache = new Map();
   for (const idea of rows) {
     try {
+      const requestedAccount = idea.account || (primaryConfig.accountTag === 'dedicated' ? 'dedicated' : 'legacy_shared');
+      const config = requestedAccount === 'legacy_shared'
+        ? (legacyConfig || (primaryConfig.accountTag === 'legacy_shared' ? primaryConfig : null))
+        : primaryConfig;
+      if (!config) throw new Error('legacy shared account credentials unavailable for legacy watcher');
+      if (requestedAccount === 'legacy_shared' && primaryConfig.accountTag === 'dedicated' && ideaTicker(idea) !== 'ZS') {
+        throw new Error('legacy watcher is restricted to ZS only');
+      }
+      if (!accountCache.has(requestedAccount)) {
+        const allOrders = await alpacaGet(config, '/orders?status=all&limit=500&direction=desc&nested=true');
+        const positions = await alpacaGet(config, '/positions');
+        accountCache.set(requestedAccount, {
+          allOrders,
+          livePositionSymbols: new Set((positions || []).map(position => String(position?.symbol || '').toUpperCase()).filter(Boolean)),
+        });
+      }
+      const { allOrders, livePositionSymbols } = accountCache.get(requestedAccount);
       const order = await alpacaGet(config, `/orders/${idea.alpaca_order_id}?nested=true`);
-      if (!idea.actual_entry_price && order?.filled_avg_price) writeEntryFill(idea, order, { payload: { client_order_id: idea.alpaca_client_order_id }, model: { order_flow: idea.auto_exec_order_class === 'entry_then_oco' ? 'entry_then_recalibrated_oco' : null } }, now);
+      if (!idea.actual_entry_price && order?.filled_avg_price) writeEntryFill(idea, order, { accountTag: config.accountTag, payload: { client_order_id: idea.alpaca_client_order_id }, model: { order_flow: idea.auto_exec_order_class === 'entry_then_oco' ? 'entry_then_recalibrated_oco' : null } }, now);
       let exitOrder = null;
       if (idea.recalibrated_oco_order_id) {
         exitOrder = await alpacaGetOptional(config, `/orders/${idea.recalibrated_oco_order_id}?nested=true`);
@@ -908,10 +977,9 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
       const ticker = ideaTicker(idea);
       const filledSymbolExit = findFilledExitOrder(idea, allOrders);
       if (filledSymbolExit && !livePositionSymbols.has(String(ticker || '').toUpperCase())) {
-        const inferredExitReason = filledSymbolExit.exit_reason || inferExitReason(filledSymbolExit);
-        const exitLeg = inferredExitReason ? { ...filledSymbolExit, exit_reason: inferredExitReason } : filledSymbolExit;
-        if (!dryRun) writeExitFill(idea, { id: filledSymbolExit.parent_order_id || filledSymbolExit.id }, exitLeg, now);
-        results.push({ ticker, action: dryRun ? 'would_update_exit_from_position_reconcile' : 'updated_exit_from_position_reconcile', order_id: order.id, exit_order_id: filledSymbolExit.id, exit_price: filledSymbolExit.filled_avg_price || null });
+        const classification = classifyExitOrder(idea, filledSymbolExit, exitOrder);
+        if (!dryRun) writeExitFill(idea, exitOrder, filledSymbolExit, now);
+        results.push({ ticker, account: requestedAccount, action: dryRun ? 'would_update_exit_from_position_reconcile' : 'updated_exit_from_position_reconcile', order_id: order.id, exit_order_id: filledSymbolExit.id, exit_price: filledSymbolExit.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose });
         continue;
       }
       const hasExitOrder = Boolean(exitOrder || parentLegs.some(leg => !['expired', 'canceled', 'cancelled', 'rejected'].includes(String(leg?.status || '').toLowerCase())));
@@ -919,15 +987,16 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
         idea.auto_exec_alert = NAKED_POSITION_ALERT;
         idea.auto_exec_alert_at = isoNow(now);
         loudAutoExecAlert(idea, 'open auto-position has no detected exit order attached during sync', { alert: NAKED_POSITION_ALERT, parent_order_id: idea.alpaca_order_id });
-        results.push({ ticker: ideaTicker(idea), action: 'alert_no_exit_order', order_id: idea.alpaca_order_id, status: idea.auto_exec_status, alert: NAKED_POSITION_ALERT });
+        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: 'alert_no_exit_order', order_id: idea.alpaca_order_id, status: idea.auto_exec_status, alert: NAKED_POSITION_ALERT });
         continue;
       }
       const filledLeg = [...parentLegs, ...exitLegs].find(leg => leg?.filled_avg_price || String(leg?.status || '').toLowerCase() === 'filled');
       if (filledLeg) {
         if (!dryRun) writeExitFill(idea, exitOrder || order, filledLeg, now);
-        results.push({ ticker: ideaTicker(idea), action: dryRun ? 'would_update_exit' : 'updated_exit', order_id: order.id, exit_order_id: filledLeg.id, exit_price: filledLeg.filled_avg_price || null });
+        const classification = classifyExitOrder(idea, filledLeg, exitOrder || order);
+        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: dryRun ? 'would_update_exit' : 'updated_exit', order_id: order.id, exit_order_id: filledLeg.id, exit_price: filledLeg.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose });
       } else {
-        results.push({ ticker: ideaTicker(idea), action: 'open', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || null, status: order.status });
+        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: 'open', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || null, status: order.status });
       }
     } catch (e) {
       appendAudit(idea, { event: 'sync_failed', reason: e.message });
@@ -943,7 +1012,7 @@ function dryRunPreview(idea, readEnvValue) {
   const preview = buildEntryOrder(idea, config);
   const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
   const simulatedOco = simulatedFill > 0 ? buildOcoExitOrder(idea, config, simulatedFill, config.qty) : null;
-  return { ok: true, enabled: config.enabled, action: 'would_place_entry_then_recalibrated_oco', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: new Date().toISOString() };
+  return { ok: true, enabled: config.enabled, action: 'would_place_entry_then_recalibrated_oco', account: config.accountTag, cohort_label: 'B_CLEAN', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: new Date().toISOString() };
 }
 
 module.exports = {
@@ -952,6 +1021,7 @@ module.exports = {
   CAP_SELECTION_RULE,
   ENTRY_LIMIT_BUFFER_PCT,
   loadConfig,
+  loadLegacyConfig,
   buildEntryOrder,
   buildBracketOrder,
   buildOcoExitOrder,
@@ -964,6 +1034,7 @@ module.exports = {
   diffConfigSnapshots,
   configHash,
   stableStringify,
+  classifyExitOrder,
   structuralExtensionPct,
   rankCapCandidates,
   dryRunPreview,
