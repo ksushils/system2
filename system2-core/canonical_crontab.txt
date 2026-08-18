@@ -14,8 +14,6 @@ CRON_TZ=UTC
 0 14 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pre-market-gap/run-local >> /root/system2-core/logs/cron_gap_check.log 2>&1
 # System2 PMF_LATE check - same >=1.5x ATR rule as proven PMF, second snapshot only; writes PMF_LATE cohort separately.
 30 15 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pre-market-gap/run-local -H 'Content-Type: application/json' -d '{"cohort":"late"}' >> /root/system2-core/logs/cron_gap_check_late.log 2>&1
-# System2 open confirmation, one hour after PMF gap check
-0 15 * * 1-5 /root/system2-core/run_open_confirmation.sh
 30 1 * * 2-6 cd /root/system2-core && .venv/bin/python implied_options_scraper.py >> /root/system2-core/logs/cron_implied_options.log 2>&1
 # Barchart UOA scraper
 15 0 * * 1-5 /root/system2-core/.venv/bin/python /root/system2-core/barchart_uoa_scraper.py >> /root/system2-core/logs/barchart_uoa.log 2>&1
@@ -70,6 +68,11 @@ CRON_TZ=UTC
 45 15 * * 1-5 cd /root/system2-core && .venv/bin/python intraday_bar_recorder.py --window-minutes 120 >> logs/intraday_bar_recorder.log 2>&1
 
 0 5 * * * cd /root/system2-core && .venv/bin/python check_crontab.py >> /root/system2-core/logs/crontab_drift_check.log 2>&1
+
+# Daily deployed-vs-GitHub canonical hash guard; alerts only and never overwrites deployed code.
+10 5 * * * cd /root/system2-core && .venv/bin/python deployed_file_guard.py >> /root/system2-core/logs/deployed_file_guard.log 2>&1
+
+# DST PLAN: before 2026-11-01 US DST transition, review 14:00/15:30 UTC jobs and shift 1h if ET alignment is intended.
 
 # Daily PMF progress report - Telegram, reporting only; Cohort B progress first, no trading logic.
 5 22 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1

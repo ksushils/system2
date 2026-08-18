@@ -1479,6 +1479,18 @@ module.exports = function attachScoring(app, db, deps) {
       }
     }
 
+    let configDrift = { changed: false };
+    if (!dryRun && !lateMode) {
+      try {
+        configDrift = pmfAutoExecutor.detectConfigDrift(readEnvValue, {
+          pmfThresholdAtrMultiple: thresholdAtrMultiple,
+          gapCheckCohort: 'PMF',
+        });
+      } catch (e) {
+        configDrift = { changed: false, error: e.message };
+      }
+    }
+
     let autoExec = { ok: true, enabled: false, placed: 0, skipped: 0, results: [] };
     if (!dryRun && newlyStampedPmfs.length) {
       try {
@@ -1494,6 +1506,12 @@ module.exports = function attachScoring(app, db, deps) {
     }
 
     const alertEvents = [];
+    if (!dryRun && configDrift.changed) {
+      const fields = (configDrift.fields_changed || []).map(row => row.field).slice(0, 12).join(', ') || 'unknown fields';
+      const text = `CONFIG CHANGED: ${configDrift.previous_hash} -> ${configDrift.current_hash} | ${fields}`;
+      const sent = await safeSendTelegramAlert(text, { event: 'config_changed', old_hash: configDrift.previous_hash, new_hash: configDrift.current_hash });
+      alertEvents.push({ type: 'config_changed', ...sent });
+    }
     if (!dryRun && !lateMode && newlyStampedPmfs.length) {
       const msg = formatPmfConfirmedMessage(newlyStampedPmfs);
       const queued = queuePmfTelegramAlert(msg, { event: 'pmf_confirmed', count: newlyStampedPmfs.length, tickers: newlyStampedPmfs.map(i => i.ticker || i.symbol) }, 'pmfConfirmed');
@@ -1536,6 +1554,7 @@ module.exports = function attachScoring(app, db, deps) {
       alerts,
       alert_events: alertEvents,
       auto_exec: autoExec,
+      config_drift: configDrift,
       newly_stamped_pmf_count: newlyStampedPmfs.length,
       newly_stamped_pmf_late_count: newlyStampedPmfLate.length,
       newly_stamped_pmf_late_examples: newlyStampedPmfLate.slice(0, 12).map(x => x.ticker),
@@ -3101,10 +3120,10 @@ module.exports = function attachScoring(app, db, deps) {
   app.post('/api/system2/pmf-alerts/test-local', localOnly, async (req, res) => {
     try {
       const messages = [
-        { type: 'pmf_confirmed', text: '[TEST] PMF: SUNB +9.08% (1.76x ATR) | entry 69.93 stop 64.88 target 81.08 | conviction: high' },
-        { type: 'auto_exec_filled', text: '[TEST] FILLED: SUNB 1sh @ 76.32 (slip +5.2%) | OCO stop 71.27 target 87.47' },
-        { type: 'position_closed', text: '[TEST] CLOSED: EIX @ 80.24 | TARGET | real R +0.48' },
-        { type: 'failure', text: '[TEST] AUTO-EXEC FAILED: TEST - simulated failure alert' },
+        { type: 'naked_position', text: '[TEST] NAKED POSITION: TEST has no exit order' },
+        { type: 'external_sell', text: '[TEST] EXTERNAL_SELL: TEST position was closed outside its attached OCO' },
+        { type: 'risk_breaker', text: '[TEST] RISK BREAKER TRIPPED: simulated breaker - TEST blocked' },
+        { type: 'config_changed', text: '[TEST] CONFIG CHANGED: simulated-old-hash -> simulated-new-hash' },
       ];
       if (envFlag('PMF_ALERT_DAILY_SUMMARY', false) || req.body?.includeDailySummary) {
         messages.push({ type: 'daily_summary', text: `[TEST] ${buildDailyPmfSummary()}` });

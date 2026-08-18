@@ -3,6 +3,7 @@
 
 import json
 import os
+import argparse
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -58,7 +59,14 @@ def send_alert(text):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
     load_env()
+    if args.self_test:
+        result = send_alert("[TEST] SYSTEM2 HEARTBEAT FAILURE: simulated no-finalists-recorded condition")
+        print(json.dumps({"ok": result.get("sent") is True, "self_test": True, "telegram": result}))
+        return
     now = datetime.now(timezone.utc)
     cutoff = trading_days_back(now.date(), 2).isoformat()
     fund = json.loads(FUND.read_text())
