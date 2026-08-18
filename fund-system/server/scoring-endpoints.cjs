@@ -295,6 +295,10 @@ module.exports = function attachScoring(app, db, deps) {
     idea.pmf_entry_at_stamp = stamp.entry;
     idea.pmf_atr_at_stamp = stamp.atr;
     idea.pmf_stamp_cohort = stamp.cohort;
+    idea.pmf_average_share_volume_at_stamp = stamp.averageShareVolume;
+    idea.pmf_average_dollar_volume_at_stamp = stamp.averageDollarVolume;
+    idea.pmf_adv_at_stamp = stamp.averageDollarVolume;
+    idea.pmf_adv_source = stamp.averageDollarVolume != null ? 'fmp_batch_quote_avgVolume_x_stamp_price' : null;
   }
 
   function intakeSourceLayer(row) {
@@ -1408,6 +1412,10 @@ module.exports = function attachScoring(app, db, deps) {
       let pmfStamp = null;
       const q = quotes[ticker];
       const { price: pmPrice, source: priceSource } = quotePrice(q);
+      const averageShareVolume = Number(q?.avgVolume ?? q?.averageVolume);
+      const averageDollarVolume = Number.isFinite(averageShareVolume) && averageShareVolume > 0 && Number.isFinite(pmPrice) && pmPrice > 0
+        ? Number((averageShareVolume * pmPrice).toFixed(2))
+        : null;
       const atr = Number(idea.atr14 || idea.atr || effectiveRiskPerShare(idea));
       const entry = effectiveEntry(idea);
       const target = effectiveTarget(idea);
@@ -1463,14 +1471,14 @@ module.exports = function attachScoring(app, db, deps) {
           update.pre_market_gap_favourable_late = qualifies && !wasPmf;
           update.pmf_cohort = update.pre_market_gap_favourable_late ? 'PMF_LATE' : (idea.pmf_cohort || null);
           if (update.pre_market_gap_favourable_late) {
-            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF_LATE' };
+            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF_LATE', averageShareVolume: averageShareVolume > 0 ? averageShareVolume : null, averageDollarVolume };
           }
         } else {
           update.pre_market_gap_favourable = qualifies;
           update.pre_market_gap_favourable_late = Boolean(idea.pre_market_gap_favourable_late);
           update.pmf_cohort = qualifies ? 'PMF' : (idea.pmf_cohort || null);
           if (qualifies) {
-            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF' };
+            pmfStamp = { at, price: pmPrice, entry, atr, atrMultiple: signedAtrMultiple, cohort: 'PMF', averageShareVolume: averageShareVolume > 0 ? averageShareVolume : null, averageDollarVolume };
           }
         }
         if (update.pre_market_gap_adverse && !dryRun) {

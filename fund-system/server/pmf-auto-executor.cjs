@@ -17,6 +17,7 @@ const DEFAULT_CONSECUTIVE_LOSS_HALT = 5;
 const CONFIG_SNAPSHOT_VERSION = 1;
 const CONFIG_LEDGER_FILE = 'config_change_ledger.jsonl';
 const CONFIG_LATEST_FILE = 'latest_seen_config_hash.json';
+const CAP_SELECTION_RULE = 'structural_extension_asc_adv_desc_ticker_asc';
 
 function num(value) {
   if (value == null || value === '') return null;
@@ -159,6 +160,9 @@ function frozenConfigSnapshot(config, readEnvValue, extra = {}) {
       exit_time_in_force: 'gtc',
       stop_target_geometry: 'derived_per_idea_from_original_entry_stop_target_and_atr',
       qty: DEFAULT_QTY,
+      daily_cap_selection: CAP_SELECTION_RULE,
+      daily_cap_primary_key: 'favourable_direction_stamp_vs_modeled_entry_pct_ascending',
+      daily_cap_tie_break: 'stamp_time_average_dollar_volume_descending_then_ticker_ascending',
     },
     auto_exec_config: env,
     risk_defaults: {
@@ -315,6 +319,44 @@ function effectiveRisk(idea) {
 
 function referencePrice(idea) {
   return num(idea?.pre_market_price ?? idea?.current_price ?? idea?.price ?? effectiveEntry(idea));
+}
+
+function structuralExtensionPct(idea) {
+  const entry = effectiveEntry(idea);
+  const stampPrice = num(idea?.pmf_price_at_stamp ?? idea?.pre_market_price_at_fill ?? idea?.pre_market_price ?? referencePrice(idea));
+  const target = effectiveTarget(idea);
+  if (!(entry > 0 && stampPrice > 0)) return null;
+  const isShort = target != null && target < entry;
+  const favourableExtension = isShort ? (entry - stampPrice) / entry : (stampPrice - entry) / entry;
+  return Number((favourableExtension * 100).toFixed(4));
+}
+
+function stampAverageDollarVolume(idea) {
+  return num(idea?.pmf_average_dollar_volume_at_stamp ?? idea?.pmf_adv_at_stamp);
+}
+
+function rankCapCandidates(ideas = [], nowFn) {
+  const ranked = [...ideas].sort((a, b) => {
+    const extensionA = structuralExtensionPct(a);
+    const extensionB = structuralExtensionPct(b);
+    if (extensionA == null && extensionB != null) return 1;
+    if (extensionA != null && extensionB == null) return -1;
+    if (extensionA != null && extensionB != null && extensionA !== extensionB) return extensionA - extensionB;
+    const advA = stampAverageDollarVolume(a);
+    const advB = stampAverageDollarVolume(b);
+    if (advA == null && advB != null) return 1;
+    if (advA != null && advB == null) return -1;
+    if (advA != null && advB != null && advA !== advB) return advB - advA;
+    return ideaTicker(a).localeCompare(ideaTicker(b));
+  });
+  ranked.forEach((idea, index) => {
+    idea.pmf_cap_rank = index + 1;
+    idea.pmf_cap_candidate_count = ranked.length;
+    idea.pmf_structural_extension_at_stamp_pct = structuralExtensionPct(idea);
+    idea.pmf_cap_selection_rule = CAP_SELECTION_RULE;
+    idea.pmf_cap_ranked_at = isoNow(nowFn);
+  });
+  return ranked;
 }
 
 function effectiveAtr(idea) {
@@ -769,26 +811,41 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
     try { open = await marketIsOpen(config); } catch (e) { open = false; results.push({ action: 'guard_failed', reason: e.message }); }
   }
   let placedToday = ordersToday(allIdeas);
-  for (const idea of ideas) {
+  const rankedIdeas = rankCapCandidates(ideas, now);
+  for (const idea of rankedIdeas) {
     const ticker = ideaTicker(idea);
     try {
       if (!ticker) throw new Error('missing ticker');
       if (!open && !dryRun) throw new Error('market is not open');
       if (orderedTickerToday(allIdeas, ticker)) throw new Error('ticker already auto-ordered today');
       if (hasOpenAutoPosition(allIdeas, ticker)) throw new Error('ticker already has open auto-position');
+      if (placedToday >= config.maxOrdersPerDay) {
+        const reason = `daily order cap reached (${config.maxOrdersPerDay}) after ranked selection`;
+        idea.pmf_cap_selected = false;
+        idea.pmf_cap_block_reason = reason;
+        appendAudit(idea, { event: 'ranked_cap_blocked', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE, reason });
+        results.push({ ticker, action: 'cap_blocked', reason, rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE });
+        continue;
+      }
       const riskBlock = evaluateRiskBreakers(config, allIdeas, idea, placedToday, dryRun);
       if (riskBlock) {
+        idea.pmf_cap_selected = false;
+        idea.pmf_cap_block_reason = riskBlock.reason;
         idea.auto_exec_last_error = riskBlock.reason;
         if (!dryRun) idea.auto_exec_status = 'risk_blocked';
         results.push({ ticker, action: 'risk_breaker_blocked', breaker: riskBlock.breaker, reason: riskBlock.reason, exposure_snapshot: riskBlock.exposure_snapshot, alert: RISK_BREAKER_ALERT });
         continue;
       }
       const preview = buildEntryOrder(idea, config);
+      idea.pmf_cap_selected = true;
+      idea.pmf_cap_block_reason = null;
+      appendAudit(idea, { event: 'ranked_cap_selected', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE });
       if (dryRun) {
         const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
         let simulatedOco = null;
         if (simulatedFill > 0) simulatedOco = buildOcoExitOrder(idea, config, simulatedFill, config.qty);
-        results.push({ ticker, action: 'would_place_entry_then_recalibrated_oco', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: isoNow(now) });
+        results.push({ ticker, action: 'would_place_entry_then_recalibrated_oco', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE, endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: isoNow(now) });
+        placedToday += 1;
         continue;
       }
       stampConfigOnIdea(idea, configMeta, now);
@@ -892,6 +949,7 @@ function dryRunPreview(idea, readEnvValue) {
 module.exports = {
   DEFAULT_QTY,
   DEFAULT_MAX_ORDERS_PER_DAY,
+  CAP_SELECTION_RULE,
   ENTRY_LIMIT_BUFFER_PCT,
   loadConfig,
   buildEntryOrder,
@@ -906,6 +964,8 @@ module.exports = {
   diffConfigSnapshots,
   configHash,
   stableStringify,
+  structuralExtensionPct,
+  rankCapCandidates,
   dryRunPreview,
   maybeExecuteConfirmedPmfs,
   syncOpenAutoPositions,
