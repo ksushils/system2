@@ -1351,7 +1351,35 @@ module.exports = function attachScoring(app, db, deps) {
     const closed = rows.filter(r => String(r.actual_exit_time || '').slice(0, 10) === today && r.fill_source === 'alpaca_paper' && !r.test_order);
     const open = rows.filter(r => r.fill_source === 'alpaca_paper' && !r.test_order && r.actual_entry_price && !r.actual_exit_price);
     const totalR = closed.reduce((s, r) => s + (Number(r.real_r) || 0), 0);
-    return `Today: ${confirmed.length} PMF confirmed, ${placed.length} orders placed, ${closed.length} closed (${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)}R), ${open.length} open | jobs OK`;
+    const peadRows = Array.isArray(db.data.pead_drift_paper) ? db.data.pead_drift_paper : [];
+    const peadResolved = peadRows.filter(row => String(row.paper_status || '').toUpperCase() === 'RESOLVED').length;
+    const peadNewest = [...peadRows].sort((a, b) => String(b.earnings_date || b.date || b.logged_at || '').localeCompare(String(a.earnings_date || a.date || a.logged_at || '')))[0];
+    let peadCheck = 'FAIL';
+    try {
+      const raw = fs.readFileSync(path.join(system2Root, 'logs', 'pead_drift_tracker.log'), 'utf8');
+      let depth = 0, start = -1, inString = false, escaped = false, latest = null;
+      for (let idx = 0; idx < raw.length; idx += 1) {
+        const ch = raw[idx];
+        if (inString) {
+          if (escaped) escaped = false;
+          else if (ch === '\\') escaped = true;
+          else if (ch === '"') inString = false;
+          continue;
+        }
+        if (ch === '"') inString = true;
+        else if (ch === '{') { if (depth === 0) start = idx; depth += 1; }
+        else if (ch === '}' && depth > 0) {
+          depth -= 1;
+          if (depth === 0 && start >= 0) {
+            try { latest = JSON.parse(raw.slice(start, idx + 1)); } catch {}
+          }
+        }
+      }
+      peadCheck = latest?.ok === true ? 'OK' : 'FAIL';
+    } catch {}
+    const pmfLine = `Today: ${confirmed.length} PMF confirmed, ${placed.length} orders placed, ${closed.length} closed (${totalR >= 0 ? '+' : ''}${totalR.toFixed(2)}R), ${open.length} open | jobs OK`;
+    const peadLine = `PEAD: n=${peadRows.length} (${peadResolved} resolved) · newest: ${peadNewest?.ticker || 'none'} · next check ${peadCheck}`;
+    return `${pmfLine}\n${peadLine}`;
   }
 
   async function runPreMarketGapCheck(opts = {}) {
