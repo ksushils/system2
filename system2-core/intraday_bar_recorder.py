@@ -193,6 +193,152 @@ def running_vwap(bars: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+SNAPSHOT_TIMES = ("09:35", "09:45", "10:00", "10:30")
+
+
+def bar_start_et(bar: dict[str, Any]) -> datetime | None:
+    raw = bar.get("timestamp")
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=ET)
+        return parsed.astimezone(ET)
+    except Exception:
+        return None
+
+
+def completed_bars(bars: list[dict[str, Any]], day: date, boundary: str) -> list[dict[str, Any]]:
+    hour, minute = (int(part) for part in boundary.split(":"))
+    cutoff = datetime.combine(day, dtime(hour, minute), ET)
+    return [bar for bar in bars if (bar_start_et(bar) is not None and bar_start_et(bar) + timedelta(minutes=5) <= cutoff)]
+
+
+def cumulative_volume(bars: list[dict[str, Any]], day: date, boundary: str) -> float | None:
+    selected = completed_bars(bars, day, boundary)
+    values = [float(bar.get("volume")) for bar in selected if num_safe(bar.get("volume")) is not None]
+    return sum(values) if values else None
+
+
+def num_safe(value: Any) -> float | None:
+    try:
+        parsed = float(value)
+        return parsed if parsed == parsed else None
+    except Exception:
+        return None
+
+
+def prior_cumulative_baseline(symbol: str, day: date, boundary: str) -> float | None:
+    values: list[float] = []
+    for directory in sorted(DATA_DIR.iterdir(), reverse=True) if DATA_DIR.exists() else []:
+        prior_day = parse_date(directory.name)
+        if prior_day is None or prior_day >= day:
+            continue
+        payload = read_json(directory / f"{symbol}.json", {})
+        volume = cumulative_volume(payload.get("bars", []), prior_day, boundary) if isinstance(payload, dict) else None
+        if volume is not None and volume > 0:
+            values.append(volume)
+        if len(values) == 20:
+            break
+    return sum(values) / 20 if len(values) == 20 else None
+
+
+def derive_opening_snapshots(symbol: str, day: date, bars: list[dict[str, Any]]) -> dict[str, Any]:
+    regular = [bar for bar in bars if bar_start_et(bar) and bar_start_et(bar).date() == day and bar_start_et(bar).time() >= dtime(9, 30)]
+    day_open = num_safe(regular[0].get("open")) if regular else None
+    opening_range_bars = [bar for bar in regular if dtime(9, 30) <= bar_start_et(bar).time() < dtime(9, 45)]
+    range_highs = [num_safe(bar.get("high")) for bar in opening_range_bars]
+    range_lows = [num_safe(bar.get("low")) for bar in opening_range_bars]
+    range_high = max(value for value in range_highs if value is not None) if any(value is not None for value in range_highs) else None
+    range_low = min(value for value in range_lows if value is not None) if any(value is not None for value in range_lows) else None
+    premarket_highs = [num_safe(bar.get("high")) for bar in bars if bar_start_et(bar) and bar_start_et(bar).date() == day and bar_start_et(bar).time() < dtime(9, 30)]
+    premarket_high = max(value for value in premarket_highs if value is not None) if any(value is not None for value in premarket_highs) else None
+    snapshots: dict[str, Any] = {}
+    for boundary in SNAPSHOT_TIMES:
+        selected = completed_bars(bars, day, boundary)
+        last = selected[-1] if selected else None
+        close = num_safe(last.get("close")) if last else None
+        vwap = num_safe(last.get("running_vwap")) if last else None
+        today_volume = cumulative_volume(bars, day, boundary)
+        baseline = prior_cumulative_baseline(symbol, day, boundary)
+        range_state = None
+        if boundary != "09:35" and close is not None and range_high is not None and range_low is not None:
+            range_state = "ABOVE" if close > range_high else ("BELOW" if close < range_low else "INSIDE")
+        snapshots[boundary] = {
+            "change_from_open_pct": round((close - day_open) / day_open * 100, 4) if close is not None and day_open else None,
+            "rvol_time": round(today_volume / baseline, 4) if today_volume is not None and baseline else None,
+            "above_vwap": close > vwap if close is not None and vwap is not None else None,
+            "opening_range_state": range_state,
+            "premarket_high_dist_pct": round((close - premarket_high) / premarket_high * 100, 4) if close is not None and premarket_high else None,
+        }
+    return snapshots
+
+
+def idea_geometry(row: dict[str, Any]) -> tuple[float | None, float | None, float | None]:
+    entry = num_safe(row.get("entry_trigger_price") or row.get("modeled_entry") or row.get("entry"))
+    stop = num_safe(row.get("original_stop") or row.get("stop"))
+    target = num_safe(row.get("original_target") or row.get("target"))
+    return entry, stop, target
+
+
+def first_touch_labels(symbol: str, day: date, bars: list[dict[str, Any]], fund: dict[str, Any]) -> list[dict[str, Any]]:
+    labels = []
+    for row in fund.get("ideas", []) if isinstance(fund, dict) else []:
+        if not isinstance(row, dict) or ticker_of(row) != symbol:
+            continue
+        row_day = parse_date(row.get("pmf_stamp_time")) or parse_date(row.get("pre_market_checked_at")) or parse_date(row.get("date"))
+        if row_day != day:
+            continue
+        entry, stop, target = idea_geometry(row)
+        if entry is None or stop is None or target is None:
+            continue
+        is_short = target < entry
+        entered = False
+        outcome = "NEITHER"
+        touch_at = None
+        ambiguous = False
+        for bar in bars:
+            high, low = num_safe(bar.get("high")), num_safe(bar.get("low"))
+            if high is None or low is None:
+                continue
+            if not entered:
+                entered = low <= entry <= high
+                if not entered:
+                    continue
+            target_hit = low <= target if is_short else high >= target
+            stop_hit = high >= stop if is_short else low <= stop
+            if target_hit and stop_hit:
+                outcome, ambiguous, touch_at = "STOP_FIRST", True, bar.get("timestamp")
+                break
+            if stop_hit:
+                outcome, touch_at = "STOP_FIRST", bar.get("timestamp")
+                break
+            if target_hit:
+                outcome, touch_at = "TARGET_FIRST", bar.get("timestamp")
+                break
+        labels.append({
+            "idea_id": row.get("id"), "ticker": symbol, "entry": entry, "stop": stop, "target": target,
+            "first_touch": outcome, "first_touch_at": touch_at, "first_touch_same_bar_ambiguous": ambiguous,
+            "first_touch_source": "stored_5min_bars", "first_touch_version": 1,
+        })
+    return labels
+
+
+def derive_payload(payload: dict[str, Any], fund: dict[str, Any]) -> dict[str, Any]:
+    symbol = str(payload.get("symbol") or "").upper()
+    day = parse_date(payload.get("date"))
+    bars = payload.get("bars", [])
+    if not symbol or day is None or not isinstance(bars, list):
+        return payload
+    payload["opening_snapshots"] = derive_opening_snapshots(symbol, day, bars)
+    payload["opening_snapshot_version"] = 1
+    payload["opening_snapshot_derived_at"] = datetime.now(UTC).isoformat()
+    payload["opening_snapshot_source"] = "stored_5min_bars"
+    payload["first_touch_labels"] = first_touch_labels(symbol, day, bars, fund)
+    return payload
+
+
 def fetch_alpaca_bars(symbol: str, start: datetime, end: datetime, env: dict[str, str], timeframe: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     params = urllib.parse.urlencode({
         "timeframe": timeframe,
@@ -239,7 +385,7 @@ def fetch_fmp_bars(symbol: str, day: date, env: dict[str, str], timeframe: str) 
     return normalized, {"status": status, "bytes": nbytes, "url_kind": "fmp_bars"}
 
 
-def record_symbol(symbol: str, reasons: set[str], day: date, env: dict[str, str], window_minutes: int, timeframe: str) -> dict[str, Any]:
+def record_symbol(symbol: str, reasons: set[str], day: date, env: dict[str, str], window_minutes: int, timeframe: str, fund: dict[str, Any]) -> dict[str, Any]:
     start, end = target_session_bounds(day, window_minutes)
     calls: list[dict[str, Any]] = []
     fallback_used = False
@@ -291,6 +437,7 @@ def record_symbol(symbol: str, reasons: set[str], day: date, env: dict[str, str]
         "error": error,
         "recorded_at": datetime.now(UTC).isoformat(),
     }
+    payload = derive_payload(payload, fund)
     out_path = DATA_DIR / str(day) / f"{symbol}.json"
     write_json(out_path, payload)
     return {
@@ -314,9 +461,29 @@ def main() -> int:
     parser.add_argument("--timeframe", default=DEFAULT_TIMEFRAME, choices=["5Min", "1Min"])
     parser.add_argument("--max-tickers", type=int, default=0, help="optional sample cap; 0 means all")
     parser.add_argument("--include", action="append", default=[], help="force-include ticker, repeatable")
+    parser.add_argument("--derive-existing", action="store_true", help="derive snapshots/labels from stored files only; makes zero API calls")
     args = parser.parse_args()
 
     day = datetime.strptime(args.date, "%Y-%m-%d").date() if args.date else datetime.now(ET).date()
+    fund = read_json(FUND_PATH, {})
+    if args.derive_existing:
+        selected_dirs = [DATA_DIR / str(day)] if args.date else sorted(path for path in DATA_DIR.iterdir() if path.is_dir())
+        files = [path for directory in selected_dirs for path in directory.glob("*.json") if path.name != "_summary.json"]
+        before_bytes = sum(path.stat().st_size for path in files)
+        ambiguous = 0
+        label_count = 0
+        for file_path in files:
+            payload = read_json(file_path, {})
+            if not isinstance(payload, dict):
+                continue
+            derived = derive_payload(payload, fund)
+            labels = derived.get("first_touch_labels", [])
+            label_count += len(labels)
+            ambiguous += sum(row.get("first_touch_same_bar_ambiguous") is True for row in labels)
+            write_json(file_path, derived)
+        after_bytes = sum(path.stat().st_size for path in files)
+        print(json.dumps({"ok": True, "mode": "derive_existing", "files": len(files), "first_touch_labels": label_count, "same_bar_ambiguous": ambiguous, "before_bytes": before_bytes, "after_bytes": after_bytes, "added_bytes": after_bytes - before_bytes, "additional_api_calls": 0}, indent=2, sort_keys=True))
+        return 0
     env = load_env()
     candidates = collect_candidates(day)
     for sym in args.include:
@@ -347,7 +514,7 @@ def main() -> int:
 
     for sym in symbols:
         try:
-            row = record_symbol(sym, candidates[sym], day, env, args.window_minutes, args.timeframe)
+            row = record_symbol(sym, candidates[sym], day, env, args.window_minutes, args.timeframe, fund)
             summary["rows"].append(row)
             summary["recorded_count"] += 1
             summary["total_calls_observed"] += row["calls"]

@@ -73,6 +73,7 @@ CRON_TZ=UTC
 10 5 * * * cd /root/system2-core && .venv/bin/python deployed_file_guard.py >> /root/system2-core/logs/deployed_file_guard.log 2>&1
 
 # DST PLAN: before 2026-11-01 US DST transition, review 14:00/15:30 UTC jobs and shift 1h if ET alignment is intended.
+# Until that decision, do not move the crons: audit session_eastern_time, session_state, minutes_from_open, and session_label on stamped rows.
 
 # Daily PMF progress report - Telegram, reporting only; Cohort B progress first, no trading logic.
 5 22 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1

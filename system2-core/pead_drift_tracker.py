@@ -19,6 +19,7 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
 FUND_PATH = Path("/root/fund-system/data/fund.json")
@@ -64,6 +65,19 @@ def fmp_key() -> str:
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def eastern_session_fields(timestamp: datetime) -> dict[str, Any]:
+    eastern = timestamp.astimezone(ZoneInfo("America/New_York"))
+    local_minutes = eastern.hour * 60 + eastern.minute
+    minutes_from_open = local_minutes - (9 * 60 + 30)
+    state = "PREMARKET" if local_minutes < 9 * 60 + 30 else ("REGULAR" if local_minutes < 16 * 60 else "AFTERHOURS")
+    return {
+        "session_eastern_time": eastern.isoformat(),
+        "session_state": state,
+        "minutes_from_open": minutes_from_open,
+        "session_label": "PREOPEN_PMF" if minutes_from_open < 0 else "POSTOPEN_PMF",
+    }
 
 
 def num(value: Any) -> float | None:
@@ -261,12 +275,14 @@ def build_candidate(event: dict[str, Any]) -> dict[str, Any] | None:
     entry = reaction_close * (1 + PEAD_ENTRY_SLIPPAGE_PCT)
     risk = PEAD_STOP_ATR_MULTIPLE * atr
     stop = entry - risk
+    logged_at = utc_now()
     return {
         "id": f"PEAD_DRIFT_{event['earnings_date']}_{event['ticker']}",
         "strategy": "PEAD_DRIFT",
         "paper_only": True,
         "ticker": event["ticker"],
-        "logged_at": utc_now().isoformat(),
+        "logged_at": logged_at.isoformat(),
+        **eastern_session_fields(logged_at),
         "earnings_date": event["earnings_date"],
         "date": event["earnings_date"],
         "actual_eps": event["actual_eps"],

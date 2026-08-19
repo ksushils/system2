@@ -792,9 +792,17 @@ function writeExitFill(idea, parentOrder, leg, nowFn) {
   idea.actual_exit_price = exitPrice;
   idea.actual_exit_time = leg?.filled_at || leg?.updated_at || isoNow(nowFn);
   const classification = classifyExitOrder(idea, leg, parentOrder);
+  const externalAlertNeeded = classification.externalClose && !idea.external_close_alerted_at;
   idea.actual_exit_reason = classification.reason;
   idea.exit_attribution = classification.attribution;
   idea.external_close = classification.externalClose;
+  if (classification.externalClose) {
+    if (idea.cohort_label === 'B_CLEAN') idea.cohort_label = 'B_CONTAMINATED_MANUAL_EXITS';
+    if (externalAlertNeeded) {
+      idea.external_close_alerted_at = isoNow(nowFn);
+      idea.external_close_alert_version = 1;
+    }
+  }
   idea.alpaca_exit_order_id = leg?.id || null;
   idea.auto_exec_status = 'exit_filled';
   idea.real_r_fill_source = 'alpaca_paper';
@@ -803,12 +811,12 @@ function writeExitFill(idea, parentOrder, leg, nowFn) {
     idea.real_r = Number(raw.toFixed(3));
   }
   appendAudit(idea, { event: 'exit_filled', parent_order_id: parentOrder?.id, exit_order_id: leg?.id, reason: idea.actual_exit_reason, exit_attribution: idea.exit_attribution, external_close: idea.external_close, price: exitPrice });
-  if (classification.externalClose && idea.account === 'dedicated') {
+  if (externalAlertNeeded) {
     idea.auto_exec_alert = 'EXTERNAL_CLOSE_DETECTED';
     idea.auto_exec_alert_at = isoNow(nowFn);
     loudAutoExecAlert(idea, 'EXTERNAL CLOSE DETECTED — experiment contaminated', { alert: 'EXTERNAL_CLOSE_DETECTED', exit_order_id: leg?.id });
   }
-  return true;
+  return { written: true, classification, externalAlertNeeded };
 }
 
 function orderTime(order) {
@@ -978,8 +986,8 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
       const filledSymbolExit = findFilledExitOrder(idea, allOrders);
       if (filledSymbolExit && !livePositionSymbols.has(String(ticker || '').toUpperCase())) {
         const classification = classifyExitOrder(idea, filledSymbolExit, exitOrder);
-        if (!dryRun) writeExitFill(idea, exitOrder, filledSymbolExit, now);
-        results.push({ ticker, account: requestedAccount, action: dryRun ? 'would_update_exit_from_position_reconcile' : 'updated_exit_from_position_reconcile', order_id: order.id, exit_order_id: filledSymbolExit.id, exit_price: filledSymbolExit.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose });
+        const writeResult = !dryRun ? writeExitFill(idea, exitOrder, filledSymbolExit, now) : null;
+        results.push({ ticker, account: requestedAccount, action: dryRun ? 'would_update_exit_from_position_reconcile' : 'updated_exit_from_position_reconcile', order_id: order.id, exit_order_id: filledSymbolExit.id, exit_price: filledSymbolExit.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose, external_close_alert_needed: dryRun ? classification.externalClose && !idea.external_close_alerted_at : Boolean(writeResult?.externalAlertNeeded) });
         continue;
       }
       const hasExitOrder = Boolean(exitOrder || parentLegs.some(leg => !['expired', 'canceled', 'cancelled', 'rejected'].includes(String(leg?.status || '').toLowerCase())));
@@ -992,9 +1000,9 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
       }
       const filledLeg = [...parentLegs, ...exitLegs].find(leg => leg?.filled_avg_price || String(leg?.status || '').toLowerCase() === 'filled');
       if (filledLeg) {
-        if (!dryRun) writeExitFill(idea, exitOrder || order, filledLeg, now);
+        const writeResult = !dryRun ? writeExitFill(idea, exitOrder || order, filledLeg, now) : null;
         const classification = classifyExitOrder(idea, filledLeg, exitOrder || order);
-        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: dryRun ? 'would_update_exit' : 'updated_exit', order_id: order.id, exit_order_id: filledLeg.id, exit_price: filledLeg.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose });
+        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: dryRun ? 'would_update_exit' : 'updated_exit', order_id: order.id, exit_order_id: filledLeg.id, exit_price: filledLeg.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose, external_close_alert_needed: dryRun ? classification.externalClose && !idea.external_close_alerted_at : Boolean(writeResult?.externalAlertNeeded) });
       } else {
         results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: 'open', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || null, status: order.status });
       }
@@ -1035,6 +1043,7 @@ module.exports = {
   configHash,
   stableStringify,
   classifyExitOrder,
+  writeExitFill,
   structuralExtensionPct,
   rankCapCandidates,
   dryRunPreview,

@@ -293,6 +293,40 @@ module.exports = function attachScoring(app, db, deps) {
     return isPmfConfirmedAtStamp(row) && !isPmfLate(row);
   }
 
+  function easternSessionFields(timestamp) {
+    const instant = new Date(timestamp);
+    if (!Number.isFinite(instant.getTime())) return null;
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+      fractionalSecondDigits: 3, timeZoneName: 'longOffset',
+    });
+    const parts = Object.fromEntries(formatter.formatToParts(instant).map(part => [part.type, part.value]));
+    const minutes = Number(parts.hour) * 60 + Number(parts.minute);
+    const minutesFromOpen = minutes - (9 * 60 + 30);
+    const sessionState = minutes < 9 * 60 + 30 ? 'PREMARKET' : (minutes < 16 * 60 ? 'REGULAR' : 'AFTERHOURS');
+    const offset = String(parts.timeZoneName || 'GMT').replace('GMT', '') || '+00:00';
+    return {
+      session_eastern_time: `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}.${parts.fractionalSecond || '000'}${offset}`,
+      session_state: sessionState,
+      minutes_from_open: minutesFromOpen,
+      session_label: minutesFromOpen < 0 ? 'PREOPEN_PMF' : 'POSTOPEN_PMF',
+    };
+  }
+
+  function writeOnceSessionFields(row, timestamp) {
+    const fields = easternSessionFields(timestamp);
+    if (!row || !fields) return false;
+    let changed = false;
+    for (const [key, value] of Object.entries(fields)) {
+      if (row[key] == null) {
+        row[key] = value;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   function writePmfConfirmationStamp(idea, stamp) {
     if (!idea || idea.pmf_confirmed_at_stamp != null || !stamp) return;
     idea.pmf_confirmed_at_stamp = true;
@@ -306,6 +340,7 @@ module.exports = function attachScoring(app, db, deps) {
     idea.pmf_average_dollar_volume_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_source = stamp.averageDollarVolume != null ? 'fmp_batch_quote_avgVolume_x_stamp_price' : null;
+    writeOnceSessionFields(idea, stamp.at);
   }
 
   function intakeSourceLayer(row) {
@@ -1346,8 +1381,9 @@ module.exports = function attachScoring(app, db, deps) {
 
   function formatSyncAlertMessage(result, idea) {
     const ticker = result.ticker || idea?.ticker || idea?.symbol || 'UNKNOWN';
-    if (result.external_close && (result.account === 'dedicated' || idea?.account === 'dedicated')) {
-      return `⚠ EXTERNAL CLOSE DETECTED — experiment contaminated | ${ticker} was closed outside its stored OCO in the dedicated account`;
+    if (result.external_close && result.external_close_alert_needed) {
+      const integrity = cohortIntegrityPayload();
+      return `⚠ EXTERNAL CLOSE DETECTED — ${ticker} closed by non-OCO order at ${fmtPrice(idea?.actual_exit_price || result.exit_price)}\ntrade excluded from clean cohort · clean-B unaffected count: ${integrity.clean_count}`;
     }
     if (String(result.action || '').startsWith('updated_exit')) {
       return `CLOSED: ${ticker} @ ${fmtPrice(idea?.actual_exit_price || result.exit_price)} | ${idea?.actual_exit_reason || 'ALPACA_EXIT'} | real R ${idea?.real_r != null ? `${Number(idea.real_r) >= 0 ? '+' : ''}${Number(idea.real_r).toFixed(2)}` : 'n/a'}`;
@@ -1355,6 +1391,32 @@ module.exports = function attachScoring(app, db, deps) {
     if (result.action === 'alert_no_exit_order') return `NAKED POSITION: ${ticker} has no exit order`;
     if (result.action === 'sync_failed') return `AUTO-EXEC FAILED: ${ticker} - sync failed: ${result.reason || 'unknown'}`;
     return null;
+  }
+
+  function cohortIntegrityPayload() {
+    const entries = (db.data.ideas || []).filter(row => row?.test_order !== true && numericOrNull(row?.actual_entry_price) != null);
+    const clean = entries.filter(row => row.cohort_label === 'B_CLEAN');
+    const contaminated = entries.filter(row => row.cohort_label === 'B_CONTAMINATED_MANUAL_EXITS');
+    const last = [...contaminated].sort((a, b) => String(b.actual_exit_time || '').localeCompare(String(a.actual_exit_time || '')))[0] || null;
+    const denominator = clean.length + contaminated.length;
+    const rate = denominator ? Number(((contaminated.length / denominator) * 100).toFixed(1)) : 0;
+    return {
+      clean_count: clean.length,
+      clean_resolved_count: clean.filter(row => numericOrNull(row.actual_exit_price) != null && numericOrNull(row.real_r) != null).length,
+      clean_open_count: clean.filter(row => numericOrNull(row.actual_exit_price) == null).length,
+      contaminated_count: contaminated.length,
+      contamination_rate_pct: rate,
+      last_contamination_at: last?.actual_exit_time || null,
+      last_contamination_ticker: last?.ticker || last?.symbol || null,
+      at_risk: rate > 20,
+    };
+  }
+
+  function cohortIntegrityLine(integrity = cohortIntegrityPayload()) {
+    const lastDate = integrity.last_contamination_at ? String(integrity.last_contamination_at).slice(0, 10) : 'none';
+    const lastTicker = integrity.last_contamination_ticker || 'none';
+    const line = `COHORT INTEGRITY: clean ${integrity.clean_count} · contaminated ${integrity.contaminated_count} (${integrity.contamination_rate_pct}%) · last contamination: ${lastDate} ${lastTicker}`;
+    return integrity.at_risk ? `${line}\nCOHORT AT RISK — external closes are invalidating the test.` : line;
   }
 
   function buildDailyPmfSummary() {
@@ -1367,6 +1429,7 @@ module.exports = function attachScoring(app, db, deps) {
     const cleanB = rows.filter(r => r.cohort_label === 'B_CLEAN' && r.test_order !== true && numericOrNull(r.actual_entry_price) != null);
     const cleanBResolved = cleanB.filter(r => numericOrNull(r.actual_exit_price) != null && numericOrNull(r.real_r) != null);
     const contaminatedB = rows.filter(r => r.cohort_label === 'B_CONTAMINATED_MANUAL_EXITS');
+    const integrity = cohortIntegrityPayload();
     const totalR = closed.reduce((s, r) => s + (Number(r.real_r) || 0), 0);
     const peadRows = Array.isArray(db.data.pead_drift_paper) ? db.data.pead_drift_paper : [];
     const peadResolved = peadRows.filter(row => String(row.paper_status || '').toUpperCase() === 'RESOLVED').length;
@@ -1398,7 +1461,7 @@ module.exports = function attachScoring(app, db, deps) {
     const peadLine = `PEAD: n=${peadRows.length} (${peadResolved} resolved) · newest: ${peadNewest?.ticker || 'none'} · next check ${peadCheck}`;
     const cohortLine = `Cohort B clean: ${cleanBResolved.length}/15 resolved, ${cleanB.length - cleanBResolved.length} open`;
     const contaminatedLine = `B-contaminated (manual exits, not a system test): n=${contaminatedB.length}, excluded`;
-    return `${pmfLine}\n${cohortLine}\n${contaminatedLine}\n${peadLine}`;
+    return `${pmfLine}\n${cohortLine}\n${contaminatedLine}\n${cohortIntegrityLine(integrity)}\n${peadLine}`;
   }
 
   async function runPreMarketGapCheck(opts = {}) {
@@ -1504,6 +1567,7 @@ module.exports = function attachScoring(app, db, deps) {
         }
       }
 
+      if (pmfStamp) Object.assign(update, easternSessionFields(pmfStamp.at) || {});
       if (!lateMode) Object.assign(update, normalNonPmfHalfsizeFields(idea, update));
       checked.push(update);
       if (!dryRun) {
@@ -2475,6 +2539,45 @@ module.exports = function attachScoring(app, db, deps) {
     }
   });
 
+  app.post('/api/system2/session-stamps/backfill-local', localOnly, async (req, res) => {
+    try {
+      ensure();
+      const report = { pmf_classified: 0, pmf_changed: 0, pead_classified: 0, pead_changed: 0, anomalies: [] };
+      for (const row of db.data.ideas || []) {
+        if (!row || !(row.pmf_confirmed_at_stamp === true || row.pmf_stamp_time)) continue;
+        const timestamp = row.pmf_stamp_time || row.pre_market_checked_at;
+        const fields = easternSessionFields(timestamp);
+        if (!fields) continue;
+        report.pmf_classified += 1;
+        const changed = writeOnceSessionFields(row, timestamp);
+        if (changed) {
+          row.session_state_backfilled = true;
+          row.session_state_backfilled_at = now();
+          row.session_state_source = row.pmf_stamp_time ? 'pmf_stamp_time' : 'pre_market_checked_at';
+          report.pmf_changed += 1;
+        }
+        if (fields.minutes_from_open !== 30) report.anomalies.push({ ticker: row.ticker || row.symbol, timestamp, ...fields });
+      }
+      for (const row of db.data.pead_drift_paper || []) {
+        if (!row?.logged_at) continue;
+        const fields = easternSessionFields(row.logged_at);
+        if (!fields) continue;
+        report.pead_classified += 1;
+        const changed = writeOnceSessionFields(row, row.logged_at);
+        if (changed) {
+          row.session_state_backfilled = true;
+          row.session_state_backfilled_at = now();
+          row.session_state_source = 'logged_at';
+          report.pead_changed += 1;
+        }
+      }
+      await db.write();
+      res.json({ ok: true, ...report });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
   app.post('/api/system2/run-metadata', serviceOrAdmin, async (req, res) => {
     try {
       ensure();
@@ -3146,7 +3249,7 @@ module.exports = function attachScoring(app, db, deps) {
           const msg = formatSyncAlertMessage(row, idea);
           if (!msg) continue;
           const closed = String(row.action || '').startsWith('updated_exit');
-          const external = row.external_close && row.account === 'dedicated';
+          const external = row.external_close && row.external_close_alert_needed;
           const event = external ? 'external_close_detected' : (closed ? 'position_closed' : 'auto_exec_failure');
           const queued = queuePmfTelegramAlert(msg, { event, ticker: row.ticker, action: row.action, account: row.account }, external ? 'failures' : (closed ? 'positionClosed' : 'failures'));
           alertEvents.push({ type: event, ticker: row.ticker, ...queued });
@@ -3990,7 +4093,9 @@ module.exports = function attachScoring(app, db, deps) {
       progress_to_verdict: {
         resolved_cohort_b: cohortB.filter(i => numericOrNull(i.real_r) != null).length,
         needed: 15,
+        contaminated_excluded: contaminatedB.length,
       },
+      cohort_integrity: cohortIntegrityPayload(),
       modeled_baseline_not_achievable: {
         label: 'Modeled-entry baseline (NOT achievable)',
         n: 79,
