@@ -331,6 +331,13 @@ def update_open_row(row: dict[str, Any]) -> bool:
         return False
     after = bars[start_idx + 1:]
     changed = False
+    latest_close = num(bars[-1].get("close")) if bars else None
+    refreshed_at = utc_now().isoformat()
+    refreshed_r = r_value(entry, risk, latest_close)
+    if row.get("markout_r_current") != refreshed_r or row.get("markout_refreshed_at") is None:
+        row["markout_r_current"] = refreshed_r
+        row["markout_refreshed_at"] = refreshed_at
+        changed = True
     for days in (10, 20, 40, 60):
         key = f"markout_r_{days}d"
         if len(after) >= days and row.get(key) is None:

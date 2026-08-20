@@ -346,8 +346,58 @@ function stampAverageDollarVolume(idea) {
   return num(idea?.pmf_average_dollar_volume_at_stamp ?? idea?.pmf_adv_at_stamp);
 }
 
+function stampCompleteness(idea) {
+  return [
+    idea?.pmf_confirmed_at_stamp,
+    idea?.pmf_confirmed_at_stamp_time,
+    idea?.pmf_price_at_stamp,
+    idea?.pmf_atr_at_stamp,
+    effectiveEntry(idea),
+    effectiveStop(idea),
+    effectiveTarget(idea),
+    stampAverageDollarVolume(idea),
+  ].filter(value => value !== null && value !== undefined && value !== '').length;
+}
+
+function deterministicIdeaId(idea) {
+  return String(idea?.id ?? idea?.idea_id ?? '');
+}
+
+function deduplicateCapCandidates(ideas = []) {
+  const groups = new Map();
+  for (const idea of ideas) {
+    const ticker = ideaTicker(idea);
+    const key = ticker || `__missing__${deterministicIdeaId(idea)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(idea);
+  }
+  const kept = [];
+  for (const group of groups.values()) {
+    group.sort((a, b) => {
+      const extensionA = structuralExtensionPct(a);
+      const extensionB = structuralExtensionPct(b);
+      if (extensionA == null && extensionB != null) return 1;
+      if (extensionA != null && extensionB == null) return -1;
+      if (extensionA != null && extensionB != null && extensionA !== extensionB) return extensionA - extensionB;
+      const completeness = stampCompleteness(b) - stampCompleteness(a);
+      if (completeness) return completeness;
+      return deterministicIdeaId(a).localeCompare(deterministicIdeaId(b), undefined, { numeric: true });
+    });
+    const survivor = group[0];
+    kept.push(survivor);
+    for (const suppressed of group.slice(1)) {
+      suppressed.dedup_suppressed = true;
+      suppressed.dedup_kept_id = survivor?.id ?? survivor?.idea_id ?? null;
+      suppressed.pmf_cap_rank = null;
+      suppressed.pmf_cap_selected = false;
+      appendAudit(suppressed, { event: 'dedup_suppressed', ticker: ideaTicker(suppressed), dedup_kept_id: suppressed.dedup_kept_id });
+    }
+  }
+  return kept;
+}
+
 function rankCapCandidates(ideas = [], nowFn) {
-  const ranked = [...ideas].sort((a, b) => {
+  const ranked = deduplicateCapCandidates(ideas).sort((a, b) => {
     const extensionA = structuralExtensionPct(a);
     const extensionB = structuralExtensionPct(b);
     if (extensionA == null && extensionB != null) return 1;
@@ -719,6 +769,20 @@ function writeEntryFill(idea, order, preview, nowFn) {
   idea.account = preview?.accountTag || idea.account || 'legacy_shared';
   idea.cohort_label = 'B_CLEAN';
   if (filled != null) {
+    if (idea.paper_status === 'CLOSED' || idea.paper_exit_reason || idea.paper_exit_price != null) {
+      idea.modeled_paper_status = idea.modeled_paper_status ?? idea.paper_status ?? null;
+      idea.modeled_paper_outcome = idea.modeled_paper_outcome ?? idea.paper_outcome ?? null;
+      idea.modeled_paper_exit_reason = idea.modeled_paper_exit_reason ?? idea.paper_exit_reason ?? null;
+      idea.modeled_paper_exit_at = idea.modeled_paper_exit_at ?? idea.paper_exit_at ?? null;
+      idea.modeled_paper_exit_price = idea.modeled_paper_exit_price ?? idea.paper_exit_price ?? null;
+      idea.modeled_paper_exit_r = idea.modeled_paper_exit_r ?? idea.paper_exit_r ?? null;
+    }
+    idea.paper_status = 'RECONCILIATION_PENDING';
+    idea.paper_outcome = null;
+    idea.paper_exit_reason = null;
+    idea.paper_exit_at = null;
+    idea.paper_exit_price = null;
+    idea.paper_exit_r = null;
     const modelEntry = effectiveEntry(idea);
     idea.actual_entry_price = filled;
     idea.actual_entry_time = order?.filled_at || order?.updated_at || isoNow(nowFn);
@@ -728,6 +792,25 @@ function writeEntryFill(idea, order, preview, nowFn) {
     idea.true_r_fill_source = 'alpaca_paper';
     idea.true_r_estimated_fill = false;
   }
+}
+
+function normalizeBrokerPendingState(idea) {
+  if (num(idea?.actual_entry_price) == null || num(idea?.actual_exit_price) != null) return false;
+  if (idea.paper_status !== 'CLOSED' && !idea.paper_exit_reason && idea.paper_exit_price == null) return false;
+  idea.modeled_paper_status = idea.modeled_paper_status ?? idea.paper_status ?? null;
+  idea.modeled_paper_outcome = idea.modeled_paper_outcome ?? idea.paper_outcome ?? null;
+  idea.modeled_paper_exit_reason = idea.modeled_paper_exit_reason ?? idea.paper_exit_reason ?? null;
+  idea.modeled_paper_exit_at = idea.modeled_paper_exit_at ?? idea.paper_exit_at ?? null;
+  idea.modeled_paper_exit_price = idea.modeled_paper_exit_price ?? idea.paper_exit_price ?? null;
+  idea.modeled_paper_exit_r = idea.modeled_paper_exit_r ?? idea.paper_exit_r ?? null;
+  idea.paper_status = 'RECONCILIATION_PENDING';
+  idea.paper_outcome = null;
+  idea.paper_exit_reason = null;
+  idea.paper_exit_at = null;
+  idea.paper_exit_price = null;
+  idea.paper_exit_r = null;
+  appendAudit(idea, { event: 'broker_state_normalized', reason: 'actual entry is open; modeled paper close preserved separately' });
+  return true;
 }
 
 function persistRecalibratedBracket(idea, exitPreview, exitOrder) {
@@ -794,6 +877,8 @@ function writeExitFill(idea, parentOrder, leg, nowFn) {
   const classification = classifyExitOrder(idea, leg, parentOrder);
   const externalAlertNeeded = classification.externalClose && !idea.external_close_alerted_at;
   idea.actual_exit_reason = classification.reason;
+  idea.paper_status = 'CLOSED';
+  idea.paper_outcome = classification.reason === 'TARGET' ? 'WIN' : 'LOSS';
   idea.exit_attribution = classification.attribution;
   idea.external_close = classification.externalClose;
   if (classification.externalClose) {
@@ -957,6 +1042,7 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
   const accountCache = new Map();
   for (const idea of rows) {
     try {
+      if (!dryRun) normalizeBrokerPendingState(idea);
       const requestedAccount = idea.account || (primaryConfig.accountTag === 'dedicated' ? 'dedicated' : 'legacy_shared');
       const config = requestedAccount === 'legacy_shared'
         ? (legacyConfig || (primaryConfig.accountTag === 'legacy_shared' ? primaryConfig : null))
@@ -1044,8 +1130,10 @@ module.exports = {
   stableStringify,
   classifyExitOrder,
   writeExitFill,
+  normalizeBrokerPendingState,
   structuralExtensionPct,
   rankCapCandidates,
+  deduplicateCapCandidates,
   dryRunPreview,
   maybeExecuteConfirmedPmfs,
   syncOpenAutoPositions,

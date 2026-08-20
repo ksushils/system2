@@ -6,6 +6,7 @@ import os
 import argparse
 import urllib.parse
 import urllib.request
+import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -13,6 +14,7 @@ ROOT = Path("/root/system2-core")
 FUND = Path("/root/fund-system/data/fund.json")
 GAP_LOG = ROOT / "logs/cron_gap_check.log"
 STATE = ROOT / "logs/system2_heartbeat_state.json"
+DISK_ALERT_THRESHOLD_PCT = 85
 
 
 def load_env():
@@ -92,9 +94,13 @@ def main():
         stale.append(f"no finalists recorded for 2 trading days (latest={latest_finalist})")
     if not latest_gap or latest_gap < cutoff:
         stale.append(f"no successful PMF gap check for 2 trading days (latest={latest_gap})")
+    disk = shutil.disk_usage("/")
+    disk_used_pct = round((disk.used / disk.total) * 100, 1) if disk.total else 0.0
+    if disk_used_pct >= DISK_ALERT_THRESHOLD_PCT:
+        stale.append(f"disk usage {disk_used_pct}% >= {DISK_ALERT_THRESHOLD_PCT}% threshold")
     fingerprint = "|".join(stale)
     previous = json.loads(STATE.read_text()) if STATE.exists() else {}
-    result = {"ok": not stale, "checked_at": now.isoformat(), "latest_finalist": latest_finalist, "latest_gap": latest_gap, "cutoff": cutoff, "issues": stale}
+    result = {"ok": not stale, "checked_at": now.isoformat(), "latest_finalist": latest_finalist, "latest_gap": latest_gap, "cutoff": cutoff, "disk_used_pct": disk_used_pct, "disk_alert_threshold_pct": DISK_ALERT_THRESHOLD_PCT, "issues": stale}
     if stale and previous.get("fingerprint") != fingerprint:
         result["telegram"] = send_alert("🚨 SYSTEM2 HEARTBEAT FAILURE\n" + "\n".join(stale))
     STATE.write_text(json.dumps({**result, "fingerprint": fingerprint}, indent=2))
