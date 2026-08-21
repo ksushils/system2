@@ -637,7 +637,8 @@ function openUnrealizedR(allIdeas) {
 function resolvedAutoRows(allIdeas, resetAt = null) {
   const resetMs = Date.parse(resetAt || 0) || 0;
   return (allIdeas || [])
-    .filter(row => row.fill_source === 'alpaca_paper' && !row.test_order && row.actual_exit_time && num(row.real_r) != null)
+    .filter(row => row.cohort_label === 'B_CLEAN')
+    .filter(row => (row.fill_source === 'alpaca_paper' || row.alpaca_order_id) && !row.test_order && row.actual_exit_time && num(row.real_r) != null)
     .filter(row => (Date.parse(row.actual_exit_time) || 0) > resetMs)
     .sort((a, b) => (Date.parse(b.actual_exit_time) || 0) - (Date.parse(a.actual_exit_time) || 0));
 }
