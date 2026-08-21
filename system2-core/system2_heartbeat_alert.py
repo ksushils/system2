@@ -15,6 +15,7 @@ FUND = Path("/root/fund-system/data/fund.json")
 GAP_LOG = ROOT / "logs/cron_gap_check.log"
 STATE = ROOT / "logs/system2_heartbeat_state.json"
 DISK_ALERT_THRESHOLD_PCT = 85
+DISK_CRITICAL_THRESHOLD_PCT = 92
 
 
 def load_env():
@@ -60,6 +61,14 @@ def send_alert(text):
         return {"sent": response.status == 200}
 
 
+def disk_issue(used_pct):
+    if used_pct >= DISK_CRITICAL_THRESHOLD_PCT:
+        return "disk_critical_92", f"CRITICAL disk usage {used_pct}% >= {DISK_CRITICAL_THRESHOLD_PCT}% threshold"
+    if used_pct >= DISK_ALERT_THRESHOLD_PCT:
+        return "disk_warning_85", f"disk usage {used_pct}% >= {DISK_ALERT_THRESHOLD_PCT}% threshold"
+    return None, None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
@@ -90,19 +99,25 @@ def main():
             gap_dates.append(str(stamp)[:10])
     latest_gap = max(gap_dates, default=None)
     stale = []
+    issue_codes = []
     if not latest_finalist or latest_finalist < cutoff:
         stale.append(f"no finalists recorded for 2 trading days (latest={latest_finalist})")
+        issue_codes.append("finalists_stale")
     if not latest_gap or latest_gap < cutoff:
         stale.append(f"no successful PMF gap check for 2 trading days (latest={latest_gap})")
+        issue_codes.append("gap_check_stale")
     disk = shutil.disk_usage("/")
     disk_used_pct = round((disk.used / disk.total) * 100, 1) if disk.total else 0.0
-    if disk_used_pct >= DISK_ALERT_THRESHOLD_PCT:
-        stale.append(f"disk usage {disk_used_pct}% >= {DISK_ALERT_THRESHOLD_PCT}% threshold")
-    fingerprint = "|".join(stale)
+    disk_code, disk_message = disk_issue(disk_used_pct)
+    if disk_code:
+        stale.append(disk_message)
+        issue_codes.append(disk_code)
+    fingerprint = "|".join(issue_codes)
     previous = json.loads(STATE.read_text()) if STATE.exists() else {}
-    result = {"ok": not stale, "checked_at": now.isoformat(), "latest_finalist": latest_finalist, "latest_gap": latest_gap, "cutoff": cutoff, "disk_used_pct": disk_used_pct, "disk_alert_threshold_pct": DISK_ALERT_THRESHOLD_PCT, "issues": stale}
+    result = {"ok": not stale, "checked_at": now.isoformat(), "latest_finalist": latest_finalist, "latest_gap": latest_gap, "cutoff": cutoff, "disk_used_pct": disk_used_pct, "disk_alert_threshold_pct": DISK_ALERT_THRESHOLD_PCT, "disk_critical_threshold_pct": DISK_CRITICAL_THRESHOLD_PCT, "issues": stale}
     if stale and previous.get("fingerprint") != fingerprint:
-        result["telegram"] = send_alert("🚨 SYSTEM2 HEARTBEAT FAILURE\n" + "\n".join(stale))
+        heading = "🚨 CRITICAL SYSTEM2 DISK USAGE" if "disk_critical_92" in issue_codes else "⚠ SYSTEM2 HEALTH WARNING"
+        result["telegram"] = send_alert(heading + "\n" + "\n".join(stale))
     STATE.write_text(json.dumps({**result, "fingerprint": fingerprint}, indent=2))
     print(json.dumps(result))
 

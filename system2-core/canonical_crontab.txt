@@ -64,6 +64,9 @@ CRON_TZ=UTC
 # Validated rotating fund.json backup - persistent, parse-checked, row-drop guarded. Does not touch trading data.
 20 4 * * * cd /root/system2-core && .venv/bin/python validated_fund_backup.py >> /root/system2-core/backups/fund-validated/cron.log 2>&1
 
+# Weekly scoped backup retention: n8n 7 daily + 4 weekly; labelled release/checkpoint/critical/forensic artifacts protected. Also cleans rebuildable npm cache only when disk >=80%.
+45 4 * * 0 cd /root/system2-core && .venv/bin/python backup_retention.py --apply >> /root/system2-core/logs/backup_retention.log 2>&1
+
 # Intraday bar recorder - additive raw bars only; no fund.json writes, PMF setter, auto-exec, selection, scoring, gates, or sizing changes.
 45 15 * * 1-5 cd /root/system2-core && .venv/bin/python intraday_bar_recorder.py --window-minutes 120 >> logs/intraday_bar_recorder.log 2>&1
 
