@@ -173,6 +173,7 @@ def num(value: Any) -> float | None:
 
 
 def fetch_constituents(label: str, endpoints: list[str]) -> dict[str, Any]:
+    request_started_at = datetime.now(timezone.utc).isoformat()
     rows, used, attempts = get_first(endpoints)
     cleaned = []
     rejected = 0
@@ -183,10 +184,12 @@ def fetch_constituents(label: str, endpoints: list[str]) -> dict[str, Any]:
         symbol = row_symbol(row)
         if symbol:
             cleaned.append({"symbol": symbol, "companyName": row.get("companyName") or row.get("name"), "source": label})
-    return {"label": label, "rows": rows, "used": used, "attempts": attempts, "cleaned": cleaned, "rejected": rejected}
+    return {"label": label, "rows": rows, "used": used, "attempts": attempts, "cleaned": cleaned, "rejected": rejected,
+            "request_started_at": request_started_at, "request_completed_at": datetime.now(timezone.utc).isoformat(), "provider_as_of": None}
 
 
 def fetch_screener(label: str, large_cap: bool = False) -> dict[str, Any]:
+    request_started_at = datetime.now(timezone.utc).isoformat()
     params = {
         "marketCapMoreThan": 2_000_000_000 if large_cap else MIN_MARKET_CAP,
         "volumeMoreThan": MIN_AVG_VOLUME,
@@ -210,7 +213,8 @@ def fetch_screener(label: str, large_cap: bool = False) -> dict[str, Any]:
         symbol = row_symbol(row)
         if symbol:
             cleaned.append({"symbol": symbol, "companyName": row.get("companyName") or row.get("name"), "source": label})
-    return {"label": label, "rows": rows, "used": used, "attempts": attempts, "cleaned": cleaned, "rejected": rejected}
+    return {"label": label, "rows": rows, "used": used, "attempts": attempts, "cleaned": cleaned, "rejected": rejected,
+            "request_started_at": request_started_at, "request_completed_at": datetime.now(timezone.utc).isoformat(), "provider_as_of": None}
 
 
 def add_layer(
@@ -401,6 +405,16 @@ def build_universe() -> tuple[list[str], dict[str, Any]]:
         "first30": sorted_universe[:30],
         "last30": sorted_universe[-30:],
     }
+    # Additive research telemetry only. Failure can never block the production universe.
+    try:
+        from research_provenance import write_universe_provenance
+        overlay_layers = []
+        for label, tickers in (("options_expansion", expansion_tickers), ("danelfin", danelfin_expansion_tickers), ("implied_options_discovery", implied_options_expansion_tickers)):
+            overlay_layers.append({"label": label, "rows": [{"symbol": s} for s in tickers], "cleaned": [{"symbol": s} for s in tickers], "request_started_at": None, "request_completed_at": None, "provider_as_of": None})
+        path = write_universe_provenance(layers + overlay_layers, sorted_universe, sources, TARGET_SIZE)
+        metadata["researchProvenanceArtifact"] = str(path)
+    except Exception as exc:
+        print(f"  ! research provenance write failed (production unaffected): {type(exc).__name__}: {exc}")
     return sorted_universe, metadata
 
 

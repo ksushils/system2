@@ -624,6 +624,14 @@ def main() -> None:
     catalysts = dedupe(all_records, args.limit)
     candidate_pool = build_candidate_pool(universe_rows, catalysts)
 
+    # Additive pre-cap research ledger. Never changes the production ranking/output.
+    if not args.dry_run:
+        try:
+            from research_provenance import write_catalyst_pre_cap
+            write_catalyst_pre_cap(all_records, catalysts, universe, args.limit)
+        except Exception as exc:
+            print(f"Research pre-cap ledger failed (production unaffected): {type(exc).__name__}: {exc}")
+
     metadata = {
         "stage": "CatalystDiscovery",
         "createdAt": datetime.now(timezone.utc).isoformat(),

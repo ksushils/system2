@@ -6,6 +6,9 @@
 
 0 2 * * * /root/fund-system/backup-fund.sh >> /root/fund-system/backups/backup.log 2>&1
 CRON_TZ=UTC
+
+# Research telemetry retention: estimated upper bound ~0.72 GiB/year; retain 1095 days (~2.2 GiB).
+35 4 * * 0 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py retention >> /root/system2-core/logs/research_telemetry.log 2>&1
 15 2 * * 2-6 /root/system2-core/run_phase_b_core_baseline.sh
 0 14-21 * * 1-5 /root/system2-core/run_system2_paper_monitor.sh
 # System2 PMF check - proven definition: FMP price vs planned entry, >=1.5x ATR, historically stamped around 14:00 UTC.
@@ -80,3 +83,11 @@ CRON_TZ=UTC
 
 # Daily PMF progress report - Telegram, reporting only; Cohort B progress first, no trading logic.
 5 22 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1
+
+# Prospective research telemetry only: immutable nightly lineage/funnel snapshot.
+0 3 * * 2-6 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py finalize-nightly >> /root/system2-core/logs/research_telemetry.log 2>&1
+
+# Prospective research telemetry only: 09:15 ET shadow snapshot; never consumed by selection or execution.
+CRON_TZ=America/New_York
+15 9 * * 1-5 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py shadow-premarket >> /root/system2-core/logs/research_telemetry.log 2>&1
+CRON_TZ=UTC
