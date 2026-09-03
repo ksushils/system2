@@ -12,7 +12,9 @@ CRON_TZ=UTC
 
 # Prospective swing champion/control memberships; immutable research only, no orders.
 5 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py create >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+7 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py create-challengers >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 25 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py update >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+27 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py update-challengers >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 CRON_TZ=America/New_York
 20 9 * * 1-5 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py attach-premarket >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 CRON_TZ=UTC
