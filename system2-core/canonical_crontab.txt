@@ -15,7 +15,12 @@ CRON_TZ=UTC
 7 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py create-challengers >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 25 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py update >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 27 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py update-challengers >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+
+# Momentum level-vs-acceleration prospective study; immutable shadow research only.
+9 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py create-nightly >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
+29 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py update >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 CRON_TZ=America/New_York
+17 9 * * 1-5 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py capture-0915 >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 20 9 * * 1-5 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py attach-premarket >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
 CRON_TZ=UTC
 15 2 * * 2-6 /root/system2-core/run_phase_b_core_baseline.sh
