@@ -67,7 +67,11 @@ def fetch_events(session: str, pipeline: datetime | None, symbols: set[str], key
             status[kind]={"quality":"FRESH","rows_returned":len(raw),"complete_for_no-event_claim":complete}
             for row in raw:
                 symbol=event_symbol(row); when=event_time(row)
-                if symbol not in symbols or (pipeline and when and when<=pipeline):continue
+                if symbol not in symbols:continue
+                if when is None:
+                    status[kind]["complete_for_no-event_claim"]=False
+                    continue
+                if pipeline and when<=pipeline:continue
                 polarity="UNKNOWN"
                 if kind=="analyst":
                     grade=str(row.get("newGrade") or row.get("gradingAction") or "").lower()
