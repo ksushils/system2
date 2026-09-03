@@ -9,6 +9,13 @@ CRON_TZ=UTC
 
 # Research telemetry retention: estimated upper bound ~0.72 GiB/year; retain 1095 days (~2.2 GiB).
 35 4 * * 0 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py retention >> /root/system2-core/logs/research_telemetry.log 2>&1
+
+# Prospective swing champion/control memberships; immutable research only, no orders.
+5 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py create >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+25 3 * * 2-6 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py update >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+CRON_TZ=America/New_York
+20 9 * * 1-5 cd /root/system2-core && .venv/bin/python swing_shadow_cohorts.py attach-premarket >> /root/system2-core/logs/swing_shadow_cohorts.log 2>&1
+CRON_TZ=UTC
 15 2 * * 2-6 /root/system2-core/run_phase_b_core_baseline.sh
 0 14-21 * * 1-5 /root/system2-core/run_system2_paper_monitor.sh
 # System2 PMF check - proven definition: FMP price vs planned entry, >=1.5x ATR, historically stamped around 14:00 UTC.
