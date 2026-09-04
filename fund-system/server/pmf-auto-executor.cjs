@@ -10,6 +10,7 @@ const TERMINAL_AUTO_STATUSES = new Set(['failed', 'skipped', 'exit_filled', 'clo
 const RECALIBRATED_BRACKET_MODE = 'recalibrated_to_fill';
 const NAKED_POSITION_ALERT = 'NAKED_AUTO_POSITION_NO_EXIT_ORDER';
 const RISK_BREAKER_ALERT = 'PMF_RISK_BREAKER_TRIPPED';
+const DEPLOY_MISMATCH_ALERT = 'DEPLOY_MISMATCH_NEW_ORDERS_BLOCKED';
 const DEFAULT_MAX_CONCURRENT_AUTO_POSITIONS = 5;
 const DEFAULT_MAX_DAILY_LOSS_R = 3;
 const DEFAULT_MAX_POSITIONS_PER_SECTOR = 2;
@@ -18,6 +19,7 @@ const CONFIG_SNAPSHOT_VERSION = 1;
 const CONFIG_LEDGER_FILE = 'config_change_ledger.jsonl';
 const CONFIG_LATEST_FILE = 'latest_seen_config_hash.json';
 const CAP_SELECTION_RULE = 'structural_extension_asc_adv_desc_ticker_asc';
+const PMF_V1_RETIRED_REASON = 'PMF_V1_RETIRED_NO_NEW_ENTRIES';
 
 function num(value) {
   if (value == null || value === '') return null;
@@ -55,6 +57,7 @@ function loadConfig(readEnvValue) {
   const maxOrdersPerDay = Number(readEnv('PMF_AUTO_EXEC_MAX_PER_DAY', readEnvValue) || DEFAULT_MAX_ORDERS_PER_DAY);
   return {
     enabled: String(readEnv('PMF_AUTO_EXEC_ENABLED', readEnvValue) || 'false').toLowerCase() === 'true',
+    retiredNoNewEntries: envFlag('PMF_V1_RETIRED_NO_NEW_ENTRIES', readEnvValue, true),
     baseUrl,
     apiKey: readEnv('ALPACA_PAPER_API_KEY', readEnvValue),
     apiSecret: readEnv('ALPACA_PAPER_API_SECRET', readEnvValue),
@@ -67,6 +70,7 @@ function loadConfig(readEnvValue) {
     riskMaxPositionsPerSector: Number(readEnv('PMF_RISK_MAX_POSITIONS_PER_SECTOR', readEnvValue) || DEFAULT_MAX_POSITIONS_PER_SECTOR),
     riskConsecutiveLossHalt: Number(readEnv('PMF_RISK_CONSECUTIVE_LOSS_HALT', readEnvValue) || DEFAULT_CONSECUTIVE_LOSS_HALT),
     riskConsecutiveLossResetAt: readEnv('PMF_RISK_CONSECUTIVE_LOSS_RESET_AT', readEnvValue) || null,
+    deployMismatchOverride: envFlag('PMF_DEPLOY_MISMATCH_OVERRIDE', readEnvValue, false),
     system2Root: readEnv('SYSTEM2_CORE_DIR', readEnvValue) || '/root/system2-core',
     accountTag: envFlag('ALPACA_DEDICATED_ACCOUNT_ENABLED', readEnvValue, false) ? 'dedicated' : 'legacy_shared',
   };
@@ -144,6 +148,7 @@ function frozenConfigSnapshot(config, readEnvValue, extra = {}) {
   };
   const env = {
     PMF_AUTO_EXEC_ENABLED: Boolean(config.enabled),
+    PMF_V1_RETIRED_NO_NEW_ENTRIES: Boolean(config.retiredNoNewEntries),
     PMF_AUTO_EXEC_MAX_PER_DAY: Number(config.maxOrdersPerDay),
     PMF_RISK_BREAKERS_ENABLED: Boolean(config.riskBreakersEnabled),
     PMF_RISK_KILL_SWITCH_ENABLED: Boolean(config.riskKillSwitchEnabled),
@@ -491,6 +496,7 @@ function recalibratedExitLevels(idea, actualFill, currentPrice = actualFill) {
 }
 
 function buildEntryOrder(idea, config) {
+  if (config?.retiredNoNewEntries) throw new Error(PMF_V1_RETIRED_REASON);
   const symbol = ideaTicker(idea);
   const entry = effectiveEntry(idea);
   const stop = effectiveStop(idea);
@@ -503,6 +509,9 @@ function buildEntryOrder(idea, config) {
   if (isShort && !(target < ref && stop > ref)) throw new Error('invalid short bracket: expected target < reference price < stop');
   const side = isShort ? 'sell' : 'buy';
   const limit = roundPrice(isShort ? ref * (1 - ENTRY_LIMIT_BUFFER_PCT) : ref * (1 + ENTRY_LIMIT_BUFFER_PCT));
+  const estimated = recalibratedExitLevels(idea, limit, limit);
+  const estimatedStop = roundPrice(estimated.stop);
+  const estimatedTarget = roundPrice(estimated.target);
   return {
     endpoint: `${config.baseUrl}/orders`,
     paper_endpoint_asserted: config.baseUrl.toLowerCase().includes('paper'),
@@ -513,10 +522,62 @@ function buildEntryOrder(idea, config) {
       limit_price: String(limit),
       qty: String(config.qty),
       time_in_force: 'day',
+      order_class: 'bracket',
+      take_profit: { limit_price: String(estimatedTarget) },
+      stop_loss: { stop_price: String(estimatedStop) },
       client_order_id: `pmf_auto_${String(idea.id || symbol).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32)}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
     },
-    model: { entry, stop, target, reference_price: ref, entry_limit_buffer_pct: ENTRY_LIMIT_BUFFER_PCT, qty: config.qty, order_flow: 'entry_then_recalibrated_oco' },
+    model: { entry, stop, target, reference_price: ref, estimated_fill: limit, estimated_stop: estimated.stop, estimated_target: estimated.target, entry_limit_buffer_pct: ENTRY_LIMIT_BUFFER_PCT, qty: config.qty, order_flow: 'native_bracket_then_replace' },
   };
+}
+
+async function alpacaPatch(config, route, payload) {
+  const res = await fetch(`${config.baseUrl}${route}`, { method: 'PATCH', headers: authHeaders(config), body: JSON.stringify(payload) });
+  const text = await res.text();
+  const body = text ? JSON.parse(text) : {};
+  if (!res.ok) throw new Error(`Alpaca PATCH ${route} ${res.status}: ${text.slice(0, 300)}`);
+  return body;
+}
+
+function liveBracketLegs(order) {
+  const live = (order?.legs || []).filter(leg => !['filled','canceled','cancelled','expired','rejected'].includes(String(leg?.status || '').toLowerCase()));
+  return {
+    stop: live.find(leg => String(leg?.type || '').toLowerCase().startsWith('stop') || leg?.stop_price),
+    target: live.find(leg => String(leg?.type || '').toLowerCase() === 'limit' && leg?.limit_price),
+  };
+}
+
+async function replaceBracketLegsAtFill(idea, config, parentOrder) {
+  const fill = num(parentOrder?.filled_avg_price);
+  const levels = recalibratedExitLevels(idea, fill, fill);
+  const legs = liveBracketLegs(parentOrder);
+  if (!legs.stop || !legs.target) throw new Error('native bracket fill did not expose both live exit legs');
+  const target = await alpacaPatch(config, `/orders/${legs.target.id}`, {
+    limit_price: String(roundPrice(levels.target)),
+    time_in_force: 'gtc',
+  });
+  const stop = await alpacaPatch(config, `/orders/${legs.stop.id}`, {
+    stop_price: String(roundPrice(levels.stop)),
+    time_in_force: 'gtc',
+  });
+  return { parent: parentOrder, target, stop, levels };
+}
+
+function deployGateState(config) {
+  const stateFile = path.join(config.system2Root || '/root/system2-core', 'logs/deployed_file_guard_state.json');
+  let state = {};
+  try { state = JSON.parse(fs.readFileSync(stateFile, 'utf8')); } catch {}
+  const mismatches = Array.isArray(state.mismatches) ? state.mismatches.filter(file => /pmf-auto-executor|scoring-endpoints/.test(file)) : [];
+  return { blocked: mismatches.length > 0 && !config.deployMismatchOverride, override: config.deployMismatchOverride, mismatches, checked_at: state.checked_at || null };
+}
+
+function deployedCodeIdentity(config) {
+  const executor = fileSha256(__filename);
+  const scoring = fileSha256(path.join(path.dirname(__filename), 'scoring-endpoints.cjs'));
+  const deployedCodeHash = sha256(stableStringify({ executor, scoring }));
+  let gitCommit = null;
+  try { gitCommit = childProcess.execFileSync('git', ['ls-remote', 'https://github.com/ksushils/system2.git', 'refs/heads/master'], { encoding: 'utf8', timeout: 15000 }).trim().split(/\s+/)[0] || null; } catch {}
+  return { deployed_code_hash: deployedCodeHash, deployed_executor_hash: executor, deployed_scoring_hash: scoring, git_commit: gitCommit };
 }
 
 function buildOcoExitOrder(idea, config, actualFill, filledQty) {
@@ -935,6 +996,13 @@ function flattenOrders(orders) {
   return out;
 }
 
+function liveSymbolExitOrders(idea, orders) {
+  const ticker = ideaTicker(idea);
+  return flattenOrders(orders).filter(order => String(order?.symbol || '').toUpperCase() === ticker)
+    .filter(order => isExitSideForIdea(idea, order))
+    .filter(order => !['filled','canceled','cancelled','expired','rejected'].includes(String(order?.status || '').toLowerCase()));
+}
+
 function findFilledExitOrder(idea, orders) {
   const ticker = ideaTicker(idea);
   const entryTime = Date.parse(idea.actual_entry_time || idea.auto_exec_at || 0) || 0;
@@ -950,8 +1018,19 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
   const config = loadConfig(readEnvValue);
   const configMeta = currentConfigSnapshot(readEnvValue, { gapCheckCohort: 'PMF' });
   const results = [];
+  if (config.retiredNoNewEntries) return { ok: true, enabled: false, retired: true, placed: 0, skipped: ideas.length, action: 'retired_blocked', reason: PMF_V1_RETIRED_REASON, broker_calls: 0, existing_positions_untouched: true, results: ideas.map(i => ({ ticker: ideaTicker(i), action: 'retired_blocked', reason: PMF_V1_RETIRED_REASON })) };
   if (!config.enabled && !dryRun) return { ok: true, enabled: false, placed: 0, skipped: ideas.length, results: ideas.map(i => ({ ticker: ideaTicker(i), action: 'skipped', reason: 'PMF_AUTO_EXEC_ENABLED=false' })) };
   if (!config.apiKey || !config.apiSecret) return { ok: false, enabled: config.enabled, placed: 0, skipped: ideas.length, error: 'Missing ALPACA_PAPER_API_KEY / ALPACA_PAPER_API_SECRET' };
+  const deployGate = deployGateState(config);
+  if (deployGate.override) console.error(`[PMF_AUTO_EXEC_ALERT] DEPLOY MISMATCH OVERRIDE ACTIVE: ${deployGate.mismatches.join(', ') || 'no current mismatch'}`);
+  if (deployGate.blocked && !dryRun) {
+    const reason = `🚨 DEPLOY MISMATCH — new orders blocked until deployed code matches canonical: ${deployGate.mismatches.join(', ')}`;
+    for (const idea of ideas) {
+      appendAudit(idea, { event: 'deploy_mismatch_blocked', alert: DEPLOY_MISMATCH_ALERT, reason, deploy_guard_checked_at: deployGate.checked_at });
+      loudAutoExecAlert(idea, reason, { alert: DEPLOY_MISMATCH_ALERT, mismatches: deployGate.mismatches });
+    }
+    return { ok: false, enabled: config.enabled, placed: 0, skipped: ideas.length, action: 'deploy_mismatch_blocked', reason, existing_positions_untouched: true, results: ideas.map(i => ({ ticker: ideaTicker(i), action: 'deploy_mismatch_blocked', reason })) };
+  }
   let open = true;
   if (!dryRun) {
     try { open = await marketIsOpen(config); } catch (e) { open = false; results.push({ action: 'guard_failed', reason: e.message }); }
@@ -984,24 +1063,25 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
       }
       const preview = buildEntryOrder(idea, config);
       preview.accountTag = config.accountTag;
+      if (deployGate.override) appendAudit(idea, { event: 'deploy_mismatch_override_used', env: 'PMF_DEPLOY_MISMATCH_OVERRIDE', mismatches: deployGate.mismatches, warning: 'owner explicitly allowed order placement despite deployed/canonical mismatch' });
       idea.pmf_cap_selected = true;
       idea.pmf_cap_block_reason = null;
       appendAudit(idea, { event: 'ranked_cap_selected', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE });
       if (dryRun) {
         const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
-        let simulatedOco = null;
-        if (simulatedFill > 0) simulatedOco = buildOcoExitOrder(idea, config, simulatedFill, config.qty);
-        results.push({ ticker, action: 'would_place_entry_then_recalibrated_oco', account: config.accountTag, cohort_label: 'B_CLEAN', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, average_dollar_volume: stampAverageDollarVolume(idea), selection_rule: CAP_SELECTION_RULE, endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: isoNow(now) });
+        const actual = simulatedFill > 0 ? recalibratedExitLevels(idea, simulatedFill, simulatedFill) : null;
+        results.push({ ticker, action: 'would_place_native_bracket_then_replace', account: config.accountTag, cohort_label: 'B_CLEAN', rank: idea.pmf_cap_rank, candidate_count: idea.pmf_cap_candidate_count, structural_extension_pct: idea.pmf_structural_extension_at_stamp_pct, selection_rule: CAP_SELECTION_RULE, order: preview.payload, simulated_fill_price: simulatedFill, simulated_replace: actual ? { stop: roundPrice(actual.stop), target: roundPrice(actual.target) } : null, simulated_replace_failure: { original_bracket_kept: true, geometry_estimated: true, alert: NAKED_POSITION_ALERT }, model: preview.model, config_hash: configMeta.hash });
         placedToday += 1;
         continue;
       }
       stampConfigOnIdea(idea, configMeta, now);
+      Object.assign(idea, deployedCodeIdentity(config));
       const order = await alpacaPost(config, '/orders', preview.payload);
       idea.alpaca_order_id = order.id;
       idea.alpaca_client_order_id = order.client_order_id || preview.payload.client_order_id;
       idea.auto_exec_at = isoNow(now);
       idea.auto_exec_status = order.status || 'submitted';
-      idea.auto_exec_order_class = 'entry_then_oco';
+      idea.auto_exec_order_class = 'native_bracket';
       idea.auto_exec_qty = config.qty;
       idea.fill_source = 'alpaca_paper';
       writePmfAtFillStamp(idea, now);
@@ -1011,15 +1091,20 @@ async function maybeExecuteConfirmedPmfs({ ideas = [], allIdeas = [], readEnvVal
       appendAudit(idea, { event: 'entry_polled', order_id: order.id, status: filled?.status, filled_avg_price: filled?.filled_avg_price || null });
       if (idea.actual_entry_price) {
         try {
+          const replaced = await replaceBracketLegsAtFill(idea, config, filled);
           const exitPreview = buildOcoExitOrder(idea, config, idea.actual_entry_price, filled?.filled_qty || config.qty);
-          const exitOrder = await alpacaPost(config, '/orders', exitPreview.payload);
-          persistRecalibratedBracket(idea, exitPreview, exitOrder);
-          appendAudit(idea, { event: 'recalibrated_oco_attached', order_id: exitOrder?.id || null, client_order_id: idea.recalibrated_oco_client_order_id, endpoint: exitPreview.endpoint, order: exitPreview.payload, model: exitPreview.model });
+          persistRecalibratedBracket(idea, exitPreview, { ...filled, legs: [replaced.target, replaced.stop] });
+          idea.geometry_estimated = false;
+          idea.estimated_bracket_stop = Number(preview.model.estimated_stop.toFixed(4));
+          idea.estimated_bracket_target = Number(preview.model.estimated_target.toFixed(4));
+          idea.geometry_fill_difference = Number((idea.actual_entry_price - preview.model.estimated_fill).toFixed(4));
+          appendAudit(idea, { event: 'native_bracket_legs_replaced_at_fill', parent_order_id: filled.id, stop_order_id: replaced.stop.id, target_order_id: replaced.target.id, estimated_stop: preview.model.estimated_stop, estimated_target: preview.model.estimated_target, actual_stop: replaced.levels.stop, actual_target: replaced.levels.target, fill_minus_estimate: idea.geometry_fill_difference });
         } catch (attachError) {
-          markBracketAttachFailed(idea, attachError);
-          placedToday += 1;
-          results.push({ ticker, action: 'bracket_attach_failed', order_id: order.id, status: idea.auto_exec_status, actual_entry_price: idea.actual_entry_price || null, reason: attachError.message });
-          continue;
+          idea.geometry_estimated = true;
+          idea.geometry_replace_failed_at = isoNow(now);
+          idea.auto_exec_last_error = attachError.message;
+          loudAutoExecAlert(idea, `native bracket geometry replace failed; original protection retained: ${attachError.message}`, { alert: 'BRACKET_REPLACE_FAILED_PROTECTION_RETAINED', parent_order_id: order.id });
+          appendAudit(idea, { event: 'native_bracket_replace_failed_original_kept', parent_order_id: order.id, reason: attachError.message, geometry_estimated: true });
         }
       }
       placedToday += 1;
@@ -1068,8 +1153,23 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
         exitOrder = await alpacaGetOptional(config, `/orders/${idea.recalibrated_oco_order_id}?nested=true`);
       }
       const parentLegs = Array.isArray(order?.legs) ? order.legs : [];
-      const exitLegs = exitOrder ? [exitOrder, ...(Array.isArray(exitOrder?.legs) ? exitOrder.legs : [])] : [];
+      let exitLegs = exitOrder ? [exitOrder, ...(Array.isArray(exitOrder?.legs) ? exitOrder.legs : [])] : [];
       const ticker = ideaTicker(idea);
+      const discovered = liveSymbolExitOrders(idea, allOrders);
+      const discoveredStop = discovered.find(leg => String(leg?.type || '').toLowerCase().startsWith('stop') || leg?.stop_price);
+      const discoveredTarget = discovered.find(leg => String(leg?.type || '').toLowerCase() === 'limit' && leg?.limit_price);
+      if (!exitOrder && discoveredStop && discoveredTarget) {
+        const parent = (allOrders || []).find(o => o.id === discoveredTarget.id || o.id === discoveredStop.id || (o.legs || []).some(l => l.id === discoveredStop.id || l.id === discoveredTarget.id));
+        exitOrder = parent || discoveredTarget;
+        exitLegs = [exitOrder, ...(exitOrder?.legs || [])];
+        if (!dryRun) {
+          const preview = buildOcoExitOrder(idea, config, idea.actual_entry_price, config.qty);
+          persistRecalibratedBracket(idea, preview, exitOrder);
+          idea.protection_attached_late_at = idea.protection_attached_late_at || (String(exitOrder?.client_order_id || '').includes('late-protect') ? isoNow(now) : null);
+          idea.protection_recovered_by_sync_at = isoNow(now);
+          appendAudit(idea, { event: 'existing_broker_protection_adopted', order_id: exitOrder?.id, stop_order_id: discoveredStop.id, target_order_id: discoveredTarget.id, attached_late: Boolean(idea.protection_attached_late_at) });
+        }
+      }
       const filledSymbolExit = findFilledExitOrder(idea, allOrders);
       if (filledSymbolExit && !livePositionSymbols.has(String(ticker || '').toUpperCase())) {
         const classification = classifyExitOrder(idea, filledSymbolExit, exitOrder);
@@ -1077,12 +1177,28 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
         results.push({ ticker, account: requestedAccount, action: dryRun ? 'would_update_exit_from_position_reconcile' : 'updated_exit_from_position_reconcile', order_id: order.id, exit_order_id: filledSymbolExit.id, exit_price: filledSymbolExit.filled_avg_price || null, exit_reason: classification.reason, exit_attribution: classification.attribution, external_close: classification.externalClose, external_close_alert_needed: dryRun ? classification.externalClose && !idea.external_close_alerted_at : Boolean(writeResult?.externalAlertNeeded) });
         continue;
       }
-      const hasExitOrder = Boolean(exitOrder || parentLegs.some(leg => !['expired', 'canceled', 'cancelled', 'rejected'].includes(String(leg?.status || '').toLowerCase())));
+      const hasExitOrder = Boolean((discoveredStop && discoveredTarget) || exitOrder || parentLegs.some(leg => !['expired', 'canceled', 'cancelled', 'rejected'].includes(String(leg?.status || '').toLowerCase())));
       if (idea.actual_entry_price && !hasExitOrder && !idea.actual_exit_price) {
-        idea.auto_exec_alert = NAKED_POSITION_ALERT;
-        idea.auto_exec_alert_at = isoNow(now);
-        loudAutoExecAlert(idea, 'open auto-position has no detected exit order attached during sync', { alert: NAKED_POSITION_ALERT, parent_order_id: idea.alpaca_order_id });
-        results.push({ ticker: ideaTicker(idea), account: requestedAccount, action: 'alert_no_exit_order', order_id: idea.alpaca_order_id, status: idea.auto_exec_status, alert: NAKED_POSITION_ALERT });
+        if (dryRun) {
+          results.push({ ticker, account: requestedAccount, action: 'would_recover_missing_protection', original_position_untouched: true, proposed_oco: buildOcoExitOrder(idea, config, idea.actual_entry_price, config.qty).payload });
+          continue;
+        }
+        try {
+          const recoveryPreview = buildOcoExitOrder(idea, config, idea.actual_entry_price, config.qty);
+          const recoveryOrder = await alpacaPost(config, '/orders', recoveryPreview.payload);
+          persistRecalibratedBracket(idea, recoveryPreview, recoveryOrder);
+          idea.protection_attached_late_at = isoNow(now);
+          idea.protection_recovered_by_sync_at = isoNow(now);
+          idea.geometry_estimated = false;
+          appendAudit(idea, { event: 'missing_protection_recovered', order_id: recoveryOrder.id, reason: 'open System2 position had no live target/stop' });
+          loudAutoExecAlert(idea, 'missing protection automatically recovered by sync', { alert: 'MISSING_PROTECTION_RECOVERED', order_id: recoveryOrder.id });
+          results.push({ ticker, account: requestedAccount, action: 'recovered_missing_protection', order_id: recoveryOrder.id, stop: recoveryPreview.model.stop, target: recoveryPreview.model.target });
+        } catch (recoveryError) {
+          idea.auto_exec_alert = NAKED_POSITION_ALERT;
+          idea.auto_exec_alert_at = isoNow(now);
+          loudAutoExecAlert(idea, `automatic protection recovery failed: ${recoveryError.message}`, { alert: NAKED_POSITION_ALERT, parent_order_id: idea.alpaca_order_id });
+          results.push({ ticker, account: requestedAccount, action: 'protection_recovery_failed', reason: recoveryError.message, alert: NAKED_POSITION_ALERT });
+        }
         continue;
       }
       const filledLeg = [...parentLegs, ...exitLegs].find(leg => leg?.filled_avg_price || String(leg?.status || '').toLowerCase() === 'filled');
@@ -1103,23 +1219,28 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
 
 function dryRunPreview(idea, readEnvValue) {
   const config = loadConfig(readEnvValue);
+  if (config.retiredNoNewEntries) return { ok: true, enabled: false, retired: true, action: 'retired_blocked', reason: PMF_V1_RETIRED_REASON, broker_calls: 0, existing_positions_untouched: true };
   const configMeta = currentConfigSnapshot(readEnvValue, { gapCheckCohort: 'PMF' });
   const preview = buildEntryOrder(idea, config);
   const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
-  const simulatedOco = simulatedFill > 0 ? buildOcoExitOrder(idea, config, simulatedFill, config.qty) : null;
-  return { ok: true, enabled: config.enabled, action: 'would_place_entry_then_recalibrated_oco', account: config.accountTag, cohort_label: 'B_CLEAN', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, entry_order: preview.payload, simulated_fill_price: simulatedFill, simulated_oco_order: simulatedOco?.payload || null, model: preview.model, oco_model: simulatedOco?.model || null, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: new Date().toISOString() };
+  const actual = simulatedFill > 0 ? recalibratedExitLevels(idea, simulatedFill, simulatedFill) : null;
+  return { ok: true, enabled: config.enabled, action: 'would_place_native_bracket_then_replace', account: config.accountTag, cohort_label: 'B_CLEAN', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, simulated_fill_price: simulatedFill, simulated_replace: actual ? { stop: roundPrice(actual.stop), target: roundPrice(actual.target) } : null, simulated_replace_failure: { original_bracket_kept: true, geometry_estimated: true, alert: 'BRACKET_REPLACE_FAILED_PROTECTION_RETAINED' }, model: preview.model, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: new Date().toISOString() };
 }
 
 module.exports = {
   DEFAULT_QTY,
   DEFAULT_MAX_ORDERS_PER_DAY,
   CAP_SELECTION_RULE,
+  PMF_V1_RETIRED_REASON,
   ENTRY_LIMIT_BUFFER_PCT,
   loadConfig,
   loadLegacyConfig,
   buildEntryOrder,
   buildBracketOrder,
   buildOcoExitOrder,
+  replaceBracketLegsAtFill,
+  deployGateState,
+  deployedCodeIdentity,
   intendedAtrGeometry,
   recalibratedExitLevels,
   exposureSnapshot,

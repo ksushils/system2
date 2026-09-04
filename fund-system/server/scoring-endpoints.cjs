@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
 const pmfAutoExecutor = require('./pmf-auto-executor.cjs');
+let startupProtectionRecoveryScheduled = false;
 
 module.exports = function attachScoring(app, db, deps) {
   const { adminOnly, serviceOrAdmin, now, fmpKey, httpGet } = deps;
@@ -205,6 +206,40 @@ module.exports = function attachScoring(app, db, deps) {
     if (!db.data.system2_stage_details) db.data.system2_stage_details = [];
   }
 
+  // Run the same broker/ledger reconciliation used by the scheduled sync once
+  // after startup. This closes the restart window for a filled entry whose
+  // protection IDs were not yet persisted, without submitting new entries.
+  if (!startupProtectionRecoveryScheduled) {
+    startupProtectionRecoveryScheduled = true;
+    const startupProtectionTimer = setTimeout(async () => {
+      try {
+        ensure();
+        const result = await pmfAutoExecutor.syncOpenAutoPositions({
+          allIdeas: db.data.ideas,
+          readEnvValue,
+          now,
+          dryRun: false,
+        });
+        const alertEvents = [];
+        for (const row of Array.isArray(result.results) ? result.results : []) {
+          const idea = db.data.ideas.find(i => String(i.ticker || i.symbol || '').toUpperCase() === String(row.ticker || '').toUpperCase());
+          const msg = formatSyncAlertMessage(row, idea);
+          if (!msg) continue;
+          const closed = String(row.action || '').startsWith('updated_exit');
+          const external = row.external_close && row.external_close_alert_needed;
+          const event = external ? 'external_close_detected' : (closed ? 'position_closed' : 'auto_exec_failure');
+          alertEvents.push(queuePmfTelegramAlert(msg, { event, ticker: row.ticker, action: row.action, account: row.account }, external ? 'failures' : (closed ? 'positionClosed' : 'failures')));
+        }
+        await db.write();
+        console.log('[PMF startup protection sync]', JSON.stringify({ ok: result.ok, results: result.results?.length || 0, alerts: alertEvents.length }));
+      } catch (error) {
+        console.error('[PMF startup protection sync] failed:', error.message);
+        queuePmfTelegramAlert(`🚨 PMF STARTUP PROTECTION SYNC FAILED\n${error.message}`, { event: 'startup_protection_sync_failed' }, 'failures');
+      }
+    }, 30000);
+    startupProtectionTimer.unref();
+  }
+
   function isLocalRequest(req) {
     const ip = req.ip || req.connection?.remoteAddress || '';
     return ip === '127.0.0.1' || ip === '::1' || ip.includes('127.0.0.1') || ip.includes('::ffff:127.0.0.1');
@@ -340,7 +375,11 @@ module.exports = function attachScoring(app, db, deps) {
     idea.pmf_average_dollar_volume_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_source = stamp.averageDollarVolume != null ? 'fmp_batch_quote_avgVolume_x_stamp_price' : null;
-    writeOnceSessionFields(idea, stamp.at);
+    // Session telemetry belongs to the final immutable PMF stamp. Earlier
+    // operational checks may already have populated these fields, so replace
+    // them atomically from the stamp instead of retaining stale check timing.
+    const sessionFields = easternSessionFields(stamp.at);
+    if (sessionFields) Object.assign(idea, sessionFields);
   }
 
   function intakeSourceLayer(row) {
@@ -518,6 +557,7 @@ module.exports = function attachScoring(app, db, deps) {
     const risk = entry != null && stop != null ? Math.abs(entry - stop) : null;
     const canonical = rawCanonicalResolvedR(row);
 
+    if (row.cohort_stats_excluded === true) reasons.push(row.cohort_exclusion_reason || 'cohort_stats_excluded');
     if (row.r_calculation_suspect === true || String(row.r_calculation_suspect).toLowerCase() === 'true') reasons.push('r_calculation_suspect');
     if (['INVALID', 'ERROR'].includes(status) || ['INVALID', 'ERROR'].includes(exitReason)) reasons.push('paper_status/exit_reason invalid_error');
     if (entry != null && risk != null && risk < 0.005 * Math.abs(entry)) reasons.push('|entry-stop| < 0.5% entry');
@@ -1422,7 +1462,7 @@ module.exports = function attachScoring(app, db, deps) {
   function buildDailyPmfSummary() {
     const today = new Date().toISOString().slice(0, 10);
     const rows = db.data.ideas || [];
-    const confirmed = rows.filter(r => String(r.pmf_stamp_time || r.pre_market_checked_at || '').slice(0, 10) === today && isPmfConfirmedAtStamp(r));
+    const confirmed = rows.filter(r => String(r.pmf_stamp_time || '').slice(0, 10) === today && isPmfConfirmedAtStamp(r));
     const placed = rows.filter(r => String(r.auto_exec_at || '').slice(0, 10) === today && r.fill_source === 'alpaca_paper' && !r.test_order);
     const closed = rows.filter(r => String(r.actual_exit_time || '').slice(0, 10) === today && r.fill_source === 'alpaca_paper' && !r.test_order);
     const open = rows.filter(r => r.fill_source === 'alpaca_paper' && !r.test_order && r.actual_entry_price && !r.actual_exit_price);
@@ -2545,7 +2585,11 @@ module.exports = function attachScoring(app, db, deps) {
       const report = { pmf_classified: 0, pmf_changed: 0, pead_classified: 0, pead_changed: 0, anomalies: [] };
       for (const row of db.data.ideas || []) {
         if (!row || !(row.pmf_confirmed_at_stamp === true || row.pmf_stamp_time)) continue;
-        const timestamp = row.pmf_stamp_time || row.pre_market_checked_at;
+        const timestamp = row.pmf_stamp_time;
+        if (!timestamp) {
+          report.anomalies.push({ ticker: row.ticker || row.symbol, reason: 'missing immutable pmf_stamp_time; mutable pre_market_checked_at fallback prohibited' });
+          continue;
+        }
         const fields = easternSessionFields(timestamp);
         if (!fields) continue;
         report.pmf_classified += 1;
@@ -2553,7 +2597,7 @@ module.exports = function attachScoring(app, db, deps) {
         if (changed) {
           row.session_state_backfilled = true;
           row.session_state_backfilled_at = now();
-          row.session_state_source = row.pmf_stamp_time ? 'pmf_stamp_time' : 'pre_market_checked_at';
+          row.session_state_source = 'pmf_stamp_time';
           report.pmf_changed += 1;
         }
         if (fields.minutes_from_open !== 30) report.anomalies.push({ ticker: row.ticker || row.symbol, timestamp, ...fields });
@@ -4096,14 +4140,14 @@ module.exports = function attachScoring(app, db, deps) {
         contaminated_excluded: contaminatedB.length,
       },
       cohort_integrity: cohortIntegrityPayload(),
-      modeled_baseline_not_achievable: {
-        label: 'Modeled-entry baseline (NOT achievable)',
-        n: 79,
-        win_rate: 84.8,
-        avg_r: 1.964,
-        current_clean_n: canonical.count ?? null,
-        current_clean_win_rate: canonical.win_rate ?? null,
-        current_clean_avg_r: canonical.avg_r ?? null,
+      current_resolved_baseline: {
+        label: 'Current resolved modeled-entry baseline',
+        definition: canonical.definition || 'displayable v2 paper ideas with non-zero modeled exit price, canonical R available, and not quarantined',
+        n: canonical.count ?? null,
+        win_rate: canonical.win_rate ?? null,
+        avg_r: canonical.avg_r ?? null,
+        median_r: canonical.median_r ?? null,
+        profit_factor: canonical.profit_factor ?? null,
       },
     };
   }
@@ -4112,7 +4156,7 @@ module.exports = function attachScoring(app, db, deps) {
     ensure();
     const today = isoDateKey();
     const rows = db.data.ideas || [];
-    const pmfs = rows.filter(i => isPrimaryPmf(i) && firstTimestamp(i, ['pmf_stamp_time', 'pre_market_checked_at', 'date'])?.slice(0, 10) === today);
+    const pmfs = rows.filter(i => isPrimaryPmf(i) && firstTimestamp(i, ['pmf_stamp_time'])?.slice(0, 10) === today);
     const entries = rows.filter(i => (i.fill_source === 'alpaca_paper' || i.alpaca_order_id) && firstTimestamp(i, ['actual_entry_time', 'actual_entry_at', 'filled_at', 'entry_filled_at'])?.slice(0, 10) === today && i.test_order !== true);
     const closed = rows.filter(i => (i.real_r_fill_source === 'alpaca_paper' || i.alpaca_order_id) && firstTimestamp(i, ['actual_exit_time', 'actual_exit_at', 'exit_filled_at'])?.slice(0, 10) === today && i.test_order !== true);
     const symbols = new Map();
