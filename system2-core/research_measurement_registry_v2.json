@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "research_only": true,
+  "legacy_artifact_rules": {
+    "momentum_acceleration_0915.json": {
+      "interpretation_state": "MEASUREMENT_DEFINITION_INVALID_V1",
+      "exclude_from_alpha": true,
+      "reason": "Nightly and premarket relative returns used different anchors."
+    },
+    "momentum_acceleration_outcomes_*.json": {
+      "interpretation_state": "MEASUREMENT_DEFINITION_INVALID_V1",
+      "exclude_from_alpha": true
+    },
+    "swing_outcomes_*.json": {
+      "interpretation_state": "OUTCOME_SOURCE_NONCANONICAL_V1",
+      "exclude_from_v2_statistics": true,
+      "reason": "Legacy resolver allowed batch-quote daily marks to replace canonical EOD rows."
+    },
+    "unchased_challenger_outcomes_*.json": {
+      "interpretation_state": "OUTCOME_SOURCE_NONCANONICAL_V1",
+      "exclude_from_v2_statistics": true
+    }
+  },
+  "v2_defaults": {
+    "outcome_namespace": "outcomes_v2",
+    "canonical_price_resolver": "research_price_resolver.py",
+    "acceleration_artifact": "momentum_acceleration_0915_v2.json",
+    "mixed_atr_v1_state": "METHODOLOGICALLY_COMPROMISED_PRESERVED"
+  }
+}
