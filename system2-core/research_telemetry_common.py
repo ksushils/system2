@@ -6,14 +6,23 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+try:
+    import exchange_calendars as xcals
+except ImportError:  # Explicitly reported as PARTIAL; never silently authoritative.
+    xcals = None
+
 ROOT = Path(__file__).resolve().parent
 RESEARCH_ROOT = ROOT / "data" / "research_telemetry"
 NY = ZoneInfo("America/New_York")
+
+
+def _xnys():
+    return xcals.get_calendar("XNYS", start="2000-01-01", end="2035-12-31") if xcals is not None else None
 
 
 def utc_now() -> datetime:
@@ -68,18 +77,53 @@ def market_holidays(year: int) -> set[date]:
 
 
 def is_market_session(day: date) -> bool:
+    if xcals is not None:
+        return day.isoformat() in _xnys().schedule.index
     return day.weekday() < 5 and day not in market_holidays(day.year)
+
+
+def session_record(day: date) -> dict[str, Any] | None:
+    """Return authoritative XNYS session metadata when the maintained library is installed."""
+    if xcals is None:
+        if not is_market_session(day):
+            return None
+        opened = datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
+        closed = datetime(day.year, day.month, day.day, 16, 0, tzinfo=NY)
+        return {"session_date": day.isoformat(), "open_timestamp_ET": opened.isoformat(), "close_timestamp_ET": closed.isoformat(), "session_type": "NORMAL", "calendar_source": "HANDMADE_FALLBACK_PARTIAL"}
+    cal = _xnys()
+    if day.isoformat() not in cal.schedule.index:
+        return None
+    schedule = cal.schedule.loc[day.isoformat()]
+    opened = schedule["open"].to_pydatetime().astimezone(NY)
+    closed = schedule["close"].to_pydatetime().astimezone(NY)
+    normal_close = time(16, 0)
+    session_type = "HALF_DAY" if closed.time() < normal_close else "NORMAL"
+    return {"session_date": day.isoformat(), "open_timestamp_ET": opened.isoformat(), "close_timestamp_ET": closed.isoformat(), "session_type": session_type, "calendar_source": "exchange_calendars:XNYS"}
+
+
+def session_offset(day: date, count: int) -> dict[str, Any] | None:
+    if not is_market_session(day):
+        return None
+    current = day
+    direction = 1 if count >= 0 else -1
+    for _ in range(abs(count)):
+        current += timedelta(days=direction)
+        while not is_market_session(current):
+            current += timedelta(days=direction)
+    return session_record(current)
 
 
 def next_market_session(after: datetime | None = None) -> dict[str, Any]:
     moment = (after or utc_now()).astimezone(NY)
     day = moment.date()
-    open_time = datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
+    record = session_record(day)
+    open_time = datetime.fromisoformat(record["open_timestamp_ET"]) if record else datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
     if moment >= open_time or not is_market_session(day):
         day += timedelta(days=1)
         while not is_market_session(day):
             day += timedelta(days=1)
-        open_time = datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
+        record = session_record(day)
+        open_time = datetime.fromisoformat(record["open_timestamp_ET"])
     prior = day - timedelta(days=1)
     weekend = prior.weekday() >= 5
     holiday = not weekend and not is_market_session(prior)
@@ -89,6 +133,11 @@ def next_market_session(after: datetime | None = None) -> dict[str, Any]:
         "hours_to_open": round((open_time.astimezone(timezone.utc) - moment.astimezone(timezone.utc)).total_seconds() / 3600, 4),
         "weekend_carry": weekend,
         "holiday_carry": holiday,
+        "session_date": day.isoformat(),
+        "open_timestamp_ET": open_time.isoformat(),
+        "close_timestamp_ET": record["close_timestamp_ET"] if record else None,
+        "session_type": record["session_type"] if record else "SPECIAL",
+        "calendar_source": record["calendar_source"] if record else "UNKNOWN",
     }
 
 
@@ -123,4 +172,3 @@ def read_json(path: Path, default: Any = None) -> Any:
         return json.loads(path.read_text(encoding="utf-8", errors="ignore"))
     except Exception:
         return default
-

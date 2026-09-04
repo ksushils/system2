@@ -15,7 +15,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from research_telemetry_common import NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json, run_directory, utc_now, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json, run_directory, session_offset, utc_now, write_immutable
+from research_price_resolver import ResearchPriceResolver
 
 ROOT = Path(__file__).resolve().parent
 HORIZONS = (1, 2, 3, 5, 7)
@@ -25,7 +26,7 @@ COHORTS = (
     "STAGE2_REJECTED_BY_CLUSTER_V1",
     "STAGE1_RANDOM_MATCHED_V1",
 )
-CHALLENGERS = ("UNCHASED_SWING_RANK_V1", "LOW_EXTENSION_BASELINE_V1")
+CHALLENGERS = ("UNCHASED_SWING_RANK_V1", "LOW_EXTENSION_BASELINE_V1", "UNCHASED_SWING_ATR5_V1", "LOW_EXTENSION_ATR5_V1")
 SECTOR_ETFS = {"Technology":"XLK","Communication Services":"XLC","Consumer Cyclical":"XLY","Consumer Defensive":"XLP","Financial Services":"XLF","Healthcare":"XLV","Industrials":"XLI","Energy":"XLE","Utilities":"XLU","Real Estate":"XLRE","Basic Materials":"XLB"}
 
 
@@ -86,7 +87,7 @@ def assign_ranks(rows: list[dict[str, Any]], challenger: str) -> None:
 
 def create_challengers() -> dict[str, Any]:
     timing = next_market_session(); session = timing["trading_session"]
-    existing = latest_artifact(session, "unchased_challenger_rankings.json")
+    existing = latest_artifact(session, "unchased_challenger_rankings_v2.json")
     if existing:
         return {"ok": True, "idempotent": True, "path": str(existing)}
     scored = read_json(ROOT / "stage2_surgical_strike_scored.json", []) or []
@@ -96,9 +97,10 @@ def create_challengers() -> dict[str, Any]:
         raw_extension = number(row.get("distanceFromVWAP") if row.get("distanceFromVWAP") is not None else row.get("distanceFromVWMA"))
         normalized.append({**row, "_atr": number(row.get("atrPct") if row.get("atrPct") is not None else row.get("atr5MinPct")),
                            "_atr_source": "atrPct" if row.get("atrPct") is not None else "atr5MinPct" if row.get("atr5MinPct") is not None else None,
+                           "_atr5": number(row.get("atr5MinPct")),
                            "_extension": max(0.0, raw_extension) if raw_extension is not None else None,
                            "_raw_extension": raw_extension, "_rs": number(row.get("rsVsSpy")), "_sector": number(row.get("sectorAlpha"))})
-    percentiles = {field: percentile_map(normalized, field) for field in ("_atr", "_extension", "_rs", "_sector")}
+    percentiles = {field: percentile_map(normalized, field) for field in ("_atr", "_atr5", "_extension", "_rs", "_sector")}
     pipeline_timestamp = datetime.fromtimestamp((ROOT / "stage2_surgical_strike_scored.json").stat().st_mtime, timezone.utc).isoformat()
     config_hash = file_hash([ROOT / "system2-config.json", ROOT / "b3_surgical_strike_stage2.py"])
     output = []
@@ -131,15 +133,39 @@ def create_challengers() -> dict[str, Any]:
                        "missing_components": simple_missing, "missing_component_count": len(simple_missing),
                        "score_state": "AVAILABLE" if simple_score is not None else "LOW_EXTENSION_SCORE_MISSING",
                        "final_score": round(simple_score, 6) if simple_score is not None else None, "rank": None, "quintile": None, "population_size": len(eligible)})
+        atr5_pct = percentiles["_atr5"].get(symbol)
+        atr5_signed = round(100 - atr5_pct, 6) if atr5_pct is not None else None
+        atr5_components = {"atr5": atr5_signed, "extension": signed["extension"], "rs": signed["rs"], "sector": signed["sector"]}
+        atr5_values = [value for value in atr5_components.values() if value is not None]
+        atr5_score = sum(atr5_values) / len(atr5_values) if len(atr5_values) >= 3 else None
+        common = {"symbol": symbol, "trading_date": session, "next_open_timestamp": timing["next_session_open"], "sector": row.get("sector"),
+                  "current_stage2_score": number(row.get("setupQualityScore") or row.get("setup_score")), "entry_source": "NEXT_REGULAR_SESSION_OPEN",
+                  "pipeline_timestamp": pipeline_timestamp, "config_hash": config_hash, "rank": None, "quintile": None, "population_size": len(eligible)}
+        output.append({"challenger": CHALLENGERS[2], **common,
+                       "raw_fields": {"atr5_min_pct": row["_atr5"], "extension_pct_raw": row["_raw_extension"], "positive_extension_pct": row["_extension"], "rs_vs_spy_pct": row["_rs"], "sector_alpha_pct": row["_sector"]},
+                       "percentiles": {"atr5": atr5_pct, "extension": pct["extension"], "rs": pct["rs"], "sector": pct["sector"]},
+                       "signed_components": atr5_components, "missing_components": [name for name,value in atr5_components.items() if value is None],
+                       "missing_component_count": sum(value is None for value in atr5_components.values()), "score_state": "AVAILABLE" if atr5_score is not None else "UNCHASED_SCORE_MISSING",
+                       "final_score": round(atr5_score, 6) if atr5_score is not None else None})
+        low5 = (atr5_signed + signed["extension"]) / 2 if atr5_signed is not None and signed["extension"] is not None else None
+        output.append({"challenger": CHALLENGERS[3], **common,
+                       "raw_fields": {"atr5_min_pct": row["_atr5"], "extension_pct_raw": row["_raw_extension"], "positive_extension_pct": row["_extension"]},
+                       "percentiles": {"atr5": atr5_pct, "extension": pct["extension"]}, "signed_components": {"atr5": atr5_signed, "extension": signed["extension"]},
+                       "missing_components": [name for name,value in (("atr5",atr5_signed),("extension",signed["extension"])) if value is None],
+                       "missing_component_count": sum(value is None for value in (atr5_signed,signed["extension"])), "score_state": "AVAILABLE" if low5 is not None else "LOW_EXTENSION_SCORE_MISSING",
+                       "final_score": round(low5, 6) if low5 is not None else None})
     for challenger in CHALLENGERS:
         assign_ranks(output, challenger)
     directory = run_directory(session)
     payload = {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_rankings": True, **timing,
                "pipeline_timestamp": pipeline_timestamp, "config_hash": config_hash, "definitions": {
                    CHALLENGERS[0]: "equal mean of available inverse ATR/positive-extension/RS/sector percentiles; minimum 3 of 4",
-                   CHALLENGERS[1]: "equal mean of inverse ATR and positive-extension percentiles; both required"},
+                   CHALLENGERS[1]: "equal mean of inverse ATR and positive-extension percentiles; both required",
+                   CHALLENGERS[2]: "equal mean of inverse ATR5/positive-extension/RS/sector percentiles; minimum 3 of 4",
+                   CHALLENGERS[3]: "equal mean of inverse ATR5 and positive-extension percentiles; both required"},
+               "v1_methodology_state": "MIXED_ATR_METHODOLOGICALLY_COMPROMISED_PRESERVED",
                "population_size": len(eligible), "rows": output}
-    path = write_immutable(directory / "unchased_challenger_rankings.json", payload)
+    path = write_immutable(directory / "unchased_challenger_rankings_v2.json", payload)
     return {"ok": True, "path": str(path), "population": len(eligible), "rows": len(output),
             "scored": {name: sum(r["challenger"] == name and r["final_score"] is not None for r in output) for name in CHALLENGERS}}
 
@@ -193,28 +219,9 @@ def create_membership() -> dict[str, Any]:
     return {"ok": True, "path": str(path), "counts": payload["cohort_counts"], "seed": seed}
 
 
-def load_price_series(symbols: set[str]) -> dict[str, list[dict[str, Any]]]:
-    chosen: dict[str, str] = {}
-    for path in glob.glob(str(ROOT / "data/fmp_cache/*/*historical-price-eod*json")):
-        match = re.search(r"symbol[=_]([A-Za-z0-9.^-]+)", Path(path).name)
-        symbol = match.group(1).upper() if match else ""
-        if symbol in symbols and (symbol not in chosen or path > chosen[symbol]):
-            chosen[symbol] = path
-    output = {}
-    for symbol, path in chosen.items():
-        data = read_json(Path(path), {})
-        rows = data.get("data", []) if isinstance(data, dict) else data
-        output[symbol] = sorted([r for r in rows if isinstance(r, dict) and r.get("date")], key=lambda r: str(r["date"]))
-    for path in sorted((RESEARCH_ROOT / "daily_marks").glob("challenger_daily_mark_*.json")):
-        payload = read_json(path, {}) or {}
-        for row in payload.get("rows", []):
-            symbol = ticker(row)
-            if symbol not in symbols or not row.get("date") or not number(row.get("open")) or not number(row.get("close")):
-                continue
-            by_date = {str(bar["date"])[:10]: bar for bar in output.get(symbol, [])}
-            by_date[str(row["date"])[:10]] = row
-            output[symbol] = [bar for _, bar in sorted(by_date.items())]
-    return output
+def load_price_series(symbols: set[str]) -> ResearchPriceResolver:
+    """Compatibility entry point now backed by the canonical V2 resolver."""
+    return ResearchPriceResolver(symbols)
 
 
 def capture_daily_marks(symbols: set[str]) -> dict[str, Any]:
@@ -234,45 +241,36 @@ def capture_daily_marks(symbols: set[str]) -> dict[str, Any]:
             for quote in raw if isinstance(raw,list) else []:
                 rows.append({"symbol":ticker(quote),"date":market_date.isoformat(),"open":number(quote.get("open")),
                              "high":number(quote.get("dayHigh") or quote.get("high")),"low":number(quote.get("dayLow") or quote.get("low")),
-                             "close":number(quote.get("price")),"provider_timestamp":quote.get("timestamp"),"quality":"FRESH"})
+                             "close":number(quote.get("price")),"provider_timestamp":quote.get("timestamp"),"session_type":"UNKNOWN",
+                             "adjustment_basis":"UNADJUSTED","quality_state":"UNKNOWN","reason":"BATCH_QUOTE_NOT_PROVEN_COMPLETED_REGULAR_SESSION"})
     except Exception as exc:
         error=f"{type(exc).__name__}:{exc}"
-    write_immutable(path,{"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"market_date":market_date.isoformat(),
+    write_immutable(path,{"schema_version":2,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"market_date":market_date.isoformat(),
                           "provider":"FMP batch-quote","source_error":error,"requested_symbols":len(symbols),"returned_rows":len(rows),"rows":rows})
     return {"ok":error is None,"path":str(path),"rows":len(rows),"source_error":error}
 
 
-def label(row: dict[str, Any], series: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
-    symbol = row["symbol"]; trading_date = row["trading_date"]; bars = series.get(symbol)
-    if not bars:
-        return {"outcome_state": "MISSING_PRICE", "missing_reason": "SYMBOL_ABSENT_FROM_LOCAL_POINT_IN_TIME_CACHE"}
-    index = next((i for i, bar in enumerate(bars) if str(bar["date"])[:10] == trading_date), None)
-    if index is None:
-        return {"outcome_state": "MISSING_PRICE", "missing_reason": "ENTRY_SESSION_NOT_IN_CACHE"}
-    entry = number(bars[index].get("open"))
-    if not entry:
-        return {"outcome_state": "MISSING_PRICE", "missing_reason": "ENTRY_OPEN_MISSING"}
-    result: dict[str, Any] = {"entry_open": entry, "entry_open_timestamp": row["next_open_timestamp"], "entry_source": "FMP_EOD_OPEN", "outcome_state": "PARTIAL"}
-    spy = series.get("SPY", []); si = next((i for i,b in enumerate(spy) if str(b["date"])[:10] == trading_date), None)
-    sector_symbol = SECTOR_ETFS.get(row.get("sector")); sector = series.get(sector_symbol, []) if sector_symbol else []; xi = next((i for i,b in enumerate(sector) if str(b["date"])[:10] == trading_date), None)
+def label(row: dict[str, Any], series: ResearchPriceResolver) -> dict[str, Any]:
+    symbol=row["symbol"]; trading_date=row["trading_date"]
+    entry_record=series.resolve(symbol,trading_date,"NEXT_OPEN"); entry=entry_record.get("price")
+    if not entry:return {"outcome_schema_version":2,"outcome_state":"MISSING_PRICE","missing_reason":entry_record.get("reason"),"entry_provenance":entry_record}
+    result={"outcome_schema_version":2,"entry_open":entry,"entry_open_timestamp":row["next_open_timestamp"],"entry_source":entry_record["source_type"],"entry_provenance":entry_record,"outcome_state":"PARTIAL"}
+    sector_symbol=SECTOR_ETFS.get(row.get("sector"))
     for horizon in HORIZONS:
         key = f"d{horizon}"
-        if index + horizon >= len(bars):
-            result[key] = {"state": "MISSING_PRICE", "reason": "FORWARD_HORIZON_NOT_YET_AVAILABLE"}; continue
-        close = number(bars[index+horizon].get("close")); raw = (close / entry - 1) * 100 if close else None
-        spy_return = None
-        if si is not None and si+horizon < len(spy):
-            so=number(spy[si].get("open")); sc=number(spy[si+horizon].get("close")); spy_return=(sc/so-1)*100 if so and sc else None
-        sector_return = None
-        if xi is not None and xi+horizon < len(sector):
-            xo=number(sector[xi].get("open")); xc=number(sector[xi+horizon].get("close")); sector_return=(xc/xo-1)*100 if xo and xc else None
-        result[key] = {"state": "AVAILABLE", "close": close, "raw_return_pct": raw, "spy_return_pct": spy_return,
-                       "spy_adjusted_return_pct": raw-spy_return if raw is not None and spy_return is not None else None,
-                       "sector_return_pct": sector_return, "sector_adjusted_return_pct": raw-sector_return if raw is not None and sector_return is not None else None}
-    through = bars[index:min(index+8,len(bars))]
-    highs=[number(x.get("high")) for x in through]; lows=[number(x.get("low")) for x in through]
-    result["mfe_pct"] = (max(x for x in highs if x is not None)/entry-1)*100 if any(x is not None for x in highs) else None
-    result["mae_pct"] = (min(x for x in lows if x is not None)/entry-1)*100 if any(x is not None for x in lows) else None
+        target=session_offset(datetime.fromisoformat(trading_date).date(),horizon)
+        if not target:result[key]={"state":"MISSING_PRICE","reason":"TARGET_SESSION_UNRESOLVED"};continue
+        target_date=target["session_date"]; close_record=series.resolve(symbol,target_date,"SESSION_CLOSE");close=close_record.get("price")
+        if not close:result[key]={"state":"MISSING_PRICE","target_market_date":target_date,"reason":close_record.get("reason"),"close_provenance":close_record};continue
+        action=series.corporate_action_state(symbol,trading_date,target_date)
+        if action["state"]=="CORPORATE_ACTION_UNRESOLVED":result[key]={"state":"CORPORATE_ACTION_UNRESOLVED","target_market_date":target_date,"corporate_action":action};continue
+        raw=(close/entry-1)*100;spy_entry=series.resolve("SPY",trading_date,"NEXT_OPEN");spy_close=series.resolve("SPY",target_date,"SESSION_CLOSE")
+        spy_return=(spy_close["price"]/spy_entry["price"]-1)*100 if spy_entry.get("price") and spy_close.get("price") else None
+        sector_entry=series.resolve(sector_symbol,trading_date,"NEXT_OPEN") if sector_symbol else None;sector_close=series.resolve(sector_symbol,target_date,"SESSION_CLOSE") if sector_symbol else None
+        sector_return=(sector_close["price"]/sector_entry["price"]-1)*100 if sector_entry and sector_close and sector_entry.get("price") and sector_close.get("price") else None
+        result[key]={"state":"AVAILABLE" if spy_return is not None else "BENCHMARK_MISSING","target_market_date":target_date,"close":close,"close_provenance":close_record,"raw_return_pct":raw,
+                     "spy_return_pct":spy_return,"spy_provenance":{"entry":spy_entry,"close":spy_close},"spy_adjusted_return_pct":raw-spy_return if spy_return is not None else None,
+                     "sector_return_pct":sector_return,"sector_provenance":{"entry":sector_entry,"close":sector_close},"sector_adjusted_return_pct":raw-sector_return if sector_return is not None else None}
     if all(result[f"d{h}"]["state"] == "AVAILABLE" for h in HORIZONS): result["outcome_state"] = "COMPLETE"
     return result
 
@@ -286,8 +284,8 @@ def update_outcomes() -> dict[str, Any]:
     symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values()); series=load_price_series(symbols)
     labelled=[{**row,"membership_artifact":str(path),**label(row,series)} for path,row in rows]
     now=utc_now(); directory=RESEARCH_ROOT/"scoreboards"; stamp=now.strftime("%Y%m%dT%H%M%SZ")
-    snapshot={"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled}
-    outpath=write_immutable(directory/f"swing_outcomes_{stamp}.json",snapshot)
+    snapshot={"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled}
+    outpath=write_immutable(directory/f"swing_outcomes_v2_{stamp}.json",snapshot)
     scores=[]
     for cohort in COHORTS:
         group=[r for r in labelled if r["cohort"]==cohort]; record={"cohort":cohort,"n":len(group),"unique_dates":len({r['trading_date'] for r in group}),"missing_pct":round(100*sum(r['outcome_state']=='MISSING_PRICE' for r in group)/len(group),2) if group else None}
@@ -298,7 +296,7 @@ def update_outcomes() -> dict[str, Any]:
             vals=[x["raw_return_pct"] for x in available if x.get("raw_return_pct") is not None]; record[f"d{h}_win_rate_pct"]=100*sum(x>0 for x in vals)/len(vals) if vals else None
         record["evidence_state"]="PRELIMINARY_CHECK_ONLY" if record["unique_dates"]>=30 else "TOO_THIN_NOT_A_VERDICT"
         scores.append(record)
-    report=write_immutable(directory/f"swing_scoreboard_{stamp}.json",{"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_preliminary":30,"preferred_dates_for_promotion":60,"cohorts":scores})
+    report=write_immutable(directory/f"swing_scoreboard_v2_{stamp}.json",{"schema_version":2,"outcome_namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_preliminary":30,"preferred_dates_for_promotion":60,"cohorts":scores})
     return {"ok":True,"outcomes":str(outpath),"scoreboard":str(report),"memberships":len(memberships),"rows":len(labelled)}
 
 
@@ -322,14 +320,14 @@ def spearman(rows: list[dict[str, Any]], horizon: int) -> float | None:
 
 
 def update_challengers() -> dict[str, Any]:
-    artifacts = sorted(RESEARCH_ROOT.glob("*/*/unchased_challenger_rankings.json")); source_rows = []
+    artifacts = sorted(RESEARCH_ROOT.glob("*/*/unchased_challenger_rankings_v2.json")); source_rows = []
     for path in artifacts:
         payload = read_json(path, {}) or {}
         for row in payload.get("rows", []): source_rows.append((path, row))
     symbols = {row["symbol"] for _, row in source_rows} | {"SPY"} | set(SECTOR_ETFS.values()); mark_result=capture_daily_marks(symbols); series = load_price_series(symbols)
     rows = [{**row, "ranking_artifact": str(path), **label(row, series)} for path, row in source_rows]
     now = utc_now(); stamp = now.strftime("%Y%m%dT%H%M%SZ"); directory = RESEARCH_ROOT / "scoreboards"
-    outcomes = write_immutable(directory / f"unchased_challenger_outcomes_{stamp}.json", {"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":rows})
+    outcomes = write_immutable(directory / f"unchased_challenger_outcomes_v2_{stamp}.json", {"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":rows})
     report = []
     for challenger in CHALLENGERS:
         challenger_rows = [row for row in rows if row["challenger"] == challenger]
@@ -350,7 +348,7 @@ def update_challengers() -> dict[str, Any]:
         missing = [row for row in challenger_rows if row.get("final_score") is None]
         report.append({"challenger":challenger,"quintile":"SCORE_MISSING","n":len(missing),"unique_dates":len({row['trading_date'] for row in missing}),"missing_pct":100.0 if missing else 0.0,"evidence_state":"UNRANKED_RETAINED"})
     correlations = {challenger:{f"d{horizon}":spearman([row for row in rows if row["challenger"]==challenger],horizon) for horizon in (3,5)} for challenger in CHALLENGERS}
-    scoreboard = write_immutable(directory / f"unchased_challenger_scoreboard_{stamp}.json", {"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_verdict":30,"preferred_dates":60,"spearman":correlations,"quintiles":report})
+    scoreboard = write_immutable(directory / f"unchased_challenger_scoreboard_v2_{stamp}.json", {"schema_version":2,"outcome_namespace":"outcomes_v2","v1_attribution":{"UNCHASED_SWING_RANK_V1":"UNCHASED_SWING_RANK_V1_MIXED_ATR","LOW_EXTENSION_BASELINE_V1":"LOW_EXTENSION_BASELINE_V1_MIXED_ATR","methodology":"COMPROMISED_PRESERVED"},"research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_verdict":30,"preferred_dates":60,"spearman":correlations,"quintiles":report})
     return {"ok":True,"ranking_artifacts":len(artifacts),"rows":len(rows),"daily_mark":mark_result,"outcomes":str(outcomes),"scoreboard":str(scoreboard)}
 
 

@@ -12,12 +12,14 @@ from pathlib import Path
 from typing import Any
 
 from prospective_research_telemetry import get_json, load_dotenv
-from research_telemetry_common import RESEARCH_ROOT, next_market_session, read_json, run_directory, utc_now, write_immutable
+from research_telemetry_common import RESEARCH_ROOT, next_market_session, read_json, run_directory, session_offset, utc_now, write_immutable
+from research_price_resolver import ResearchPriceResolver, validate_premarket_quote
 from swing_shadow_cohorts import SECTOR_ETFS, capture_daily_marks, file_hash, label, load_price_series, number, ticker
 
 ROOT = Path(__file__).resolve().parent
 STATES = ("HIGH_LEVEL_NO_NEW_STRENGTH", "HIGH_LEVEL_ACCELERATING", "LOWER_LEVEL_ACCELERATING", "LOWER_LEVEL_FLAT", "DETERIORATING", "UNKNOWN")
 INTERACTIONS = ("NO_NEW_COMPANY_EVENT", "FRESH_POSITIVE_EVENT", "FRESH_NEGATIVE_EVENT", "UNKNOWN")
+V1_INTERPRETATION = "MEASUREMENT_DEFINITION_INVALID_V1"
 
 
 def latest(session: str, name: str) -> Path | None:
@@ -46,7 +48,7 @@ def create_nightly() -> dict[str, Any]:
                        "vwap_vwma_extension_pct":extension,"rvol":number(row.get("volumeRatio")),"price":number(row.get("price")),
                        "price_return_pct":number(row.get("todayReturnPct")),"distance_from_recent_high_pct":number(row.get("pct_from_52wk_high")),
                        "sector":row.get("sector"),"field_states":{"price_return_pct":"FRESH" if row.get("todayReturnPct") is not None else "MISSING"}})
-    path=write_immutable(run_directory(session)/"momentum_level_nightly.json",{"schema_version":1,"research_only":True,"non_trading":True,"immutable_membership":True,**timing,"pipeline_timestamp":pipeline,"config_hash":config_hash,"population":len(output),"rows":output})
+    path=write_immutable(run_directory(session)/"momentum_level_nightly.json",{"schema_version":1,"interpretation_state":V1_INTERPRETATION,"exclude_from_alpha":True,"research_only":True,"non_trading":True,"immutable_membership":True,**timing,"pipeline_timestamp":pipeline,"config_hash":config_hash,"population":len(output),"rows":output})
     return {"ok":True,"path":str(path),"population":len(output)}
 
 
@@ -129,8 +131,58 @@ def capture_premarket() -> dict[str,Any]:
                        "fresh_earnings_event":any(e["type"]=="earnings" for e in ev),"fresh_guidance_event":any(e["guidance_flag"] for e in ev),
                        "events":ev,"information_interaction":interaction,"acceleration_state":classify(high,stock_delta,sector_delta),
                        "premarket_quality":"SOURCE_ERROR" if source_error else "FRESH","premarket_missing_reason":source_error})
-    path=write_immutable(source.parent/"momentum_acceleration_0915.json",{"schema_version":1,"research_only":True,"non_trading":True,"created_at":utc_now().isoformat(),"nightly_artifact":str(source),"quote_source_error":source_error,"event_source_status":event_status,"rows":output})
+    path=write_immutable(source.parent/"momentum_acceleration_0915.json",{"schema_version":1,"interpretation_state":V1_INTERPRETATION,"exclude_from_alpha":True,"research_only":True,"non_trading":True,"created_at":utc_now().isoformat(),"nightly_artifact":str(source),"quote_source_error":source_error,"event_source_status":event_status,"rows":output})
     return {"ok":True,"path":str(path),"rows":len(output),"source_error":source_error,"state_counts":{s:sum(r["acceleration_state"]==s for r in output) for s in STATES}}
+
+
+def create_nightly_v2() -> dict[str,Any]:
+    timing=next_market_session();session=timing["trading_session"];existing=latest(session,"momentum_level_nightly_v2.json")
+    if existing:return {"ok":True,"idempotent":True,"path":str(existing)}
+    scored=[r for r in (read_json(ROOT/"stage2_surgical_strike_scored.json",[]) or []) if r.get("status")=="OK" and ticker(r)]
+    prior=session_offset(datetime.fromisoformat(session).date(),-1)
+    if not prior:return {"ok":False,"reason":"PRIOR_SESSION_UNRESOLVED"}
+    anchor_date=prior["session_date"];symbols={ticker(r) for r in scored}|{"SPY"}|set(SECTOR_ETFS.values());resolver=ResearchPriceResolver(symbols)
+    pipeline=datetime.fromtimestamp((ROOT/"stage2_surgical_strike_scored.json").stat().st_mtime,timezone.utc).isoformat();config_hash=file_hash([ROOT/"system2-config.json",ROOT/"b3_surgical_strike_stage2.py"]);rows=[]
+    for source in scored:
+        symbol=ticker(source);sector_symbol=SECTOR_ETFS.get(source.get("sector"));sa=resolver.resolve(symbol,anchor_date,"NEXT_OPEN");se=resolver.resolve(symbol,anchor_date,"SESSION_CLOSE")
+        pa=resolver.resolve("SPY",anchor_date,"NEXT_OPEN");pe=resolver.resolve("SPY",anchor_date,"SESSION_CLOSE");xa=resolver.resolve(sector_symbol,anchor_date,"NEXT_OPEN") if sector_symbol else None;xe=resolver.resolve(sector_symbol,anchor_date,"SESSION_CLOSE") if sector_symbol else None
+        stock=(se["price"]/sa["price"]-1)*100 if sa.get("price") and se.get("price") else None;spy=(pe["price"]/pa["price"]-1)*100 if pa.get("price") and pe.get("price") else None;sector=(xe["price"]/xa["price"]-1)*100 if xa and xe and xa.get("price") and xe.get("price") else None
+        nightly_rs=stock-spy if stock is not None and spy is not None else None;nightly_sector=stock-sector if stock is not None and sector is not None else None
+        rows.append({"schema_version":2,"symbol":symbol,"sector":source.get("sector"),"sector_etf":sector_symbol,"trading_date":session,"anchor_date":anchor_date,"pipeline_timestamp":pipeline,"config_hash":config_hash,
+                     "stock_anchor":sa,"spy_anchor":pa,"sector_anchor":xa,"stock_nightly_endpoint":se,"spy_nightly_endpoint":pe,"sector_nightly_endpoint":xe,
+                     "stock_return_t1_pct":stock,"spy_return_t1_pct":spy,"sector_return_t1_pct":sector,"nightly_rs_v2_pct":nightly_rs,"nightly_sector_rs_v2_pct":nightly_sector,
+                     "high_level_v2":bool(nightly_rs is not None and nightly_sector is not None and nightly_rs>0 and nightly_sector>0),"measurement_state":"VALID" if nightly_rs is not None and nightly_sector is not None else "ACCELERATION_MEASUREMENT_MISSING"})
+    path=write_immutable(run_directory(session)/"momentum_level_nightly_v2.json",{"schema_version":2,"research_only":True,"non_trading":True,"common_anchor":"PRIOR_REGULAR_SESSION_OPEN","population":len(rows),**timing,"rows":rows})
+    return {"ok":True,"path":str(path),"population":len(rows),"missing":sum(r["measurement_state"]!="VALID" for r in rows)}
+
+
+def capture_premarket_v2() -> dict[str,Any]:
+    timing=next_market_session();session=timing["trading_session"];source=latest(session,"momentum_level_nightly_v2.json")
+    if not source:return {"ok":False,"reason":"MISSING_NIGHTLY_V2"}
+    existing=latest(session,"momentum_acceleration_0915_v2.json")
+    if existing:return {"ok":True,"idempotent":True,"path":str(existing)}
+    payload=read_json(source,{}) or {};rows=payload.get("rows",[]);symbols={r["symbol"] for r in rows}|{"SPY","QQQ"}|set(SECTOR_ETFS.values());quotes={};error=None
+    load_dotenv();key=os.environ.get("FMP_API_KEY") or os.environ.get("FMP_KEY")
+    if not key:error="FMP_KEY_MISSING"
+    else:
+        try:
+            ordered=sorted(symbols)
+            for start in range(0,len(ordered),75):
+                raw=get_json("batch-quote?symbols="+",".join(ordered[start:start+75]),key)
+                for quote in raw if isinstance(raw,list) else []:quotes[ticker(quote)]=quote
+        except Exception as exc:error=f"{type(exc).__name__}:{exc}"
+    validated={symbol:validate_premarket_quote(symbol,quotes.get(symbol,{}),session) for symbol in symbols};output=[]
+    for row in rows:
+        stock=validated[row["symbol"]];spy=validated["SPY"];sector=validated.get(row.get("sector_etf"));sa=(row.get("stock_anchor") or {}).get("price");pa=(row.get("spy_anchor") or {}).get("price");xa=(row.get("sector_anchor") or {}).get("price")
+        stock_t2=(stock["price"]/sa-1)*100 if stock.get("price") and sa else None;spy_t2=(spy["price"]/pa-1)*100 if spy.get("price") and pa else None;sector_t2=(sector["price"]/xa-1)*100 if sector and sector.get("price") and xa else None
+        pre_rs=stock_t2-spy_t2 if stock_t2 is not None and spy_t2 is not None else None;pre_sector=stock_t2-sector_t2 if stock_t2 is not None and sector_t2 is not None else None
+        drs=pre_rs-row["nightly_rs_v2_pct"] if pre_rs is not None and row.get("nightly_rs_v2_pct") is not None else None;dsector=pre_sector-row["nightly_sector_rs_v2_pct"] if pre_sector is not None and row.get("nightly_sector_rs_v2_pct") is not None else None
+        state=classify(bool(row.get("high_level_v2")),drs,dsector) if drs is not None and dsector is not None else "UNKNOWN"
+        output.append({**row,"stock_premarket_endpoint":stock,"spy_premarket_endpoint":spy,"sector_premarket_endpoint":sector,"stock_return_t2_pct":stock_t2,"spy_return_t2_pct":spy_t2,"sector_return_t2_pct":sector_t2,
+                       "premarket_rs_v2_pct":pre_rs,"premarket_sector_rs_v2_pct":pre_sector,"delta_rs_v2_pct":drs,"delta_sector_rs_v2_pct":dsector,"acceleration_state_v2":state,
+                       "measurement_state":"VALID" if drs is not None and dsector is not None else "ACCELERATION_MEASUREMENT_MISSING"})
+    path=write_immutable(source.parent/"momentum_acceleration_0915_v2.json",{"schema_version":2,"research_only":True,"non_trading":True,"created_at":utc_now().isoformat(),"nightly_artifact":str(source),"quote_source_error":error,"rows":output})
+    return {"ok":True,"path":str(path),"rows":len(output),"missing":sum(r["measurement_state"]!="VALID" for r in output),"quality_counts":{q:sum(r["stock_premarket_endpoint"]["quality_state"]==q for r in output) for q in ("PREMARKET_VALID","PREVIOUS_SESSION_STALE","NO_PREMARKET_TRADE","SOURCE_ERROR","UNKNOWN")}}
 
 
 def update() -> dict[str,Any]:
@@ -140,6 +192,8 @@ def update() -> dict[str,Any]:
     symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values()); mark=capture_daily_marks(symbols); series=load_price_series(symbols)
     labelled=[{**row,"acceleration_artifact":str(path),**label(row,series)} for path,row in rows]; now=utc_now(); stamp=now.strftime("%Y%m%dT%H%M%SZ"); directory=RESEARCH_ROOT/"scoreboards"
     outcomes=write_immutable(directory/f"momentum_acceleration_outcomes_{stamp}.json",{"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled})
+    scoreboard=write_immutable(directory/f"momentum_acceleration_scoreboard_{stamp}.json",{"schema_version":1,"interpretation_state":V1_INTERPRETATION,"excluded_from_alpha":True,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"groups":[]})
+    return {"ok":True,"artifacts":len(artifacts),"rows":len(labelled),"daily_mark":mark,"outcomes":str(outcomes),"scoreboard":str(scoreboard),"interpretation_state":V1_INTERPRETATION}
     report=[]
     for state in STATES:
         for interaction in INTERACTIONS:
@@ -154,9 +208,29 @@ def update() -> dict[str,Any]:
     return {"ok":True,"artifacts":len(artifacts),"rows":len(labelled),"daily_mark":mark,"outcomes":str(outcomes),"scoreboard":str(scoreboard)}
 
 
+def update_v2() -> dict[str,Any]:
+    artifacts=sorted(RESEARCH_ROOT.glob("*/*/momentum_acceleration_0915_v2.json"));rows=[]
+    for path in artifacts:
+        for row in (read_json(path,{}) or {}).get("rows",[]):rows.append((path,row))
+    symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values());series=load_price_series(symbols)
+    labelled=[{**row,"acceleration_artifact":str(path),**label(row,series)} for path,row in rows];now=utc_now();stamp=now.strftime("%Y%m%dT%H%M%SZ");directory=RESEARCH_ROOT/"scoreboards"
+    outcomes=write_immutable(directory/f"momentum_acceleration_outcomes_v2_{stamp}.json",{"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled})
+    report=[]
+    for state in STATES:
+        group=[r for r in labelled if r.get("acceleration_state_v2")==state]
+        if not group:continue
+        item={"acceleration_state":state,"n":len(group),"unique_dates":len({r['trading_date'] for r in group}),"missing_pct":100*sum(r.get("outcome_state")=="MISSING_PRICE" for r in group)/len(group)}
+        for horizon in (1,2,3,5,7):
+            vals=[r[f"d{horizon}"]["spy_adjusted_return_pct"] for r in group if (r.get(f"d{horizon}") or {}).get("state")=="AVAILABLE" and r[f"d{horizon}"].get("spy_adjusted_return_pct") is not None]
+            item[f"mean_spy_adjusted_d{horizon}"]=statistics.mean(vals) if vals else None
+        item["evidence_state"]="PRELIMINARY_CHECK_ONLY" if item["unique_dates"]>=30 else "TOO_THIN_NOT_A_VERDICT";report.append(item)
+    scoreboard=write_immutable(directory/f"momentum_acceleration_scoreboard_v2_{stamp}.json",{"schema_version":2,"outcome_namespace":"outcomes_v2","v1_interpretation":V1_INTERPRETATION,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"groups":report})
+    return {"ok":True,"artifacts":len(artifacts),"rows":len(labelled),"outcomes":str(outcomes),"scoreboard":str(scoreboard)}
+
+
 def main()->None:
-    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create-nightly","capture-0915","update","self-test")); args=parser.parse_args()
-    result=create_nightly() if args.command=="create-nightly" else capture_premarket() if args.command=="capture-0915" else update() if args.command=="update" else {"ok":True,"states":STATES,"interactions":INTERACTIONS,"broker_modules_imported":False}
+    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create-nightly","capture-0915","update","create-nightly-v2","capture-0915-v2","update-v2","self-test")); args=parser.parse_args()
+    result=create_nightly() if args.command=="create-nightly" else capture_premarket() if args.command=="capture-0915" else update() if args.command=="update" else create_nightly_v2() if args.command=="create-nightly-v2" else capture_premarket_v2() if args.command=="capture-0915-v2" else update_v2() if args.command=="update-v2" else {"ok":True,"states":STATES,"interactions":INTERACTIONS,"v1_interpretation":V1_INTERPRETATION,"broker_modules_imported":False}
     print(json.dumps(result,indent=2))
 
 
