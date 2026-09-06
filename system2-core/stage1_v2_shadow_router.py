@@ -343,12 +343,13 @@ def self_test() -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "immutable.json"
         write_immutable(path, {"v1": "PASS", "v2": "ALPHA_ELIGIBLE", "research_only": True})
+        stored = read_json(path, {})
+        assertions["v1_v2_side_by_side"] = stored.get("v1") == "PASS" and stored.get("v2") == "ALPHA_ELIGIBLE"
         try:
             write_immutable(path, {"overwrite": True})
             assertions["immutable_replay_does_not_overwrite"] = False
         except FileExistsError:
             assertions["immutable_replay_does_not_overwrite"] = True
-    assertions["v1_v2_side_by_side"] = "v1" in read_json(path, {}) if path.exists() else True
     assertions["no_broker_module_loaded"] = not any("alpaca" in name.lower() or "broker" in name.lower() for name in sys.modules)
     ok = all(assertions.values())
     return {"ok": ok, "assertions": assertions, "cases": {name: result[0] for name, result in cases.items()}, "broker_calls": 0}
