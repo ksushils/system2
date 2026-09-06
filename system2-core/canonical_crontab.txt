@@ -7,6 +7,10 @@
 0 2 * * * /root/fund-system/backup-fund.sh >> /root/fund-system/backups/backup.log 2>&1
 CRON_TZ=UTC
 
+# Stage1 V2 shadow router: isolated research classifications and V2 outcomes; never feeds production or broker execution.
+2 3 * * 2-6 cd /root/system2-core && .venv/bin/python stage1_v2_shadow_router.py create >> /root/system2-core/logs/stage1_v2_shadow_router.log 2>&1
+23 3 * * 2-6 cd /root/system2-core && .venv/bin/python stage1_v2_shadow_router.py update >> /root/system2-core/logs/stage1_v2_shadow_router.log 2>&1
+
 # Research telemetry retention: estimated upper bound ~0.72 GiB/year; retain 1095 days (~2.2 GiB).
 35 4 * * 0 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py retention >> /root/system2-core/logs/research_telemetry.log 2>&1
 
