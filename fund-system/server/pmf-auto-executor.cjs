@@ -1178,6 +1178,15 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
         continue;
       }
       const hasExitOrder = Boolean((discoveredStop && discoveredTarget) || exitOrder || parentLegs.some(leg => !['expired', 'canceled', 'cancelled', 'rejected'].includes(String(leg?.status || '').toLowerCase())));
+      if (livePositionSymbols.has(String(ticker || '').toUpperCase()) && hasExitOrder && idea.actual_entry_price && !idea.actual_exit_price && idea.paper_status === 'RECONCILIATION_PENDING') {
+        if (!dryRun) {
+          idea.paper_status = 'OPEN';
+          idea.reconciliation_confirmed_open_at = isoNow(now);
+          appendAudit(idea, { event: 'broker_confirmed_open_protected', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || exitOrder?.id || null });
+        }
+        results.push({ ticker, account: requestedAccount, action: dryRun ? 'would_update_open_from_position_reconcile' : 'updated_open_from_position_reconcile', order_id: order.id, oco_order_id: idea.recalibrated_oco_order_id || exitOrder?.id || null, status: 'open', protected: true });
+        continue;
+      }
       if (idea.actual_entry_price && !hasExitOrder && !idea.actual_exit_price) {
         if (dryRun) {
           results.push({ ticker, account: requestedAccount, action: 'would_recover_missing_protection', original_position_untouched: true, proposed_oco: buildOcoExitOrder(idea, config, idea.actual_entry_price, config.qty).payload });
@@ -1214,7 +1223,7 @@ async function syncOpenAutoPositions({ allIdeas = [], readEnvValue, now, dryRun 
       results.push({ ticker: ideaTicker(idea), action: 'sync_failed', reason: e.message });
     }
   }
-  return { ok: true, dryRun, checked: rows.length, updated: results.filter(r => String(r.action || '').startsWith('updated_exit')).length, results };
+  return { ok: true, dryRun, checked: rows.length, updated: results.filter(r => String(r.action || '').startsWith('updated_')).length, results };
 }
 
 function dryRunPreview(idea, readEnvValue) {
@@ -1225,6 +1234,20 @@ function dryRunPreview(idea, readEnvValue) {
   const simulatedFill = num(idea.simulated_fill_price ?? idea.actual_entry_price ?? idea.entry_trigger_price ?? referencePrice(idea));
   const actual = simulatedFill > 0 ? recalibratedExitLevels(idea, simulatedFill, simulatedFill) : null;
   return { ok: true, enabled: config.enabled, action: 'would_place_native_bracket_then_replace', account: config.accountTag, cohort_label: 'B_CLEAN', endpoint: preview.endpoint, paper_endpoint_asserted: preview.paper_endpoint_asserted, order: preview.payload, simulated_fill_price: simulatedFill, simulated_replace: actual ? { stop: roundPrice(actual.stop), target: roundPrice(actual.target) } : null, simulated_replace_failure: { original_bracket_kept: true, geometry_estimated: true, alert: 'BRACKET_REPLACE_FAILED_PROTECTION_RETAINED' }, model: preview.model, bracket_mode: RECALIBRATED_BRACKET_MODE, config_hash: configMeta.hash, config_snapshot_ref: configMeta.snapshotRef, config_hash_time: new Date().toISOString() };
+}
+
+async function retirementInvariantCheck(readEnvValue) {
+  const config = loadConfig(readEnvValue);
+  const idea = { id: 'pmf-retirement-invariant-probe', ticker: 'INVARIANT', entry: 100, stopLoss: 98, target: 104, atr14: 2 };
+  const primary = await maybeExecuteConfirmedPmfs({ ideas: [{ ...idea }], allIdeas: [], readEnvValue, dryRun: true });
+  const pmfLate = await maybeExecuteConfirmedPmfs({ ideas: [{ ...idea, pmf_cohort: 'PMF_LATE' }], allIdeas: [], readEnvValue, dryRun: true });
+  const retry = await maybeExecuteConfirmedPmfs({ ideas: [{ ...idea, auto_exec_status: 'failed' }], allIdeas: [], readEnvValue, dryRun: true });
+  const manual = dryRunPreview({ ...idea, requested_source: 'manual_dashboard' }, readEnvValue);
+  const flags = { PMF_AUTO_EXEC_ENABLED: config.enabled, PMF_V1_RETIRED_NO_NEW_ENTRIES: config.retiredNoNewEntries };
+  const paths = { primary: primary.action, pmf_late: pmfLate.action, retry: retry.action, manual: manual.action };
+  const brokerCalls = [primary, pmfLate, retry, manual].reduce((sum, result) => sum + Number(result.broker_calls || 0), 0);
+  const ok = flags.PMF_AUTO_EXEC_ENABLED === false && flags.PMF_V1_RETIRED_NO_NEW_ENTRIES === true && Object.values(paths).every(action => action === 'retired_blocked') && brokerCalls === 0;
+  return { ok, invariant: 'PMF_V1_NEW_BROKER_ENTRIES_DISABLED', flags, self_test: { ...paths, action: primary.action, broker_calls: brokerCalls, reason: primary.reason }, reconciliation_untouched: true };
 }
 
 module.exports = {
@@ -1257,6 +1280,7 @@ module.exports = {
   rankCapCandidates,
   deduplicateCapCandidates,
   dryRunPreview,
+  retirementInvariantCheck,
   maybeExecuteConfirmedPmfs,
   syncOpenAutoPositions,
 };

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from prospective_research_telemetry import get_json, load_dotenv
-from research_telemetry_common import RESEARCH_ROOT, next_market_session, read_json, run_directory, session_offset, utc_now, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json, run_directory, session_offset, session_record, utc_now, write_immutable
 from research_price_resolver import ResearchPriceResolver, validate_premarket_quote
 from swing_shadow_cohorts import SECTOR_ETFS, capture_daily_marks, file_hash, label, load_price_series, number, ticker
 
@@ -148,7 +148,7 @@ def create_nightly_v2() -> dict[str,Any]:
         pa=resolver.resolve("SPY",anchor_date,"NEXT_OPEN");pe=resolver.resolve("SPY",anchor_date,"SESSION_CLOSE");xa=resolver.resolve(sector_symbol,anchor_date,"NEXT_OPEN") if sector_symbol else None;xe=resolver.resolve(sector_symbol,anchor_date,"SESSION_CLOSE") if sector_symbol else None
         stock=(se["price"]/sa["price"]-1)*100 if sa.get("price") and se.get("price") else None;spy=(pe["price"]/pa["price"]-1)*100 if pa.get("price") and pe.get("price") else None;sector=(xe["price"]/xa["price"]-1)*100 if xa and xe and xa.get("price") and xe.get("price") else None
         nightly_rs=stock-spy if stock is not None and spy is not None else None;nightly_sector=stock-sector if stock is not None and sector is not None else None
-        rows.append({"schema_version":2,"symbol":symbol,"sector":source.get("sector"),"sector_etf":sector_symbol,"trading_date":session,"anchor_date":anchor_date,"pipeline_timestamp":pipeline,"config_hash":config_hash,
+        rows.append({"schema_version":2,"symbol":symbol,"sector":source.get("sector"),"sector_etf":sector_symbol,"trading_date":session,"next_open_timestamp":timing["next_session_open"],"anchor_date":anchor_date,"pipeline_timestamp":pipeline,"config_hash":config_hash,
                      "stock_anchor":sa,"spy_anchor":pa,"sector_anchor":xa,"stock_nightly_endpoint":se,"spy_nightly_endpoint":pe,"sector_nightly_endpoint":xe,
                      "stock_return_t1_pct":stock,"spy_return_t1_pct":spy,"sector_return_t1_pct":sector,"nightly_rs_v2_pct":nightly_rs,"nightly_sector_rs_v2_pct":nightly_sector,
                      "high_level_v2":bool(nightly_rs is not None and nightly_sector is not None and nightly_rs>0 and nightly_sector>0),"measurement_state":"VALID" if nightly_rs is not None and nightly_sector is not None else "ACCELERATION_MEASUREMENT_MISSING"})
@@ -157,7 +157,13 @@ def create_nightly_v2() -> dict[str,Any]:
 
 
 def capture_premarket_v2() -> dict[str,Any]:
-    timing=next_market_session();session=timing["trading_session"];source=latest(session,"momentum_level_nightly_v2.json")
+    now_et=utc_now().astimezone(NY)
+    if not is_market_session(now_et.date()):
+        return {"ok":True,"skipped":True,"reason":"NON_XNYS_SESSION","date":now_et.date().isoformat()}
+    timing=next_market_session();session=timing["trading_session"]
+    if session != now_et.date().isoformat():
+        return {"ok":True,"skipped":True,"reason":"FUTURE_SESSION_GUARD","date":now_et.date().isoformat(),"resolved_session":session}
+    source=latest(session,"momentum_level_nightly_v2.json")
     if not source:return {"ok":False,"reason":"MISSING_NIGHTLY_V2"}
     existing=latest(session,"momentum_acceleration_0915_v2.json")
     if existing:return {"ok":True,"idempotent":True,"path":str(existing)}
@@ -211,7 +217,12 @@ def update() -> dict[str,Any]:
 def update_v2() -> dict[str,Any]:
     artifacts=sorted(RESEARCH_ROOT.glob("*/*/momentum_acceleration_0915_v2.json"));rows=[]
     for path in artifacts:
-        for row in (read_json(path,{}) or {}).get("rows",[]):rows.append((path,row))
+        payload=read_json(path,{}) or {}
+        for row in payload.get("rows",[]):
+            if not row.get("next_open_timestamp"):
+                record=session_record(datetime.fromisoformat(row["trading_date"]).date())
+                row={**row,"next_open_timestamp":payload.get("next_session_open") or (record or {}).get("open_timestamp_ET")}
+            rows.append((path,row))
     symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values());series=load_price_series(symbols)
     labelled=[{**row,"acceleration_artifact":str(path),**label(row,series)} for path,row in rows];now=utc_now();stamp=now.strftime("%Y%m%dT%H%M%SZ");directory=RESEARCH_ROOT/"scoreboards"
     outcomes=write_immutable(directory/f"momentum_acceleration_outcomes_v2_{stamp}.json",{"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled})

@@ -11,6 +11,10 @@ const VALID_SOURCES = new Set(['signal', 'rejection']);
 let lastRun = null;
 let hourlyStarted = false;
 let capitalSession = null;
+let capitalLoginInFlight = null;
+let capitalLoginCooldownUntil = 0;
+let capitalLoginLastFailure = null;
+const CAPITAL_LOGIN_429_COOLDOWN_MS = Number(process.env.CAPITAL_LOGIN_429_COOLDOWN_MS || 60 * 60_000);
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const MAX_SKIP_ATTEMPTS = 5;
 
@@ -182,6 +186,11 @@ export async function capitalLogin() {
   if (capitalSession?.cst && capitalSession?.token && Date.now() < capitalSession.expires) {
     return { ok: true, apiKey, baseUrl, cst: capitalSession.cst, token: capitalSession.token };
   }
+  if (Date.now() < capitalLoginCooldownUntil) {
+    return { ok: false, status: capitalLoginLastFailure?.status || 429, error: 'capital_login_cooldown', retry_after_ms: capitalLoginCooldownUntil - Date.now() };
+  }
+  if (capitalLoginInFlight) return capitalLoginInFlight;
+  capitalLoginInFlight = (async () => {
   const response = await fetch(`${baseUrl}/api/v1/session`, {
     method: 'POST',
     headers: { 'X-CAP-API-KEY': apiKey, 'Content-Type': 'application/json' },
@@ -191,12 +200,22 @@ export async function capitalLogin() {
   const text = await response.text();
   let body;
   try { body = text ? JSON.parse(text) : null; } catch { body = text; }
-  if (!response.ok) return { ok: false, status: response.status, error: body?.errorCode || body?.error || 'capital_login_failed' };
+  if (!response.ok) {
+    const failure = { ok: false, status: response.status, error: body?.errorCode || body?.error || 'capital_login_failed' };
+    capitalLoginLastFailure = failure;
+    if (response.status === 429) capitalLoginCooldownUntil = Date.now() + CAPITAL_LOGIN_429_COOLDOWN_MS;
+    return failure;
+  }
   const cst = response.headers.get('cst') || response.headers.get('CST');
   const token = response.headers.get('x-security-token') || response.headers.get('X-SECURITY-TOKEN');
   if (!cst || !token) return { ok: false, status: response.status, error: 'capital_session_headers_missing' };
   capitalSession = { cst, token, expires: Date.now() + 8 * 60 * 1000 };
+  capitalLoginLastFailure = null;
+  capitalLoginCooldownUntil = 0;
   return { ok: true, apiKey, baseUrl, cst, token };
+  })();
+  try { return await capitalLoginInFlight; }
+  finally { capitalLoginInFlight = null; }
 }
 
 // A cached session that has expired early must be droppable by its

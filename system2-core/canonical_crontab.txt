@@ -24,6 +24,7 @@ CRON_TZ=UTC
 9 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py create-nightly >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 11 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py create-nightly-v2 >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 29 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py update >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
+31 3 * * 2-6 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py update-v2 >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 CRON_TZ=America/New_York
 17 9 * * 1-5 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py capture-0915 >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
 19 9 * * 1-5 cd /root/system2-core && .venv/bin/python momentum_acceleration_shadow.py capture-0915-v2 >> /root/system2-core/logs/momentum_acceleration_shadow.log 2>&1
@@ -75,7 +76,7 @@ CRON_TZ=UTC
 0 14 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
 0 18 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
 45 23 * * 1-5 cd /root/system2-core && .venv/bin/python signal_learning.py >> /root/system2-core/logs/signal_learning.log 2>&1
-0 6 * * 1-5 cd /root/system2-core && .venv/bin/python continuous_discovery.py >> /root/system2-core/logs/continuous_discovery.log 2>&1
+0 6 * * 1-5 cd /root/system2-core && .venv/bin/python continuous_discovery.py --once >> /root/system2-core/logs/continuous_discovery.log 2>&1
 
 
 # PEAD_DRIFT paper tracker - additive separate cohort; logs strict PEAD setups and resolves open PEAD rows only.
@@ -102,7 +103,10 @@ CRON_TZ=UTC
 # Until that decision, do not move the crons: audit session_eastern_time, session_state, minutes_from_open, and session_label on stamped rows.
 
 # Daily PMF progress report - Telegram, reporting only; Cohort B progress first, no trading logic.
-5 22 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1
+5 22 * * 1-5 curl -fsS --retry 5 --retry-all-errors --retry-delay 10 -X POST http://127.0.0.1:3210/api/system2/pmf-alerts/daily-summary-local >> /root/system2-core/logs/pmf_daily_report.log 2>&1
+
+# Daily out-of-sample experiment guard; reads the fund-system PM2 process environment securely.
+20 5 * * * /root/fund-system/scripts/oos-guard.sh >> /root/fund-system/logs/oos-guard.log 2>&1
 
 # Prospective research telemetry only: immutable nightly lineage/funnel snapshot.
 0 3 * * 2-6 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py finalize-nightly >> /root/system2-core/logs/research_telemetry.log 2>&1

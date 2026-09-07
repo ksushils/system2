@@ -33,6 +33,13 @@ fi
 # changes trading data or decisions.
 /root/system2-core/.venv/bin/python /root/system2-core/system2_heartbeat_alert.py >> "$LOG" 2>&1
 
+# PMF V1 retirement invariant: alert-only, broker-free, and independent of
+# existing-position reconciliation/OCO protection.
+node /root/fund-system/server/pmf-retirement-invariant.cjs --alert --source=health-monitor >> "$LOG" 2>&1
+if [ $? -ne 0 ]; then
+  echo "[$TS] CRITICAL: PMF retirement invariant failed" >> "$LOG"
+fi
+
 # Rotate log if > 10MB
 if [ -f "$LOG" ] && [ $(stat -f%z "$LOG" 2>/dev/null || stat -c%s "$LOG" 2>/dev/null || echo 0) -gt 10485760 ]; then
   mv "$LOG" "$LOG.old"

@@ -15,6 +15,7 @@ const path = require('path');
 const childProcess = require('child_process');
 const pmfAutoExecutor = require('./pmf-auto-executor.cjs');
 let startupProtectionRecoveryScheduled = false;
+let startupRetirementInvariantScheduled = false;
 
 module.exports = function attachScoring(app, db, deps) {
   const { adminOnly, serviceOrAdmin, now, fmpKey, httpGet } = deps;
@@ -204,6 +205,14 @@ module.exports = function attachScoring(app, db, deps) {
     if (!db.data.system2_rejections) db.data.system2_rejections = [];
     if (!db.data.system2_monitor_snapshots) db.data.system2_monitor_snapshots = [];
     if (!db.data.system2_stage_details) db.data.system2_stage_details = [];
+  }
+
+  if (!startupRetirementInvariantScheduled) {
+    startupRetirementInvariantScheduled = true;
+    childProcess.execFile(process.execPath, [path.join(__dirname, 'pmf-retirement-invariant.cjs'), '--alert', '--source=startup'], { timeout: 20000 }, (error, stdout, stderr) => {
+      if (error) console.error('[PMF retirement invariant] HIGH PRIORITY failure:', String(stdout || stderr || error.message).trim());
+      else console.log('[PMF retirement invariant]', String(stdout).trim());
+    });
   }
 
   // Run the same broker/ledger reconciliation used by the scheduled sync once
