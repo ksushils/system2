@@ -22,7 +22,8 @@ FILES = {
     "fund-system/server/scoring-endpoints.cjs": Path("/root/fund-system/server/scoring-endpoints.cjs"),
     "fund-system/server/pmf-auto-executor.cjs": Path("/root/fund-system/server/pmf-auto-executor.cjs"),
 }
-RAW_BASE = "https://raw.githubusercontent.com/ksushils/system2/master"
+GITHUB_REPO = "ksushils/system2"
+GITHUB_REF = "master"
 
 
 def load_env():
@@ -66,16 +67,24 @@ def main():
         invariant = {"ok": False, "error": (invariant_process.stderr or "invalid invariant output")[-500:], "broker_calls": 0}
     mismatches = []
     hashes = {}
+    ref_request = urllib.request.Request(
+        f"https://api.github.com/repos/{GITHUB_REPO}/commits/{GITHUB_REF}",
+        headers={"User-Agent": "system2-deploy-guard"},
+    )
+    with urllib.request.urlopen(ref_request, timeout=30) as response:
+        canonical_commit = json.load(response)["sha"]
     for relative, deployed in FILES.items():
         local = deployed.read_bytes()
-        with urllib.request.urlopen(f"{RAW_BASE}/{relative}", timeout=30) as response:
+        with urllib.request.urlopen(
+            f"https://raw.githubusercontent.com/{GITHUB_REPO}/{canonical_commit}/{relative}", timeout=30
+        ) as response:
             canonical = response.read()
         hashes[relative] = {"deployed": sha256(local), "canonical": sha256(canonical)}
         if hashes[relative]["deployed"] != hashes[relative]["canonical"]:
             mismatches.append(relative)
     fingerprint = "|".join(mismatches)
     previous = json.loads(STATE.read_text()) if STATE.exists() else {}
-    result = {"ok": not mismatches and invariant.get("ok") is True, "checked_at": datetime.now(timezone.utc).isoformat(), "mismatches": mismatches, "hashes": hashes, "pmf_retirement_invariant": invariant}
+    result = {"ok": not mismatches and invariant.get("ok") is True, "checked_at": datetime.now(timezone.utc).isoformat(), "canonical_commit": canonical_commit, "mismatches": mismatches, "hashes": hashes, "pmf_retirement_invariant": invariant}
     if mismatches and previous.get("fingerprint") != fingerprint:
         result["telegram"] = send_alert("DEPLOYED FILE DIFFERS FROM CANONICAL: " + ", ".join(mismatches))
     STATE.write_text(json.dumps({**result, "fingerprint": fingerprint}, indent=2))
