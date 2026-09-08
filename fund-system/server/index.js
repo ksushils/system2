@@ -56,7 +56,9 @@ import {
   startLayer4Jobs
 } from './layer4.js';
 import { shapeRegimeLatest } from './regime-latest.js';
-import { computeFleetState, readActualFleet, fleetWarnings } from './fleet-state.js';
+import pg from 'pg';
+import { classifyRejectionReason, normalizeRejectionReason } from './rejection-class.js';
+import { computeFleetState, readActualFleet, fleetWarnings, FLEET_SCHEDULES, isWeekendET, UNKNOWN } from './fleet-state.js';
 import { reconcilePositions } from './position-reconcile.js';
 import { getFleetExpected, initFleetStore } from './fleet-store.js';
 import { attachBrokerResolve } from './broker-resolve.js';
@@ -89,12 +91,43 @@ import {
   insertUpdatePostgres,
   upsertTradePostgres,
   insertBrainPostgres,
+  deleteBrainByDealPostgres,
   insertReservationPostgres,
   sweepExpiredReservationsPostgres,
   openPositionPostgres,
-  closePositionPostgres
+  closePositionPostgres,
+  getTradeExcursionPostgres
 } from './storage-adapter.js';
+import { analyticsFirewallRow } from './analytics-firewall.js';
 import fundIntegrity from './fund-integrity.cjs';
+
+// ── PROCESS-LEVEL SAFETY NET ────────────────────────────────────
+// Eight async setIntervals are unguarded and there was no
+// process.on('unhandledRejection') anywhere, so any one of them could take
+// the process down with nothing in the log to attribute it to. This does not
+// fix them; it makes the next failure visible instead of silent.
+//
+// Installed here, at module scope, BEFORE anything else is initialised --
+// so it may use only globals. new Date().toISOString(), never now();
+// console.error, never sendTelegramAlert. Calling a module helper from a
+// handler that can fire during module evaluation is what crashed the
+// boot-time catch on 2026-08-13 (index.js:289, TDZ on `now`).
+//
+// It deliberately does NOT exit. Node would terminate on an unhandled
+// rejection; staying alive is the point. After an uncaughtException the
+// process may be inconsistent, so the health issue below is the signal to
+// restart deliberately rather than be restarted blindly.
+let processFault = null;
+let processFaultAlerted = false;
+function recordProcessFault(kind, err) {
+  const at = new Date().toISOString();
+  const detail = (err && err.stack) ? String(err.stack) : String(err);
+  // First fault wins: later ones are usually cascades of the first.
+  if (!processFault) processFault = { kind, at, error: detail.slice(0, 900) };
+  console.error(`[${at}] ${kind.toUpperCase()} — process kept alive, health flagged:\n${detail}`);
+}
+process.on('unhandledRejection', (reason) => recordProcessFault('unhandledRejection', reason));
+process.on('uncaughtException', (err) => recordProcessFault('uncaughtException', err));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
@@ -501,7 +534,23 @@ async function serializeRiskGate(req,res,next){
 const CONFIG_PUBLIC_KEYS = ['account_size','max_global_heat_pct','max_open_positions','kill_switch','paper_only','gemini_model','updated_at'];
 const CONFIG_WRITE_KEYS = new Set(['account_size','max_global_heat_pct','max_open_positions','kill_switch','paper_only','gemini_model']);
 
-const SCANNERS = ['fmp', 'forex', 'comm', 'pa', 'vp', 'fb', 'main', 'all'];
+// Derived from SCANNER_ORDER (param-store.js:12), imported at the top of this
+// file and previously unused here. The old literal carried three names that no
+// scanner has answered to for months -- 'vp', 'fb' and 'main' -- while OMITTING
+// volume, failed_breakout, mean_reversion, indices, crypto and fmp_alpaca. The
+// per-scanner loop at ~609 therefore reported on three ghosts and skipped six
+// live scanners. 'all' is appended because the scope validator at ~827 accepts
+// it as a legitimate value; it is filtered out of the per-scanner loop.
+const SCANNERS = [...SCANNER_ORDER, 'all'];
+
+// ONE display-name map for the whole system. The dashboard carried its own
+// copies with the same dead names.
+const SCANNER_DISPLAY_NAMES = {
+  fmp: 'FMP Stocks', forex: 'Forex', comm: 'Commodity', pa: 'Price Action',
+  volume: 'Volume Profile', failed_breakout: 'Failed Breakout',
+  fmp_alpaca: 'FMP Alpaca', mean_reversion: 'Mean Reversion',
+  indices: 'Indices', crypto: 'Crypto'
+};
 
 // ── Auth middleware ───────────────────────────────────────────
 function auth(req, res, next) {
@@ -569,11 +618,37 @@ function calcFundStats() {
 
   // Max drawdown from running equity
   let peak = 0, maxDD = 0, runEq = 0;
-  closed.sort((a,b) => a.closed_at?.localeCompare(b.closed_at)).forEach(t => {
+  // A missing closed_at made this comparator inconsistent: optional chaining
+  // returned undefined (coerced to +0, "equal to everything") when the LEFT
+  // side was null, while localeCompare coerced a null RIGHT side to the string
+  // "null" and ordered real dates against it. Neither is transitive, so the
+  // order feeding the drawdown walk was unspecified. Falls back to ts, which is
+  // the pattern already used at the monthly-equity sort.
+  closed.sort((a,b) => (a.closed_at||a.ts||'').localeCompare(b.closed_at||b.ts||'')).forEach(t => {
     runEq += t.pnl;
     if (runEq > peak) peak = runEq;
     const dd = peak - runEq;
     if (dd > maxDD) maxDD = dd;
+  });
+
+  // Per-TRADE equity curve, in the SAME order the drawdown walk just used, so the
+  // chart and the max_drawdown figure can never disagree about sequence.
+  // The panels were being fed monthly_returns, which collapses to a SINGLE point
+  // whenever every closed trade falls in one month — measured 2026-08-22, all 53
+  // do, and the chart rendered one dot. Counts come from this array's length; it
+  // is never sliced.
+  let eqRun = 0;
+  const equityCurve = closed.map(t => {
+    eqRun += t.pnl;
+    return {
+      at:      t.closed_at || t.ts || null,
+      dated:   !!t.closed_at,
+      id:      t.id,
+      ticker:  t.ticker || null,
+      scanner: t.scanner || null,
+      pnl:     parseFloat(t.pnl.toFixed(2)),
+      equity:  parseFloat(eqRun.toFixed(2))
+    };
   });
 
   // Per scanner
@@ -606,6 +681,14 @@ function calcFundStats() {
     avg_win:       parseFloat(avgWin.toFixed(2)),
     avg_loss:      parseFloat(avgLoss.toFixed(2)),
     max_drawdown:  parseFloat(maxDD.toFixed(2)),
+    // The peak the drawdown is measured FROM. When it is 0 the equity curve never
+    // rose above its starting point, so max_drawdown is measured from the start
+    // rather than from a high-water mark — that is what makes it look like it
+    // "equals" all-time P&L. The panel must say so instead of leaving it implied.
+    drawdown_peak:       parseFloat(peak.toFixed(2)),
+    equity_curve:        equityCurve,
+    equity_curve_count:  equityCurve.length,
+    equity_curve_undated: equityCurve.filter(p => !p.dated).length,
     gross_win:     parseFloat(grossWin.toFixed(2)),
     gross_loss:    parseFloat(grossLoss.toFixed(2)),
     scanner_stats: scannerStats,
@@ -755,7 +838,7 @@ app.post('/api/investors', adminOnly, async (req,res)=>{
     id: nid('risk_settings'), investor_id:inv.id,
     max_risk_pct_per_trade:2, max_open_positions:5,
     max_daily_loss_pct:5, max_monthly_loss_pct:15,
-    scanners_enabled:['fmp','forex','comm','pa','vp','fb','main'],
+    scanners_enabled:[...SCANNER_ORDER],
     position_size_override:null, updated_at:now()
   });
   await save(); res.json({ status:'ok', investor:{id:inv.id,name,email} });
@@ -901,6 +984,13 @@ app.post('/api/investor/withdraw', auth, async (req,res)=>{
 // ── Input validation helpers ─────────────────────────────────
 function validTicker(t) { return typeof t === 'string' && t.length >= 1 && t.length <= 20 && /^[A-Za-z0-9\.\-_]+$/.test(t); }
 function validDirection(d) { return ['BUY','SELL','LONG','SHORT'].includes(String(d).toUpperCase()); }
+// Signals RECORD a direction when one is supplied and recognised; they do not
+// require one. A signal may legitimately be a 'skip' with no side, and 1,510 of
+// mean_reversion's rows are exactly that -- rejecting them would lose the row
+// rather than the field. Unrecognised or absent becomes null, never a default:
+// a fabricated side is worse than an absent one, which is the same mistake as
+// the indices node's hardcoded "type":"buy".
+function normDirection(d) { return validDirection(d) ? String(d).toUpperCase() : null; }
 function validNumber(n, min, max) { const v = Number(n); return isFinite(v) && v >= min && v <= max; }
 
 app.post('/api/signal', scannerAuth, async (req,res)=>{
@@ -909,7 +999,7 @@ app.post('/api/signal', scannerAuth, async (req,res)=>{
     if (!validTicker(b.ticker||b.pair||b.asset)) return res.status(400).json({status:'error',message:'valid ticker required (1-20 chars, alphanumeric)'});
     if (b.entry != null && !validNumber(b.entry, 0.0001, 1000000)) return res.status(400).json({status:'error',message:'entry must be 0.0001-1000000'});
     const scanner = b.scanner||'unknown';
-    const signal = { id:nid('signals'), ts:b.ts||now(), scanner, type:b.type||'skip', ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null, config_hash:await getConfigHash(scanner, db.data.scanner_config||{}) };
+    const signal = { id:nid('signals'), ts:b.ts||now(), scanner, type:b.type||'skip', direction:normDirection(b.direction ?? b.dir ?? b.side), ticker:(b.ticker||b.pair||b.asset).toUpperCase(), detail:b.detail||'', entry:b.entry||b.entry_price||null, sl:b.sl||b.stop_loss||null, tp:b.tp||b.take_profit_1||null, quality:b.quality_score||null, adx:b.adx||null, rsi:b.rsi||null, volume_ratio:b.volume_ratio||null, config_hash:await getConfigHash(scanner, db.data.scanner_config||{}) };
     db.data.signals.unshift(signal);
     if(db.data.signals.length>1000) db.data.signals=db.data.signals.slice(0,1000);
     await saveSignalHot(signal); res.json({status:'ok'});
@@ -927,6 +1017,9 @@ app.post('/api/trade/open', scannerAuth, async (req,res)=>{
     if (b.sl != null && !validNumber(b.sl, 0.0001, 1000000)) return res.status(400).json({status:'error',message:'sl must be 0.0001-1000000'});
     if (b.size != null && !validNumber(b.size, 1, 1000000)) return res.status(400).json({status:'error',message:'size must be 1-1000000'});
     if (b.risk_usd != null && !validNumber(b.risk_usd, 0.01, 100000)) return res.status(400).json({status:'error',message:'risk_usd must be 0.01-100000'});
+    // risk_amount is the REALISED risk -- the actual fill against the live
+    // stop, computed by `Confirm & Register Deal`. Same bounds as risk_usd.
+    if (b.risk_amount != null && !validNumber(b.risk_amount, 0.01, 100000)) return res.status(400).json({status:'error',message:'risk_amount must be 0.01-100000'});
     const dealId = String(b.deal_id || b.dealId || '').trim();
     if (!dealId || ['UNKNOWN','FAILED'].includes(dealId.toUpperCase())) return res.status(400).json({status:'error',reason:'NO_BROKER_CONFIRMATION',message:'valid confirmed broker deal_id required'});
     if (dealId) {
@@ -957,7 +1050,7 @@ app.post('/api/trade/open', scannerAuth, async (req,res)=>{
     const trade = { id:nid('trades'), ts:b.ts||now(), scanner, ticker:(b.ticker||b.epic).toUpperCase(), deal_id:dealId, direction:String(b.direction).toUpperCase(), setup_type:b.setup_type||b.type||'',
       // NEW field, never folded into setup_type: that is a matching key with
       // exact-equality semantics in the Trade Brain. Null until a scanner sends it.
-      engine_branch:b.engine_branch||b.branch||null, entry, intended_entry:intendedEntry, fill_slippage_pct:computeFillSlippage(b.direction, entry, intendedEntry), sl:initialSl, initial_sl:initialSl, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, spread_cost:spreadCost, commission:Number(b.commission??0), financing_accrued:0, pnl_gross:null, pnl_net:null, signal_to_order_ms:signalToOrderMs, order_to_fill_ms:orderToFillMs, bracket_mode:b.bracket_mode||null, fill_drift_pct:b.fill_drift_pct==null?null:Number(b.fill_drift_pct), measurement_population:b.measurement_population||'ENTERED', config_hash:await getConfigHash(scanner, db.data.scanner_config||{}), status:'OPEN', close_price:null, pnl:null, max_favorable:entry, max_adverse:entry, mae_r:null, mfe_r:null, opened_at:b.fill_ts||b.fill_time||b.filled_at||b.ts||now(), closed_at:null };
+      engine_branch:b.engine_branch||b.branch||null, entry, intended_entry:intendedEntry, fill_slippage_pct:computeFillSlippage(b.direction, entry, intendedEntry), sl:initialSl, initial_sl:initialSl, tp1:b.tp1||b.take_profit_1||null, tp2:b.tp2||b.take_profit_2||null, size:b.size||null, risk_usd:b.risk_usd||null, risk_amount:b.risk_amount??null, spread_cost:spreadCost, commission:Number(b.commission??0), financing_accrued:0, pnl_gross:null, pnl_net:null, signal_to_order_ms:signalToOrderMs, order_to_fill_ms:orderToFillMs, bracket_mode:b.bracket_mode||null, fill_drift_pct:b.fill_drift_pct==null?null:Number(b.fill_drift_pct), measurement_population:b.measurement_population||'ENTERED', config_hash:await getConfigHash(scanner, db.data.scanner_config||{}), status:'OPEN', close_price:null, pnl:null, max_favorable:entry, max_adverse:entry, mae_r:null, mfe_r:null, opened_at:b.fill_ts||b.fill_time||b.filled_at||b.ts||now(), closed_at:null };
     db.data.trades.unshift(trade);
     await saveTradeHot(trade);
     if (orderTime) await journalEvent('order_placed', trade).catch(()=>{});
@@ -970,15 +1063,55 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
   try {
     const b=req.body;
     const t=findTradeForMutation(db.data.trades,b);
+
+    // ── closed_at validation (C1, 2026-08-18) ──────────────────────────────
+    // A supplied `ts` was ALREADY honoured below (`t.closed_at=b.ts||now()`);
+    // what was missing is any check that it is sane. Validated HERE, before a
+    // single field is mutated, so an invalid stamp cannot leave a trade
+    // half-closed -- the guard is structurally able to stop the write because
+    // it returns before the mutation block is entered.
+    //
+    // The 60s future tolerance absorbs clock skew between a scanner box and
+    // this one. Beyond that a future stamp is a bug, and a stamp before
+    // opened_at inverts the hold duration -- which is how 144/168/169 came to
+    // overstate theirs by up to 11h in the other direction.
+    if (t && b.ts != null && b.ts !== '') {
+      const suppliedMs = Date.parse(b.ts);
+      if (!Number.isFinite(suppliedMs)) {
+        return res.status(400).json({ status:'error', reason:'INVALID_CLOSED_AT',
+          message:`closed_at (ts) is not a parseable date: ${JSON.stringify(b.ts)}`,
+          trade_id:t.id, deal_id:t.deal_id });
+      }
+      if (suppliedMs > Date.now() + 60000) {
+        return res.status(400).json({ status:'error', reason:'CLOSED_AT_IN_FUTURE',
+          message:`closed_at ${b.ts} is more than 60s in the future`,
+          trade_id:t.id, deal_id:t.deal_id });
+      }
+      const openedMs = Date.parse(t.opened_at || '');
+      if (Number.isFinite(openedMs) && suppliedMs < openedMs) {
+        return res.status(400).json({ status:'error', reason:'CLOSED_AT_BEFORE_OPENED_AT',
+          message:`closed_at ${b.ts} precedes opened_at ${t.opened_at}`,
+          trade_id:t.id, deal_id:t.deal_id });
+      }
+    }
+
     if(t){
       let closePrice = b.close_price??b.closePrice??b.current_price??null;
       let grossIn    = b.pnl_gross??b.pnl??b.pnl_realised??null;
 
-      // An economics-free close is refused, not recorded. If the caller
-      // supplied neither a price nor a pnl, ask Capital; if Capital
-      // cannot answer either, 422 and leave the trade OPEN for retry.
-      // Recording CLOSED with nulls loses the money permanently.
-      if (closePrice == null && grossIn == null) {
+      // An unverifiable close is refused, not recorded. Resolution is triggered
+      // by a MISSING PRICE, not by a missing price AND a missing pnl: the old
+      // `&& grossIn == null` meant a caller could supply a pnl with no price,
+      // skip the resolver entirely, and have the figure recorded verbatim with
+      // close_price NULL. Nothing downstream can then check that pnl against the
+      // market. That is exactly how trades 134/136/137 booked figures on
+      // 2026-08-07 that no price supports.
+      //
+      // Only 3 closes in the system's history have ever arrived pnl-without-price
+      // (indices, all on 2026-08-07, none in the 17 days since), so widening the
+      // trigger blocks nothing any active scanner currently does. The dominant
+      // path -- neither field supplied -- is unchanged and still resolves.
+      if (closePrice == null) {
         const resolved = await resolveCloseEconomics({
           deal_id: t.deal_id, epic: t.ticker, direction: t.direction,
           size: t.size ?? b.size, opened_at: t.opened_at
@@ -994,7 +1127,7 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
           }).catch(()=>{});
           return res.status(422).json({
             status:'error', reason:'CLOSE_ECONOMICS_UNRESOLVED',
-            message:'close carried no price and no pnl, and Capital could not resolve them; trade left OPEN for retry',
+            message:'close carried no price and Capital could not resolve one; a pnl alone cannot be verified, so the trade is left OPEN for retry',
             trade_id: t.id, deal_id: t.deal_id, detail: resolved.error || null
           });
         }
@@ -1005,7 +1138,13 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
         const isLong = dir === 'BUY' || dir === 'LONG';
         const sz = Number(t.size ?? b.size);
         const entry = Number(t.entry);
-        if (Number.isFinite(sz) && Number.isFinite(entry)) {
+        // Derive the gross ONLY when the caller supplied none. A pnl that DID
+        // arrive is the broker's realised figure and may carry costs a
+        // price-times-size calculation cannot see, so it is kept -- it is now
+        // simply accompanied by a resolved close_price that can corroborate it.
+        // For the dominant path (neither field supplied) grossIn is null here,
+        // so this behaves exactly as before.
+        if (grossIn == null && Number.isFinite(sz) && Number.isFinite(entry)) {
           grossIn = +(((isLong ? closePrice - entry : entry - closePrice)) * sz).toFixed(2);
         }
       }
@@ -1042,15 +1181,32 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
         recorded_at: now()
       };
       db.data.trade_brain = db.data.trade_brain || [];
-      if (rec.deal_id) db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
+      // Dedup BOTH stores. Memory alone reverses on the next restart.
+      if (rec.deal_id) {
+        db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
+        await deleteBrainByDealPostgres(rec.deal_id).catch(()=>{});
+      }
       db.data.trade_brain.push(rec);
       await saveBrainHot(rec);
+    }
+
+    // Release the risk reservation on a FULL close. Idempotent, so a close
+    // whose reservation was already released (or never made) is a no-op.
+    // A failure here must NOT fail the close -- the trade is already CLOSED
+    // and losing that is worse than a stale reservation, which the health
+    // check already surfaces as trade_risk_position_mismatch.
+    let riskRelease = null;
+    if (t && t.status === 'CLOSED') {
+      riskRelease = await releaseRiskReservation(t.deal_id || b.deal_id).catch(e => ({ ok:false, matched:null, error:e.message }));
+      if (!riskRelease.ok) {
+        console.error(`[${new Date().toISOString()}] [risk] trade/close could not release ${t.deal_id || b.deal_id}: ${riskRelease.error}`);
+      }
     }
 
     if (t) await saveTradeHot(t);
     if (t?.status === 'CLOSED') await journalEvent(b.external_close ? 'external_close' : 'trade_close', t).catch(()=>{});
     await saveUpdateHot(update);
-    res.json({status:'ok',found:!!t});
+    res.json({status:'ok',found:!!t,risk_released:riskRelease});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
 });
 
@@ -1363,18 +1519,49 @@ app.get('/api/signals', adminOnly, (req,res)=>{
 app.get('/api/rejections', adminOnly, (req,res)=>{
   try {
     const { scanner, reason, date, ticker, limit=200 } = req.query;
+    // `class` is a reserved word, so it arrives as a query param but is read
+    // into a differently-named binding.
+    const wantClass = String(req.query.class || 'all').toUpperCase();
     let rejections = db.data.rejections || [];
     if (scanner && scanner !== 'all') rejections = rejections.filter(r => r.scanner === scanner);
     if (reason  && reason  !== 'all') rejections = rejections.filter(r => r.reason === reason);
     if (ticker)  rejections = rejections.filter(r => r.ticker?.toUpperCase().includes(ticker.toUpperCase()));
     if (date)    rejections = rejections.filter(r => r.ts?.startsWith(date));
-    rejections = rejections.slice(0, parseInt(limit));
-    res.json({ rejections, total: rejections.length });
+
+    // CLASSIFY AT READ TIME. Nothing is written back: the stored row is
+    // untouched, so historical rows keep whatever reason they were given and a
+    // change to the rule set re-classifies everything for free. 34.5% of this
+    // corpus fleet-wide is INFRASTRUCTURE (83.6% for failed_breakout), so a
+    // panel that does not separate the two is reporting on FMP's rate limiter.
+    const classified = rejections.map(r => {
+      const raw = r.reason ?? (r.data && r.data.reason) ?? null;
+      return { ...r, reason_prefix: normalizeRejectionReason(raw), class: classifyRejectionReason(raw) };
+    });
+
+    // Counts are over the filtered set BEFORE the class filter, so a caller can
+    // show "showing N decisions, M infrastructure excluded" without a 2nd call.
+    const counts = { DECISION: 0, INFRASTRUCTURE: 0, UNCLASSIFIED: 0 };
+    for (const r of classified) counts[r.class] = (counts[r.class] || 0) + 1;
+
+    const wanted = wantClass === 'ALL' ? classified : classified.filter(r => r.class === wantClass);
+    const page = wanted.slice(0, parseInt(limit));
+    res.json({
+      rejections: page,
+      total: page.length,
+      matched: wanted.length,
+      class_filter: wantClass,
+      class_counts: counts,
+      // MEASURED, not assumed: db.data.rejections holds the FULL table
+      // (74,426 rows at 2026-08-22), because loadFromPostgres selects all of
+      // them. So class_counts IS a corpus census, not a page -- `rejections`
+      // is the paged slice, `matched` and `class_counts` are totals.
+      source: 'db.data.rejections (full table in memory)'
+    });
   } catch(e) { res.status(500).json({error:e.message}); }
 });
 
 // Single trade detail
-app.get('/api/trades/:id', adminOnly, (req,res)=>{
+app.get('/api/trades/:id', adminOnly, async (req,res)=>{
   const trade = (db.data.trades||[]).find(t => t.id == req.params.id);
   if (!trade) return res.status(404).json({error:'Not found'});
   // Find related signal
@@ -1390,7 +1577,12 @@ app.get('/api/trades/:id', adminOnly, (req,res)=>{
   const ping = (db.data.pings||[])
     .filter(p => p.scanner === trade.scanner && p.ts <= trade.ts)
     .sort((a,b) => b.ts.localeCompare(a.ts))[0];
-  res.json({ trade, signal, updates, ping });
+  // Excursion is read straight from Postgres for this one trade — see the note
+  // on getTradeExcursionPostgres. Absent (null) means NOT COMPUTED; it must
+  // never be rendered as zero, because zero is what the old mae_r/mfe_r columns
+  // report for the side that was never measured.
+  const excursion = await getTradeExcursionPostgres(req.params.id);
+  res.json({ trade, signal, updates, ping, excursion });
 });
 
 // Master activity feed — signals + rejections + trades unified
@@ -1445,8 +1637,10 @@ app.get('/api/activity', adminOnly, (req,res)=>{
 app.get('/api/investor/scanners', auth, (req,res)=>{
   if (req.isAdmin) return res.status(403).json({error:'Use admin endpoint'});
   try {
-    const SCANNERS = ['fmp','forex','comm','pa','vp','fb','main'];
-    const sLabel = {fmp:'FMP Stocks',forex:'Forex',comm:'Commodity',pa:'Price Action',vp:'Volume Profile',fb:'Failed Breakout',main:'Main'};
+    // This local SHADOWED the module-level SCANNERS with the same dead names.
+    // A fourth copy of the same list; both now come from SCANNER_ORDER.
+    const SCANNERS = [...SCANNER_ORDER];
+    const sLabel = SCANNER_DISPLAY_NAMES;
 
     const stats = SCANNERS.map(sc => {
       const trades  = (db.data.trades||[]).filter(t=>t.scanner===sc&&t.status==='CLOSED'&&t.pnl!=null);
@@ -1719,6 +1913,38 @@ app.patch('/api/trades/:id/pnl', adminOnly, async (req,res)=>{
     const trade = (db.data.trades||[]).find(t => t.id == req.params.id);
     if (!trade) return res.status(404).json({ error: 'Not found' });
     const { pnl, close_price, closed_at, status } = req.body;
+
+    // ── closed_at validation, mirroring the C1 guard on /api/trade/close ─────
+    // That guard was added 2026-08-18 and never applied here, so this ADMIN
+    // route -- the one route whose whole purpose is correcting a bad stamp --
+    // accepted any string at all: `if (closed_at) trade.closed_at = closed_at;`.
+    // It is placed BEFORE the first mutation and returns, so it is structurally
+    // capable of stopping the write rather than merely reporting on it.
+    //
+    // Same three refusals and the same reason codes as /api/trade/close, so a
+    // caller sees one vocabulary: unparseable, more than 60s in the future
+    // (the tolerance absorbs clock skew), or before opened_at, which inverts
+    // the hold duration -- the defect that made 144/168/169 overstate theirs.
+    if (closed_at != null && closed_at !== '') {
+      const suppliedMs = Date.parse(closed_at);
+      if (!Number.isFinite(suppliedMs)) {
+        return res.status(400).json({ status:'error', reason:'INVALID_CLOSED_AT',
+          message:`closed_at is not a parseable date: ${JSON.stringify(closed_at)}`,
+          trade_id:trade.id, deal_id:trade.deal_id });
+      }
+      if (suppliedMs > Date.now() + 60000) {
+        return res.status(400).json({ status:'error', reason:'CLOSED_AT_IN_FUTURE',
+          message:`closed_at ${closed_at} is more than 60s in the future`,
+          trade_id:trade.id, deal_id:trade.deal_id });
+      }
+      const openedMs = Date.parse(trade.opened_at || '');
+      if (Number.isFinite(openedMs) && suppliedMs < openedMs) {
+        return res.status(400).json({ status:'error', reason:'CLOSED_AT_BEFORE_OPENED_AT',
+          message:`closed_at ${closed_at} precedes opened_at ${trade.opened_at}`,
+          trade_id:trade.id, deal_id:trade.deal_id });
+      }
+    }
+
     // A manually supplied pnl is treated as GROSS, consistent with the
     // reconcile payload it exists to correct.
     if (pnl       != null) {
@@ -1746,7 +1972,10 @@ app.patch('/api/trades/:id/pnl', adminOnly, async (req,res)=>{
         recorded_at: now()
       };
       db.data.trade_brain = db.data.trade_brain || [];
-      if (rec.deal_id) db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
+      if (rec.deal_id) {
+        db.data.trade_brain = db.data.trade_brain.filter(r=>r.deal_id!==rec.deal_id);
+        await deleteBrainByDealPostgres(rec.deal_id).catch(()=>{});
+      }
       db.data.trade_brain.push(rec);
     }
     await saveTradeHot(trade);
@@ -1768,10 +1997,41 @@ app.get('/api/intelligence', adminOnly, (req,res)=>{
 
     if (!trades.length) return res.json({ trades:[], patterns:{}, summary:{} });
 
-    // ── By setup type ──
+    // ── By STRATEGY (engine_branch), not by region (2026-08-19) ──────────────
+    // setup_type carries a REGION for indices — INDICES_UK, INDICES_EU,
+    // INDICES_JP,AU — so "performance by setup" was five geography rows for a
+    // single scanner and no strategy signal at all. The strategy lives in
+    // engine_branch (trade 171 carried TREND_STATE).
+    //
+    // Rows predating engine_branch group under LEGACY: visible and honest,
+    // NOT silently dropped and NOT backfilled. Strategy-level n therefore
+    // resets close to zero, which is the point — the old per-region n was
+    // never a strategy sample.
+    //
+    // setup_type survives as `byRegion`, a separate dimension for filtering.
+    const groupStats = (rows, keyOf) => {
+      const out = {};
+      rows.forEach(t => {
+        const k = keyOf(t);
+        if (!out[k]) out[k] = { trades:0, wins:0, losses:0, total_pnl:0, pnls:[] };
+        out[k].trades++;
+        out[k].total_pnl += t.pnl;
+        out[k].pnls.push(t.pnl);
+        if (t.pnl > 0) out[k].wins++; else out[k].losses++;
+      });
+      Object.values(out).forEach(s => {
+        s.win_rate   = s.trades ? parseFloat((s.wins/s.trades*100).toFixed(1)) : 0;
+        s.avg_pnl    = parseFloat((s.total_pnl/s.trades).toFixed(2));
+        s.avg_win    = s.wins ? parseFloat((s.pnls.filter(p=>p>0).reduce((a,b)=>a+b,0)/s.wins).toFixed(2)) : 0;
+        s.avg_loss   = s.losses ? parseFloat((Math.abs(s.pnls.filter(p=>p<=0).reduce((a,b)=>a+b,0))/s.losses).toFixed(2)) : 0;
+        s.expectancy = parseFloat((s.win_rate/100*s.avg_win - (1-s.win_rate/100)*s.avg_loss).toFixed(2));
+      });
+      return out;
+    };
+    const byRegion = groupStats(trades, t => t.setup_type || 'UNKNOWN');
     const bySetup = {};
     trades.forEach(t => {
-      const k = t.setup_type || 'UNKNOWN';
+      const k = (t.engine_branch && String(t.engine_branch).trim()) ? String(t.engine_branch).trim() : 'LEGACY';
       if (!bySetup[k]) bySetup[k] = { trades:0, wins:0, losses:0, total_pnl:0, pnls:[] };
       bySetup[k].trades++;
       bySetup[k].total_pnl += t.pnl;
@@ -1877,10 +2137,10 @@ app.get('/api/intelligence', adminOnly, (req,res)=>{
         max_loss_streak: maxLossStreak,
         current_streak: currentStreak
       },
-      patterns: { bySetup, byHour, byScanner, byDay, byRegime },
+      patterns: { bySetup, byRegion, byHour, byScanner, byDay, byRegime },
       best5, worst5,
       raw_trades: trades.map(t=>({
-        id:t.id, ticker:t.ticker, scanner:t.scanner, setup_type:t.setup_type,
+        id:t.id, ticker:t.ticker, scanner:t.scanner, setup_type:t.setup_type, engine_branch:t.engine_branch || null,
         direction:t.direction, entry:t.entry, close_price:t.close_price,
         pnl:t.pnl, ts:t.ts, closed_at:t.closed_at,
         rsi:t.rsi, adx:t.adx, volume_ratio:t.volume_ratio, quality_score:t.quality_score
@@ -2777,10 +3037,17 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
   const withBrain = (payload) => res.json({ ...payload, brain });
   const brainReason = () => `BRAIN_VETO: ${brainStatsText(brain)}`;
   const drawdown = await maybeAlertRiskMult(sendTelegramAlert).catch(e => ({ risk_mult: 1, drawdown_pct: 0, error: e.message }));
+  // ── BREAKER OBSERVE MODE — DEMO PHASE ONLY (owner decision 2026-08-19) ──
+  // "always keep trading, never stop any scanner - I want data to see what is
+  // failing". CONSECUTIVE_LOSS_HALT and MAX_DAILY_LOSS_R now RECORD and allow
+  // instead of refusing. MAX_ORDERS_PER_DAY still HALTS.
+  // THIS MUST BE REVERTED TO HALTING BEFORE ANY REAL-MONEY ACCOUNT TRADES.
+  const observedBreakers = [];
   const withLayer3 = (payload) => ({
     risk_mult: drawdown.risk_mult,
     drawdown_pct: drawdown.drawdown_pct,
     risk_mult_alert_sent: drawdown.sent === true,
+    ...(observedBreakers.length ? { breaker_observed: observedBreakers } : {}),
     ...payload
   });
   const blockBreaker = async (code, detail) => {
@@ -2791,9 +3058,79 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
     await journalEvent('breaker_trip', rejection).catch(()=>{});
     return withBrain(withLayer3({ allowed:false, reason, paper_only:cfg.paper_only===true }));
   };
+  // Records EXACTLY what blockBreaker records -- rejection row, breaker_trip
+  // event, full detail -- but does NOT refuse and, critically, does NOT RETURN.
+  // Execution falls through to the position cap, concentration, global heat,
+  // correlation heat, the brain veto and the reservation, so converting the
+  // breaker bypasses no other control. Returning allowed:true here instead
+  // would skip all of them and create no reservation.
+  //
+  // measurement_population is deliberately NOT 'NEVER_ENTERED': the candidate
+  // is allowed and may now enter, so labelling it NEVER_ENTERED would corrupt
+  // the analytics population. It sits in neither bucket by design.
+  const observeBreaker = async (code, detail) => {
+    const reason = `BREAKER_OBSERVED:${code}`;
+    const rejection = { id:nid('rejections'), ts:now(), scanner:scanner||'unknown',
+      ticker:ticker||'UNKNOWN', reason, detail,
+      breaker_observed:true, breaker_code:code, would_have_blocked:true,
+      measurement_population:'OBSERVED_NOT_BLOCKED',
+      config_hash:await getConfigHash(scanner||'unknown', cfg) };
+    db.data.rejections.unshift(rejection);
+    if (db.data.rejections.length > 500) db.data.rejections = db.data.rejections.slice(0, 500);
+    await saveRejectionHot(rejection);
+    await journalEvent('breaker_trip', rejection).catch(()=>{});
+    observedBreakers.push({ code, detail, would_have_blocked: true });
+  };
+
+  // ── Refusal persistence (2026-08-18) ────────────────────────────────────
+  // Six of the twelve return paths below refused an order and wrote NOTHING:
+  // no row, no event, no trace. Combined with logReject's bare catch on the
+  // scanner side, a refusal could vanish entirely -- which is why pa's block
+  // took six sessions to locate. This records them.
+  //
+  // Same table and same write path as the BRAIN_SHADOW_VETO branch further
+  // down; no new mechanism and no new table. The persist CANNOT fail the
+  // refusal: the verdict is returned unconditionally after the try/catch, and
+  // a failure to record is logged rather than swallowed. blockBreaker above
+  // is the reference shape.
+  const refuse = async (verdict) => {
+    try {
+      // No fault-injection switch lives here. An env var that disables
+      // recording on six refusal paths is a production hazard, and this one
+      // survived `pm2 restart --update-env` while the HTTP response stayed
+      // byte-identical -- only the TABLE showed it was still on. The
+      // persist-failure path is exercised by scripts/harness.js instead.
+      const rejection = {
+        id: nid('rejections'),
+        ts: now(),
+        scanner: scanner || 'unknown',
+        ticker: ticker || 'UNKNOWN',
+        reason: verdict.reason,
+        detail: 'Refused by /api/risk/check; the order was blocked.',
+        direction: body.direction || '',
+        intended_entry: body.intended_entry ?? body.entry ?? null,
+        intended_sl: body.intended_sl ?? body.sl ?? null,
+        intended_tp1: body.intended_tp1 ?? body.tp1 ?? body.tp ?? null,
+        intended_tp2: body.intended_tp2 ?? body.tp2 ?? null,
+        rejected_price: body.rejected_price ?? body.entry ?? body.intended_entry ?? null,
+        rejected_time: body.ts || now(),
+        score: body.score ?? body.quality_score ?? null,
+        risk_response: verdict,
+        measurement_population: 'NEVER_ENTERED'
+      };
+      db.data.rejections.unshift(rejection);
+      if (db.data.rejections.length > 500) db.data.rejections = db.data.rejections.slice(0, 500);
+      await saveRejectionHot(rejection);
+    } catch (e) {
+      // Never rethrow: a logging fault must not turn a refusal into an error,
+      // and must not be silent either.
+      console.error('[REJECTION_PERSIST_FAILED]', (verdict && verdict.reason) || 'unknown', (e && e.message) || e);
+    }
+    return withBrain(withLayer3(verdict));
+  };
 
   if (cfg.kill_switch === true) {
-    return withBrain(withLayer3({ allowed: false, reason: 'KILL_SWITCH active - all new orders blocked', paper_only: false }));
+    return await refuse({ allowed: false, reason: 'KILL_SWITCH active - all new orders blocked', paper_only: false });
   }
 
   // R1: risk_amount was destructured with a default of 0 and never validated.
@@ -2824,7 +3161,7 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
     const risk=Number(t.risk_amount??t.risk_usd??0), pnl=Number(t.pnl??0); return s+(risk>0&&pnl<0?pnl/risk:0);
   },0));
   const maxLossR = Number(scannerParams.MAX_DAILY_LOSS_R ?? 3);
-  if (lossR >= maxLossR) return blockBreaker('MAX_DAILY_LOSS_R',`${lossR.toFixed(2)}/${maxLossR}`);
+  if (lossR >= maxLossR) await observeBreaker('MAX_DAILY_LOSS_R',`${lossR.toFixed(2)}/${maxLossR}`);
   const resetAt = cfg.loss_halt_reset_at?.[String(scanner||'').toLowerCase()] || '';
   const recentClosed = scannerTrades.filter(t=>t.status==='CLOSED'&&(!resetAt||new Date(t.closed_at)>new Date(resetAt))).sort((a,b)=>new Date(b.closed_at)-new Date(a.closed_at));
   // R3: a null-pnl close used to reset this streak. Number(null) is 0, which is
@@ -2842,7 +3179,7 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
     if (pnl < 0) consecutiveLosses++; else break;          // 0 = breakeven, correctly ends the streak
   }
   const lossHalt = Number(scannerParams.CONSECUTIVE_LOSS_HALT ?? 5);
-  if (consecutiveLosses >= lossHalt) return blockBreaker('CONSECUTIVE_LOSS_HALT',`${consecutiveLosses}/${lossHalt}; manual reset required`);
+  if (consecutiveLosses >= lossHalt) await observeBreaker('CONSECUTIVE_LOSS_HALT',`${consecutiveLosses}/${lossHalt}; observed only`);
 
   const ledger = db.data.risk_ledger || [];
   const acct = cfg.account_size || 10000;
@@ -2859,18 +3196,18 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
   const heat = correlationHeat(ledger, body, acct);
 
   if (ledger.length >= maxPos) {
-    return withBrain(withLayer3({
+    return await refuse({
       allowed: false,
       reason: `Max global positions reached (${ledger.length}/${maxPos})`,
       current_heat_pct: +currentHeatPct.toFixed(2),
       effective_heat_pct: heat.effective_heat_pct,
       class_direction_count: heat.class_direction_count,
       paper_only: cfg.paper_only === true
-    }));
+    });
   }
 
   if (heat.class_direction_count >= 5) {
-    return withBrain(withLayer3({
+    return await refuse({
       allowed: false,
       reason: `CONCENTRATION: 5 ${heat.direction.toLowerCase()} ${heat.asset_class} already open`,
       current_heat_pct: +currentHeatPct.toFixed(2),
@@ -2878,22 +3215,22 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
       effective_heat_pct: heat.effective_heat_pct,
       class_direction_count: heat.class_direction_count,
       paper_only: cfg.paper_only === true
-    }));
+    });
   }
 
   if (newHeatPct > maxHeat) {
-    return withBrain(withLayer3({
+    return await refuse({
       allowed: false,
       reason: `Global heat ${newHeatPct.toFixed(1)}% would exceed ${maxHeat}% cap (current ${currentHeatPct.toFixed(1)}%)`,
       current_heat_pct: +currentHeatPct.toFixed(2),
       effective_heat_pct: heat.effective_heat_pct,
       class_direction_count: heat.class_direction_count,
       paper_only: cfg.paper_only === true
-    }));
+    });
   }
 
   if (heat.effective_heat_pct > maxHeat) {
-    return withBrain(withLayer3({
+    return await refuse({
       allowed: false,
       reason: `CORRELATION_HEAT: effective heat ${heat.effective_heat_pct.toFixed(1)}% would exceed ${maxHeat}% cap`,
       current_heat_pct: +currentHeatPct.toFixed(2),
@@ -2901,12 +3238,12 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
       effective_heat_pct: heat.effective_heat_pct,
       class_direction_count: heat.class_direction_count,
       paper_only: cfg.paper_only === true
-    }));
+    });
   }
 
   if (brain.verdict === 'VETO' && brainVetoEnabled) {
     await journalEvent('brain_veto', { scanner, ticker, payload:{ mode:'enforced', brain } }).catch(()=>{});
-    return withBrain(withLayer3({
+    return await refuse({
       allowed: false,
       reason: brainReason(),
       paper_only: false,
@@ -2916,7 +3253,7 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
       class_direction_count: heat.class_direction_count,
       open_positions: ledger.length,
       brain_veto_enabled: true
-    }));
+    });
   }
 
   if (brain.verdict === 'VETO' && !brainVetoEnabled) {
@@ -2960,6 +3297,13 @@ app.post('/api/risk/check', scannerAuth, serializeRiskGate, async (req, res) => 
   catch (e) {
     ledger.splice(ledger.indexOf(reservation),1);   // do not hand out a slot we failed to record
     console.error('[PERSISTENCE_FAILURE] reservation', e.message);
+    // A reservation that failed to persist cannot write a rejection row --
+    // writing is exactly what failed -- but it must not stay silent.
+    // 'persistence_failure' is NOT on the KINDS whitelist in
+    // event-journal.js and would be dropped without trace; 'scanner_error' is.
+    await journalEvent('scanner_error', { scanner, ticker, payload:{
+      kind: 'PERSISTENCE_FAILURE', stage: 'risk_check_reservation',
+      message: String((e && e.message) || e).slice(0, 300) } }).catch(()=>{});
     await sendTelegramAlert(`PERSISTENCE FAILURE: risk reservation could not be written (${e.message}). Gate rejected the request.`).catch(()=>{});
     return res.status(500).json({status:'error',reason:'PERSISTENCE_FAILURE',message:e.message});
   }
@@ -3040,7 +3384,7 @@ app.post('/api/risk/check-legacy', scannerAuth, async (req, res) => {
 // Scanner registers an opened position into the ledger
 app.post('/api/risk/open', scannerAuth, async (req, res) => {
  try {
-  const { scanner, ticker, deal_id, direction = 'LONG' } = req.body || {};
+  const { scanner, ticker, deal_id, direction: bodyDirection } = req.body || {};
   if (!deal_id || deal_id === 'UNKNOWN') return res.status(400).json({ error: 'valid deal_id required' });
 
   // No default. A missing risk_amount used to become 0, and a zero row is
@@ -3066,6 +3410,31 @@ app.post('/api/risk/open', scannerAuth, async (req, res) => {
       scanner: scanner ?? null, ticker: ticker ?? null, deal_id
     });
   }
+  // Direction is NOT defaulted. This used to read `direction = 'LONG'`, and
+  // because NO active scanner has ever sent the field -- every payload on both
+  // risk endpoints is {scanner, deal_id, ticker, risk_amount} -- every ledger
+  // row ever written recorded LONG, including the fleet's 48 short trades.
+  // correlationHeat buckets by asset_class + direction, so a short has never
+  // once been counted as a short, and the concentration cap at
+  // `class_direction_count >= 5` has been guarding the wrong bucket throughout.
+  //
+  // Take it from the trade the deal_id already identifies. Refuse only when
+  // neither the payload nor the trade can supply one: a silent default is
+  // exactly what produced this, and a refusal is visible where a wrong value
+  // is not. NOTE the second half of the defect, deliberately NOT changed here:
+  // normalizeDirection (layer3.js:25) also returns 'LONG' for anything it does
+  // not recognise, so a null stored here would still READ as long.
+  const tradeForDirection = (db.data.trades || []).find(t => t.deal_id === deal_id);
+  const direction = String(bodyDirection || tradeForDirection?.direction || '').trim().toUpperCase();
+  if (!direction) {
+    console.error(`[${new Date().toISOString()}] [risk] REFUSED risk/open ${deal_id}: direction absent from payload and no trade carries that deal_id`);
+    return res.status(400).json({
+      status: 'error', reason: 'MISSING_DIRECTION',
+      message: `direction is required on risk/open and could not be resolved from the payload or from a trade carrying deal_id ${deal_id}. Recording a defaulted direction is what caused every short position to be counted as long.`,
+      scanner: scanner ?? null, ticker: ticker ?? null, deal_id
+    });
+  }
+
   db.data.risk_ledger = db.data.risk_ledger || [];
   const requested=String(req.body?.reservation_id||'');
   const pending=db.data.risk_ledger.find(p=>p.status==='PENDING'&&new Date(p.expires_at)>new Date()&&((requested&&p.reservation_id===requested)||(!requested&&p.scanner===scanner&&p.ticker===ticker)));
@@ -3127,6 +3496,29 @@ setInterval(async()=>{
 },15000).unref?.();
 
 // Scanner clears a closed position from the ledger
+// Shared release, used by BOTH /api/risk/close and /api/trade/close.
+// IDEMPOTENT by contract: an unknown or already-released deal_id is a
+// SUCCESS with matched:false, not an error -- /api/trade/close must be able
+// to call it on every close without caring whether a reservation exists.
+// Before this existed, closePositionPostgres had exactly one caller (inside
+// /api/risk/close), so a trade closed by any other route leaked its
+// reservation permanently. Demonstrated on a fixture 2026-08-13: trade
+// CLOSED, ledger row still OPEN.
+async function releaseRiskReservation(deal_id) {
+  if (!deal_id || deal_id === 'UNKNOWN') return { ok: true, matched: false, reason: 'no_deal_id' };
+  const ledger = db.data.risk_ledger || [];
+  const existing = ledger.find(p => p.deal_id === deal_id);
+  if (!existing) return { ok: true, matched: false, reason: 'not_reserved' };
+  db.data.risk_ledger = ledger.filter(p => p !== existing);
+  try { await closePositionPostgres(deal_id); }
+  catch (e) {
+    db.data.risk_ledger = ledger;   // never drop a row we failed to persist removing
+    console.error(`[${new Date().toISOString()}] [PERSISTENCE_FAILURE] releaseRiskReservation ${deal_id}: ${e.message}`);
+    return { ok: false, matched: true, error: e.message };
+  }
+  return { ok: true, matched: true, released: Number(existing.risk_amount) || 0 };
+}
+
 app.post('/api/risk/close', scannerAuth, async (req, res) => {
  try {
   const { deal_id } = req.body || {};
@@ -3155,6 +3547,291 @@ app.post('/api/risk/close', scannerAuth, async (req, res) => {
  } catch(error) { res.status(500).json({ status:'error', reason:'PERSISTENCE_FAILURE', message:error.message }); }
 });
 
+// Amend a reservation's risk_amount. /api/risk/open creates from the request
+// body and cannot amend, and SQL against risk_ledger is DISCARDED by
+// saveToPostgres -- so this endpoint is the only way to correct a stored
+// figure. It deliberately does NOT release: that is releaseRiskReservation's
+// job, reached through /api/trade/close and /api/risk/close.
+app.post('/api/admin/risk-ledger/amend', adminOnly, async (req, res) => {
+  try {
+    const { deal_id, risk_amount, direction, reason } = req.body || {};
+    if (!deal_id || String(deal_id).trim() === '' || deal_id === 'UNKNOWN')
+      return res.status(400).json({ status:'error', reason:'valid deal_id required' });
+    if (reason === undefined || reason === null || String(reason).trim() === '')
+      return res.status(400).json({ status:'error', reason:'reason is mandatory' });
+    // Either field may be amended, or both, but at least one must be supplied.
+    const wantsRisk = risk_amount !== undefined && risk_amount !== null && String(risk_amount).trim() !== '';
+    const wantsDir  = direction   !== undefined && direction   !== null && String(direction).trim()   !== '';
+    if (!wantsRisk && !wantsDir)
+      return res.status(400).json({ status:'error', reason:'supply risk_amount, direction, or both' });
+
+    // Number(null) is 0 and IS finite, so the positivity test carries the
+    // refusal, not Number.isFinite alone.
+    let amt = null;
+    if (wantsRisk) {
+      amt = Number(risk_amount);
+      if (!Number.isFinite(amt) || amt <= 0)
+        return res.status(400).json({ status:'error', reason:'risk_amount must be a positive finite number' });
+    }
+
+    // DIRECTION IS VALIDATED EXACTLY, and deliberately NOT routed through
+    // normalizeDirection (layer3.js:25) -- that helper returns 'LONG' for
+    // anything it does not recognise, which is the SECOND half of the direction
+    // defect this route exists to repair. A typo must be refused here, not
+    // silently stored as LONG.
+    let dir = null;
+    if (wantsDir) {
+      dir = String(direction).trim().toUpperCase();
+      if (dir !== 'LONG' && dir !== 'SHORT')
+        return res.status(400).json({ status:'error', reason:'INVALID_DIRECTION',
+          message:'direction must be exactly LONG or SHORT (uppercase); received ' + JSON.stringify(direction) });
+    }
+    const row = (db.data.risk_ledger || []).find(p => p.deal_id === deal_id);
+    if (!row) return res.status(404).json({ status:'error', reason:'unknown deal_id' });
+    if (String(row.status || 'OPEN').toUpperCase() !== 'OPEN')
+      return res.status(409).json({ status:'error', reason:`ledger row is ${row.status}, not OPEN` });
+
+    // ECONOMICS FINGERPRINT, same shape as the closed_at route: taken before the
+    // assignment and re-taken after, with the persist DOWNSTREAM of the
+    // comparison rather than beside it. The guarded set excludes whatever is
+    // legitimately being amended, so the guard cannot fire on the intended edit.
+    const AMENDING = [...(wantsRisk ? ['risk_amount'] : []), ...(wantsDir ? ['direction'] : [])];
+    const GUARDED  = ['risk_amount','status','deal_id','scanner','ticker','opened_at']
+                       .filter(k => !AMENDING.includes(k));
+    const fingerprint = () => JSON.stringify(GUARDED.map(k => row[k] ?? null));
+    const before = fingerprint();
+
+    const old_value     = Number(row.risk_amount) || 0;
+    const old_direction = row.direction ?? null;
+    const new_value     = wantsRisk ? +amt.toFixed(2) : old_value;
+    const new_direction = wantsDir ? dir : old_direction;
+
+    if (wantsRisk) row.risk_amount = new_value;
+    if (wantsDir)  row.direction   = new_direction;
+    row.amended_at    = new Date().toISOString();
+    row.amend_reason  = String(reason).trim();
+
+    if (fingerprint() !== before) {
+      row.risk_amount = old_value;          // revert in memory; nothing persisted yet
+      row.direction   = old_direction;
+      return res.status(500).json({ status:'error', reason:'ECONOMICS_MUTATED',
+        message:'refused: a field other than the amended one changed', before, after: fingerprint() });
+    }
+
+    await save();
+    // journalEvent would be silently dropped -- its KINDS whitelist has no
+    // risk-ledger kind. intelligence_changelog is the durable record.
+    if (wantsRisk) await logChangelogRow({
+      scanner: row.scanner || 'unknown', parameter: `risk_ledger.risk_amount[${deal_id}]`,
+      old_value, new_value, reason: String(reason).trim(), approved_by: 'admin'
+    }).catch(()=>{});
+    if (wantsDir) await logChangelogRow({
+      scanner: row.scanner || 'unknown', parameter: `risk_ledger.direction[${deal_id}]`,
+      old_value: old_direction, new_value: new_direction,
+      reason: String(reason).trim(), approved_by: 'admin'
+    }).catch(()=>{});
+    console.error(`[${new Date().toISOString()}] [risk] amend ${deal_id} ${old_value} -> ${new_value}: ${String(reason).trim()}`);
+    res.json({ status:'ok', deal_id, ticker: row.ticker || null,
+               old_risk_amount: old_value, new_risk_amount: new_value,
+               old_direction, new_direction, amended: AMENDING,
+               reason: row.amend_reason,
+               open_positions: (db.data.risk_ledger || []).length,
+               total_open_risk: +(db.data.risk_ledger || []).reduce((a,p)=>a+(Number(p.risk_amount)||0),0).toFixed(2) });
+  } catch (e) { res.status(500).json({ status:'error', message:e.message }); }
+});
+
+// ── closed_at CORRECTION (F1, 2026-08-19) ───────────────────────────────────
+// A dedicated route because NOTHING else can do this safely:
+//   /api/trade/close  recomputes economics on every call -- supplying
+//                     close_price makes grossIn resolve to null and WIPES
+//                     pnl_gross/pnl_net/pnl; supplying neither re-resolves
+//                     close_price from Capital.
+//   /api/trade/update never touches closed_at at all.
+//   /api/reconcile    is reserved and writes GROSS pnl into trade.pnl.
+// This sets closed_at and NOTHING ELSE, and it is meant to run on CLOSED
+// rows -- correcting a historical stamp is the entire point of it.
+app.post('/api/admin/trade/closed-at', adminOnly, async (req, res) => {
+  try {
+    const { trade_id, closed_at, reason } = req.body || {};
+    if (trade_id === undefined || trade_id === null || String(trade_id).trim() === '')
+      return res.status(400).json({ status:'error', reason:'valid trade_id required' });
+    if (reason === undefined || reason === null || String(reason).trim() === '')
+      return res.status(400).json({ status:'error', reason:'reason is mandatory' });
+    if (closed_at === undefined || closed_at === null || String(closed_at).trim() === '')
+      return res.status(400).json({ status:'error', reason:'closed_at is required' });
+
+    // trades.id is TEXT; compare as string so a numeric literal still matches.
+    const t = (db.data.trades || []).find(x => String(x.id) === String(trade_id));
+    if (!t) return res.status(404).json({ status:'error', reason:'unknown trade_id' });
+
+    // The same three guards as /api/trade/close (C1), evaluated before any
+    // mutation. 60s of future tolerance absorbs clock skew.
+    const ms = Date.parse(closed_at);
+    if (!Number.isFinite(ms))
+      return res.status(400).json({ status:'error', reason:'INVALID_CLOSED_AT',
+        message:`closed_at is not a parseable date: ${JSON.stringify(closed_at)}` });
+    if (ms > Date.now() + 60000)
+      return res.status(400).json({ status:'error', reason:'CLOSED_AT_IN_FUTURE',
+        message:`closed_at ${closed_at} is more than 60s in the future` });
+    const openedMs = Date.parse(t.opened_at || '');
+    if (Number.isFinite(openedMs) && ms < openedMs)
+      return res.status(400).json({ status:'error', reason:'CLOSED_AT_BEFORE_OPENED_AT',
+        message:`closed_at ${closed_at} precedes opened_at ${t.opened_at}` });
+
+    // ECONOMICS FINGERPRINT. Taken before the assignment and re-taken after,
+    // and the write is REFUSED if anything but closed_at moved. This is a
+    // structural guarantee rather than a promise in a comment: the persist
+    // is downstream of the comparison, not beside it.
+    const GUARDED = ['pnl','pnl_gross','pnl_net','close_price','close_source','status',
+                     'entry','size','commission','financing_accrued','risk_amount','opened_at'];
+    const fingerprint = () => JSON.stringify(GUARDED.map(k => t[k] ?? null));
+    const before = fingerprint();
+
+    const old_value = t.closed_at ?? null;
+    const new_value = new Date(ms).toISOString();
+    t.closed_at = new_value;
+
+    if (fingerprint() !== before) {
+      t.closed_at = old_value;   // revert in memory; nothing has been persisted
+      return res.status(500).json({ status:'error', reason:'ECONOMICS_MUTATED',
+        message:'refused: a field other than closed_at changed', before, after: fingerprint() });
+    }
+
+    await saveTradeHot(t);
+    // journalEvent has no kind for this; intelligence_changelog is the record.
+    await logChangelogRow({
+      scanner: t.scanner || 'unknown', parameter: `trades.closed_at[${t.id}]`,
+      old_value, new_value, reason: String(reason).trim(), approved_by: 'admin'
+    }).catch(()=>{});
+    console.error(`[${new Date().toISOString()}] [trade] closed_at ${t.id} ${old_value} -> ${new_value}: ${String(reason).trim()}`);
+
+    const holdMin = Number.isFinite(openedMs) ? +((ms - openedMs) / 60000).toFixed(1) : null;
+    res.json({ status:'ok', trade_id: String(t.id), ticker: t.ticker || null,
+               old_closed_at: old_value, new_closed_at: new_value,
+               hold_minutes: holdMin, economics_unchanged: true,
+               reason: String(reason).trim() });
+  } catch (e) { res.status(500).json({ status:'error', message:e.message }); }
+});
+
+// ── ARCHIVE A SCANNER'S HISTORY (2026-08-19) ────────────────────────────────
+// Owner: "archive them" — fmp and fmp_alpaca are deactivated and superseded by
+// FMP Scanner v18.5, but their 88 rows still count toward every fund figure.
+// ARCHIVED is the status calcFundStats already excludes.
+//
+// THIS EXISTS BECAUSE SQL CANNOT DO IT. saveToPostgres DELETEs and reinserts
+// `trades` from db.data, so an UPDATE against the table is discarded on the
+// next save() -- measured 2026-08-19: 15 rows reverted after one cycle. The
+// mutation must go through db.data and then save().
+//
+// IT REFUSES LIVE ROWS. Trade 147 SPT is scanner `fmp` and is OPEN at the
+// broker holding the entire ledger risk; a blanket archive would hide a live
+// position from the book. OPEN/PARTIAL are skipped and reported by id.
+app.post('/api/admin/trades/archive', adminOnly, async (req, res) => {
+  try {
+    const { scanner, reason } = req.body || {};
+    if (!scanner || String(scanner).trim() === '')
+      return res.status(400).json({ status:'error', reason:'scanner required' });
+    if (reason === undefined || reason === null || String(reason).trim() === '')
+      return res.status(400).json({ status:'error', reason:'reason is mandatory' });
+    const sc = String(scanner).trim().toLowerCase();
+    const all = (db.data.trades || []).filter(t => String(t.scanner || '').toLowerCase() === sc);
+    if (!all.length)
+      return res.status(404).json({ status:'error', reason:'no trades for that scanner', scanner: sc });
+
+    const LIVE = ['OPEN','PARTIAL'];
+    const live    = all.filter(t => LIVE.includes(t.status));
+    const already = all.filter(t => t.status === 'ARCHIVED');
+    const target  = all.filter(t => !LIVE.includes(t.status) && t.status !== 'ARCHIVED');
+
+    const stamp = now();
+    for (const t of target) {
+      t.status = 'ARCHIVED';
+      t.archived_at = stamp;
+      t.archive_reason = String(reason).trim();
+    }
+    await save();
+    await logChangelogRow({
+      scanner: sc, parameter: `trades.status[${sc}]`,
+      old_value: `${target.length} rows CLOSED/other`, new_value: `${target.length} rows ARCHIVED`,
+      reason: String(reason).trim(), approved_by: 'admin'
+    }).catch(()=>{});
+    console.error(`[${new Date().toISOString()}] [trades] archived ${target.length} ${sc} rows; refused ${live.length} live: ${String(reason).trim()}`);
+
+    res.json({ status:'ok', scanner: sc,
+      archived: target.length,
+      archived_ids: target.map(t => String(t.id)),
+      already_archived: already.length,
+      total_archived_now: already.length + target.length,
+      refused_live: live.map(t => ({ id:String(t.id), ticker:t.ticker, status:t.status, deal_id:t.deal_id || null })),
+      reason: String(reason).trim() });
+  } catch (e) { res.status(500).json({ status:'error', message:e.message }); }
+});
+
+// ── RISK MONITOR ROWS (2026-08-19) ──────────────────────────────────────────
+// The panel used to fetch /api/positions/live, which returns Capital's
+// response VERBATIM and therefore NESTED: {market:{epic}, position:{level,
+// size, stopLevel, profitLevel, upl, direction}}. The renderer reads FLAT
+// fields (pos.entry, pos.sl, pos.size, pos.direction), so every one resolved
+// undefined -> entry 0, sl 0, size 1, unrealised (0-0)*1 = 0.00, distToSL 100
+// -> "ON TRACK". Three real positions rendered as three blank rows.
+//
+// This endpoint is the JOIN the panel actually needs: the BOOK's open trades
+// (the things we are accountable for) enriched with live broker figures, and
+// emitted in the FLAT shape the renderer already understands.
+//
+// A row with no ticker is impossible: the filter is here, server-side, not in
+// the renderer. Rows carry matched_broker so a book position the broker does
+// not hold is visible rather than silently drawn as healthy.
+app.get('/api/risk-positions', adminOnly, (req, res) => {
+  try {
+    const trades = (db.data.trades || []).filter(t => ['OPEN','PARTIAL'].includes(t.status));
+    const live   = Array.isArray(db.data.live_positions?.positions) ? db.data.live_positions.positions : [];
+    const byDeal = new Map();
+    for (const p of live) {
+      const id = p?.position?.dealId;
+      if (id) byDeal.set(String(id), p);
+    }
+    const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+
+    const positions = trades.map(t => {
+      const p    = byDeal.get(String(t.deal_id || '')) || null;
+      const pp   = p?.position || {};
+      const mk   = p?.market || {};
+      const dir  = String(t.direction || pp.direction || 'BUY').toUpperCase();
+      const isLong = dir === 'BUY' || dir === 'LONG';
+      const entry  = num(pp.level) ?? num(t.entry);
+      const bid    = num(mk.bid), offer = num(mk.offer);
+      const current = (bid != null && offer != null) ? +(((bid + offer) / 2).toFixed(6))
+                    : (num(pp.level) ?? entry);
+      const sl   = num(pp.stopLevel)   ?? num(t.sl);
+      const tp1  = num(pp.profitLevel) ?? num(t.tp1);
+      const size = num(pp.size) ?? num(t.size);
+      const upl  = num(pp.upl);
+      const unrealised = upl != null ? upl
+        : (entry != null && current != null && size != null
+            ? +(((isLong ? current - entry : entry - current) * size).toFixed(2)) : null);
+      const pctToSL = (sl != null && entry != null && entry !== 0)
+        ? +((Math.abs(current - sl) / entry) * 100).toFixed(2) : null;
+      return {
+        trade_id: String(t.id), ticker: t.ticker || mk.epic || '', scanner: t.scanner || '',
+        direction: dir, entry, current, sl, tp1, size,
+        unrealised, pct_to_sl: pctToSL,
+        risk_usd: num(t.risk_amount) ?? num(t.risk_usd),
+        deal_id: t.deal_id || null, opened_at: t.opened_at || t.ts || null,
+        matched_broker: !!p
+      };
+    }).filter(r => r.ticker && String(r.ticker).trim() !== '');
+
+    res.json({
+      positions,
+      updated_at: db.data.live_positions?.updated_at || null,
+      book_open: trades.length,
+      broker_positions: live.length,
+      unmatched_book_rows: positions.filter(r => !r.matched_broker).map(r => r.ticker)
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Dashboard reads current global risk state
 app.get('/api/risk-status', adminOnly, (req, res) => {
   const cfg = db.data.scanner_config || {};
@@ -3164,6 +3841,14 @@ app.get('/api/risk-status', adminOnly, (req, res) => {
   res.json({
     open_positions: ledger.length,
     max_positions: cfg.max_open_positions || 10,
+    // STATE the denominator. It cannot be recovered from the response without it:
+    // current_heat_pct is rounded to 2dp, so 200 of risk against 60,000 back-computes
+    // to 60,606 — a number that exists nowhere on this box. The dashboard divides by
+    // fund.total_account_size (10,000) at its other heat renderer, so the same KPI
+    // reads 0.33% or 2.00% depending on which loader ran last. Nothing here changes
+    // a denominator; this only reports the one already in use.
+    account_size: acct,
+    account_size_source: cfg.account_size ? 'scanner_config.account_size' : 'fallback literal 10000',
     current_heat_pct: +((currentRisk / acct) * 100).toFixed(2),
     max_heat_pct: cfg.max_global_heat_pct || 20,
     total_risk: +currentRisk.toFixed(2),
@@ -3194,6 +3879,206 @@ app.post('/api/heartbeat', scannerAuth, async (req, res) => {
 });
 
 // Dashboard reads heartbeat health. Flags STALE if no ping in 30 min.
+// ══════════════════════════════════════════════════════════════════════════
+// ONE LIVENESS FUNCTION. Both dashboard panels must call /api/scanner-liveness.
+//
+// Before this, the Overview read db.data.pings on a 15-minute window and the
+// heartbeat panel read db.data.heartbeats on a 30-minute one, so the same page
+// load could show a scanner OFFLINE and ALIVE simultaneously. Neither knew
+// whether the workflow was switched off in n8n at all.
+//
+// WINDOW: 30 minutes, adopting the server's existing STALE_MS rather than
+// inventing a third number. The client's 15 minutes was the stricter of the
+// two and produced false OFFLINE on scanners that legitimately ping on a
+// 20-minute cadence.
+//
+// ts COERCION: db.data.heartbeats holds ts as a NUMBER for live scanners but as
+// a STRING for fmp, failed_breakout and indices-key-test. `Date.now() - new
+// Date(stringTs)` is NaN, and NaN comparisons are false, so those forced
+// OFFLINE regardless of age. Every timestamp is coerced on read here.
+const LIVENESS_WINDOW_MS = 30 * 60 * 1000;
+
+// ── NO RECORDED ACTIVITY ──────────────────────────────────────────────────
+// A scanner can heartbeat every two minutes and still write nothing. comm does
+// exactly that: it fetches, prompts Gemini, scores, and refuses correctly at
+// `IF Trades Qualified` -- but that branch routes to Telegram and never to its
+// rejection writer, so eight correct refusals in two days are invisible here.
+//
+// THIS IS NOT A FAILURE STATE. The label is "no recorded activity", because the
+// scanner may be working perfectly and simply not recording. Computed from
+// ACTUAL ROW COUNTS, never from the heartbeat -- the heartbeat is the thing
+// that misleads.
+//
+// Counted in POSTGRES, not from db.data: the in-memory rejections array is
+// capped at 500 and pings at 400, so an in-memory count would understate a busy
+// scanner and read as silence.
+//
+// Lazy pool for the same reason scoreboard.js is lazy: ESM imports evaluate
+// before dotenv.config() runs in the index.js body.
+let _actPool = null;
+function getActivityPool() {
+  if (_actPool) return _actPool;
+  if (!process.env.DATABASE_URL) return null;
+  _actPool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  return _actPool;
+}
+
+let _actCache = { at: 0, data: null, error: null };
+async function scannerActivity24h() {
+  if (Date.now() - _actCache.at < 60000) return _actCache;
+  const pool = getActivityPool();
+  if (!pool) { _actCache = { at: Date.now(), data: null, error: 'DATABASE_URL unset' }; return _actCache; }
+  try {
+    const out = {};
+    const bump = (sc, key, n) => {
+      if (!sc) return;
+      out[sc] = out[sc] || { trades: 0, rejections: 0, signals: 0 };
+      out[sc][key] = Number(n) || 0;
+    };
+    // Each table carries its OWN timestamp column -- trades.opened_at,
+    // rejections.created_at, signals.created_at -- VERIFIED against information_schema.
+    // A wrong column returns zero silently, which reads as "no activity" -- the
+    // exact opposite of the truth. signals uses created_at, NOT ts.
+    const q = async (sql, key) => {
+      const r = await pool.query(sql);
+      for (const row of r.rows) bump(row.scanner, key, row.n);
+    };
+    await q("SELECT scanner, count(*) AS n FROM trades WHERE opened_at > now() - interval '24 hours' GROUP BY scanner", 'trades');
+    await q("SELECT scanner, count(*) AS n FROM rejections WHERE created_at > now() - interval '24 hours' GROUP BY scanner", 'rejections');
+    await q("SELECT scanner, count(*) AS n FROM signals WHERE created_at > now() - interval '24 hours' GROUP BY scanner", 'signals');
+    _actCache = { at: Date.now(), data: out, error: null };
+  } catch (e) {
+    _actCache = { at: Date.now(), data: null, error: e.message };
+  }
+  return _actCache;
+}
+
+function coerceTs(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const n = Number(v);                       // numeric string, e.g. "1785874200322"
+  if (Number.isFinite(n) && n > 1e12) return n;
+  const p = Date.parse(String(v));           // ISO string
+  return Number.isFinite(p) ? p : null;
+}
+
+// readActualFleet spawns a python child with a 25s timeout, so it is cached.
+let _fleetCache = { at: 0, data: null, error: null };
+async function fleetActiveMap() {
+  if (Date.now() - _fleetCache.at < 60000) return _fleetCache;
+  try {
+    const actual = await readActualFleet({ db: process.env.N8N_SQLITE_DB || null });
+    _fleetCache = { at: Date.now(), data: actual, error: null };
+  } catch (e) {
+    _fleetCache = { at: Date.now(), data: null, error: e.message };
+  }
+  return _fleetCache;
+}
+
+async function computeScannerLiveness(now = Date.now()) {
+  const hb    = db.data.heartbeats || {};
+  const pings = db.data.pings || [];
+  const latestPing = {};
+  for (const p of pings) {
+    const t = coerceTs(p && p.ts);
+    if (!p || !p.scanner || t === null) continue;
+    if (!latestPing[p.scanner] || t > latestPing[p.scanner]._ts) latestPing[p.scanner] = { ...p, _ts: t };
+  }
+  const fleet = await fleetActiveMap();
+  const fleetScanners = (fleet.data && fleet.data.scanners) || {};
+  const weekend = isWeekendET(new Date(now));
+  const act = await scannerActivity24h();
+  const actRows = (act.data) || {};
+
+  const rows = SCANNER_ORDER.map(name => {
+    const h = hb[name] || null;
+    const hTs = h ? coerceTs(h.ts) : null;
+    const p = latestPing[name] || null;
+    const pTs = p ? p._ts : null;
+    // NEWEST of the two stores. A scanner that pings but does not heartbeat is
+    // alive, and vice versa; requiring both would invent silence.
+    const lastTs = [hTs, pTs].filter(t => t !== null).sort((a, b) => b - a)[0] ?? null;
+    const ageMin = lastTs === null ? null : Math.round((now - lastTs) / 60000);
+
+    const fs = fleetScanners[name] || null;
+    const activeCount = fs ? Number(fs.actual_active_count || 0) : null;
+    const schedule = FLEET_SCHEDULES[name] || UNKNOWN;
+
+    let state, why;
+    if (fleet.error || activeCount === null) {
+      state = 'UNKNOWN'; why = `n8n state unavailable (${fleet.error || 'scanner absent from fleet read'})`;
+    } else if (activeCount === 0) {
+      // OFF is a DIFFERENT fact from STALE: the workflow is switched off, so
+      // silence is expected and is not a fault.
+      state = 'OFF'; why = 'workflow is active=0 in n8n';
+    } else if (lastTs === null) {
+      state = 'STALE'; why = 'active in n8n but has never reported';
+    } else if (now - lastTs <= LIVENESS_WINDOW_MS) {
+      state = 'ALIVE'; why = `reported ${ageMin}m ago`;
+    } else if (weekend && schedule === 'weekday-only') {
+      state = 'IDLE_WEEKEND'; why = `weekday-only scanner, quiet at the weekend (last ${ageMin}m ago)`;
+    } else {
+      state = 'STALE'; why = `active in n8n but silent for ${ageMin}m`;
+    }
+
+    // Row counts are per-scanner and independent of the heartbeat.
+    const a = actRows[name] || { trades: 0, rejections: 0, signals: 0 };
+    const actTotal = a.trades + a.rejections + a.signals;
+    // Only meaningful for a scanner that IS running. An OFF scanner writing
+    // nothing is expected, not notable.
+    const noActivity = (act.error ? null : (state === 'ALIVE' && actTotal === 0));
+
+    return {
+      scanner: name,
+      display_name: SCANNER_DISPLAY_NAMES[name] || name,
+      state, reason: why,
+      activity_24h: { ...a, total: actTotal },
+      no_recorded_activity: noActivity,
+      activity_note: noActivity
+        ? 'no recorded activity in 24h — the scanner is running and may be refusing correctly without writing'
+        : null,
+      active_in_n8n: activeCount === null ? null : activeCount > 0,
+      workflow_id: fs ? (fs.actual_workflow_id || null) : null,
+      last_ts: lastTs, age_minutes: ageMin,
+      source: lastTs === null ? null : (lastTs === hTs ? 'heartbeat' : 'ping'),
+      ping_status: p ? (p.status || null) : null,
+      schedule
+    };
+  });
+
+  // Diagnostic entries are probe residue, not scanners. `indices-key-test` is a
+  // 2026-08-05 fossil in db.data.heartbeats carrying status:'diagnostic'; it has
+  // no code anywhere. Filtering on the status keeps the data and hides the row.
+  const hidden = Object.entries(hb)
+    .filter(([k, v]) => String(v && v.status) === 'diagnostic' || !SCANNER_ORDER.includes(k))
+    .map(([k, v]) => ({ key: k, status: (v && v.status) || null }));
+
+  const trades = db.data.trades || [];
+  return {
+    window_minutes: LIVENESS_WINDOW_MS / 60000,
+    weekend_et: weekend,
+    fleet_error: fleet.error,
+    activity_error: act.error,
+    activity_window_hours: 24,
+    scanners: rows,
+    hidden_non_scanner_entries: hidden,
+    // Panels must LABEL the population they are counting. ARCHIVED is excluded
+    // by owner decision 2026-08-19 and is 70% of the book, so a card reading
+    // zero is otherwise indistinguishable from zero-because-archived.
+    population: {
+      counts_status: 'CLOSED',
+      archived_excluded: trades.filter(t => t.status === 'ARCHIVED').length,
+      closed_included: trades.filter(t => t.status === 'CLOSED').length,
+      note: 'Counts and P&L exclude ARCHIVED trades (owner decision 2026-08-19).'
+    }
+  };
+}
+
+app.get('/api/scanner-liveness', async (req, res) => {
+  try { res.json(await computeScannerLiveness()); }
+  catch (e) { res.status(500).json({ status: 'error', message: e.message }); }
+});
+
 app.get('/api/heartbeat/status', (req, res) => {
   const hb = db.data.heartbeats || {};
   const STALE_MS = 30 * 60 * 1000; // 30 minutes
@@ -3245,6 +4130,19 @@ async function buildHealthPayload() {
     .filter(Number.isFinite);
   const oldestReservationAgeS = reservationAges.length ? Math.round(Math.max(...reservationAges)) : 0;
   const issues = [];
+  // Never clears for the life of the process: a fault that happened an hour
+  // ago still means an interval died and whatever it did has not run since.
+  if (processFault) {
+    issues.push(`process_fault:${processFault.kind}`);
+    if (!processFaultAlerted) {
+      processFaultAlerted = true;
+      sendTelegramAlert(`PROCESS FAULT ${processFault.kind} at ${processFault.at}\n` +
+        `${String(processFault.error).slice(0, 400)}\n` +
+        `The process was kept alive and is flagged in /api/health. An unguarded interval ` +
+        `has died; whatever it does has not run since. Restart deliberately once the cause is known.`)
+        .catch(() => {});
+    }
+  }
   // ISSUE, not a warning: running on the mirror means Postgres is no longer
   // the in-memory source, and the next save() writes the mirror back over it.
   if (postgresLoadFailure) {
@@ -3337,8 +4235,18 @@ async function buildHealthPayload() {
       risk_positions: riskOpen,
       pending_reservations: pendingReservations,
       oldest_reservation_age_s: oldestReservationAgeS,
+      // NAMING (2026-08-18): `live_positions` is MANAGED positions -- live
+      // broker positions MINUS the UNMANAGED_POSITION_EPICS allow-list. The
+      // arithmetic is right; the label inverts when read beside
+      // `unmanaged_live_positions`, because it looks like the unmanaged one is
+      // the live one when in fact it is the one NOT counted. That misreading
+      // produced an instruction to close a live position carrying the entire
+      // book heat. Prefer managed_live_positions / total_live_positions;
+      // `live_positions` is retained only for back-compat.
       live_positions: liveOpen,
+      managed_live_positions: liveOpen,
       unmanaged_live_positions: unmanagedLive.length,
+      total_live_positions: livePositions.length,
       scanner_heartbeats: heartbeatCount,
       scanner_errors_24h: scannerErrors.total,
       price_tick_rejections: tickRejections.total
@@ -3473,6 +4381,7 @@ app.post('/api/brain/record', scannerAuth, async (req, res) => {
   // De-dupe by deal_id if present
   if (record.deal_id) {
     db.data.trade_brain = db.data.trade_brain.filter(r => r.deal_id !== record.deal_id);
+    await deleteBrainByDealPostgres(record.deal_id).catch(()=>{});
   }
   db.data.trade_brain.push(record);
   await save();
@@ -3490,9 +4399,26 @@ app.post('/api/brain/similar', scannerAuth, async (req, res) => {
 
 // Brain stats — overview of what the brain has learned, broken down
 app.get('/api/brain/stats', (req, res) => {
-  const brain = db.data.trade_brain || [];
+  const recorded = db.data.trade_brain || [];
+  // FIREWALL. 77 of 140 rows were fixture data (test_harness 72, test 5) and
+  // they carried the only positive win rates on the panel -- FIXTURE and
+  // HARNESS were showing as real setup types. The rows are NOT deleted; they
+  // are excluded from every figure this endpoint reports.
+  const brain = recorded.filter(analyticsFirewallRow);
   const total = brain.length;
-  if (total === 0) return res.json({ total: 0, by_setup: [], by_scanner: [], message: 'Brain is empty — close some trades to start learning.' });
+  const excluded_fixture = recorded.length - total;
+  // deal_id -> engine_branch. A brain row carries no engine_branch of its own,
+  // so the branch has to come from the trade it was recorded against.
+  const branchOf = new Map();
+  for (const t of (db.data.trades || [])) {
+    if (t && t.deal_id) branchOf.set(String(t.deal_id), t.engine_branch || null);
+  }
+  if (total === 0) return res.json({ total: 0, total_recorded: recorded.length, excluded_fixture,
+    population: '0 of ' + recorded.length + ' recorded rows; ' + excluded_fixture + ' fixture rows excluded (test / test_harness / ZZ*)',
+    by_branch: [], by_setup: [], by_scanner: [],
+    message: excluded_fixture
+      ? 'No real memories yet — every recorded row is fixture data.'
+      : 'Brain is empty — close some trades to start learning.' });
 
   const group = (keyFn) => {
     const m = {};
@@ -3500,20 +4426,31 @@ app.get('/api/brain/stats', (req, res) => {
       const k = keyFn(r) || 'UNKNOWN';
       m[k] = m[k] || { key: k, n: 0, wins: 0, pnl: 0, rSum: 0, rN: 0 };
       m[k].n++; if (r.outcome.win) m[k].wins++;
-      m[k].pnl += r.outcome.pnl || 0;
+      m[k].pnl += Number(r.outcome.pnl) || 0;
       if (r.outcome.r_multiple !== null && !isNaN(r.outcome.r_multiple)) { m[k].rSum += r.outcome.r_multiple; m[k].rN++; }
     });
     return Object.values(m).map(g => ({
       key: g.key, samples: g.n,
       win_rate: Math.round((g.wins / g.n) * 100),
       avg_r: g.rN ? +(g.rSum / g.rN).toFixed(2) : null,
-      total_pnl: +g.pnl.toFixed(2)
+      total_pnl: +Number(g.pnl || 0).toFixed(2)
     })).sort((a, b) => b.samples - a.samples);
   };
 
   res.json({
     total,
-    overall_win_rate: Math.round((brain.filter(r => r.outcome.win).length / total) * 100),
+    total_recorded: recorded.length,
+    excluded_fixture,
+    // Say the population out loud. "140 memories" against 188 trades invited
+    // exactly the wrong reading, because the number was neither trades nor
+    // real memories -- it was every row ever appended, fixtures included.
+    population: total + ' of ' + recorded.length + ' recorded rows; '
+      + excluded_fixture + ' fixture rows excluded (test / test_harness / ZZ*)',
+    overall_win_rate: total ? Math.round((brain.filter(r => r.outcome.win).length / total) * 100) : 0,
+    // ENGINE BRANCH is the grouping that describes the logic that fired.
+    // setup_type stays below it as a REGION dimension -- for indices it holds
+    // INDICES_EU / INDICES_UK / INDICES_US, which is geography, not strategy.
+    by_branch: group(r => branchOf.get(String(r.deal_id)) || 'LEGACY'),
     by_setup: group(r => r.setup_type),
     by_scanner: group(r => r.scanner),
     by_regime: group(r => r.features.spy_regime),
@@ -3636,12 +4573,111 @@ function _computeMetrics(trades) {
   };
 }
 
+// ── OUT-OF-SAMPLE WINDOWS ───────────────────────────────────────────────────
+// Progress and validity only. No verdict, no recommendation, no projection of
+// how the window will end -- the whole point of the freeze is that the answer
+// is not known yet, and a panel that hints at one re-creates the bias the
+// window exists to prevent.
+//
+// OUT-OF-SAMPLE POPULATION: trades for this scanner CLOSED STRICTLY AFTER the
+// window's opened_at. Anything closed before it is in-sample by definition and
+// is already counted in in_sample_n.
+app.get('/api/oos-windows', (req, res) => {
+  try {
+    const windows = db.data.oos_windows || [];
+    const trades  = db.data.trades || [];
+    const rOf = t => {
+      const risk = Number(t.risk_usd);
+      return risk > 0 ? Number(t.pnl) / risk : null;
+    };
+    const rows = windows.map(w => {
+      const openedMs = Date.parse(w.opened_at);
+      // THE OOS QUERY, in the same shape the rest of this file uses:
+      const oos = trades.filter(t =>
+        t.scanner === w.scanner &&
+        t.status === 'CLOSED' &&
+        t.pnl != null &&
+        t.closed_at && Date.parse(t.closed_at) > openedMs);
+      const rs = oos.map(rOf).filter(x => x != null && Number.isFinite(x));
+      const wins = rs.filter(x => x > 0).length;
+      // HOW THE CLOSE ECONOMICS WERE OBTAINED. `close_resolved_from` is set
+      // whenever resolveCloseEconomics ran -- i.e. the caller closed WITHOUT a
+      // price and the server derived it from the broker activity log.
+      //
+      // IT DOES NOT MEAN "recovered by hand after the fact". Measured
+      // 2026-09-02 against events.trade_close.ts, 4 of the 6 out-of-sample
+      // closes carrying this flag were booked within the same minute as the
+      // broker close (OKTA, PLTR, EU50, DE40 #235); only ROST (1.91h) and
+      // DE40 #233 (3.97h) lagged. A lateness metric needs that event join,
+      // which this route does not do -- so this field is reported as what it
+      // is, and nothing is inferred from it about scanner observation.
+      const resolverDerived = oos.filter(t => t.close_resolved_from);
+      // Free-parameter count is the number of keys in the captured snapshot --
+      // the SAME set the config_hash is taken over, so it is re-derivable and
+      // cannot drift from the hash. It counts every literal captured, which is
+      // stricter than counting only "core" strategy parameters by hand.
+      let paramCount = null;
+      try {
+        const pj = typeof w.params_json === 'string' ? JSON.parse(w.params_json) : (w.params_json || {});
+        paramCount = Object.keys(pj).length;
+      } catch { paramCount = null; }
+      const nowN = Number(w.in_sample_n) || 0;
+      const atTarget = nowN + (Number(w.target_n) || 0);
+      return {
+        id: w.id,
+        scanner: w.scanner,
+        opened_at: w.opened_at,
+        config_hash: w.config_hash,
+        config_hash_short: String(w.config_hash || '').slice(0, 8),
+        status: w.status,
+        verdict: w.verdict || null,
+        closed_at: w.closed_at || null,
+        target_n: Number(w.target_n) || 0,
+        accrued_n: rs.length,
+        in_sample: {
+          n: nowN,
+          total_r: w.in_sample_total_r == null ? null : Number(w.in_sample_total_r),
+          win_rate: w.in_sample_win_rate == null ? null : Number(w.in_sample_win_rate)
+        },
+        out_of_sample: {
+          n: rs.length,
+          total_r: rs.length ? +rs.reduce((a, b) => a + b, 0).toFixed(4) : null,
+          win_rate: rs.length ? +(100 * wins / rs.length).toFixed(2) : null,
+          resolver_derived_n: resolverDerived.length,
+          resolver_derived: resolverDerived.map(t => ({
+            id: t.id, ticker: t.ticker, closed_at: t.closed_at,
+            close_source: t.close_source || null,
+            resolved_from: t.close_resolved_from || null
+          }))
+        },
+        free_params: paramCount,
+        trades_per_param: paramCount ? +(nowN / paramCount).toFixed(2) : null,
+        trades_per_param_at_target: paramCount ? +(atTarget / paramCount).toFixed(2) : null,
+        guideline_trades_per_param: 252
+      };
+    });
+    res.json({
+      windows: rows,
+      open_count: rows.filter(r => r.status === 'OPEN').length,
+      invalidated_count: rows.filter(r => r.status === 'INVALIDATED').length,
+      note: 'Progress and validity only. No verdict or projection is reported here.',
+      resolver_derived_note: 'out_of_sample.resolver_derived counts closes whose economics the SERVER derived from the broker activity log because the caller supplied no close_price. It does NOT indicate a late or hand-recovered close: measured 2026-09-02, 4 of 6 such closes were booked within the same minute as the broker close.',
+      oos_population: "trades with scanner = window.scanner, status CLOSED, pnl not null, closed_at strictly after window.opened_at"
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/analytics/overview', (req, res) => {
   try {
     const trades     = db.data.trades     || [];
     const signals    = db.data.signals    || [];
     const rejections = db.data.rejections || [];
 
+    // The dashboard renders GBP from fund.base_currency while this page hard-coded
+    // en-US/USD, so the SAME total_pnl appeared as £-6,254.52 on one view and
+    // -$6,254.52 on the other. Neither page can be right about a figure it does
+    // not know the unit of — so the unit travels with the payload.
+    const baseCurrency = (db.data.fund && db.data.fund.base_currency) || 'GBP';
     const overall = _computeMetrics(trades);
 
     // Per-strategy breakdown
@@ -3727,7 +4763,7 @@ app.get('/api/analytics/overview', (req, res) => {
     const totalRejected = rejections.length;
     const signalAcceptRate = totalSignals ? _r2(((totalSignals-totalRejected)/totalSignals)*100) : 0;
 
-    res.json({ overall, byStrategy, dailyPnl, weeklyPnl, monthlyPnl, equityCurve, byHour, bestTrades, worstTrades, readiness, readinessMessages:msgs, signalAcceptRate, totalSignals, totalRejected, todayPnl, weekPnl });
+    res.json({ base_currency: baseCurrency, overall, byStrategy, dailyPnl, weeklyPnl, monthlyPnl, equityCurve, byHour, bestTrades, worstTrades, readiness, readinessMessages:msgs, signalAcceptRate, totalSignals, totalRejected, todayPnl, weekPnl });
   } catch(err) {
     console.error('Analytics overview error:', err);
     res.status(500).json({ error: err.message });

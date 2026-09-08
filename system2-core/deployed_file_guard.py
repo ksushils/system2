@@ -14,6 +14,11 @@ from pathlib import Path
 ROOT = Path("/root/system2-core")
 STATE = ROOT / "logs/deployed_file_guard_state.json"
 FILES = {
+    "fund-system/server/index.js": Path("/root/fund-system/server/index.js"),
+    "fund-system/server/rejection-class.js": Path("/root/fund-system/server/rejection-class.js"),
+    "fund-system/server/fleet-state.js": Path("/root/fund-system/server/fleet-state.js"),
+    "fund-system/server/analytics-firewall.js": Path("/root/fund-system/server/analytics-firewall.js"),
+    "fund-system/server/storage-adapter.js": Path("/root/fund-system/server/storage-adapter.js"),
     "fund-system/server/scoring-endpoints.cjs": Path("/root/fund-system/server/scoring-endpoints.cjs"),
     "fund-system/server/pmf-auto-executor.cjs": Path("/root/fund-system/server/pmf-auto-executor.cjs"),
 }
