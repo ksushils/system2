@@ -438,19 +438,23 @@ export async function outcomeBacklogCounts() {
   if (!pool) return null;
   const { rows } = await pool.query(`
     WITH src AS (
-      SELECT 'signal'::text source_type, id::text source_id,
-        NULLIF(data->>'ts','')::timestamptz event_ts FROM signals
+      SELECT 'signal'::text source_type, id::text source_id, scanner, ticker, data,
+        NULLIF(data->>'ts','')::timestamptz event_ts FROM signals s
+        WHERE ${analyticsFirewallSql('','s')}
       UNION ALL
-      SELECT 'rejection'::text source_type, id::text source_id,
+      SELECT 'rejection'::text source_type, id::text source_id, scanner, ticker, data,
         COALESCE(NULLIF(data->>'rejected_time',''), NULLIF(data->>'ts',''))::timestamptz event_ts
-      FROM rejections
+      FROM rejections r WHERE ${analyticsFirewallSql('','r')}
     )
     SELECT
-      (SELECT count(*)::int FROM signal_outcomes WHERE ret_1d IS NULL) AS unlabeled_partial,
-      (SELECT count(*)::int FROM outcome_label_skips
-        WHERE retry_after IS NULL OR attempt_count >= 5)              AS parked_skips,
-      (SELECT count(*)::int FROM outcome_label_skips
-        WHERE retry_after IS NOT NULL AND attempt_count < 5)          AS deferred_skips,
+      (SELECT count(*)::int FROM signal_outcomes o
+        WHERE ret_1d IS NULL AND ${analyticsFirewallSql('o')}) AS unlabeled_partial,
+      (SELECT count(*)::int FROM outcome_label_skips k
+        WHERE (retry_after IS NULL OR attempt_count >= 5)
+          AND ${analyticsFirewallSql('k')})                            AS parked_skips,
+      (SELECT count(*)::int FROM outcome_label_skips k
+        WHERE retry_after IS NOT NULL AND attempt_count < 5
+          AND ${analyticsFirewallSql('k')})                            AS deferred_skips,
       (SELECT count(*)::int FROM src s
          WHERE s.event_ts IS NOT NULL
            AND NOT EXISTS (SELECT 1 FROM signal_outcomes o
