@@ -21,6 +21,9 @@ FILES = {
     "fund-system/server/storage-adapter.js": Path("/root/fund-system/server/storage-adapter.js"),
     "fund-system/server/scoring-endpoints.cjs": Path("/root/fund-system/server/scoring-endpoints.cjs"),
     "fund-system/server/pmf-auto-executor.cjs": Path("/root/fund-system/server/pmf-auto-executor.cjs"),
+    "fund-system/server/pmf-retirement-invariant.cjs": Path("/root/fund-system/server/pmf-retirement-invariant.cjs"),
+    "fund-system/server/pmf-retirement-invariant-test.cjs": Path("/root/fund-system/server/pmf-retirement-invariant-test.cjs"),
+    "fund-system/server/start-fund-system.sh": Path("/root/fund-system/server/start-fund-system.sh"),
 }
 GITHUB_REPO = "ksushils/system2"
 GITHUB_REF = "master"

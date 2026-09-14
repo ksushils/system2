@@ -209,7 +209,7 @@ module.exports = function attachScoring(app, db, deps) {
 
   if (!startupRetirementInvariantScheduled) {
     startupRetirementInvariantScheduled = true;
-    childProcess.execFile(process.execPath, [path.join(__dirname, 'pmf-retirement-invariant.cjs'), '--alert', '--source=startup'], { timeout: 20000 }, (error, stdout, stderr) => {
+    childProcess.execFile(process.execPath, [path.join(__dirname, 'pmf-retirement-invariant.cjs'), '--alert', '--source=startup', `--pid=${process.pid}`], { timeout: 20000 }, (error, stdout, stderr) => {
       if (error) console.error('[PMF retirement invariant] HIGH PRIORITY failure:', String(stdout || stderr || error.message).trim());
       else console.log('[PMF retirement invariant]', String(stdout).trim());
     });
