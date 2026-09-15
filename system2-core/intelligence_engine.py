@@ -65,6 +65,17 @@ def mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
+def cached_shadow_5d_return(value: Any) -> float | None:
+    """Read both legacy numeric cache entries and the current structured format."""
+    if isinstance(value, dict):
+        value = value.get("shadow_5d_return")
+    try:
+        result = float(value)
+        return result if math.isfinite(result) else None
+    except (TypeError, ValueError):
+        return None
+
+
 def safe_div(a: float, b: float) -> float | None:
     return a / b if b else None
 
@@ -215,10 +226,11 @@ def track_shadow_performance() -> dict[str, Any]:
 
         # Skip if already have returns
         if cache_key in cache and cache[cache_key] is not None:
-            ret = cache[cache_key]
-            gates[reason].append(ret)
-            tracked_count += 1
-            continue
+            ret = cached_shadow_5d_return(cache[cache_key])
+            if ret is not None:
+                gates[reason].append(ret)
+                tracked_count += 1
+                continue
 
         # Skip if rejection was < 5 trading days ago
         tds = trading_days_since(date_str)

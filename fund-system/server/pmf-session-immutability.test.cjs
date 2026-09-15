@@ -1,0 +1,13 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const source = fs.readFileSync(require.resolve('./scoring-endpoints.cjs'), 'utf8');
+const stampFn = source.match(/function writePmfConfirmationStamp\([\s\S]*?\n  }/);
+const onceFn = source.match(/function writeOnceSessionFields\([\s\S]*?\n  }/);
+assert.ok(stampFn, 'writePmfConfirmationStamp must exist');
+assert.ok(onceFn, 'writeOnceSessionFields must exist');
+assert.match(stampFn[0], /pmf_confirmed_at_stamp != null/);
+assert.match(stampFn[0], /easternSessionFields\(stamp\.at\)/);
+assert.match(onceFn[0], /row\[key\] == null/);
+assert.doesNotMatch(onceFn[0], /Object\.assign\(row/);
+console.log('PASS PMF session immutability contract fixture');

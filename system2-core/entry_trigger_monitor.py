@@ -123,8 +123,8 @@ def fmp_get(endpoint: str, params: dict[str, str] | None = None) -> Any:
         return json.loads(raw.decode("utf-8", "ignore"))
 
 
-def get_watchlist() -> list[dict[str, Any]]:
-    """Load watchlist finalists from fund.json — not entered and not closed."""
+def load_fund_ideas() -> list[dict[str, Any]]:
+    """Parse the large fund ledger once per cycle and return its idea rows."""
     if not FUND_DATA_PATH.exists():
         return []
     try:
@@ -132,19 +132,26 @@ def get_watchlist() -> list[dict[str, Any]]:
     except Exception as exc:
         print(f"Could not read fund.json: {exc}")
         return []
+    return fund.get("ideas", []) if isinstance(fund, dict) else []
 
-    ideas = fund.get("ideas", [])
+
+def partition_monitor_ideas(ideas: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Derive watchlist and open positions in one pass without a second 115 MB parse."""
     watch: list[dict[str, Any]] = []
+    open_positions: list[dict[str, Any]] = []
     for i in ideas:
         if not isinstance(i, dict):
             continue
+        status = str(i.get("paper_status", "")).upper()
+        if status == "OPEN":
+            open_positions.append(i)
+
         entered = bool(
             i.get("actual_entry_price")
             or i.get("paper_entry_price")
             or i.get("entryRecorded")
             or i.get("paper_entry_date")
         )
-        status = str(i.get("paper_status", "")).upper()
         if entered:
             continue
         if status in ("OPEN", "RESOLVED", "CLOSED", "EXPIRED", "INVALID"):
@@ -155,25 +162,19 @@ def get_watchlist() -> list[dict[str, Any]]:
             continue
 
         watch.append(i)
+    return watch, open_positions
+
+
+def get_watchlist(ideas: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    """Load watchlist finalists from fund.json — not entered and not closed."""
+    watch, _ = partition_monitor_ideas(ideas if ideas is not None else load_fund_ideas())
     return watch
 
 
-def get_open_positions() -> list[dict[str, Any]]:
+def get_open_positions(ideas: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
     """Load active paper positions that must always have fresh live prices."""
-    if not FUND_DATA_PATH.exists():
-        return []
-    try:
-        fund = json.loads(FUND_DATA_PATH.read_text(encoding="utf-8"))
-    except Exception as exc:
-        print(f"Could not read fund.json open positions: {exc}")
-        return []
-
-    ideas = fund.get("ideas", [])
-    return [
-        i
-        for i in ideas
-        if isinstance(i, dict) and str(i.get("paper_status", "")).upper() == "OPEN"
-    ]
+    _, open_positions = partition_monitor_ideas(ideas if ideas is not None else load_fund_ideas())
+    return open_positions
 
 
 def batch_quote(tickers: list[str]) -> dict[str, dict[str, Any]]:
@@ -697,8 +698,11 @@ def run_cycle(force: bool = False) -> dict[str, Any]:
     if not force and not is_market_hours():
         return {"ok": True, "market_open": False, "checked": 0, "triggered": 0}
 
-    watch = get_watchlist()
-    open_positions = get_open_positions()
+    # fund.json is currently ~115 MB. Parsing it twice in one cycle produced
+    # 550-730 MB transient RSS peaks and PM2 memory restarts. One immutable
+    # snapshot preserves identical selection semantics without the duplicate heap.
+    ideas = load_fund_ideas()
+    watch, open_positions = partition_monitor_ideas(ideas)
     quote_candidates = watch + open_positions
     if not quote_candidates:
         return {"ok": True, "market_open": True, "checked": 0, "triggered": 0, "message": "No watchlist or open ideas"}
