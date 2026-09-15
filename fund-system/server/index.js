@@ -100,6 +100,7 @@ import {
 } from './storage-adapter.js';
 import { analyticsFirewallRow } from './analytics-firewall.js';
 import fundIntegrity from './fund-integrity.cjs';
+import { startMemoryProfiler } from './memory-profiler.js';
 
 // ── PROCESS-LEVEL SAFETY NET ────────────────────────────────────
 // Eight async setIntervals are unguarded and there was no
@@ -131,6 +132,7 @@ process.on('uncaughtException', (err) => recordProcessFault('uncaughtException',
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app  = express();
+const memoryProfiler = startMemoryProfiler(app);
 const PORT = process.env.PORT || 3210;
 if (!process.env.ADMIN_PIN) throw new Error('ADMIN_PIN is required; refusing to boot with a default PIN');
 
@@ -215,8 +217,6 @@ async function sendTelegramAlert(text) {
   try { body = bodyText ? JSON.parse(bodyText) : null; } catch { body = bodyText; }
   return { ok: response.ok, status: response.status, body };
 }
-fundIntegrity.validateFundFileOnLoad(DB_PATH);
-
 const defaultData = {
   // Fund config
   fund: {
@@ -297,6 +297,10 @@ for (const [key, value] of Object.entries(defaultData)) {
     db.data[key] = Array.isArray(value) ? [] : { ...value };
   }
 }
+// Reuse LowDB's already-parsed mirror for integrity validation. The previous
+// pre-load validator parsed the 100MB+ file a second time and was the proven
+// source of a large startup allocation spike.
+fundIntegrity.validateLoadedFundData(db.data, DB_PATH);
 
 // ── Storage mode: Postgres / JSON / dual-write ──
 // If USE_POSTGRES=true, load the dataset from Postgres into the in-memory db.data
@@ -407,10 +411,10 @@ const save = async () => {
     db.data.updates=(db.data.updates||[]).slice(0,5000);
     db.data.sessions=(db.data.sessions||[]).filter(s=>s.expires>Date.now()).slice(-500);
     if (postgresEnabled) {
-      await saveToPostgres(db.data);
-      if (dualWriteEnabled) { try { await db.write(); } catch(e){ console.error('dual-write json failed:', e.message); } }
+      await memoryProfiler.track('saveToPostgres:full_dataset', () => saveToPostgres(db.data));
+      if (dualWriteEnabled) { try { await memoryProfiler.track('fundJsonWrite:full_dataset', () => db.write()); } catch(e){ console.error('dual-write json failed:', e.message); } }
     } else {
-      await db.write();
+      await memoryProfiler.track('fundJsonWrite:full_dataset', () => db.write());
     }
   } catch (error) {
     console.error('[PERSISTENCE_FAILURE]', error.message);
@@ -433,7 +437,7 @@ const scheduleJsonMirror = () => {
     jsonMirrorInFlight = true;
     jsonMirrorDirty = false;
     try {
-      await db.write();
+      await memoryProfiler.track('fundJsonMirrorWrite:full_dataset', () => db.write());
     } catch (e) {
       console.error('dual-write json failed:', e.message);
     } finally {
@@ -4181,13 +4185,14 @@ async function buildHealthPayload() {
   if (pendingReservations > 3) warnings.push('pending_reservations_high');
   // scanner_errors_24h is a WARNING, never an issue -- a burst of reported
   // scanner-side failures should not itself take the dashboard to 503.
-  const scannerErrors = await scannerErrorStats().catch(() => ({ total: 0, by_scanner_stage: [] }));
+  const scannerErrors = await memoryProfiler.track('health:scannerErrorStats', () => scannerErrorStats())
+    .catch(() => ({ total: 0, by_scanner_stage: [] }));
   if (scannerErrors.total > 0) warnings.push('scanner_errors_present');
 
   // Acting without recording. NOT "few rejections" -- a scanner may
   // legitimately reject nothing. This fires only when the trading path
   // ran and produced no signal, no rejection and no trade at all.
-  const tgap = await telemetryGaps().catch(() => null);
+  const tgap = await memoryProfiler.track('health:telemetryGaps', () => telemetryGaps()).catch(() => null);
   if (tgap?.gaps?.length) {
     for (const g of (tgap.scanners||[]).filter(x=>x.gap)) warnings.push(`telemetry_gap:${g.scanner}:${g.gap_type}`);
   }
@@ -4205,7 +4210,7 @@ async function buildHealthPayload() {
   // Outcome rows that exist but were never labelled. A WARNING, never an
   // issue: this must not flap health to 503.
   try {
-    const bl = await outcomeBacklogCounts();
+    const bl = await memoryProfiler.track('health:outcomeBacklogCounts', () => outcomeBacklogCounts());
     if (bl) {
       if (bl.unlabeled_partial > 0) warnings.push(`unlabeled_partial:${bl.unlabeled_partial}`);
       if (bl.parked_skips > 0)      warnings.push(`parked_skips:${bl.parked_skips}`);
@@ -4257,7 +4262,7 @@ async function buildHealthPayload() {
     halt_updated_by: haltCfg.halt_updated_by || null,
     halt_reason: haltCfg.halt_reason || null,
     account_size: accountSizeDivergence(),
-    telemetry_gap: await telemetryGaps().catch(e => ({ error: e.message })),
+    telemetry_gap: tgap || { error: 'unavailable' },
     live_positions_last_ok: livePosLastOk,
     live_positions_failures: livePosFailures,
     live_positions_last_error: livePosLastError,
@@ -4268,7 +4273,7 @@ async function buildHealthPayload() {
 }
 
 app.get('/api/health', async (req, res) => {
-  const payload = await buildHealthPayload();
+  const payload = await memoryProfiler.track('request:buildHealthPayload', () => buildHealthPayload());
   res.status(payload.issues.length ? 503 : 200).json(payload);
 });
 

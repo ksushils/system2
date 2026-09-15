@@ -34,6 +34,7 @@ FUND_DATA_PATH = Path("/root/fund-system/data/fund.json")
 LIVE_PRICES_PATH = ROOT / "data" / "live_prices.json"
 ALERT_LOG_PATH = ROOT / "data" / "entry_alerts.json"
 OUTCOME_LOG_PATH = ROOT / "data" / "entry_alert_outcomes.json"
+MEMORY_TELEMETRY_PATH = ROOT / "logs" / "entry_monitor_memory.jsonl"
 FINALIST_SOURCE_PATHS = [
     ROOT / "stage7_clustered_survivors.json",
     ROOT / "stage2_confluence_ranked_top40.json",
@@ -66,6 +67,7 @@ MAX_BOOTSTRAP_QUOTES_PER_CYCLE = 15 # cost ceiling for names with no cached live
 SPY_TICKER = "SPY"
 MAX_BAR_CALLS_PER_CYCLE = 60        # hard cost ceiling
 MARKET_CLOSE_UTC = 20.0  # 20:00 UTC = 16:00 ET (EDT)
+FUND_PARSE_COUNT = 0
 
 
 def now_utc() -> datetime:
@@ -125,6 +127,8 @@ def fmp_get(endpoint: str, params: dict[str, str] | None = None) -> Any:
 
 def load_fund_ideas() -> list[dict[str, Any]]:
     """Parse the large fund ledger once per cycle and return its idea rows."""
+    global FUND_PARSE_COUNT
+    FUND_PARSE_COUNT += 1
     if not FUND_DATA_PATH.exists():
         return []
     try:
@@ -993,10 +997,41 @@ def main() -> None:
 
     print("Entry-Trigger Monitor starting...")
     while True:
+        global FUND_PARSE_COUNT
+        FUND_PARSE_COUNT = 0
+        cycle_started = time.perf_counter()
         try:
-            run_cycle()
+            result = run_cycle()
         except Exception as e:
             print(f"Cycle error: {e}")
+            result = {"ok": False, "error": str(e)[:300]}
+        status: dict[str, int] = {}
+        try:
+            for line in Path("/proc/self/status").read_text(encoding="utf-8").splitlines():
+                if line.startswith(("VmRSS:", "VmHWM:", "Threads:")):
+                    key, raw = line.split(":", 1)
+                    status[key] = int(raw.strip().split()[0])
+        except (OSError, ValueError):
+            pass
+        telemetry = {
+            "at": now_utc().isoformat(),
+            "market_open": bool(result.get("market_open")),
+            "cycle_duration_ms": round((time.perf_counter() - cycle_started) * 1000, 1),
+            "fund_json_parse_count": FUND_PARSE_COUNT,
+            "single_snapshot": FUND_PARSE_COUNT == 1 if result.get("market_open") else None,
+            "watchlist_size": result.get("watchlist_count"),
+            "open_position_count": result.get("open_position_count"),
+            "checked": result.get("checked"),
+            "rss_kb": status.get("VmRSS"),
+            "vmhwm_kb": status.get("VmHWM"),
+            "threads": status.get("Threads"),
+        }
+        try:
+            MEMORY_TELEMETRY_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with MEMORY_TELEMETRY_PATH.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(telemetry, separators=(",", ":")) + "\n")
+        except OSError as exc:
+            print(f"Memory telemetry write error: {exc}")
         time.sleep(POLL_SECONDS)
 
 

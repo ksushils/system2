@@ -63,19 +63,20 @@ CRON_TZ=UTC
 30 0 * * 1-5 cd /root/system2-core && .venv/bin/python finra_ats_scraper.py >> logs/finra_ats.log 2>&1
 45 0 * * 1-5 cd /root/system2-core && .venv/bin/python openinsider_scraper.py >> logs/openinsider.log 2>&1
 50 0 * * 1-5 cd /root/system2-core && .venv/bin/python congress_scraper.py >> logs/congress_scraper.log 2>&1
-45 13 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/morning-brief-live/run-local >> /root/system2-core/logs/cron_morning_brief_live.log 2>&1
+# VESTIGIAL_SCHEDULE_RETIRED: morning brief dashboard/read route remains active; removed run-local POST returned 404.
 # ApeWisdom + social discovery
 40 0 * * 1-5 cd /root/system2-core && .venv/bin/python social_scraper.py >> /root/system2-core/logs/social_scraper.log 2>&1
 # Finviz new highs + unusual volume
 55 0 * * 1-5 cd /root/system2-core && .venv/bin/python finviz_scraper.py >> /root/system2-core/logs/finviz_scraper.log 2>&1
-0 12 * * 0 curl -fsS -X POST http://127.0.0.1:3210/api/system2/weekly-snapshot/generate >> /root/system2-core/logs/cron_weekly_snapshot.log 2>&1
+# VESTIGIAL_SCHEDULE_RETIRED: weekly snapshot dashboard/history remains; removed scheduled generate POST returned 401.
 30 21 * * 1-5 cd /root/system2-core && .venv/bin/python performance_metrics.py >> logs/performance_metrics.log 2>&1
 5 1 * * 1-5 cd /root/system2-core && .venv/bin/python earnings_drift_scraper.py >> logs/earnings_drift.log 2>&1
 10 1 * * 1-5 cd /root/system2-core && .venv/bin/python finnhub_scraper.py >> logs/finnhub.log 2>&1
 0 23 * * 1-5 cd /root/system2-core && .venv/bin/python discovery_feedback.py >> /root/system2-core/logs/discovery_feedback.log 2>&1
 0 14 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
 0 18 * * 1-5 cd /root/system2-core && .venv/bin/python options_positioning.py >> /root/system2-core/logs/options_positioning.log 2>&1
-45 23 * * 1-5 cd /root/system2-core && .venv/bin/python signal_learning.py >> /root/system2-core/logs/signal_learning.log 2>&1
+# SIGNAL_LEARNING_DISABLED_PENDING_SHADOW_REDESIGN
+# Production data/learned_weights.json remains unchanged and consumed by scoring; do not re-enable this writer without a separate shadow namespace.
 0 6 * * 1-5 cd /root/system2-core && .venv/bin/python continuous_discovery.py --once >> /root/system2-core/logs/continuous_discovery.log 2>&1
 
 

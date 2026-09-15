@@ -10,7 +10,19 @@ const ROW_DROP_FRACTION = 0.10;
 
 function sha256(filePath) {
   const h = crypto.createHash('sha256');
-  h.update(fs.readFileSync(filePath));
+  // Hash in bounded chunks. Reading the entire 100MB+ mirror into one Buffer
+  // briefly doubled process RSS during startup integrity validation.
+  const fd = fs.openSync(filePath, 'r');
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  try {
+    let bytesRead;
+    do {
+      bytesRead = fs.readSync(fd, buffer, 0, buffer.length, null);
+      if (bytesRead) h.update(buffer.subarray(0, bytesRead));
+    } while (bytesRead);
+  } finally {
+    fs.closeSync(fd);
+  }
   return h.digest('hex');
 }
 
@@ -80,8 +92,20 @@ function validateFundFileOnLoad(filePath) {
   }
 }
 
+function validateLoadedFundData(data, filePath) {
+  try {
+    const result = validateObject(data, filePath);
+    console.log('? fund.json integrity check passed', JSON.stringify({ ideas_count: result.ideas_count, pead_drift_paper_count: result.pead_drift_paper_count, size: result.size }));
+    return result;
+  } catch (err) {
+    writeAlert('fund.json failed load-time integrity check; no auto-restore performed', { file: filePath, error: err.message });
+    return { ok: false, error: err.message, file: filePath };
+  }
+}
+
 module.exports = {
   validateObject,
   validateFundFileOnLoad,
+  validateLoadedFundData,
   readLastGoodManifest,
 };
