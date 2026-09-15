@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from prospective_research_telemetry import get_json, load_dotenv
-from research_telemetry_common import NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json, run_directory, session_offset, session_record, utc_now, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_offset, session_record, utc_now, version_resolved_outcomes, write_immutable
 from research_price_resolver import ResearchPriceResolver, validate_premarket_quote
 from swing_shadow_cohorts import SECTOR_ETFS, capture_daily_marks, file_hash, label, load_price_series, number, ticker
 
@@ -223,9 +223,11 @@ def update_v2() -> dict[str,Any]:
                 record=session_record(datetime.fromisoformat(row["trading_date"]).date())
                 row={**row,"next_open_timestamp":payload.get("next_session_open") or (record or {}).get("open_timestamp_ET")}
             rows.append((path,row))
+    rows, duplicate_memberships = independent_membership_rows(rows, ("trading_date", "symbol"))
     symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values());series=load_price_series(symbols)
     labelled=[{**row,"acceleration_artifact":str(path),**label(row,series)} for path,row in rows];now=utc_now();stamp=now.strftime("%Y%m%dT%H%M%SZ");directory=RESEARCH_ROOT/"scoreboards"
-    outcomes=write_immutable(directory/f"momentum_acceleration_outcomes_v2_{stamp}.json",{"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled})
+    labelled, versioning = version_resolved_outcomes(labelled, "momentum_acceleration_v2", now.isoformat())
+    outcomes=write_immutable(directory/f"momentum_acceleration_outcomes_v2_{stamp}.json",{"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"duplicate_intended_session_memberships":duplicate_memberships,"outcome_versioning":versioning,"rows":labelled})
     report=[]
     for state in STATES:
         group=[r for r in labelled if r.get("acceleration_state_v2")==state]
@@ -236,7 +238,7 @@ def update_v2() -> dict[str,Any]:
             item[f"mean_spy_adjusted_d{horizon}"]=statistics.mean(vals) if vals else None
         item["evidence_state"]="PRELIMINARY_CHECK_ONLY" if item["unique_dates"]>=30 else "TOO_THIN_NOT_A_VERDICT";report.append(item)
     scoreboard=write_immutable(directory/f"momentum_acceleration_scoreboard_v2_{stamp}.json",{"schema_version":2,"outcome_namespace":"outcomes_v2","v1_interpretation":V1_INTERPRETATION,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"groups":report})
-    return {"ok":True,"artifacts":len(artifacts),"rows":len(labelled),"outcomes":str(outcomes),"scoreboard":str(scoreboard)}
+    return {"ok":True,"artifacts":len(artifacts),"rows":len(labelled),"outcomes":str(outcomes),"scoreboard":str(scoreboard),"duplicate_intended_session_memberships":len(duplicate_memberships),"outcome_versioning":versioning}
 
 
 def main()->None:

@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -88,8 +89,10 @@ def session_record(day: date) -> dict[str, Any] | None:
         if not is_market_session(day):
             return None
         opened = datetime(day.year, day.month, day.day, 9, 30, tzinfo=NY)
-        closed = datetime(day.year, day.month, day.day, 16, 0, tzinfo=NY)
-        return {"session_date": day.isoformat(), "open_timestamp_ET": opened.isoformat(), "close_timestamp_ET": closed.isoformat(), "session_type": "NORMAL", "calendar_source": "HANDMADE_FALLBACK_PARTIAL"}
+        thanksgiving = _nth_weekday(day.year, 11, 3, 4)
+        early_close = day == thanksgiving + timedelta(days=1) or (day.month == 12 and day.day == 24 and day.weekday() < 5) or (day.month == 7 and day.day == 3 and day.weekday() < 5)
+        closed = datetime(day.year, day.month, day.day, 13 if early_close else 16, 0, tzinfo=NY)
+        return {"session_date": day.isoformat(), "open_timestamp_ET": opened.isoformat(), "close_timestamp_ET": closed.isoformat(), "session_type": "HALF_DAY" if early_close else "NORMAL", "calendar_source": "HANDMADE_FALLBACK_PARTIAL"}
     cal = _xnys()
     if day.isoformat() not in cal.schedule.index:
         return None
@@ -155,6 +158,123 @@ def run_directory(session: str | None = None, identifier: str | None = None) -> 
 def content_hash(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
     return hashlib.sha256(raw).hexdigest()
+
+
+def _safe_component(value: Any) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", str(value or "UNKNOWN"))[:80]
+
+
+def independent_membership_rows(
+    rows: list[tuple[Path, dict[str, Any]]], identity_fields: tuple[str, ...]
+) -> tuple[list[tuple[Path, dict[str, Any]]], list[dict[str, Any]]]:
+    """Keep one research member per intended-session identity.
+
+    Operational reruns remain on disk. Evaluation uses the earliest immutable
+    membership for a key, preventing holiday carry plus a same-session rerun
+    from inflating the independent sample.
+    """
+    selected: dict[tuple[Any, ...], tuple[Path, dict[str, Any]]] = {}
+    duplicates: list[dict[str, Any]] = []
+    for path, row in sorted(rows, key=lambda item: str(item[0])):
+        identity = tuple(row.get(field) for field in identity_fields)
+        if identity in selected:
+            duplicates.append({
+                "identity": dict(zip(identity_fields, identity)),
+                "kept_artifact": str(selected[identity][0]),
+                "duplicate_artifact": str(path),
+                "classification": "DUPLICATE_INTENDED_SESSION_MEMBERSHIP",
+            })
+            continue
+        selected[identity] = (path, row)
+    return list(selected.values()), duplicates
+
+
+def version_resolved_outcomes(
+    rows: list[dict[str, Any]], family: str, resolution_timestamp: str
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Attach append-only provenance versions to every resolved horizon.
+
+    A provider revision creates a new immutable version. An identical rerun
+    reuses the prior version and its original resolution timestamp.
+    """
+    root = RESEARCH_ROOT / "outcome_versions_v2" / _safe_component(family)
+    counters = {"created": 0, "reused": 0, "upstream_price_revisions": 0}
+    for row in rows:
+        namespace = row.get("cohort") or row.get("challenger") or row.get("acceleration_state_v2") or "UNGROUPED"
+        for horizon in (1, 2, 3, 5, 7):
+            key = f"d{horizon}"
+            outcome = row.get(key)
+            if not isinstance(outcome, dict) or outcome.get("state") not in {"AVAILABLE", "BENCHMARK_MISSING"}:
+                continue
+            identity = {
+                "family": family,
+                "namespace": namespace,
+                "symbol": row.get("symbol") or row.get("ticker"),
+                "entry_session": row.get("trading_date"),
+                "target_horizon": key,
+                "target_xnys_date": outcome.get("target_market_date"),
+            }
+            price_record = {
+                **identity,
+                "price_value": outcome.get("close"),
+                "provider": (outcome.get("close_provenance") or {}).get("provider"),
+                "provider_timestamp": (outcome.get("close_provenance") or {}).get("provider_timestamp"),
+                "source_artifact_cache": (outcome.get("close_provenance") or {}).get("source_file"),
+                "state": outcome.get("state"),
+                "raw_return_pct": outcome.get("raw_return_pct"),
+                "spy_return_pct": outcome.get("spy_return_pct"),
+                "spy_adjusted_return_pct": outcome.get("spy_adjusted_return_pct"),
+                "sector_return_pct": outcome.get("sector_return_pct"),
+                "sector_adjusted_return_pct": outcome.get("sector_adjusted_return_pct"),
+            }
+            # Cache refresh paths are provenance, not economic revisions. A new
+            # version is created only when the published value/returns change.
+            hash_record = {key: value for key, value in price_record.items() if key not in {"source_artifact_cache", "provider_timestamp"}}
+            outcome_hash = content_hash(hash_record)
+            identity_hash = content_hash(identity)
+            directory = root / identity_hash[:2] / identity_hash
+            existing = sorted(directory.glob("v*_*.json")) if directory.exists() else []
+            latest = read_json(existing[-1], {}) if existing else {}
+            if latest.get("outcome_hash") == outcome_hash:
+                version = int(latest.get("outcome_version") or len(existing) or 1)
+                revision_state = latest.get("revision_state") or "ORIGINAL_PUBLISHED_OUTCOME"
+                resolved_at = latest.get("resolution_timestamp") or resolution_timestamp
+                previous_hash = latest.get("previous_outcome_hash")
+                counters["reused"] += 1
+            else:
+                version = len(existing) + 1
+                previous_hash = latest.get("outcome_hash") if latest else None
+                revision_state = "UPSTREAM_PRICE_REVISION" if latest else "ORIGINAL_PUBLISHED_OUTCOME"
+                resolved_at = resolution_timestamp
+                payload = {
+                    "schema_version": 1,
+                    "namespace": "outcome_versions_v2",
+                    "research_only": True,
+                    "non_trading": True,
+                    **price_record,
+                    "resolution_timestamp": resolved_at,
+                    "outcome_version": version,
+                    "outcome_hash": outcome_hash,
+                    "previous_outcome_hash": previous_hash,
+                    "revision_state": revision_state,
+                }
+                directory.mkdir(parents=True, exist_ok=True)
+                version_path = directory / f"v{version:04d}_{outcome_hash[:16]}.json"
+                try:
+                    write_immutable(version_path, payload)
+                    counters["created"] += 1
+                    if revision_state == "UPSTREAM_PRICE_REVISION":
+                        counters["upstream_price_revisions"] += 1
+                except FileExistsError:
+                    counters["reused"] += 1
+            outcome.update({
+                "outcome_version": version,
+                "outcome_hash": outcome_hash,
+                "resolution_timestamp": resolved_at,
+                "revision_state": revision_state,
+                "previous_outcome_hash": previous_hash,
+            })
+    return rows, counters
 
 
 def write_immutable(path: Path, payload: dict[str, Any]) -> Path:

@@ -358,6 +358,62 @@ module.exports = function attachScoring(app, db, deps) {
     };
   }
 
+  function nthWeekday(year, month, weekday, occurrence) {
+    const day = new Date(Date.UTC(year, month - 1, 1));
+    while (day.getUTCDay() !== weekday) day.setUTCDate(day.getUTCDate() + 1);
+    day.setUTCDate(day.getUTCDate() + 7 * (occurrence - 1));
+    return day;
+  }
+
+  function lastWeekday(year, month, weekday) {
+    const day = new Date(Date.UTC(year, month, 0));
+    while (day.getUTCDay() !== weekday) day.setUTCDate(day.getUTCDate() - 1);
+    return day;
+  }
+
+  function easterSunday(year) {
+    const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4;
+    const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+    const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+    const month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+    return new Date(Date.UTC(year,month-1,day));
+  }
+
+  function observedFixedHoliday(year, month, day) {
+    const value = new Date(Date.UTC(year, month - 1, day));
+    if (value.getUTCDay() === 6) value.setUTCDate(value.getUTCDate() - 1);
+    if (value.getUTCDay() === 0) value.setUTCDate(value.getUTCDate() + 1);
+    return value;
+  }
+
+  function isXnysSessionDate(value) {
+    const day = new Date(`${value}T12:00:00Z`);
+    if (!Number.isFinite(day.getTime()) || day.getUTCDay() === 0 || day.getUTCDay() === 6) return false;
+    const year = day.getUTCFullYear();
+    const iso = x => x.toISOString().slice(0, 10);
+    const goodFriday = easterSunday(year); goodFriday.setUTCDate(goodFriday.getUTCDate() - 2);
+    const holidays = [
+      observedFixedHoliday(year,1,1), nthWeekday(year,1,1,3), nthWeekday(year,2,1,3), goodFriday,
+      lastWeekday(year,5,1), observedFixedHoliday(year,6,19), observedFixedHoliday(year,7,4),
+      nthWeekday(year,9,1,1), nthWeekday(year,11,4,4), observedFixedHoliday(year,12,25),
+    ];
+    return !holidays.some(item => iso(item) === value);
+  }
+
+  function intendedMarketSessionForStamp(timestamp) {
+    const fields = easternSessionFields(timestamp);
+    if (!fields) return null;
+    const initial = fields.session_eastern_time.slice(0, 10);
+    const day = new Date(`${initial}T12:00:00Z`);
+    while (!isXnysSessionDate(day.toISOString().slice(0, 10))) day.setUTCDate(day.getUTCDate() + 1);
+    return day.toISOString().slice(0, 10);
+  }
+
+  function pmfResearchStampIdentity(symbol, stamp) {
+    const intended = stamp.intendedMarketSession || intendedMarketSessionForStamp(stamp.at);
+    return `${String(symbol || '').toUpperCase()}|${intended || 'UNKNOWN'}|${String(stamp.cohort || 'PMF').toUpperCase()}|V1`;
+  }
+
   function writeOnceSessionFields(row, timestamp) {
     const fields = easternSessionFields(timestamp);
     if (!row || !fields) return false;
@@ -371,8 +427,22 @@ module.exports = function attachScoring(app, db, deps) {
     return changed;
   }
 
-  function writePmfConfirmationStamp(idea, stamp) {
-    if (!idea || idea.pmf_confirmed_at_stamp != null || !stamp) return;
+  function writePmfConfirmationStamp(idea, stamp, allIdeas = []) {
+    if (!idea || idea.pmf_confirmed_at_stamp != null || !stamp) return { written: false, reason: 'ALREADY_STAMPED' };
+    stamp.intendedMarketSession = stamp.intendedMarketSession || intendedMarketSessionForStamp(stamp.at);
+    const identity = pmfResearchStampIdentity(idea.ticker || idea.symbol, stamp);
+    const existing = allIdeas.find(row => row !== idea && row?.pmf_confirmed_at_stamp === true && (
+      row.pmf_research_stamp_identity || pmfResearchStampIdentity(row.ticker || row.symbol, {
+        at: row.pmf_stamp_time, cohort: row.pmf_stamp_cohort || row.pmf_cohort,
+        intendedMarketSession: row.intended_market_session,
+      })
+    ) === identity);
+    if (existing) {
+      idea.pmf_research_stamp_state = 'DUPLICATE_RESEARCH_STAMP';
+      idea.pmf_duplicate_of_identity = identity;
+      idea.pmf_duplicate_detected_at = stamp.at;
+      return { written: false, reason: 'DUPLICATE_RESEARCH_STAMP', identity };
+    }
     idea.pmf_confirmed_at_stamp = true;
     idea.pmf_stamp_time = stamp.at;
     idea.pmf_atr_multiple_at_stamp = stamp.atrMultiple;
@@ -384,11 +454,15 @@ module.exports = function attachScoring(app, db, deps) {
     idea.pmf_average_dollar_volume_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_at_stamp = stamp.averageDollarVolume;
     idea.pmf_adv_source = stamp.averageDollarVolume != null ? 'fmp_batch_quote_avgVolume_x_stamp_price' : null;
+    idea.intended_market_session = stamp.intendedMarketSession;
+    idea.pmf_research_stamp_identity = identity;
+    idea.pmf_research_stamp_state = 'CANONICAL_RESEARCH_STAMP';
     // Session telemetry belongs to the final immutable PMF stamp. Earlier
     // operational checks may already have populated these fields, so replace
     // them atomically from the stamp instead of retaining stale check timing.
     const sessionFields = easternSessionFields(stamp.at);
     if (sessionFields) Object.assign(idea, sessionFields);
+    return { written: true, identity };
   }
 
   function intakeSourceLayer(row) {
@@ -1633,13 +1707,17 @@ module.exports = function attachScoring(app, db, deps) {
           };
           if (update.pre_market_gap_favourable_late) lateUpdate.pmf_cohort = 'PMF_LATE';
           Object.assign(idea, lateUpdate);
-          if (update.pre_market_gap_favourable_late) writePmfConfirmationStamp(idea, pmfStamp);
+          if (update.pre_market_gap_favourable_late) {
+            const stampResult = writePmfConfirmationStamp(idea, pmfStamp, db.data.ideas);
+            if (stampResult.written) newlyStampedPmfLate.push(idea);
+          }
         } else {
           Object.assign(idea, update);
-          if (update.pre_market_gap_favourable) writePmfConfirmationStamp(idea, pmfStamp);
+          if (update.pre_market_gap_favourable) {
+            const stampResult = writePmfConfirmationStamp(idea, pmfStamp, db.data.ideas);
+            if (stampResult.written && !wasPmf) newlyStampedPmfs.push(idea);
+          }
         }
-        if (!lateMode && update.pre_market_gap_favourable && !wasPmf) newlyStampedPmfs.push(idea);
-        if (lateMode && update.pre_market_gap_favourable_late) newlyStampedPmfLate.push(idea);
       }
     }
 
@@ -2591,7 +2669,8 @@ module.exports = function attachScoring(app, db, deps) {
   app.post('/api/system2/session-stamps/backfill-local', localOnly, async (req, res) => {
     try {
       ensure();
-      const report = { pmf_classified: 0, pmf_changed: 0, pead_classified: 0, pead_changed: 0, anomalies: [] };
+      const report = { pmf_classified: 0, pmf_changed: 0, pmf_duplicate_stamps: 0, pmf_non_session_reassigned: 0, pead_classified: 0, pead_changed: 0, anomalies: [] };
+      const canonicalStampIdentities = new Map();
       for (const row of db.data.ideas || []) {
         if (!row || !(row.pmf_confirmed_at_stamp === true || row.pmf_stamp_time)) continue;
         const timestamp = row.pmf_stamp_time;
@@ -2602,6 +2681,35 @@ module.exports = function attachScoring(app, db, deps) {
         const fields = easternSessionFields(timestamp);
         if (!fields) continue;
         report.pmf_classified += 1;
+        const timestampDate = fields.session_eastern_time.slice(0, 10);
+        const intendedMarketSession = row.intended_market_session || intendedMarketSessionForStamp(timestamp);
+        const identity = pmfResearchStampIdentity(row.ticker || row.symbol, {
+          at: timestamp,
+          cohort: row.pmf_stamp_cohort || row.pmf_cohort,
+          intendedMarketSession,
+        });
+        if (row.intended_market_session == null) {
+          row.intended_market_session = intendedMarketSession;
+          report.pmf_changed += 1;
+        }
+        if (row.pmf_research_stamp_identity == null) {
+          row.pmf_research_stamp_identity = identity;
+          report.pmf_changed += 1;
+        }
+        if (timestampDate !== intendedMarketSession) {
+          row.pmf_session_attribution_state = 'NON_XNYS_RUN_ASSIGNED_TO_NEXT_SESSION';
+          row.pmf_original_run_date = timestampDate;
+          report.pmf_non_session_reassigned += 1;
+        }
+        if (canonicalStampIdentities.has(identity)) {
+          row.pmf_research_stamp_state = 'DUPLICATE_RESEARCH_STAMP';
+          row.pmf_duplicate_of_identity = identity;
+          row.pmf_duplicate_of_id = canonicalStampIdentities.get(identity)?.id || null;
+          report.pmf_duplicate_stamps += 1;
+        } else {
+          canonicalStampIdentities.set(identity, row);
+          if (row.pmf_research_stamp_state == null) row.pmf_research_stamp_state = 'CANONICAL_RESEARCH_STAMP';
+        }
         const changed = writeOnceSessionFields(row, timestamp);
         if (changed) {
           row.session_state_backfilled = true;

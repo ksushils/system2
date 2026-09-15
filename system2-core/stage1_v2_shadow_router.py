@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from research_price_resolver import ResearchPriceResolver
-from research_telemetry_common import RESEARCH_ROOT, next_market_session, read_json, run_directory, utc_now, write_immutable
+from research_telemetry_common import RESEARCH_ROOT, independent_membership_rows, next_market_session, read_json, run_directory, utc_now, version_resolved_outcomes, write_immutable
 from swing_shadow_cohorts import HORIZONS, SECTOR_ETFS, label
 
 ROOT = Path(__file__).resolve().parent
@@ -294,6 +294,7 @@ def update() -> dict[str, Any]:
     for path in artifacts:
         for row in (read_json(path, {}) or {}).get("rows", []):
             source_rows.append((path, row))
+    source_rows, duplicate_memberships = independent_membership_rows(source_rows, ("cohort", "trading_date", "symbol"))
     # Bound memory: the canonical EOD cache is multi-gigabyte. Resolve members
     # in small symbol groups while retaining the same V2 authority and calendar.
     rows: list[dict[str, Any]] = []
@@ -309,7 +310,8 @@ def update() -> dict[str, Any]:
         rows.extend({**row, "membership_artifact": str(path), **label(row, resolver)} for path, row in source_rows if row["symbol"] in group_symbols)
     now, directory = utc_now(), RESEARCH_ROOT / "scoreboards"
     stamp = now.strftime("%Y%m%dT%H%M%SZ")
-    outcomes = write_immutable(directory / f"stage1_v2_outcomes_{stamp}.json", {"schema_version": 2, "research_only": True, "non_trading": True, "created_at": now.isoformat(), "rows": rows})
+    rows, versioning = version_resolved_outcomes(rows, "stage1_v2", now.isoformat())
+    outcomes = write_immutable(directory / f"stage1_v2_outcomes_{stamp}.json", {"schema_version": 2, "namespace": "outcomes_v2", "research_only": True, "non_trading": True, "created_at": now.isoformat(), "duplicate_intended_session_memberships": duplicate_memberships, "outcome_versioning": versioning, "rows": rows})
     scores = []
     for cohort in COHORTS:
         group = [row for row in rows if row["cohort"] == cohort]
@@ -327,7 +329,7 @@ def update() -> dict[str, Any]:
         record["evidence_state"] = "PRELIMINARY_CHECK_ONLY" if record["unique_dates"] >= 30 else "TOO_THIN_NOT_A_VERDICT"
         scores.append(record)
     scoreboard = write_immutable(directory / f"stage1_v2_scoreboard_{stamp}.json", {"schema_version": 2, "research_only": True, "non_trading": True, "created_at": now.isoformat(), "minimum_dates_for_preliminary": 30, "cohorts": scores})
-    return {"ok": True, "memberships": len(artifacts), "rows": len(rows), "outcomes": str(outcomes), "scoreboard": str(scoreboard), "broker_calls": 0}
+    return {"ok": True, "memberships": len(artifacts), "rows": len(rows), "outcomes": str(outcomes), "scoreboard": str(scoreboard), "broker_calls": 0, "duplicate_intended_session_memberships": len(duplicate_memberships), "outcome_versioning": versioning}
 
 
 def self_test() -> dict[str, Any]:

@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from research_telemetry_common import NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json, run_directory, session_offset, utc_now, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_offset, utc_now, version_resolved_outcomes, write_immutable
 from research_price_resolver import ResearchPriceResolver
 
 ROOT = Path(__file__).resolve().parent
@@ -281,10 +281,12 @@ def update_outcomes() -> dict[str, Any]:
     for path in memberships:
         payload=read_json(path,{}) or {}
         for row in payload.get("rows",[]): rows.append((path,row))
+    rows, duplicate_memberships = independent_membership_rows(rows, ("cohort", "trading_date", "symbol"))
     symbols={r["symbol"] for _,r in rows}|{"SPY"}|set(SECTOR_ETFS.values()); series=load_price_series(symbols)
     labelled=[{**row,"membership_artifact":str(path),**label(row,series)} for path,row in rows]
     now=utc_now(); directory=RESEARCH_ROOT/"scoreboards"; stamp=now.strftime("%Y%m%dT%H%M%SZ")
-    snapshot={"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":labelled}
+    labelled, versioning = version_resolved_outcomes(labelled, "swing", now.isoformat())
+    snapshot={"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"duplicate_intended_session_memberships":duplicate_memberships,"outcome_versioning":versioning,"rows":labelled}
     outpath=write_immutable(directory/f"swing_outcomes_v2_{stamp}.json",snapshot)
     scores=[]
     for cohort in COHORTS:
@@ -297,7 +299,7 @@ def update_outcomes() -> dict[str, Any]:
         record["evidence_state"]="PRELIMINARY_CHECK_ONLY" if record["unique_dates"]>=30 else "TOO_THIN_NOT_A_VERDICT"
         scores.append(record)
     report=write_immutable(directory/f"swing_scoreboard_v2_{stamp}.json",{"schema_version":2,"outcome_namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_preliminary":30,"preferred_dates_for_promotion":60,"cohorts":scores})
-    return {"ok":True,"outcomes":str(outpath),"scoreboard":str(report),"memberships":len(memberships),"rows":len(labelled)}
+    return {"ok":True,"outcomes":str(outpath),"scoreboard":str(report),"memberships":len(memberships),"rows":len(labelled),"duplicate_intended_session_memberships":len(duplicate_memberships),"outcome_versioning":versioning}
 
 
 def spearman(rows: list[dict[str, Any]], horizon: int) -> float | None:
@@ -324,10 +326,12 @@ def update_challengers() -> dict[str, Any]:
     for path in artifacts:
         payload = read_json(path, {}) or {}
         for row in payload.get("rows", []): source_rows.append((path, row))
+    source_rows, duplicate_memberships = independent_membership_rows(source_rows, ("challenger", "trading_date", "symbol"))
     symbols = {row["symbol"] for _, row in source_rows} | {"SPY"} | set(SECTOR_ETFS.values()); mark_result=capture_daily_marks(symbols); series = load_price_series(symbols)
     rows = [{**row, "ranking_artifact": str(path), **label(row, series)} for path, row in source_rows]
     now = utc_now(); stamp = now.strftime("%Y%m%dT%H%M%SZ"); directory = RESEARCH_ROOT / "scoreboards"
-    outcomes = write_immutable(directory / f"unchased_challenger_outcomes_v2_{stamp}.json", {"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"rows":rows})
+    rows, versioning = version_resolved_outcomes(rows, "challenger", now.isoformat())
+    outcomes = write_immutable(directory / f"unchased_challenger_outcomes_v2_{stamp}.json", {"schema_version":2,"namespace":"outcomes_v2","research_only":True,"non_trading":True,"created_at":now.isoformat(),"duplicate_intended_session_memberships":duplicate_memberships,"outcome_versioning":versioning,"rows":rows})
     report = []
     for challenger in CHALLENGERS:
         challenger_rows = [row for row in rows if row["challenger"] == challenger]
@@ -349,7 +353,7 @@ def update_challengers() -> dict[str, Any]:
         report.append({"challenger":challenger,"quintile":"SCORE_MISSING","n":len(missing),"unique_dates":len({row['trading_date'] for row in missing}),"missing_pct":100.0 if missing else 0.0,"evidence_state":"UNRANKED_RETAINED"})
     correlations = {challenger:{f"d{horizon}":spearman([row for row in rows if row["challenger"]==challenger],horizon) for horizon in (3,5)} for challenger in CHALLENGERS}
     scoreboard = write_immutable(directory / f"unchased_challenger_scoreboard_v2_{stamp}.json", {"schema_version":2,"outcome_namespace":"outcomes_v2","v1_attribution":{"UNCHASED_SWING_RANK_V1":"UNCHASED_SWING_RANK_V1_MIXED_ATR","LOW_EXTENSION_BASELINE_V1":"LOW_EXTENSION_BASELINE_V1_MIXED_ATR","methodology":"COMPROMISED_PRESERVED"},"research_only":True,"non_trading":True,"created_at":now.isoformat(),"minimum_dates_for_verdict":30,"preferred_dates":60,"spearman":correlations,"quintiles":report})
-    return {"ok":True,"ranking_artifacts":len(artifacts),"rows":len(rows),"daily_mark":mark_result,"outcomes":str(outcomes),"scoreboard":str(scoreboard)}
+    return {"ok":True,"ranking_artifacts":len(artifacts),"rows":len(rows),"daily_mark":mark_result,"outcomes":str(outcomes),"scoreboard":str(scoreboard),"duplicate_intended_session_memberships":len(duplicate_memberships),"outcome_versioning":versioning}
 
 
 def attach_premarket() -> dict[str, Any]:

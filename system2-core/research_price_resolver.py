@@ -15,6 +15,8 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent
 RESEARCH_ROOT = ROOT / "data" / "research_telemetry"
 NY = ZoneInfo("America/New_York")
+_CACHE_FILE_INDEX: dict[str, list[str]] | None = None
+_CORPORATE_ACTION_INDEX: dict[str, list[dict[str, Any]]] | None = None
 
 
 def number(value: Any) -> float | None:
@@ -62,6 +64,35 @@ def _symbol_from_cache(path: str) -> str:
     return match.group(1).upper() if match else ""
 
 
+def _cache_file_index() -> dict[str, list[str]]:
+    global _CACHE_FILE_INDEX
+    if _CACHE_FILE_INDEX is None:
+        index: dict[str, list[str]] = {}
+        for path in glob.glob(str(ROOT / "data/fmp_cache/*/*historical-price-eod*json")):
+            symbol = _symbol_from_cache(path)
+            if symbol:
+                index.setdefault(symbol, []).append(path)
+        _CACHE_FILE_INDEX = {symbol: sorted(paths) for symbol, paths in index.items()}
+    return _CACHE_FILE_INDEX
+
+
+def _corporate_action_index() -> dict[str, list[dict[str, Any]]]:
+    global _CORPORATE_ACTION_INDEX
+    if _CORPORATE_ACTION_INDEX is None:
+        result: dict[str, list[dict[str, Any]]] = {}
+        for pattern in ("*split*json", "*symbol-change*json", "*merger*json"):
+            for raw_path in glob.glob(str(ROOT / "data/fmp_cache/*" / pattern)):
+                payload = _read(Path(raw_path), [])
+                rows = payload.get("data", []) if isinstance(payload, dict) else payload
+                for row in rows if isinstance(rows, list) else []:
+                    symbol = str(row.get("symbol") or row.get("ticker") or "").upper()
+                    day = str(row.get("date") or row.get("effectiveDate") or "")[:10]
+                    if symbol and day:
+                        result.setdefault(symbol, []).append({"date": day, "source_file": raw_path, "type": row.get("type") or Path(raw_path).name})
+        _CORPORATE_ACTION_INDEX = result
+    return _CORPORATE_ACTION_INDEX
+
+
 def _read(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8", errors="ignore"))
@@ -69,29 +100,50 @@ def _read(path: Path, default: Any) -> Any:
         return default
 
 
-def canonical_eod_records(symbols: set[str]) -> dict[str, dict[str, dict[str, Any]]]:
-    """Load canonical EOD rows. Batch marks are deliberately not merged here."""
-    chosen: dict[str, str] = {}
-    for path in glob.glob(str(ROOT / "data/fmp_cache/*/*historical-price-eod*json")):
-        symbol = _symbol_from_cache(path)
-        if symbol in symbols and (symbol not in chosen or path > chosen[symbol]):
-            chosen[symbol] = path
-    output: dict[str, dict[str, dict[str, Any]]] = {}
-    for symbol, raw_path in chosen.items():
-        payload = _read(Path(raw_path), {})
+def _symbol_aliases(symbol: str) -> tuple[str, ...]:
+    symbol = symbol.upper()
+    aliases = [symbol]
+    for candidate in (symbol.replace(".", "-"), symbol.replace("/", "-"), symbol.replace("-", ".")):
+        if candidate not in aliases:
+            aliases.append(candidate)
+    return tuple(aliases)
+
+
+def canonical_eod_records(symbols: set[str]) -> tuple[dict[str, dict[str, dict[str, Any]]], dict[str, dict[str, Any]]]:
+    """Merge retained canonical EOD caches newest-per-date, never newest-file-only.
+
+    A later empty or shortened provider response must not hide valid earlier
+    point-in-time cache rows.
+    """
+    requested_by_alias = {alias: requested for requested in symbols for alias in _symbol_aliases(requested)}
+    diagnostics: dict[str, dict[str, Any]] = {symbol: {"cache_files": 0, "nonempty_files": 0, "dates": set(), "aliases": _symbol_aliases(symbol)} for symbol in symbols}
+    output: dict[str, dict[str, dict[str, Any]]] = {symbol: {} for symbol in symbols}
+    cache_index = _cache_file_index()
+    relevant = [(requested_by_alias[alias], alias, path) for alias in requested_by_alias for path in cache_index.get(alias, [])]
+    for symbol, cache_symbol, path in relevant:
+        diagnostics[symbol]["cache_files"] += 1
+        payload = _read(Path(path), {})
         rows = payload.get("data", []) if isinstance(payload, dict) else payload
-        by_date: dict[str, dict[str, Any]] = {}
+        if isinstance(rows, list) and rows:
+            diagnostics[symbol]["nonempty_files"] += 1
         for row in rows if isinstance(rows, list) else []:
             if isinstance(row, dict) and row.get("date"):
-                by_date[str(row["date"])[:10]] = {
+                market_date = str(row["date"])[:10]
+                diagnostics[symbol]["dates"].add(market_date)
+                existing = output[symbol].get(market_date)
+                if existing and str(existing.get("_source_file")) > path:
+                    continue
+                output[symbol][market_date] = {
                     **row,
-                    "_source_file": raw_path,
+                    "_source_file": path,
                     "_source_type": "CANONICAL_FMP_EOD",
                     "_provider": "FMP historical-price-eod/full",
+                    "_source_symbol": cache_symbol,
                     "_adjustment_basis": str(row.get("adjustment_basis") or "UNKNOWN").upper(),
                 }
-        output[symbol] = by_date
-    return output
+    for item in diagnostics.values():
+        item["dates"] = sorted(item["dates"])
+    return output, diagnostics
 
 
 def retained_daily_marks(symbols: set[str]) -> dict[str, dict[str, list[dict[str, Any]]]]:
@@ -111,7 +163,7 @@ class ResearchPriceResolver:
 
     def __init__(self, symbols: set[str]):
         self.symbols = {s.upper() for s in symbols}
-        self.eod = canonical_eod_records(self.symbols)
+        self.eod, self.cache_diagnostics = canonical_eod_records(self.symbols)
         self.marks = retained_daily_marks(self.symbols)
 
     def _missing(self, symbol: str, day: str, field: str, reason: str, quality: str = "MISSING_PRICE") -> dict[str, Any]:
@@ -132,20 +184,31 @@ class ResearchPriceResolver:
             if proven and number(mark.get(key)) is not None:
                 basis = str(mark.get("adjustment_basis") or "UNKNOWN").upper()
                 return ResolvedPrice(symbol, market_date, number(mark[key]), field_type, "IMMUTABLE_COMPLETED_OHLC", mark.get("_source_file"), str(mark.get("provider") or "UNKNOWN"), timestamp.isoformat(), session, basis, "VALIDATED_FALLBACK", 2, None).to_dict()
-        return self._missing(symbol, market_date, field_type, "NO_CANONICAL_OR_PROVEN_COMPLETED_SESSION_PRICE")
+        # The recorder is a retained, timestamped Alpaca market-data artifact,
+        # not a broker request. Its first 09:30 ET bar can authoritatively
+        # recover NEXT_OPEN only; partial intraday files can never supply close.
+        if field_type == "NEXT_OPEN":
+            intraday_path = ROOT / "data" / "intraday_bars" / market_date / f"{symbol}.json"
+            payload = _read(intraday_path, {})
+            bars = payload.get("bars", []) if isinstance(payload, dict) else []
+            for bar in bars if isinstance(bars, list) else []:
+                stamp = parse_timestamp(bar.get("timestamp"))
+                if stamp and stamp.astimezone(NY).date().isoformat() == market_date and stamp.astimezone(NY).time() == time(9, 30) and number(bar.get("open")) is not None:
+                    return ResolvedPrice(symbol, market_date, number(bar["open"]), field_type, "IMMUTABLE_ALPACA_5MIN_OPEN", str(intraday_path), "Alpaca market-data recorder", stamp.isoformat(), "COMPLETED_REGULAR", "UNADJUSTED", "VALIDATED_FALLBACK", 2, None).to_dict()
+        diagnostic = self.cache_diagnostics.get(symbol, {})
+        if not diagnostic.get("cache_files"):
+            reason = "SYMBOL_NOT_FOUND"
+        elif not diagnostic.get("nonempty_files"):
+            reason = "REQUEST_FAILED_OR_EMPTY_CACHE"
+        elif market_date not in set(diagnostic.get("dates") or []):
+            reason = "FMP_NO_HISTORICAL_PRICE_FOR_TARGET_DATE"
+        else:
+            reason = "PRICE_FIELD_MISSING_OR_INVALID"
+        return self._missing(symbol, market_date, field_type, reason)
 
     def corporate_action_state(self, symbol: str, start_date: str, end_date: str) -> dict[str, Any]:
         """Conservative: explicit cached actions are flagged; unknown adjustment basis is retained."""
-        actions = []
-        patterns = ("*split*", "*symbol-change*", "*merger*")
-        for pattern in patterns:
-            for path in glob.glob(str(ROOT / f"data/fmp_cache/*/{pattern}{symbol}*json")):
-                payload = _read(Path(path), [])
-                rows = payload.get("data", []) if isinstance(payload, dict) else payload
-                for row in rows if isinstance(rows, list) else []:
-                    day = str(row.get("date") or row.get("effectiveDate") or "")[:10]
-                    if start_date <= day <= end_date:
-                        actions.append({"date": day, "source_file": path, "type": row.get("type") or Path(path).name})
+        actions = [row for row in _corporate_action_index().get(symbol.upper(), []) if start_date <= row["date"] <= end_date]
         return {"state": "CORPORATE_ACTION_UNRESOLVED" if actions else "NO_RETAINED_ACTION_FOUND", "actions": actions}
 
 

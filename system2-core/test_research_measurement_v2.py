@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Offline fixtures for research measurement V2. No network or broker access."""
 
+import json
+import tempfile
 from datetime import datetime, timezone
+from pathlib import Path
 
 from research_price_resolver import ResearchPriceResolver, validate_premarket_quote
-from research_telemetry_common import session_offset, session_record
+import research_telemetry_common as common
+from research_telemetry_common import independent_membership_rows, session_offset, session_record, version_resolved_outcomes
 from swing_shadow_cohorts import label
 
 
@@ -26,6 +30,31 @@ def run() -> None:
     assert session_record(datetime(2026,11,27).date())["session_type"] == "HALF_DAY"
     assert session_offset(datetime(2026,12,31).date(),1)["session_date"] == "2027-01-04"  # cross-year New Year closure
     assert session_offset(datetime(2026,11,25).date(),1)["session_date"] == "2026-11-27"  # Thanksgiving
+    fixture_row = {"cohort":"TEST","trading_date":"2026-09-08","symbol":"TST"}
+    unique, duplicates = independent_membership_rows(
+        [(Path("20260905-run/membership.json"), fixture_row), (Path("20260908-rerun/membership.json"), dict(fixture_row))],
+        ("cohort", "trading_date", "symbol"),
+    )
+    assert len(unique) == 1 and len(duplicates) == 1
+
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = common.RESEARCH_ROOT
+        common.RESEARCH_ROOT = Path(tmp)
+        try:
+            initial = {"cohort":"TEST","symbol":"TST","trading_date":"2026-09-08","d1":{"state":"AVAILABLE","target_market_date":"2026-09-09","close":101.0,"close_provenance":{"provider":"fixture","provider_timestamp":"2026-09-09T20:00:00Z","source_file":"A.json"},"raw_return_pct":1.0,"spy_return_pct":0.0,"spy_adjusted_return_pct":1.0,"sector_return_pct":0.0,"sector_adjusted_return_pct":1.0}}
+            version_resolved_outcomes([initial], "fixture", "2026-09-09T21:00:00Z")
+            revised = json.loads(json.dumps(initial))
+            revised["d1"].update({"close":102.0,"raw_return_pct":2.0,"spy_adjusted_return_pct":2.0,"sector_adjusted_return_pct":2.0})
+            revised["d1"]["close_provenance"]["source_file"] = "B.json"
+            second, stats = version_resolved_outcomes([revised], "fixture", "2026-09-10T21:00:00Z")
+            versions = sorted(Path(tmp).glob("outcome_versions_v2/fixture/*/*/v*.json"))
+            assert len(versions) == 2
+            assert json.loads(versions[0].read_text())["price_value"] == 101.0
+            assert json.loads(versions[1].read_text())["price_value"] == 102.0
+            assert second[0]["d1"]["revision_state"] == "UPSTREAM_PRICE_REVISION"
+            assert stats["upstream_price_revisions"] == 1
+        finally:
+            common.RESEARCH_ROOT = old_root
     class ExactDateFixture:
         def resolve(self, symbol, market_date, field_type):
             values = {("TST","2026-09-04","NEXT_OPEN"):100, ("TST","2026-09-08","SESSION_CLOSE"):102,
