@@ -1102,6 +1102,7 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
     if(t){
       let closePrice = b.close_price??b.closePrice??b.current_price??null;
       let grossIn    = b.pnl_gross??b.pnl??b.pnl_realised??null;
+      let authoritativeCloseAt = null;
 
       // An unverifiable close is refused, not recorded. Resolution is triggered
       // by a MISSING PRICE, not by a missing price AND a missing pnl: the old
@@ -1136,6 +1137,7 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
           });
         }
         closePrice = resolved.close_price;
+        authoritativeCloseAt = resolved.close_at || null;
         t.close_source = resolved.close_source;
         t.close_resolved_from = 'capital /history/activity detailed=true';
         const dir = String(t.direction||'').toUpperCase();
@@ -1160,7 +1162,7 @@ app.post('/api/trade/close', scannerAuth, async (req,res)=>{
       t.pnl_net=t.pnl_gross==null?null:computeNetPnl(t);
       t.pnl=t.pnl_net;
       if(t.status==='CLOSED') {
-        t.closed_at=b.ts||now();
+        t.closed_at=b.ts||authoritativeCloseAt||now();
         finalizeTradePath(t);
       }
     }
