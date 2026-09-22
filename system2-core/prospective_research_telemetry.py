@@ -15,7 +15,7 @@ from typing import Any
 
 from research_telemetry_common import (
     NY, RESEARCH_ROOT, is_market_session, next_market_session, read_json,
-    run_directory, utc_now, write_immutable,
+    publish_session_authority, run_directory, session_authority, utc_now, write_immutable,
 )
 
 ROOT = Path(__file__).resolve().parent
@@ -64,13 +64,13 @@ def latest_artifact(session: str, name: str) -> Path | None:
 
 def finalize_nightly() -> dict[str, Any]:
     timing = next_market_session()
-    directory = latest_run_dir(timing["trading_session"]) or run_directory(timing["trading_session"])
+    provenance_path = latest_artifact(timing["trading_session"], "universe_provenance.json")
+    directory = provenance_path.parent if provenance_path else run_directory(timing["trading_session"])
     universe = read_json(ROOT / "universe.json", [])
     candidate_pool = read_json(ROOT / "candidate_pool.json", [])
     stage1 = read_json(ROOT / "stage1_survivors.json", [])
     stage2 = read_json(ROOT / "stage2_surgical_strike_top40.json", [])
     finalists = read_json(ROOT / "stage7_clustered_survivors.json", [])
-    provenance_path = latest_artifact(timing["trading_session"], "universe_provenance.json")
     provenance = read_json(provenance_path or Path("/missing"), {})
     base_vectors = provenance.get("source_lineage", {}) if isinstance(provenance, dict) else {}
     overlay: dict[str, set[str]] = {}
@@ -97,12 +97,23 @@ def finalize_nightly() -> dict[str, Any]:
             "stage2_member": ticker in stage2_set,
             "finalist_member": ticker in finalist_set,
         }
+    pipeline_completed_at = datetime.fromtimestamp((ROOT / "stage7_clustered_survivors.json").stat().st_mtime, timezone.utc).isoformat()
+    run = directory.name
+    candidate_run = next((row.get("_system2_run_id") for row in candidate_pool if isinstance(row, dict) and row.get("_system2_run_id")), None)
+    if candidate_run and candidate_run != run:
+        raise RuntimeError(f"PROVENANCE_RUN_MISMATCH: provenance={run} candidate_pool={candidate_run}")
+    prior = session_authority(timing["trading_session"])
     payload = {
         "schema_version": 1,
         "research_only": True,
         "non_trading": True,
         "created_at": utc_now().isoformat(),
-        "pipeline_completed_at": datetime.fromtimestamp((ROOT / "stage7_clustered_survivors.json").stat().st_mtime, timezone.utc).isoformat(),
+        "pipeline_completed_at": pipeline_completed_at,
+        "run_id": run,
+        "run_timestamp": pipeline_completed_at,
+        "intended_xnys_session": timing["trading_session"],
+        "authoritative_for_session": True,
+        "supersedes_run_id": (prior or {}).get("run_id") if not prior or prior.get("run_id") != run else prior.get("supersedes_run_id"),
         **timing,
         "production_counts": {"universe": len(universe), "candidate_pool": len(candidate_pool), "stage1": len(stage1), "stage2": len(stage2), "finalists": len(finalists)},
         "source_lineage": lineage,
@@ -110,9 +121,14 @@ def finalize_nightly() -> dict[str, Any]:
     }
     path = directory / "funnel_membership.json"
     if path.exists():
+        existing = read_json(path, {})
+        if existing.get("run_id") == run:
+            authority = publish_session_authority(timing["trading_session"], run, pipeline_completed_at, path)
+            return {"ok": True, "idempotent": True, "path": str(path), "counts": existing.get("production_counts"), "authority": authority}
         raise FileExistsError(f"immutable artifact already exists: {path}")
     write_immutable(path, payload)
-    return {"ok": True, "path": str(path), "counts": payload["production_counts"]}
+    authority = publish_session_authority(timing["trading_session"], run, pipeline_completed_at, path)
+    return {"ok": True, "path": str(path), "counts": payload["production_counts"], "authority": authority}
 
 
 def datum(value: Any, observed_at: str, provider: str, event_time: str | None = None, error: str | None = None, stale: bool = False) -> dict[str, Any]:

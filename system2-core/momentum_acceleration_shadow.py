@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from prospective_research_telemetry import get_json, load_dotenv
-from research_telemetry_common import NY, RESEARCH_ROOT, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_offset, session_record, utc_now, version_resolved_outcomes, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, authority_fields, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_authority, session_offset, session_record, utc_now, version_resolved_outcomes, write_immutable
 from research_price_resolver import ResearchPriceResolver, validate_premarket_quote
 from swing_shadow_cohorts import SECTOR_ETFS, capture_daily_marks, file_hash, label, load_price_series, number, ticker
 
@@ -35,20 +35,21 @@ def parse_time(value: Any) -> datetime | None:
 
 def create_nightly() -> dict[str, Any]:
     timing=next_market_session(); session=timing["trading_session"]; existing=latest(session,"momentum_level_nightly.json")
-    if existing:return {"ok":True,"idempotent":True,"path":str(existing)}
+    decision=session_authority(session)
+    if existing and (not decision or (read_json(existing,{}) or {}).get("run_id")==decision.get("run_id")):return {"ok":True,"idempotent":True,"path":str(existing)}
     rows=[r for r in (read_json(ROOT/"stage2_surgical_strike_scored.json",[]) or []) if r.get("status")=="OK" and ticker(r)]
     pipeline=datetime.fromtimestamp((ROOT/"stage2_surgical_strike_scored.json").stat().st_mtime,timezone.utc).isoformat()
-    config_hash=file_hash([ROOT/"system2-config.json",ROOT/"b3_surgical_strike_stage2.py"]); output=[]
+    config_hash=file_hash([ROOT/"system2-config.json",ROOT/"b3_surgical_strike_stage2.py"]); output=[]; run_fields=authority_fields(session,pipeline,pipeline)
     for row in rows:
         extension=number(row.get("distanceFromVWAP") if row.get("distanceFromVWAP") is not None else row.get("distanceFromVWMA"))
-        output.append({"symbol":ticker(row),"trading_date":session,"next_open_timestamp":timing["next_session_open"],"pipeline_timestamp":pipeline,"config_hash":config_hash,
+        output.append({"symbol":ticker(row),**run_fields,"trading_date":session,"next_open_timestamp":timing["next_session_open"],"pipeline_timestamp":pipeline,"config_hash":config_hash,
                        "nightly_rs_vs_spy_pct":number(row.get("rsVsSpy")),"nightly_sector_alpha_pct":number(row.get("sectorAlpha")),
                        "atr_pct":number(row.get("atrPct") if row.get("atrPct") is not None else row.get("atr5MinPct")),
                        "atr_source":"atrPct" if row.get("atrPct") is not None else "atr5MinPct" if row.get("atr5MinPct") is not None else None,
                        "vwap_vwma_extension_pct":extension,"rvol":number(row.get("volumeRatio")),"price":number(row.get("price")),
                        "price_return_pct":number(row.get("todayReturnPct")),"distance_from_recent_high_pct":number(row.get("pct_from_52wk_high")),
                        "sector":row.get("sector"),"field_states":{"price_return_pct":"FRESH" if row.get("todayReturnPct") is not None else "MISSING"}})
-    path=write_immutable(run_directory(session)/"momentum_level_nightly.json",{"schema_version":1,"interpretation_state":V1_INTERPRETATION,"exclude_from_alpha":True,"research_only":True,"non_trading":True,"immutable_membership":True,**timing,"pipeline_timestamp":pipeline,"config_hash":config_hash,"population":len(output),"rows":output})
+    path=write_immutable(run_directory(session,str(run_fields["run_id"])+"-research")/"momentum_level_nightly.json",{"schema_version":1,"interpretation_state":V1_INTERPRETATION,"exclude_from_alpha":True,"research_only":True,"non_trading":True,"immutable_membership":True,**timing,**run_fields,"pipeline_timestamp":pipeline,"config_hash":config_hash,"population":len(output),"rows":output})
     return {"ok":True,"path":str(path),"population":len(output)}
 
 
@@ -137,22 +138,23 @@ def capture_premarket() -> dict[str,Any]:
 
 def create_nightly_v2() -> dict[str,Any]:
     timing=next_market_session();session=timing["trading_session"];existing=latest(session,"momentum_level_nightly_v2.json")
-    if existing:return {"ok":True,"idempotent":True,"path":str(existing)}
+    decision=session_authority(session)
+    if existing and (not decision or (read_json(existing,{}) or {}).get("run_id")==decision.get("run_id")):return {"ok":True,"idempotent":True,"path":str(existing)}
     scored=[r for r in (read_json(ROOT/"stage2_surgical_strike_scored.json",[]) or []) if r.get("status")=="OK" and ticker(r)]
     prior=session_offset(datetime.fromisoformat(session).date(),-1)
     if not prior:return {"ok":False,"reason":"PRIOR_SESSION_UNRESOLVED"}
     anchor_date=prior["session_date"];symbols={ticker(r) for r in scored}|{"SPY"}|set(SECTOR_ETFS.values());resolver=ResearchPriceResolver(symbols)
-    pipeline=datetime.fromtimestamp((ROOT/"stage2_surgical_strike_scored.json").stat().st_mtime,timezone.utc).isoformat();config_hash=file_hash([ROOT/"system2-config.json",ROOT/"b3_surgical_strike_stage2.py"]);rows=[]
+    pipeline=datetime.fromtimestamp((ROOT/"stage2_surgical_strike_scored.json").stat().st_mtime,timezone.utc).isoformat();config_hash=file_hash([ROOT/"system2-config.json",ROOT/"b3_surgical_strike_stage2.py"]);rows=[];run_fields=authority_fields(session,pipeline,pipeline)
     for source in scored:
         symbol=ticker(source);sector_symbol=SECTOR_ETFS.get(source.get("sector"));sa=resolver.resolve(symbol,anchor_date,"NEXT_OPEN");se=resolver.resolve(symbol,anchor_date,"SESSION_CLOSE")
         pa=resolver.resolve("SPY",anchor_date,"NEXT_OPEN");pe=resolver.resolve("SPY",anchor_date,"SESSION_CLOSE");xa=resolver.resolve(sector_symbol,anchor_date,"NEXT_OPEN") if sector_symbol else None;xe=resolver.resolve(sector_symbol,anchor_date,"SESSION_CLOSE") if sector_symbol else None
         stock=(se["price"]/sa["price"]-1)*100 if sa.get("price") and se.get("price") else None;spy=(pe["price"]/pa["price"]-1)*100 if pa.get("price") and pe.get("price") else None;sector=(xe["price"]/xa["price"]-1)*100 if xa and xe and xa.get("price") and xe.get("price") else None
         nightly_rs=stock-spy if stock is not None and spy is not None else None;nightly_sector=stock-sector if stock is not None and sector is not None else None
-        rows.append({"schema_version":2,"symbol":symbol,"sector":source.get("sector"),"sector_etf":sector_symbol,"trading_date":session,"next_open_timestamp":timing["next_session_open"],"anchor_date":anchor_date,"pipeline_timestamp":pipeline,"config_hash":config_hash,
+        rows.append({"schema_version":2,**run_fields,"symbol":symbol,"sector":source.get("sector"),"sector_etf":sector_symbol,"trading_date":session,"next_open_timestamp":timing["next_session_open"],"anchor_date":anchor_date,"pipeline_timestamp":pipeline,"config_hash":config_hash,
                      "stock_anchor":sa,"spy_anchor":pa,"sector_anchor":xa,"stock_nightly_endpoint":se,"spy_nightly_endpoint":pe,"sector_nightly_endpoint":xe,
                      "stock_return_t1_pct":stock,"spy_return_t1_pct":spy,"sector_return_t1_pct":sector,"nightly_rs_v2_pct":nightly_rs,"nightly_sector_rs_v2_pct":nightly_sector,
                      "high_level_v2":bool(nightly_rs is not None and nightly_sector is not None and nightly_rs>0 and nightly_sector>0),"measurement_state":"VALID" if nightly_rs is not None and nightly_sector is not None else "ACCELERATION_MEASUREMENT_MISSING"})
-    path=write_immutable(run_directory(session)/"momentum_level_nightly_v2.json",{"schema_version":2,"research_only":True,"non_trading":True,"common_anchor":"PRIOR_REGULAR_SESSION_OPEN","population":len(rows),**timing,"rows":rows})
+    path=write_immutable(run_directory(session,str(run_fields["run_id"])+"-research")/"momentum_level_nightly_v2.json",{"schema_version":2,"research_only":True,"non_trading":True,"common_anchor":"PRIOR_REGULAR_SESSION_OPEN","population":len(rows),**timing,**run_fields,"rows":rows})
     return {"ok":True,"path":str(path),"population":len(rows),"missing":sum(r["measurement_state"]!="VALID" for r in rows)}
 
 

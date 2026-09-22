@@ -155,6 +155,48 @@ def run_directory(session: str | None = None, identifier: str | None = None) -> 
     return path
 
 
+def session_authority(session: str) -> dict[str, Any] | None:
+    """Latest immutable authority decision for an intended market session."""
+    directory = RESEARCH_ROOT / "session_authority" / session
+    decisions = sorted(directory.glob("*.json")) if directory.exists() else []
+    return read_json(decisions[-1], {}) if decisions else None
+
+
+def publish_session_authority(session: str, run: str, run_timestamp: str, source_artifact: Path) -> dict[str, Any]:
+    """Append a supersession decision; never edit a previous run or membership."""
+    previous = session_authority(session)
+    if previous and previous.get("run_id") == run:
+        return previous
+    moment = utc_now()
+    payload = {
+        "schema_version": 1,
+        "research_only": True,
+        "run_id": run,
+        "run_timestamp": run_timestamp,
+        "intended_xnys_session": session,
+        "authoritative_for_session": True,
+        "supersedes_run_id": previous.get("run_id") if previous else None,
+        "source_artifact": str(source_artifact),
+        "decided_at": moment.isoformat(),
+    }
+    directory = RESEARCH_ROOT / "session_authority" / session
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{moment.strftime('%Y%m%dT%H%M%S%fZ')}_{_safe_component(run)}.json"
+    write_immutable(path, payload)
+    return {**payload, "authority_artifact": str(path)}
+
+
+def authority_fields(session: str, fallback_run: str, fallback_timestamp: str) -> dict[str, Any]:
+    decision = session_authority(session)
+    return {
+        "run_id": decision.get("run_id") if decision else fallback_run,
+        "run_timestamp": decision.get("run_timestamp") if decision else fallback_timestamp,
+        "intended_xnys_session": session,
+        "authoritative_for_session": True,
+        "supersedes_run_id": decision.get("supersedes_run_id") if decision else None,
+    }
+
+
 def content_hash(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
     return hashlib.sha256(raw).hexdigest()
@@ -169,13 +211,24 @@ def independent_membership_rows(
 ) -> tuple[list[tuple[Path, dict[str, Any]]], list[dict[str, Any]]]:
     """Keep one research member per intended-session identity.
 
-    Operational reruns remain on disk. Evaluation uses the earliest immutable
-    membership for a key, preventing holiday carry plus a same-session rerun
-    from inflating the independent sample.
+    Operational reruns remain on disk. When an explicit immutable session
+    authority exists, evaluation uses only that run; legacy sessions without
+    an authority decision retain the earliest-membership rule.
     """
     selected: dict[tuple[Any, ...], tuple[Path, dict[str, Any]]] = {}
     duplicates: list[dict[str, Any]] = []
     for path, row in sorted(rows, key=lambda item: str(item[0])):
+        session = str(row.get("intended_xnys_session") or row.get("trading_date") or "")
+        authority = session_authority(session) if session else None
+        row_run = row.get("run_id") or row.get("pipeline_run_id")
+        if authority and row_run != authority.get("run_id"):
+            duplicates.append({
+                "identity": {field: row.get(field) for field in identity_fields},
+                "duplicate_artifact": str(path),
+                "authoritative_run_id": authority.get("run_id"),
+                "classification": "SUPERSEDED_INTENDED_SESSION_RUN",
+            })
+            continue
         identity = tuple(row.get(field) for field in identity_fields)
         if identity in selected:
             duplicates.append({

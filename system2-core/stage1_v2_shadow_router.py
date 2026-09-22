@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from research_price_resolver import ResearchPriceResolver
-from research_telemetry_common import RESEARCH_ROOT, independent_membership_rows, next_market_session, read_json, run_directory, utc_now, version_resolved_outcomes, write_immutable
+from research_telemetry_common import RESEARCH_ROOT, authority_fields, independent_membership_rows, next_market_session, read_json, run_directory, session_authority, utc_now, version_resolved_outcomes, write_immutable
 from swing_shadow_cohorts import HORIZONS, SECTOR_ETFS, label
 
 ROOT = Path(__file__).resolve().parent
@@ -178,8 +178,9 @@ def latest_existing(session: str, filename: str) -> Path | None:
 def create() -> dict[str, Any]:
     timing = next_market_session()
     session = timing["trading_session"]
+    decision = session_authority(session)
     existing = latest_existing(session, "stage1_v2_shadow.json")
-    if existing:
+    if existing and (not decision or (read_json(existing, {}) or {}).get("run_id") == decision.get("run_id")):
         payload = read_json(existing, {}) or {}
         return {"ok": True, "idempotent": True, "path": str(existing), "counts": payload.get("counts")}
     candidates = read_json(ROOT / "candidate_pool.json", []) or []
@@ -199,6 +200,9 @@ def create() -> dict[str, Any]:
     enrichment, enrichment_errors = screener_enrichment(api_key)
     pipeline_timestamp = datetime.fromtimestamp((ROOT / "candidate_pool.json").stat().st_mtime, timezone.utc).isoformat()
     run_id = str(next((row.get("_system2_run_id") for row in candidates if isinstance(row, dict) and row.get("_system2_run_id")), None) or metadata.get("run_id") or pipeline_timestamp)
+    run_fields = authority_fields(session, run_id, pipeline_timestamp)
+    if decision and run_id != decision.get("run_id"):
+        raise RuntimeError("STAGE1_V2_RUN_DOES_NOT_MATCH_SESSION_AUTHORITY")
     config_hash = hash_files([ROOT / "system2-config.json", ROOT / "b2_stage1_cheap_filter.py", ROOT / "stage1_v2_shadow_router.py"])
     action_map = retained_corporate_actions(set(symbols), pipeline_timestamp[:10], session)
     output: list[dict[str, Any]] = []
@@ -241,7 +245,7 @@ def create() -> dict[str, Any]:
         })
         atr = number(v1.get("atrPct") or candidate.get("atrPct") or candidate.get("atr5MinPct"))
         output.append({
-            "symbol": key, "run_id": run_id, "trading_session": session, "next_open_timestamp": timing["next_session_open"],
+            "symbol": key, **run_fields, "trading_session": session, "next_open_timestamp": timing["next_session_open"],
             "pipeline_timestamp": pipeline_timestamp, "measurement_timestamp": measured_at,
             "production_stage1_v1_result": v1.get("status") or "UNKNOWN",
             "production_stage1_v1_rejection_reasons": reasons,
@@ -272,7 +276,7 @@ def create() -> dict[str, Any]:
     production = {"input": len(candidates), "pass": sum(row["production_stage1_v1_result"] == "PASS" for row in output), "reject": sum(row["production_stage1_v1_result"] == "REJECT" for row in output)}
     directory = run_directory(session, run_id)
     payload = {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, **timing,
-               "run_id": run_id, "pipeline_timestamp": pipeline_timestamp, "config_hash": config_hash,
+               **run_fields, "pipeline_timestamp": pipeline_timestamp, "config_hash": config_hash,
                "production_stage1_counts": production, "counts": counts, "quote_errors": quote_errors, "enrichment_errors": enrichment_errors, "event_error": event_error, "rows": output}
     shadow_path = write_immutable(directory / "stage1_v2_shadow.json", payload)
     cohort_rows: list[dict[str, Any]] = []
@@ -282,7 +286,7 @@ def create() -> dict[str, Any]:
             cohort_rows.append({**row, "cohort": mapping[row["stage1_v2_classification"]], "trading_date": session, "entry_source": "NEXT_REGULAR_SESSION_OPEN"})
         if row["production_stage1_v1_result"] == "PASS":
             cohort_rows.append({**row, "cohort": COHORTS[3], "trading_date": session, "entry_source": "NEXT_REGULAR_SESSION_OPEN"})
-    cohort_path = write_immutable(directory / "stage1_v2_cohort_membership.json", {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, **timing, "run_id": run_id, "source_artifact": str(shadow_path), "rows": cohort_rows})
+    cohort_path = write_immutable(directory / "stage1_v2_cohort_membership.json", {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, **timing, **run_fields, "source_artifact": str(shadow_path), "rows": cohort_rows})
     return {"ok": True, "path": str(shadow_path), "cohort_path": str(cohort_path), "counts": counts, "production": production,
             "capacity_limited": counts.get("ALPHA_ELIGIBLE_CAPACITY_LIMITED", 0), "recent_shadow_measured": sum(row["recent_shadow_context"] and row["data_quality_state"] == "COMPLETE_CORE" for row in output),
             "recent_shadow_total": sum(row["recent_shadow_context"] for row in output), "broker_calls": 0}

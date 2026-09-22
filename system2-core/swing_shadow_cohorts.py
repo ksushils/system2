@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from research_telemetry_common import NY, RESEARCH_ROOT, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_offset, utc_now, version_resolved_outcomes, write_immutable
+from research_telemetry_common import NY, RESEARCH_ROOT, authority_fields, independent_membership_rows, is_market_session, next_market_session, read_json, run_directory, session_authority, session_offset, utc_now, version_resolved_outcomes, write_immutable
 from research_price_resolver import ResearchPriceResolver
 
 ROOT = Path(__file__).resolve().parent
@@ -87,8 +87,9 @@ def assign_ranks(rows: list[dict[str, Any]], challenger: str) -> None:
 
 def create_challengers() -> dict[str, Any]:
     timing = next_market_session(); session = timing["trading_session"]
+    decision = session_authority(session)
     existing = latest_artifact(session, "unchased_challenger_rankings_v2.json")
-    if existing:
+    if existing and (not decision or (read_json(existing, {}) or {}).get("run_id") == decision.get("run_id")):
         return {"ok": True, "idempotent": True, "path": str(existing)}
     scored = read_json(ROOT / "stage2_surgical_strike_scored.json", []) or []
     eligible = [row for row in scored if row.get("status") == "OK" and ticker(row)]
@@ -102,6 +103,7 @@ def create_challengers() -> dict[str, Any]:
                            "_raw_extension": raw_extension, "_rs": number(row.get("rsVsSpy")), "_sector": number(row.get("sectorAlpha"))})
     percentiles = {field: percentile_map(normalized, field) for field in ("_atr", "_atr5", "_extension", "_rs", "_sector")}
     pipeline_timestamp = datetime.fromtimestamp((ROOT / "stage2_surgical_strike_scored.json").stat().st_mtime, timezone.utc).isoformat()
+    run_fields = authority_fields(session, pipeline_timestamp, pipeline_timestamp)
     config_hash = file_hash([ROOT / "system2-config.json", ROOT / "b3_surgical_strike_stage2.py"])
     output = []
     for row in normalized:
@@ -156,8 +158,11 @@ def create_challengers() -> dict[str, Any]:
                        "final_score": round(low5, 6) if low5 is not None else None})
     for challenger in CHALLENGERS:
         assign_ranks(output, challenger)
-    directory = run_directory(session)
+    for ranked_row in output:
+        ranked_row.update(run_fields)
+    directory = run_directory(session, str(run_fields["run_id"]) + "-research")
     payload = {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_rankings": True, **timing,
+               **run_fields,
                "pipeline_timestamp": pipeline_timestamp, "config_hash": config_hash, "definitions": {
                    CHALLENGERS[0]: "equal mean of available inverse ATR/positive-extension/RS/sector percentiles; minimum 3 of 4",
                    CHALLENGERS[1]: "equal mean of inverse ATR and positive-extension percentiles; both required",
@@ -186,14 +191,15 @@ def row_fields(row: dict[str, Any], state: str, lineage: dict[str, Any]) -> dict
 
 def create_membership() -> dict[str, Any]:
     timing = next_market_session(); session = timing["trading_session"]
+    decision = session_authority(session)
     existing = latest_artifact(session, "swing_cohort_membership.json")
-    if existing:
+    if existing and (not decision or (read_json(existing, {}) or {}).get("run_id") == decision.get("run_id")):
         return {"ok": True, "idempotent": True, "path": str(existing)}
     kept = read_json(ROOT / "stage7_clustered_survivors.json", []) or []
     rejected_all = read_json(ROOT / "stage7_cluster_rejections.json", []) or []
     rejected = [r for r in rejected_all if str(r.get("clusterRejectReason") or "").startswith("cluster_cap_")]
     stage1 = read_json(ROOT / "stage1_survivors.json", []) or []
-    provenance_path = latest_artifact(session, "funnel_membership.json")
+    provenance_path = Path(decision["source_artifact"]) if decision else latest_artifact(session, "funnel_membership.json")
     provenance = read_json(provenance_path or Path("/missing"), {}) or {}
     lineage = provenance.get("source_lineage", {})
     seed_text = f"{session}|STAGE1_RANDOM_MATCHED_V1"
@@ -202,6 +208,7 @@ def create_membership() -> dict[str, Any]:
     eligible = sorted([r for r in stage1 if ticker(r) and ticker(r) not in excluded], key=ticker)
     control = random.Random(seed).sample(eligible, min(len(kept), len(eligible)))
     pipeline_stamp = datetime.fromtimestamp((ROOT / "stage7_clustered_survivors.json").stat().st_mtime, timezone.utc).isoformat()
+    run_fields = authority_fields(session, provenance.get("run_id") or pipeline_stamp, pipeline_stamp)
     config_hash = file_hash([ROOT / "system2-config.json", ROOT / "b3_surgical_strike_stage2.py", ROOT / "b4_correlation_cluster_engine.py"])
     rows = []
     for cohort, source, state in (
@@ -209,11 +216,12 @@ def create_membership() -> dict[str, Any]:
         (COHORTS[2], rejected, "REJECTED"), (COHORTS[3], control, "CONTROL"),
     ):
         for row in source:
-            rows.append({"cohort": cohort, "membership_timestamp": utc_now().isoformat(), "pipeline_run_id": provenance.get("run_id") or pipeline_stamp,
+            rows.append({"cohort": cohort, "membership_timestamp": utc_now().isoformat(), "pipeline_run_id": run_fields["run_id"], **run_fields,
                          "config_hash": config_hash, "trading_date": session, "next_open_timestamp": timing["next_session_open"],
                          **row_fields(row, state, lineage), "outcome_state": "PENDING"})
-    directory = run_directory(session)
+    directory = run_directory(session, str(run_fields["run_id"]) + "-research")
     payload = {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, **timing,
+               **run_fields,
                "pipeline_completed_at": pipeline_stamp, "deterministic_control_seed": seed, "cohort_counts": {c: sum(r["cohort"] == c for r in rows) for c in COHORTS}, "rows": rows}
     path = write_immutable(directory / "swing_cohort_membership.json", payload)
     return {"ok": True, "path": str(path), "counts": payload["cohort_counts"], "seed": seed}

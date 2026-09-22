@@ -3,7 +3,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { JSONFilePreset } from 'lowdb/node';
 import * as fmpStore from './fmp-budget.js';
 import attachScoring from './scoring-endpoints.cjs';
@@ -1262,6 +1262,39 @@ app.post('/api/rejection', scannerAuth, async (req,res)=>{
     await saveRejectionHot(rejection); res.json({status:'ok'});
     await journalEvent('rejection', rejection).catch(()=>{});
   } catch(e){ res.status(500).json({status:'error',message:e.message}); }
+});
+
+// Append-only PA risk decisions. This is operational attribution, not a trading
+// input: no risk threshold, sizing, or broker path is changed here.
+app.post('/api/pa/risk-attribution', scannerAuth, (req, res) => {
+  try {
+    const b = req.body || {};
+    const terminal = String(b.terminal_state || '');
+    if (!['RISK_PASS', 'RISK_REJECT', 'RISK_ERROR', 'RISK_EMPTY_OUTPUT'].includes(terminal)) {
+      return res.status(400).json({ error: 'invalid terminal_state' });
+    }
+    const symbol = String(b.symbol || 'UNKNOWN').trim().toUpperCase();
+    if (!/^[A-Z0-9.^_-]{1,30}$/.test(symbol)) return res.status(400).json({ error: 'valid symbol required' });
+    const cleanNumber = value => value == null || value === '' ? null : Number.isFinite(Number(value)) ? Number(value) : null;
+    const record = {
+      ts: now(), scanner: 'pa', terminal_state: terminal, symbol,
+      input_signal_id: String(b.input_signal_id || '').slice(0, 160) || null,
+      signal_timestamp: String(b.signal_timestamp || '').slice(0, 80) || null,
+      entry: cleanNumber(b.entry), stop: cleanNumber(b.stop), target: cleanNumber(b.target),
+      qty: cleanNumber(b.qty), heat: cleanNumber(b.heat),
+      risk_inputs: {
+        risk_amount: cleanNumber(b.risk_inputs?.risk_amount),
+        projected_heat_pct: cleanNumber(b.risk_inputs?.projected_heat_pct),
+        effective_heat_pct: cleanNumber(b.risk_inputs?.effective_heat_pct),
+      },
+      risk_reason: String(b.risk_reason || '').slice(0, 500) || null,
+      downstream_order_state: String(b.downstream_order_state || 'UNKNOWN').slice(0, 80),
+    };
+    appendFileSync(path.join(DATA_DIR, 'pa-risk-attribution.jsonl'), JSON.stringify(record) + '\n', { mode: 0o600 });
+    return res.json({ status: 'ok' });
+  } catch (error) {
+    return res.status(500).json({ error: 'risk attribution write failed' });
+  }
 });
 
 // Scanner-side failure reporter. The 44% of production risk/close calls that
