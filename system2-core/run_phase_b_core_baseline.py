@@ -436,6 +436,21 @@ def main() -> None:
         if result["ok"]:
             for out_name in step_outputs.get(name, []):
                 stamp_run_id(ROOT / out_name, run_id)
+            # Research-only capture at the precise Stage2-to-cluster boundary.
+            # Its failure is logged but never changes production scoring,
+            # clustering, finalists, or the pipeline's success state.
+            if name == "B3 technical score":
+                capture = subprocess.run(
+                    [str(ROOT / ".venv/bin/python"), "frozen_shadow_experiments.py", "capture-stage2"],
+                    cwd=ROOT, env=env, capture_output=True, text=True, timeout=120,
+                )
+                result["research_full_stage2_capture"] = {
+                    "ok": capture.returncode == 0,
+                    "stdoutTail": capture.stdout[-500:],
+                    "stderrTail": capture.stderr[-500:],
+                }
+                if capture.returncode != 0:
+                    print("[WARNING] research full-Stage2 capture failed; production pipeline continues unchanged.")
         else:
             failed_step = result
             break

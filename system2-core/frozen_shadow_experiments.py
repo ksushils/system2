@@ -275,6 +275,12 @@ def create_all(commit: str | None=None) -> dict[str,Any]:
     registry(commit); result={"full_stage2":create_stage2_membership(),"pead":create_pead_membership(),"next_open_chase":create_chase_membership()}; result["summary"]=daily_summary(result); return result
 
 
+def capture_stage2() -> dict[str, Any]:
+    """Called immediately after production Stage2, before the cluster step."""
+    registry()
+    return create_stage2_membership()
+
+
 def update_all() -> dict[str,Any]:
     result={"stage2_and_chase":update_stage2_and_chase(),"pead":update_pead()}; result["summary"]=daily_summary(result); result["health"]=health(); return result
 
@@ -310,8 +316,8 @@ def self_test() -> dict[str,Any]:
 
 
 def main() -> None:
-    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create","update","health","self-test")); parser.add_argument("--git-commit"); args=parser.parse_args()
-    result=self_test() if args.command=="self-test" else create_all(args.git_commit) if args.command=="create" else health() if args.command=="health" else update_all()
+    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create","capture-stage2","update","health","self-test")); parser.add_argument("--git-commit"); args=parser.parse_args()
+    result=self_test() if args.command=="self-test" else create_all(args.git_commit) if args.command=="create" else capture_stage2() if args.command=="capture-stage2" else health() if args.command=="health" else update_all()
     print(json.dumps(result,indent=2,default=str))
 
 if __name__=="__main__": main()
