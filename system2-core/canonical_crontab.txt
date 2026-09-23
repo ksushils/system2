@@ -86,6 +86,8 @@ CRON_TZ=UTC
 # Frozen prospective shadow experiments: append-only research telemetry only; never imports broker execution or changes production selection.
 16 3 * * 2-6 cd /root/system2-core && .venv/bin/python frozen_shadow_experiments.py create >> logs/frozen_shadow_experiments.log 2>&1
 33 3 * * 2-6 cd /root/system2-core && .venv/bin/python frozen_shadow_experiments.py update >> logs/frozen_shadow_experiments.log 2>&1
+# PMF V2 early-entry shadow: stamps only; never imports execution or submits orders.
+*/15 * * * 1-5 cd /root/system2-core && .venv/bin/python pmf_early_entry_shadow.py collect >> logs/pmf_early_entry_shadow.log 2>&1
 
 # PMF Alpaca paper auto-exec exit sync - syncs bracket entry/exit fills only; PMF_AUTO_EXEC_ENABLED remains controlled by env.
 */15 14-21 * * 1-5 curl -fsS -X POST http://127.0.0.1:3210/api/system2/pmf-auto-exec/sync-local >> /root/system2-core/logs/pmf_auto_exec_sync.log 2>&1
