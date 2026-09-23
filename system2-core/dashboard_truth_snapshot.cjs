@@ -40,14 +40,24 @@ function cloneAndDerive(source) {
   return { ...row, paper_status, _entry: entry, _stop: stop, _target: n(row.original_target ?? row.target) };
 }
 function resolvedR(row) {
-  if (isInvalid(row) || row.paper_status === 'OPEN') return null;
+  if (isInvalid(row)) return null;
   const exit = n(row.paper_exit_price);
   const risk = row._entry != null && row._stop != null ? Math.abs(row._entry - row._stop) : null;
-  if (exit == null || !risk || row.r_calculation_suspect === true || row.cohort_stats_excluded === true) return null;
-  const calculated = (exit - row._entry) / (row._entry - row._stop);
-  if (risk < Math.abs(row._entry) * .005 || Math.abs(calculated) > 10) return null;
-  if (row._target != null && (exit < Math.min(row._stop, row._target) - 5 * risk || exit > Math.max(row._stop, row._target) + 5 * risk)) return null;
-  return n(row.canonical_r) ?? Number(calculated.toFixed(4));
+  const statusResolved = row.paper_status !== 'OPEN';
+  let quarantined = false;
+  // Match canonicalQuarantineReasons: a non-resolved row has no quarantine
+  // reasons, so its persisted canonical_r remains a valid legacy fallback.
+  if (statusResolved) {
+    const calculated = exit != null && row._entry != null && row._stop != null && row._entry !== row._stop ? (exit - row._entry) / (row._entry - row._stop) : null;
+    quarantined = row.cohort_stats_excluded === true || row.r_calculation_suspect === true ||
+      (risk != null && risk < Math.abs(row._entry) * .005) || (calculated != null && Math.abs(calculated) > 10) ||
+      (exit != null && row._target != null && risk != null && (exit < Math.min(row._stop, row._target) - 5 * risk || exit > Math.max(row._stop, row._target) + 5 * risk));
+  }
+  if (quarantined) return null;
+  const stored = n(row.canonical_r);
+  if (stored != null && row.canonical_r_quarantined !== true) return stored;
+  if (!statusResolved || exit == null || !risk || row._entry === row._stop) return null;
+  return Number(((exit - row._entry) / (row._entry - row._stop)).toFixed(4));
 }
 function displayable(row) { return row.paper !== false && !isInvalid(row) && !SUSPECT.has(String(row.ticker || '').toUpperCase()) && row.r_calculation_suspect !== true; }
 function rSource(row) {
