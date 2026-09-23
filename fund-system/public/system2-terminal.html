@@ -3498,6 +3498,25 @@ function cols(k){return ({universe:[['ticker','Ticker'],['source','Source'],['ca
   function csv(){if(!current)return;const c=cols(current.stage_key), rows=filtered();const text=[c.map(x=>x[1]).join(',')].concat(rows.map(r=>c.map(([k])=>`"${String(val(r,k)).replaceAll('"','""')}"`).join(','))).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download=`${$('stageDate').value}_${current.stage_key}.csv`;a.click();URL.revokeObjectURL(a.href)}
   window.closeStageDetail=close; window.downloadStageCsv=csv; window.__stageSetSort=k=>{sortKey=k;sortDir*=-1;render()};
 })();
+/* Presentation-only provenance layer. No endpoint data or trade state changes. */
+(()=>{
+  const replaceLabels=()=>{
+    document.querySelectorAll('.k').forEach(el=>{
+      const t=el.textContent.trim();
+      if(t==='Active Trades') el.textContent='Open / Watch Ideas';
+      if(t==='PMF Active') el.textContent='PMF Open / Watch Signals';
+      if(t==='True Avg R') el.textContent='Estimated Executable R';
+    });
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.children.length) return;
+      if(el.textContent==='UNREAL R') el.textContent='MARKOUT R';
+      if(el.textContent==='True R') el.textContent='Estimated Executable R';
+    });
+  };
+  const observe=new MutationObserver(replaceLabels);
+  observe.observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',replaceLabels);
+})();
 </script>
 </body>
 </html>
