@@ -5,14 +5,16 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import statistics
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from research_telemetry_common import (RESEARCH_ROOT, authority_fields, content_hash,
-    independent_membership_rows, next_market_session, read_json, run_directory,
+from research_telemetry_common import (RESEARCH_ROOT, authoritative_experiment_membership_rows, content_hash,
+    experiment_authority, experiment_authority_fields, publish_experiment_authority,
+    next_market_session, read_json, run_directory,
     session_offset, utc_now, version_resolved_outcomes, write_immutable)
 from research_price_resolver import ResearchPriceResolver
 from swing_shadow_cohorts import SECTOR_ETFS, label, number, ticker
@@ -25,7 +27,6 @@ HORIZONS = (1, 2, 3, 5, 7)
 
 
 def git_commit() -> str:
-    import os
     return os.environ.get("SYSTEM2_GIT_COMMIT", "UNKNOWN")
 
 
@@ -76,7 +77,8 @@ def immutable_meta(experiment: str, session: str, run: dict[str, Any], artifact_
     return {"experiment_name": experiment, "experiment_version": "V1", "run_id": run["run_id"],
             "run_timestamp": run["run_timestamp"], "intended_xnys_session": session,
             "authoritative_for_session": True, "membership_timestamp": utc_now().isoformat(),
-            "git_commit": registry().get("git_commit", "UNKNOWN"), "measurement_schema_version": SCHEMA,
+            "git_commit": git_commit(), "capture_code_commit": git_commit(),
+            "registry_git_commit": registry().get("git_commit", "UNKNOWN"), "measurement_schema_version": SCHEMA,
             "artifact_hash": content_hash(artifact_payload)}
 
 
@@ -85,13 +87,29 @@ def latest(session: str, name: str) -> Path | None:
     return matches[-1] if matches else None
 
 
+def stage2_capture_context() -> tuple[Path, str, str, str]:
+    """Return only retained provenance from the Stage2 source used by this capture."""
+    source = ROOT / "stage2_surgical_strike_scored.json"
+    timestamp = datetime.fromtimestamp(source.stat().st_mtime, timezone.utc).isoformat()
+    rows = read_json(source, []) or []
+    source_run = os.environ.get("SYSTEM2_RUN_ID") or next(
+        (str(row.get("_system2_run_id")) for row in rows if isinstance(row, dict) and row.get("_system2_run_id")),
+        "UNKNOWN",
+    )
+    return source, hashlib.sha256(source.read_bytes()).hexdigest(), source_run, timestamp
+
+
+def publish_capture_authority(experiment: str, session: str, run: dict[str, Any], artifact: Path, metadata: dict[str, Any]) -> dict[str, Any]:
+    return publish_experiment_authority(experiment, session, run["run_id"], run["run_timestamp"], artifact, metadata=metadata)
+
+
 def create_stage2_membership() -> dict[str, Any]:
     timing, session = next_market_session(), next_market_session()["trading_session"]
     existing = latest(session, "full_stage2_quartiles_membership.json")
     if existing: return {"ok": True, "idempotent": True, "path": str(existing)}
     scored = stage2_rows()
-    stamp = datetime.fromtimestamp((ROOT / "stage2_surgical_strike_scored.json").stat().st_mtime, timezone.utc).isoformat()
-    run = authority_fields(session, stamp, stamp)
+    source, source_hash, source_run, stamp = stage2_capture_context()
+    run = experiment_authority_fields(EXPERIMENTS[0], session, source_run, stamp)
     kept = {ticker(r) for r in (read_json(ROOT / "stage7_clustered_survivors.json", []) or [])}
     rejected = {ticker(r) for r in (read_json(ROOT / "stage7_cluster_rejections.json", []) or [])}
     finalists = {ticker(r) for r in (read_json(ROOT / "stage7_finalists.json", []) or [])}
@@ -117,7 +135,8 @@ def create_stage2_membership() -> dict[str, Any]:
     for row in rows: row.update(immutable_meta(EXPERIMENTS[0], session, run, base))
     directory = run_directory(session, str(run["run_id"]) + "-frozen-shadow")
     path = write_immutable(directory / "full_stage2_quartiles_membership.json", base)
-    return {"ok": True, "path": str(path), "population": len(rows)}
+    authority = publish_capture_authority(EXPERIMENTS[0], session, run, path, {"source_stage2_artifact": str(source), "source_artifact_hash": source_hash, "capture_code_commit": git_commit()})
+    return {"ok": True, "path": str(path), "population": len(rows), "authority": authority}
 
 
 def pead_rows() -> list[dict[str, Any]]:
@@ -131,7 +150,7 @@ def create_pead_membership() -> dict[str, Any]:
     for path in RESEARCH_ROOT.glob("*/*/pead_tp1_breakeven_membership.json"):
         existing |= {str(r.get("original_pead_trade_id")) for r in (read_json(path, {}) or {}).get("rows", [])}
     rows = []
-    run = authority_fields(session, deployment, deployment)
+    run = experiment_authority_fields(EXPERIMENTS[1], session, os.environ.get("SYSTEM2_RUN_ID", deployment), deployment)
     for source in pead_rows():
         logged = str(source.get("logged_at") or "")
         identifier = str(source.get("id") or "")
@@ -149,15 +168,16 @@ def create_pead_membership() -> dict[str, Any]:
     if not rows: return {"ok": True, "idempotent": True, "new_events": 0}
     for row in rows: row.update(immutable_meta(EXPERIMENTS[1], session, run, base))
     path = write_immutable(run_directory(session, str(run["run_id"]) + "-frozen-shadow") / "pead_tp1_breakeven_membership.json", base)
-    return {"ok": True, "path": str(path), "new_events": len(rows)}
+    authority = publish_capture_authority(EXPERIMENTS[1], session, run, path, {"capture_code_commit": git_commit()})
+    return {"ok": True, "path": str(path), "new_events": len(rows), "authority": authority}
 
 
 def create_chase_membership() -> dict[str, Any]:
     timing, session = next_market_session(), next_market_session()["trading_session"]
     existing = latest(session, "next_open_chase_context_membership.json")
     if existing: return {"ok": True, "idempotent": True, "path": str(existing)}
-    scored = stage2_rows(); stamp = datetime.fromtimestamp((ROOT / "stage2_surgical_strike_scored.json").stat().st_mtime, timezone.utc).isoformat()
-    run = authority_fields(session, stamp, stamp); prior = session_offset(datetime.fromisoformat(session).date(), -1)
+    scored = stage2_rows(); source, source_hash, source_run, stamp = stage2_capture_context()
+    run = experiment_authority_fields(EXPERIMENTS[2], session, source_run, stamp); prior = session_offset(datetime.fromisoformat(session).date(), -1)
     symbols = {ticker(r) for r in scored} | {"SPY"} | set(SECTOR_ETFS.values()); resolver = ResearchPriceResolver(symbols)
     kept = {ticker(r) for r in (read_json(ROOT / "stage7_clustered_survivors.json", []) or [])}; rejected = {ticker(r) for r in (read_json(ROOT / "stage7_cluster_rejections.json", []) or [])}; finalists={ticker(r) for r in (read_json(ROOT / "stage7_finalists.json", []) or [])}
     rows=[]
@@ -172,7 +192,8 @@ def create_chase_membership() -> dict[str, Any]:
     base={"schema_version":SCHEMA,"namespace":NAMESPACE,"research_only":True,"non_trading":True,"immutable_membership":True,**timing,**run,"rows":rows}
     for row in rows: row.update(immutable_meta(EXPERIMENTS[2],session,run,base))
     path=write_immutable(run_directory(session,str(run["run_id"])+"-frozen-shadow")/"next_open_chase_context_membership.json",base)
-    return {"ok":True,"path":str(path),"population":len(rows)}
+    authority = publish_capture_authority(EXPERIMENTS[2], session, run, path, {"source_stage2_artifact": str(source), "source_artifact_hash": source_hash, "capture_code_commit": git_commit()})
+    return {"ok":True,"path":str(path),"population":len(rows),"authority":authority}
 
 
 def gap_bucket(value: float | None) -> str:
@@ -197,7 +218,7 @@ def update_stage2_and_chase() -> dict[str, Any]:
         sources=[]
         for path in paths:
             for row in (read_json(path,{}) or {}).get("rows",[]): sources.append((path,row))
-        sources,duplicates=independent_membership_rows(sources,identity); symbols={r["symbol"] for _,r in sources}|{"SPY"}|set(SECTOR_ETFS.values()); resolver=ResearchPriceResolver(symbols); rows=[]
+        sources,duplicates=authoritative_experiment_membership_rows(sources,identity); symbols={r["symbol"] for _,r in sources}|{"SPY"}|set(SECTOR_ETFS.values()); resolver=ResearchPriceResolver(symbols); rows=[]
         for path,row in sources:
             labelled={**row,"membership_artifact":str(path),**label(row,resolver)}
             if name=="chase":
@@ -213,7 +234,8 @@ def update_stage2_and_chase() -> dict[str, Any]:
             rows.append(labelled)
         rows,versions=version_resolved_outcomes(rows,name,utc_now().isoformat()); stamp=utc_now().strftime("%Y%m%dT%H%M%SZ"); directory=RESEARCH_ROOT/"scoreboards"
         out=write_immutable(directory/f"{name}_frozen_shadow_outcomes_{stamp}.json",{"schema_version":SCHEMA,"namespace":NAMESPACE,"research_only":True,"non_trading":True,"rows":rows,"duplicates":duplicates,"outcome_versioning":versions})
-        output[name]={"rows":len(rows),"duplicates":len(duplicates),"outcomes":str(out)}
+        terminal_counts = dict(Counter(str(item.get("classification")) for item in duplicates))
+        output[name]={"accepted_rows":len(rows),"terminal_rows":len(duplicates),"terminal_counts":terminal_counts,"outcomes":str(out)}
     return output
 
 
@@ -243,11 +265,63 @@ def update_pead() -> dict[str, Any]:
     paths=sorted(RESEARCH_ROOT.glob("*/*/pead_tp1_breakeven_membership.json")); sources=[]
     for path in paths:
         for row in (read_json(path,{}) or {}).get("rows",[]):sources.append((path,row))
-    sources,duplicates=independent_membership_rows(sources,("experiment_name","original_pead_trade_id")); production={str(r.get("id")):r for r in pead_rows()}; resolver=ResearchPriceResolver({r["symbol"] for _,r in sources}); rows=[]
+    sources,duplicates=authoritative_experiment_membership_rows(sources,("experiment_name","original_pead_trade_id")); production={str(r.get("id")):r for r in pead_rows()}; resolver=ResearchPriceResolver({r["symbol"] for _,r in sources}); rows=[]
     for path,row in sources:
         p=production.get(str(row["original_pead_trade_id"]),{}); rows.append({**row,"membership_artifact":str(path),"original_pead_r":p.get("canonical_r"),"original_pead_status":p.get("paper_status"),**resolve_pead_path(row,p,resolver)})
     stamp=utc_now().strftime("%Y%m%dT%H%M%SZ"); out=write_immutable(RESEARCH_ROOT/"scoreboards"/f"pead_tp1_breakeven_shadow_outcomes_{stamp}.json",{"schema_version":SCHEMA,"namespace":NAMESPACE,"research_only":True,"non_trading":True,"rows":rows,"duplicates":duplicates,"ambiguity_rule":"DAILY_OHLC_DUAL_TOUCH_EXCLUDED_FROM_PRIMARY"})
     return {"rows":len(rows),"duplicates":len(duplicates),"outcomes":str(out)}
+
+
+def repair_sep23_authority() -> dict[str, Any]:
+    """Append a metadata-only decision for the pre-open Sep 23 capture incident."""
+    session = "2026-09-23"
+    stage = latest(session, "full_stage2_quartiles_membership.json")
+    chase = latest(session, "next_open_chase_context_membership.json")
+    if not stage or not chase:
+        raise RuntimeError("SEP23_MEMBERSHIP_ARTIFACT_MISSING")
+    stage_payload, chase_payload = read_json(stage, {}), read_json(chase, {})
+    if len(stage_payload.get("rows", [])) != 105 or len(chase_payload.get("rows", [])) != 105:
+        raise RuntimeError("SEP23_EXPECTED_105_ROWS_PER_EXPERIMENT")
+    capture_run = str(stage_payload.get("run_id") or "UNKNOWN")
+    capture_timestamp = str(stage_payload.get("run_timestamp") or "UNKNOWN")
+    before = {"stage2": hashlib.sha256(stage.read_bytes()).hexdigest(), "chase": hashlib.sha256(chase.read_bytes()).hexdigest()}
+    stage_symbols = {ticker(row) for row in stage_payload.get("rows", [])}
+    lineage = {"source_stage2_artifact": str(ROOT / "stage2_surgical_strike_scored.json"), "source_artifact_hash": "UNKNOWN_NOT_RETAINED", "source_pipeline_run_id": "UNKNOWN", "evidence": []}
+    for log in sorted((ROOT / "logs").glob("phase_b_core_*.json")):
+        payload = read_json(log, {}) or {}
+        for step in payload.get("steps", []):
+            if step.get("name") != "B3 technical score" or not step.get("ok"):
+                continue
+            text = str(step.get("stdoutTail") or "")
+            if '"count_ok": 105' not in text:
+                continue
+            matches = sum(1 for symbol in ("FIVN", "CGON", "SPNT", "MDB", "VRSN") if symbol in stage_symbols and f'"{symbol}"' in text)
+            if matches == 5:
+                lineage = {"source_stage2_artifact": str(ROOT / "stage2_surgical_strike_scored.json"), "source_artifact_hash": "UNKNOWN_NOT_RETAINED", "source_pipeline_run_id": payload.get("run_id"), "evidence": [str(log), "B3 count_ok=105", "top-symbol sample matched=5/5"]}
+                break
+        if lineage["source_pipeline_run_id"] != "UNKNOWN":
+            break
+    reason = "MEMBERSHIP_SOURCE_PIPELINE_RUN_MISMATCH"
+    metadata = {"repair_timestamp": utc_now().isoformat(), "repair_reason": reason,
+                "capture_run_id": capture_run, "capture_run_timestamp": capture_timestamp,
+                "capture_code_commit": stage_payload.get("rows", [{}])[0].get("git_commit") or "UNKNOWN",
+                "registry_git_commit": registry().get("git_commit", "UNKNOWN"), **lineage,
+                "membership_hash_before": before, "membership_hash_after": before,
+                "performance_eligibility": "INVALID_FOR_PERFORMANCE"}
+    authorities = {}
+    for experiment, artifact in ((EXPERIMENTS[0], stage), (EXPERIMENTS[2], chase)):
+        authorities[experiment] = publish_experiment_authority(experiment, session, capture_run, capture_timestamp, artifact,
+            status="INVALID_FOR_PERFORMANCE", reason=reason, metadata=metadata)
+    repair = {"schema_version": SCHEMA, "namespace": NAMESPACE, "research_only": True, "non_trading": True,
+              "repair_timestamp": utc_now().isoformat(), "repair_reason": reason, "intended_xnys_session": session,
+              "old_authority": {"global_session_authority": "20260923T021502Z-57b12a4a", "membership_capture_run": capture_run},
+              "new_authority": authorities, "membership_changed": False, **metadata}
+    path = write_immutable(RESEARCH_ROOT / "provenance_repairs" / "sep23_shadow_authority_repair.json", repair)
+    after = {"stage2": hashlib.sha256(stage.read_bytes()).hexdigest(), "chase": hashlib.sha256(chase.read_bytes()).hexdigest()}
+    if before != after:
+        raise RuntimeError("MEMBERSHIP_HASH_CHANGED_DURING_METADATA_REPAIR")
+    return {"ok": True, "repair": str(path), "membership_hash_before": before, "membership_hash_after": after,
+            "performance_eligibility": "INVALID_FOR_PERFORMANCE", "authorities": authorities}
 
 
 def daily_summary(results: dict[str,Any]) -> dict[str,Any]:
@@ -291,10 +365,14 @@ def health() -> dict[str, Any]:
     for name in names:
         paths=sorted(RESEARCH_ROOT.glob(f"*/*/{name}")); payload=read_json(paths[-1],{}) if paths else {}
         captures[name]={"latest_artifact":str(paths[-1]) if paths else None,"latest_intended_session":payload.get("intended_xnys_session"),"rows":len(payload.get("rows",[])),"artifact_hash_present":bool(payload.get("artifact_hash"))}
-    duplicates=0
-    for path in RESEARCH_ROOT.glob("scoreboards/*frozen_shadow_outcomes_*.json"):
-        duplicates += len((read_json(path,{}) or {}).get("duplicates",[]))
-    return {"ok":True,"namespace":NAMESPACE,"membership_capture":captures,"duplicate_count":duplicates,
+    terminal = Counter()
+    for family in ("stage2", "chase", "pead_tp1_breakeven"):
+        paths = sorted((RESEARCH_ROOT / "scoreboards").glob(f"{family}_frozen_shadow_outcomes_*.json" if family != "pead_tp1_breakeven" else "pead_tp1_breakeven_shadow_outcomes_*.json"))
+        if paths:
+            terminal.update(str(item.get("classification")) for item in (read_json(paths[-1], {}) or {}).get("duplicates", []))
+    return {"ok":True,"namespace":NAMESPACE,"membership_capture":captures,
+            "duplicate_membership_count":terminal.get("DUPLICATE_INTENDED_SESSION_MEMBERSHIP", 0),
+            "terminal_authority_counts":dict(terminal),
             "outcome_resolver_health":"ACTIVE","versioning_health":"APPEND_ONLY_VERSIONED","horizon_coverage":"EXPLICIT_PER_ROW"}
 
 
@@ -316,8 +394,8 @@ def self_test() -> dict[str,Any]:
 
 
 def main() -> None:
-    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create","capture-stage2","update","health","self-test")); parser.add_argument("--git-commit"); args=parser.parse_args()
-    result=self_test() if args.command=="self-test" else create_all(args.git_commit) if args.command=="create" else capture_stage2() if args.command=="capture-stage2" else health() if args.command=="health" else update_all()
+    parser=argparse.ArgumentParser(); parser.add_argument("command",choices=("create","capture-stage2","update","health","self-test","repair-sep23-authority")); parser.add_argument("--git-commit"); args=parser.parse_args()
+    result=self_test() if args.command=="self-test" else create_all(args.git_commit) if args.command=="create" else capture_stage2() if args.command=="capture-stage2" else repair_sep23_authority() if args.command=="repair-sep23-authority" else health() if args.command=="health" else update_all()
     print(json.dumps(result,indent=2,default=str))
 
 if __name__=="__main__": main()

@@ -197,6 +197,87 @@ def authority_fields(session: str, fallback_run: str, fallback_timestamp: str) -
     }
 
 
+def experiment_authority(experiment: str, session: str) -> dict[str, Any] | None:
+    """The sole authority decision for one experiment and intended XNYS session."""
+    directory = RESEARCH_ROOT / "experiment_authority" / _safe_component(experiment) / session
+    decisions = sorted(directory.glob("*.json")) if directory.exists() else []
+    return read_json(decisions[-1], {}) if decisions else None
+
+
+def publish_experiment_authority(
+    experiment: str, session: str, run: str, run_timestamp: str, source_artifact: Path,
+    *, status: str = "VALID", reason: str | None = None, metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Append an explicit experiment/session authority decision; never alter membership."""
+    previous = experiment_authority(experiment, session)
+    if (previous and previous.get("authoritative_run_id") == run
+            and previous.get("status") == status and previous.get("reason") == reason):
+        return previous
+    moment = utc_now()
+    previous_run = previous.get("authoritative_run_id") if previous else None
+    payload = {
+        "schema_version": 1, "research_only": True, "non_trading": True,
+        "experiment_name": experiment, "intended_xnys_session": session,
+        "authoritative_run_id": run, "run_id": run, "run_timestamp": run_timestamp,
+        "authoritative_for_session": True, "status": status, "reason": reason,
+        "previous_run_id": previous_run, "new_run_id": run,
+        "supersedes_run_id": previous_run,
+        "superseded_at": moment.isoformat() if previous_run and previous_run != run else None,
+        "source_artifact": str(source_artifact), "decided_at": moment.isoformat(),
+        "metadata": metadata or {},
+    }
+    directory = RESEARCH_ROOT / "experiment_authority" / _safe_component(experiment) / session
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{moment.strftime('%Y%m%dT%H%M%S%fZ')}_{_safe_component(run)}.json"
+    write_immutable(path, payload)
+    return {**payload, "authority_artifact": str(path)}
+
+
+def experiment_authority_fields(experiment: str, session: str, fallback_run: str, fallback_timestamp: str) -> dict[str, Any]:
+    """Resolve only the experiment-scoped authority; never consult global session authority."""
+    decision = experiment_authority(experiment, session)
+    return {
+        "run_id": decision.get("authoritative_run_id") if decision else fallback_run,
+        "run_timestamp": decision.get("run_timestamp") if decision else fallback_timestamp,
+        "intended_xnys_session": session,
+        "authoritative_for_session": True,
+        "supersedes_run_id": decision.get("supersedes_run_id") if decision else None,
+    }
+
+
+def authoritative_experiment_membership_rows(
+    rows: list[tuple[Path, dict[str, Any]]], identity_fields: tuple[str, ...]
+) -> tuple[list[tuple[Path, dict[str, Any]]], list[dict[str, Any]]]:
+    """Evaluate only the experiment/session authority and retain terminal exclusion reasons."""
+    selected: dict[tuple[Any, ...], tuple[Path, dict[str, Any]]] = {}
+    terminal: list[dict[str, Any]] = []
+    for path, row in sorted(rows, key=lambda item: str(item[0])):
+        experiment = str(row.get("experiment_name") or "")
+        session = str(row.get("intended_xnys_session") or row.get("trading_date") or "")
+        identity = {field: row.get(field) for field in identity_fields}
+        authority = experiment_authority(experiment, session) if experiment and session else None
+        if not authority:
+            terminal.append({"identity": identity, "membership_artifact": str(path), "classification": "AUTHORITY_UNKNOWN"})
+            continue
+        if authority.get("status") != "VALID":
+            terminal.append({"identity": identity, "membership_artifact": str(path), "classification": "INVALID_SESSION_MEMBERSHIP",
+                             "authority_status": authority.get("status"), "reason": authority.get("reason"),
+                             "authoritative_run_id": authority.get("authoritative_run_id")})
+            continue
+        row_run = row.get("run_id") or row.get("pipeline_run_id")
+        if row_run != authority.get("authoritative_run_id"):
+            terminal.append({"identity": identity, "membership_artifact": str(path), "classification": "SUPERSEDED_RUN",
+                             "authoritative_run_id": authority.get("authoritative_run_id")})
+            continue
+        key = tuple(row.get(field) for field in identity_fields)
+        if key in selected:
+            terminal.append({"identity": identity, "membership_artifact": str(path), "classification": "DUPLICATE_INTENDED_SESSION_MEMBERSHIP",
+                             "kept_artifact": str(selected[key][0])})
+            continue
+        selected[key] = (path, row)
+    return list(selected.values()), terminal
+
+
 def content_hash(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
     return hashlib.sha256(raw).hexdigest()
