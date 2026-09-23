@@ -3215,7 +3215,12 @@ module.exports = function attachScoring(app, db, deps) {
       const toStop = numericOrNull(i.distance_to_stop_pct);
       const toTarget = numericOrNull(i.distance_to_target_pct);
       const rows = [];
-      if (toStop != null && toStop <= NEAR_LINE_PCT) rows.push({
+      if (toStop != null && toStop < 0) rows.push({
+        tier: 'B', kind: 'stop_crossed', ticker: i.ticker, label: 'Stop crossed',
+        reason: `${i.ticker} is ${Math.abs(toStop).toFixed(2)}% beyond stop; review in Live Monitor.`, distance_pct: toStop,
+        link: { section: 'trade', tab: 'monitor' },
+      });
+      else if (toStop != null && toStop <= NEAR_LINE_PCT) rows.push({
         tier: 'B',
         kind: 'near_stop',
         ticker: i.ticker,
@@ -3224,7 +3229,12 @@ module.exports = function attachScoring(app, db, deps) {
         distance_pct: toStop,
         link: { section: 'trade', tab: 'monitor' },
       });
-      if (toTarget != null && toTarget <= NEAR_LINE_PCT) rows.push({
+      if (toTarget != null && toTarget < 0) rows.push({
+        tier: 'B', kind: 'target_crossed', ticker: i.ticker, label: 'Target crossed',
+        reason: `${i.ticker} is ${Math.abs(toTarget).toFixed(2)}% beyond target; review in Live Monitor.`, distance_pct: toTarget,
+        link: { section: 'trade', tab: 'monitor' },
+      });
+      else if (toTarget != null && toTarget <= NEAR_LINE_PCT) rows.push({
         tier: 'B',
         kind: 'near_target',
         ticker: i.ticker,
