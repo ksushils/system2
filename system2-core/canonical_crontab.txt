@@ -125,3 +125,7 @@ CRON_TZ=UTC
 CRON_TZ=America/New_York
 15 9 * * 1-5 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py shadow-premarket >> /root/system2-core/logs/research_telemetry.log 2>&1
 CRON_TZ=UTC
+
+# Alpha Edge Isolation V1: append-only PEAD and Stage1 next-open fixed-hold research; no broker execution.
+15 3 * * 2-6 cd /root/system2-core && .venv/bin/python alpha_edge_isolation_v1.py create >> /root/system2-core/logs/alpha_edge_isolation_v1.log 2>&1
+45 3 * * 2-6 cd /root/system2-core && .venv/bin/python alpha_edge_isolation_v1.py update >> /root/system2-core/logs/alpha_edge_isolation_v1.log 2>&1
