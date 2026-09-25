@@ -137,3 +137,8 @@ CRON_TZ=UTC
 
 # Continuous Research + Implementation Queue: immutable weekly evidence registry; no execution or strategy changes.
 10 5 * * 0 cd /root/system2-core && .venv/bin/python continuous_research_queue.py weekly >> /root/system2-core/logs/continuous_research_queue.log 2>&1
+
+# Continuous Improvement Lab V1: immutable Stage2/cluster/finalist controls and weekly alpha review; no broker execution.
+37 3 * * 2-6 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py create >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
+5 4 * * 2-6 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py update >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
+15 5 * * 0 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py weekly >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
