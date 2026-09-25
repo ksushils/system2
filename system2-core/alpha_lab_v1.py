@@ -95,18 +95,19 @@ def deterministic_control(rows: list[dict[str, Any]], row: dict[str, Any], seed:
     return pool[value % len(pool)]["symbol"]
 
 
-def create() -> dict[str, Any]:
+def create(corrective: bool = False) -> dict[str, Any]:
     reg = registry(); deployed = parse(reg.get("deployed_at")); timing = next_market_session(); session = timing["trading_session"]
     existing = sorted((LAB_ROOT / session).glob("*/memberships.json"))
-    if existing:
+    if existing and not corrective:
         return {"ok": True, "idempotent": True, "path": str(existing[-1]), "broker_calls": 0}
     source = latest(session, "stage1_v2_shadow.json")
     if not source:
         return {"ok": True, "pending": "STAGE1_ARTIFACT_NOT_AVAILABLE", "broker_calls": 0}
     artifact = read_json(source, {}) or {}; source_time = parse(artifact.get("pipeline_timestamp") or artifact.get("run_timestamp"))
     run_at = utc_now().isoformat(); rows: list[dict[str, Any]] = []
-    if not (deployed and source_time and source_time >= deployed):
-        path = LAB_ROOT / session / str(artifact.get("run_id") or "pending") / "memberships.json"
+    pre_entry_correction = corrective and utc_now() < datetime.fromisoformat(timing["next_session_open"])
+    if not (deployed and source_time and (source_time >= deployed or pre_entry_correction)):
+        path = LAB_ROOT / session / str(artifact.get("run_id") or "pending") / ("memberships_v1_1.json" if corrective else "memberships.json")
         write_immutable(path, {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, "reason": "PRE_DEPLOYMENT_SOURCE_NOT_ADMITTED", "rows": []})
         return {"ok": True, "rows": 0, "reason": "PRE_DEPLOYMENT_SOURCE_NOT_ADMITTED", "broker_calls": 0}
     eligible = [r for r in artifact.get("rows", []) if r.get("stage1_v2_classification") == "ALPHA_ELIGIBLE" and r.get("symbol")]
@@ -151,8 +152,8 @@ def create() -> dict[str, Any]:
         rows.append({**item, "experiment_name": REV, "variant": bucket, "catalyst_state": catalyst_state, "idiosyncratic_return": value, "direction": "SHORT_REVERSION" if value > 0 else "LONG_REVERSION", "trading_date": session, "next_open_timestamp": timing["next_session_open"], "entry_basis": "NEXT_OPEN", "model_reference": None, "estimated_executable": None, "real_fill": None, "membership_timestamp": run_at, "research_only": True, "non_trading": True})
     for row in rows:
         row["control_symbol"] = deterministic_control(base, row, seed)
-    path = LAB_ROOT / session / str(artifact.get("run_id") or source_time.strftime("%Y%m%dT%H%M%SZ")) / "memberships.json"
-    write_immutable(path, {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, "deployment_timestamp": reg.get("deployed_at"), "run_id": artifact.get("run_id"), "pipeline_timestamp": artifact.get("pipeline_timestamp"), "intended_xnys_session": session, "next_open_timestamp": timing["next_session_open"], "source_artifact": str(source), "control_seed": seed, "rows": rows})
+    path = LAB_ROOT / session / str(artifact.get("run_id") or source_time.strftime("%Y%m%dT%H%M%SZ")) / ("memberships_v1_1.json" if corrective else "memberships.json")
+    write_immutable(path, {"schema_version": 1, "research_only": True, "non_trading": True, "immutable_membership": True, "deployment_timestamp": reg.get("deployed_at"), "run_id": artifact.get("run_id"), "pipeline_timestamp": artifact.get("pipeline_timestamp"), "intended_xnys_session": session, "next_open_timestamp": timing["next_session_open"], "source_artifact": str(source), "control_seed": seed, "correction_of": "ALPHA_LAB_V1" if corrective else None, "correction_reason": "PRE_ENTRY_COLLECTOR_BUG" if corrective else None, "created_before_entry": pre_entry_correction, "original_v1_preserved": corrective, "rows": rows})
     return {"ok": True, "rows": len(rows), "momentum": len(momentum), "catalyst": sum(r["experiment_name"] == CAT for r in rows), "reversal": sum(r["experiment_name"] == REV for r in rows), "broker_calls": 0}
 
 
@@ -227,8 +228,8 @@ def weekly() -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(); parser.add_argument("command", choices=("create", "update", "weekly", "self-test")); args = parser.parse_args()
-    funcs = {"create": create, "update": update, "weekly": weekly, "self-test": lambda: {"ok": True, "research_only": True, "broker_calls": 0, "experiments": [MOM, CAT, REV]}}
+    parser = argparse.ArgumentParser(); parser.add_argument("command", choices=("create", "create-corrective", "update", "weekly", "self-test")); args = parser.parse_args()
+    funcs = {"create": create, "create-corrective": lambda: create(True), "update": update, "weekly": weekly, "self-test": lambda: {"ok": True, "research_only": True, "broker_calls": 0, "experiments": [MOM, CAT, REV]}}
     print(json.dumps(funcs[args.command](), sort_keys=True))
 
 

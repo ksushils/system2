@@ -7,12 +7,12 @@ authoritative XNYS session; outcomes use only Research Measurement V2.
 from __future__ import annotations
 import argparse, hashlib, json, random, statistics
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 from research_telemetry_common import (RESEARCH_ROOT, authority_fields,
     independent_membership_rows, next_market_session, read_json, run_directory,
-    session_authority, session_offset, utc_now, version_resolved_outcomes, write_immutable)
+    session_authority, session_offset, session_record, utc_now, version_resolved_outcomes, write_immutable)
 from research_price_resolver import ResearchPriceResolver
 from swing_shadow_cohorts import SECTOR_ETFS, label, number, spearman
 
@@ -71,22 +71,61 @@ def create() -> dict[str, Any]:
     pipeline = datetime.fromtimestamp((ROOT/"stage7_clustered_survivors.json").stat().st_mtime, timezone.utc).isoformat()
     run = authority_fields(session, authority["run_id"], pipeline)
     run["config_hash"] = source_hash([ROOT/"b3_surgical_strike_stage2.py", ROOT/"b4_correlation_cluster_engine.py", ROOT/"system2-config.json"])
+    matched_controls = deterministic_cluster_control(kept,rejected,session)
+    match_seed = hashlib.sha256((session+"|CLUSTER_OFF_CONTROL_V1").encode()).hexdigest()
+    pair_map = [{"pair_id":f"{session}|{index+1}", "kept_id":symbol(left), "matched_control_id":symbol(right),
+                 "session":session, "sector_bucket":left.get("sector"),
+                 "market_cap_bucket":left.get("marketCap"), "liquidity_bucket":left.get("dollarVolume"),
+                 "matching_algorithm_version":"CLUSTER_MATCH_NEAREST_V1"} for index,(left,right) in enumerate(zip(sorted(kept,key=symbol),matched_controls))]
     rows = []
     for exp, cohort, population in (
         ("STAGE2_OFF_CONTROL_V1","STAGE1_ALL",stage1), ("STAGE2_OFF_CONTROL_V1","STAGE2_SELECTED",stage2),
-        ("CLUSTER_OFF_CONTROL_V1","CLUSTER_KEPT",kept), ("CLUSTER_OFF_CONTROL_V1","MATCHED_STAGE2_CONTROL",deterministic_cluster_control(kept,rejected,session)),
+        ("CLUSTER_OFF_CONTROL_V1","CLUSTER_KEPT",kept), ("CLUSTER_OFF_CONTROL_V1","MATCHED_STAGE2_CONTROL",matched_controls),
         ("FINALIST_OFF_CONTROL_V1","ALL_PRE_FINALIST_ELIGIBLE",stage2), ("FINALIST_OFF_CONTROL_V1","FINALISTS",kept)):
         rows.extend(fields(r, exp, cohort, session, timing, run) for r in population)
     payload = {"schema_version":1,"research_only":True,"non_trading":True,"immutable_membership":True,
                "rule_version":"CONTINUOUS_IMPROVEMENT_LAB_V1","deployment_timestamp":utc_now().isoformat(),
                "intended_xnys_session":session,"source_artifact":authority["source_artifact"],
                "membership_hash":hashlib.sha256(json.dumps(rows,sort_keys=True,default=str).encode()).hexdigest(),
+               "matching_algorithm_version":"CLUSTER_MATCH_NEAREST_V1", "matching_seed":match_seed,
+               "source_candidate_population_hash":hashlib.sha256(json.dumps(rejected,sort_keys=True,default=str).encode()).hexdigest(),
+               "pair_map":pair_map, "pair_map_hash":hashlib.sha256(json.dumps(pair_map,sort_keys=True).encode()).hexdigest(),
                **timing, **run, "rows":rows}
     write_immutable(target,payload)
     return {"ok":True,"path":str(target),"counts":{x:sum(r["experiment"]==x for r in rows) for x in EXPERIMENTS},"broker_calls":0}
 
 def status(dates: int) -> str:
     return "COLLECTING" if dates < 15 else "EARLY_EVIDENCE" if dates < 30 else "PRELIMINARY" if dates < 60 else "REVIEWABLE"
+
+def _at(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+def time_aware_label(row: dict[str, Any], resolver: ResearchPriceResolver, now: datetime | None = None) -> dict[str, Any]:
+    """Never turn a future canonical observation into MISSING_PRICE."""
+    now = now or utc_now()
+    entry_open = _at(str(row["next_open_timestamp"]))
+    start = date.fromisoformat(str(row["trading_date"])[:10])
+    pending = {"entry_state": "PENDING_CANONICAL_XNYS_OPEN", "outcome_state": "PENDING_CANONICAL_XNYS_OPEN",
+               "entry_type": "NEXT_OPEN", "entry_open_timestamp": entry_open.isoformat(),
+               "correction_safe_state": True}
+    for h in HORIZONS:
+        target = session_offset(start, h)
+        pending[f"d{h}"] = {"state": "PENDING", "target_market_date": target["session_date"] if target else None}
+    if now < entry_open:
+        return pending
+    result = label(row, resolver)
+    if result.get("outcome_state") == "MISSING_PRICE":
+        result["entry_state"] = "AWAITING_CANONICAL_PRICE"
+        result["outcome_state"] = "AWAITING_CANONICAL_PRICE"
+        result["entry_type"] = "NEXT_OPEN"
+    for h in HORIZONS:
+        target = session_offset(start, h)
+        if not target:
+            continue
+        close_text = (session_record(date.fromisoformat(target["session_date"])) or {}).get("close_timestamp_ET")
+        if close_text and now < _at(close_text):
+            result[f"d{h}"] = {"state": "PENDING", "target_market_date": target["session_date"]}
+    return result
 
 def values(rows: list[dict[str, Any]], h: int, field: str) -> list[float]:
     return [r[f"d{h}"][field] for r in rows if isinstance(r.get(f"d{h}"),dict) and r[f"d{h}"].get("state")=="AVAILABLE" and isinstance(r[f"d{h}"].get(field),(int,float))]
@@ -98,7 +137,7 @@ def update() -> dict[str, Any]:
     inputs, duplicates = independent_membership_rows(inputs, ("experiment","cohort","trading_date","symbol"))
     universe = {row["symbol"] for _,row in inputs}|{"SPY"}|set(SECTOR_ETFS.values())
     resolver = ResearchPriceResolver(universe) if universe else None
-    rows = [{**row,"membership_artifact":str(path),**label(row,resolver)} for path,row in inputs] if resolver else []
+    rows = [{**row,"membership_artifact":str(path),**time_aware_label(row,resolver)} for path,row in inputs] if resolver else []
     rows, versioning = version_resolved_outcomes(rows,"continuous_improvement_lab",utc_now().isoformat())
     now=utc_now(); stamp=now.strftime("%Y%m%dT%H%M%SZ")
     outcomes=write_immutable(LAB/"outcomes"/f"improvement_lab_outcomes_v2_{stamp}.json",
@@ -130,6 +169,32 @@ def update() -> dict[str, Any]:
         {"schema_version":1,"research_only":True,"non_trading":True,"created_at":now.isoformat(),"comparisons":report,"stage2_feature_scorecard":features,"minimum_dates":30,"preferred_dates":60})
     return {"ok":True,"outcomes":str(outcomes),"scoreboard":str(scoreboard),"rows":len(rows),"broker_calls":0}
 
+def correct_premature_sep25() -> dict[str, Any]:
+    """Append a superseding derived artifact; immutable memberships are untouched."""
+    inputs = []
+    for path in sorted(RESEARCH_ROOT.glob("2026-09-25/*/improvement_lab_membership.json")):
+        for row in (read_json(path,{}) or {}).get("rows", []):
+            inputs.append((path, row))
+    if len(inputs) != 797:
+        return {"ok": False, "reason": "EXPECTED_797_MEMBERSHIPS_NOT_FOUND", "rows": len(inputs)}
+    original = sorted((LAB/"outcomes").glob("improvement_lab_outcomes_v2_*.json"))
+    original = next((p for p in original if "correction" not in p.name), None)
+    if original is None:
+        return {"ok": False, "reason": "ORIGINAL_OUTCOME_NOT_FOUND"}
+    membership_hashes = sorted({(read_json(path,{}) or {}).get("membership_hash") for path,_ in inputs})
+    symbols = {row["symbol"] for _,row in inputs}|{"SPY"}|set(SECTOR_ETFS.values())
+    resolver = ResearchPriceResolver(symbols)
+    rows = [{**row, "membership_artifact":str(path), **time_aware_label(row,resolver),
+             "correction_reason":"PREMATURE_FUTURE_PRICE_CLASSIFICATION"} for path,row in inputs]
+    source = read_json(original,{}) or {}
+    payload = {"schema_version":2, "namespace":"outcomes_v2", "research_only":True, "non_trading":True,
+               "created_at":utc_now().isoformat(), "correction_reason":"PREMATURE_FUTURE_PRICE_CLASSIFICATION",
+               "supersedes_artifact":str(original), "supersedes_artifact_hash":source.get("artifact_hash"),
+               "membership_hashes_unchanged":membership_hashes, "rule_version":"PROSPECTIVE_RESEARCH_INTEGRITY_HOTFIX_V1",
+               "rows":rows}
+    path = write_immutable(LAB/"outcomes"/("improvement_lab_outcomes_v2_correction_"+utc_now().strftime("%Y%m%dT%H%M%SZ")+".json"), payload)
+    return {"ok":True, "path":str(path), "rows":len(rows), "broker_calls":0}
+
 def weekly() -> dict[str, Any]:
     scores=sorted((LAB/"scoreboards").glob("improvement_lab_scoreboard_*.json"))
     latest=read_json(scores[-1],{}) if scores else {}
@@ -143,7 +208,7 @@ def weekly() -> dict[str, Any]:
     return {"ok":True,"report":str(path),"broker_calls":0}
 
 def main() -> None:
-    p=argparse.ArgumentParser(); p.add_argument("command",choices=("create","update","weekly","self-test")); a=p.parse_args()
-    result={"create":create,"update":update,"weekly":weekly,"self-test":lambda:{"ok":True,"experiments":EXPERIMENTS,"broker_calls":0,"production_changes":0}}[a.command]()
+    p=argparse.ArgumentParser(); p.add_argument("command",choices=("create","update","weekly","correct-preopen","self-test")); a=p.parse_args()
+    result={"create":create,"update":update,"weekly":weekly,"correct-preopen":correct_premature_sep25,"self-test":lambda:{"ok":True,"experiments":EXPERIMENTS,"broker_calls":0,"production_changes":0}}[a.command]()
     print(json.dumps(result,sort_keys=True,default=str))
 if __name__=="__main__": main()

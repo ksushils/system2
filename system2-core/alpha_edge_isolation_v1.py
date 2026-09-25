@@ -160,6 +160,47 @@ def create() -> dict[str, Any]:
     return {"ok": True, **created}
 
 
+def create_stage1_corrective_v1_1() -> dict[str, Any]:
+    """Pre-entry corrective cohort for a deployment-marker collector defect."""
+    registry = deployment(); deployed_at = stamp(registry.get("deployed_at"))
+    timing = next_market_session(); session = timing["trading_session"]; now = utc_now()
+    if now >= datetime.fromisoformat(timing["next_session_open"]):
+        return {"ok": True, "state": "NEXT_SESSION_ONLY", "reason": "ENTRY_ALREADY_OPENED"}
+    stage_path = latest_stage1(session)
+    if not stage_path:
+        return {"ok": False, "reason": "STAGE1_ARTIFACT_NOT_AVAILABLE"}
+    payload = read_json(stage_path, {}) or {}
+    source_time = stamp(payload.get("pipeline_timestamp") or payload.get("run_timestamp"))
+    if not (deployed_at and source_time):
+        return {"ok": False, "reason": "SOURCE_TIMESTAMP_UNRESOLVED"}
+    directory = EXPERIMENT_ROOT / session / str(payload.get("run_id") or "unknown") / "corrective-v1_1"
+    path = directory / "stage1_next_open_baseline_v1_1_membership.json"
+    if path.exists():
+        return {"ok": True, "idempotent": True, "path": str(path)}
+    run_at = now.isoformat()
+    run_fields = authority_fields(session, str(payload.get("run_id") or source_time.isoformat()), source_time.isoformat())
+    rows = []
+    for row in payload.get("rows", []):
+        if row.get("stage1_v2_classification") != "ALPHA_ELIGIBLE":
+            continue
+        symbol = str(row.get("symbol") or "").upper()
+        if symbol:
+            rows.append({"experiment_name": STAGE1 + "_1", "symbol": symbol, "trading_date": session,
+                "next_open_timestamp": timing["next_session_open"], "entry_source": "NEXT_OPEN",
+                "entry_provenance_state": "PENDING_CANONICAL_XNYS_OPEN", "membership_timestamp": run_at,
+                "pipeline_timestamp": payload.get("pipeline_timestamp"), "pipeline_run_id": payload.get("run_id"),
+                "config_hash": payload.get("config_hash"), "sector": row.get("sector"),
+                "stage1_classification": row.get("stage1_v2_classification"),
+                "production_stage1_result": row.get("production_stage1_v1_result"),
+                "source_artifact": str(stage_path), "research_only": True, "non_trading": True, **run_fields})
+    write_immutable(path, {"schema_version": 1, "research_only": True, "non_trading": True,
+        "immutable_membership": True, "experiment_name": STAGE1 + "_1",
+        "correction_of": STAGE1, "correction_reason": "PRE_ENTRY_COLLECTOR_BUG",
+        "source_pipeline_run": payload.get("run_id"), "created_before_entry": True,
+        "original_v1_preserved": True, **timing, **run_fields, "source_artifact": str(stage_path), "rows": rows})
+    return {"ok": True, "path": str(path), "rows": len(rows), "broker_calls": 0}
+
+
 def outcome(row: dict[str, Any], resolver: ResearchPriceResolver, horizon: int) -> dict[str, Any]:
     start = date.fromisoformat(str(row["trading_date"])[:10])
     target = session_offset(start, horizon)
@@ -259,8 +300,8 @@ def self_test() -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(); parser.add_argument("command", choices=("create", "update", "self-test")); args = parser.parse_args()
-    print(json.dumps({"create": create, "update": update, "self-test": self_test}[args.command](), sort_keys=True))
+    parser = argparse.ArgumentParser(); parser.add_argument("command", choices=("create", "update", "create-corrective", "self-test")); args = parser.parse_args()
+    print(json.dumps({"create": create, "update": update, "create-corrective": create_stage1_corrective_v1_1, "self-test": self_test}[args.command](), sort_keys=True))
 
 
 if __name__ == "__main__":
