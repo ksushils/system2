@@ -142,3 +142,6 @@ CRON_TZ=UTC
 37 3 * * 2-6 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py create >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
 5 4 * * 2-6 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py update >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
 15 5 * * 0 cd /root/system2-core && .venv/bin/python continuous_improvement_lab_v1.py weekly >> /root/system2-core/logs/continuous_improvement_lab_v1.log 2>&1
+
+# Implementation Candidate Factory V1: immutable research-to-shadow manifests and gate report; no production activation.
+20 5 * * 0 cd /root/system2-core && .venv/bin/python implementation_candidate_factory_v1.py report >> /root/system2-core/logs/implementation_candidate_factory_v1.log 2>&1
