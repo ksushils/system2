@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { appendFile, rename, unlink, writeFile } from 'fs/promises';
 import { JSONFilePreset } from 'lowdb/node';
 import * as fmpStore from './fmp-budget.js';
 import attachScoring from './scoring-endpoints.cjs';
@@ -101,6 +102,7 @@ import {
 import { analyticsFirewallRow } from './analytics-firewall.js';
 import fundIntegrity from './fund-integrity.cjs';
 import { startMemoryProfiler } from './memory-profiler.js';
+import { createPersistenceController } from './persistence-controller.js';
 
 // ── PROCESS-LEVEL SAFETY NET ────────────────────────────────────
 // Eight async setIntervals are unguarded and there was no
@@ -403,19 +405,73 @@ const isToday = ts => ts && ts.startsWith(today());
 //   - Postgres ON   → write Postgres (primary). Also write fund.json if DUAL_WRITE=true.
 // Primary persistence failures must fail the request. A memory-only risk/config
 // mutation is not success and would disappear on restart.
-const save = async () => {
-  try {
+const compactForPersistence = () => {
     const openTrades=(db.data.trades||[]).filter(t=>['OPEN','PARTIAL'].includes(t.status));
     const closedTrades=(db.data.trades||[]).filter(t=>!['OPEN','PARTIAL'].includes(t.status)).sort((a,b)=>new Date(b.closed_at||b.ts||0)-new Date(a.closed_at||a.ts||0)).slice(0,5000);
     db.data.trades=[...openTrades,...closedTrades];
     db.data.updates=(db.data.updates||[]).slice(0,5000);
     db.data.sessions=(db.data.sessions||[]).filter(s=>s.expires>Date.now()).slice(-500);
-    if (postgresEnabled) {
+};
+
+const persistenceTelemetryPath = '/root/system2-core/logs/fund_persistence_cycles.jsonl';
+const recordPersistenceTelemetry = row => {
+  appendFile(persistenceTelemetryPath, `${JSON.stringify(row)}\n`, { encoding: 'utf8', mode: 0o600 })
+    .catch(error => console.error('[persistence] telemetry write failed:', error.message));
+};
+
+// LowDB's JSON adapter pretty-prints and allocates a new full payload for every
+// db.write(). The mirror is runtime state, not a whitespace-sensitive interface.
+// This keeps the same atomic temp-file + rename durability contract with exactly
+// one compact serialized string per controller cycle.
+const writeCompactJsonMirror = async () => {
+  const startedAt = Date.now();
+  const serialized = JSON.stringify(db.data);
+  const tempPath = `${DB_PATH}.persistence-tmp`;
+  try {
+    await writeFile(tempPath, serialized, 'utf8');
+    await rename(tempPath, DB_PATH);
+  } catch (error) {
+    await unlink(tempPath).catch(() => {});
+    throw error;
+  }
+  return { serializedJsonBytes: Buffer.byteLength(serialized), jsonWriteDurationMs: Date.now() - startedAt };
+};
+
+const persistenceController = createPersistenceController({
+  onTelemetry: recordPersistenceTelemetry,
+  runCycle: async ({ requiresPostgres }) => {
+    compactForPersistence();
+    let postgresDurationMs = null;
+    if (requiresPostgres && postgresEnabled) {
+      const startedAt = Date.now();
       await memoryProfiler.track('saveToPostgres:full_dataset', () => saveToPostgres(db.data));
-      if (dualWriteEnabled) { try { await memoryProfiler.track('fundJsonWrite:full_dataset', () => db.write()); } catch(e){ console.error('dual-write json failed:', e.message); } }
-    } else {
-      await memoryProfiler.track('fundJsonWrite:full_dataset', () => db.write());
+      postgresDurationMs = Date.now() - startedAt;
     }
+    // Preserve existing semantics: Postgres is authoritative. A mirror failure
+    // leaves the old atomic mirror intact and does not undo a successful PG save.
+    if (dualWriteEnabled || !postgresEnabled) {
+      try {
+        const details = await memoryProfiler.track('fundJsonWrite:full_dataset', writeCompactJsonMirror);
+        return { ...details, postgresDurationMs };
+      } catch (error) {
+        console.error('dual-write json failed:', error.message);
+        return { serializedJsonBytes: null, jsonWriteDurationMs: null, postgresDurationMs };
+      }
+    }
+    return { serializedJsonBytes: null, jsonWriteDurationMs: null, postgresDurationMs };
+  },
+});
+
+// Attach the controller at the LowDB boundary as well as the named save() path.
+// Scoring/legacy modules receive `db` and historically called db.write() directly;
+// leaving that escape hatch would allow a mirror serialization to overlap a full
+// save. This wrapper intentionally performs a JSON-only cycle, matching the old
+// direct-write semantics, while serializing with the same single-flight lock.
+db.write = async () => persistenceController.request({ requiresPostgres: false });
+
+const save = async () => {
+  try {
+    await persistenceController.request({ requiresPostgres: postgresEnabled });
   } catch (error) {
     console.error('[PERSISTENCE_FAILURE]', error.message);
     await sendTelegramAlert(`PERSISTENCE FAILURE: ${error.message}. Request rejected; inspect Postgres immediately.`).catch(()=>{});
@@ -424,25 +480,16 @@ const save = async () => {
 };
 
 let jsonMirrorTimer = null;
-let jsonMirrorInFlight = false;
-let jsonMirrorDirty = false;
 
 const scheduleJsonMirror = () => {
   if (!dualWriteEnabled) return;
-  jsonMirrorDirty = true;
-  if (jsonMirrorTimer || jsonMirrorInFlight) return;
+  if (jsonMirrorTimer) return;
   jsonMirrorTimer = setTimeout(async () => {
     jsonMirrorTimer = null;
-    if (jsonMirrorInFlight) return;
-    jsonMirrorInFlight = true;
-    jsonMirrorDirty = false;
     try {
-      await memoryProfiler.track('fundJsonMirrorWrite:full_dataset', () => db.write());
+      await persistenceController.request({ requiresPostgres: false });
     } catch (e) {
       console.error('dual-write json failed:', e.message);
-    } finally {
-      jsonMirrorInFlight = false;
-      if (jsonMirrorDirty) scheduleJsonMirror();
     }
   }, Number(process.env.JSON_MIRROR_DEBOUNCE_MS || 5000));
   jsonMirrorTimer.unref?.();
