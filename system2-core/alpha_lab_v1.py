@@ -201,6 +201,16 @@ def update() -> dict[str, Any]:
             if isinstance(own, (int, float)) and isinstance(ctl, (int, float)): deltas.append(own - ctl)
         dates = len({r["trading_date"] for r in group}); status = "DESCRIPTIVE_ONLY" if dates < 15 else "EARLY_EVIDENCE" if dates < 30 else "PRELIMINARY" if dates < 60 else "MEANINGFUL_EVIDENCE"
         report.append({"strategy": name, "independent_dates": dates, "mature_rows": len(values), "primary_horizon": horizon, "primary_mean": statistics.fmean(values) if values else None, "median": statistics.median(values) if values else None, "win_rate": 100 * sum(v > 0 for v in values) / len(values) if values else None, "matched_control_delta": statistics.fmean(deltas) if deltas else None, "execution_coverage": "NEXT_OPEN_PROXY_ONLY", "status": status})
+    # Existing frozen experiments remain untouched.  Their rows are carried as
+    # explicit leaderboard placeholders so a tiny new cohort cannot appear to
+    # be a winner merely by omission of the established controls.
+    for name in ("STAGE1_NEXT_OPEN_BASELINE_V1", "FULL_STAGE2_QUARTILES_V1",
+                 "CLUSTER_KEPT_NEXT_OPEN_V1", "PEAD_NEXT_OPEN_FIXED_HOLD_V1",
+                 "PEAD_CURRENT_EXIT", "PMF_NEGATIVE_CONTROL"):
+        report.append({"strategy": name, "independent_dates": None, "mature_rows": None,
+                       "primary_horizon": None, "primary_mean": None, "median": None,
+                       "win_rate": None, "max_drawdown": None, "matched_control_delta": None,
+                       "execution_coverage": "SEPARATE_FROZEN_EXPERIMENT", "status": "COLLECTING"})
     summary = LAB_ROOT / "scoreboards" / f"alpha_leaderboard_{tag}.json"
     write_immutable(summary, {"schema_version": 1, "research_only": True, "non_trading": True, "created_at": now.isoformat(), "leaderboard": report})
     return {"ok": True, "rows": len(rows), "leaderboard": str(summary), "broker_calls": 0}
@@ -208,7 +218,10 @@ def update() -> dict[str, Any]:
 
 def weekly() -> dict[str, Any]:
     latest_score = sorted((LAB_ROOT / "scoreboards").glob("alpha_leaderboard_*.json"))
-    payload = {"schema_version": 1, "research_only": True, "non_trading": True, "created_at": utc_now().isoformat(), "root_cause": "DESCRIPTIVE_ONLY_UNTIL_EVIDENCE_GATES", "leaderboard": read_json(latest_score[-1], {}) if latest_score else {}, "broker_calls": 0}
+    payload = {"schema_version": 1, "research_only": True, "non_trading": True, "created_at": utc_now().isoformat(),
+               "root_cause": "DESCRIPTIVE_ONLY_UNTIL_EVIDENCE_GATES", "leaderboard": read_json(latest_score[-1], {}) if latest_score else {},
+               "weekly_questions": {"new_evidence": "REPORTED_FROM_LEADERBOARD", "improved_vs_control": "TOO_EARLY", "deteriorated": "TOO_EARLY", "alpha_loss": "TOO_EARLY", "loss_attribution": "TOO_EARLY", "checkpoint_reached": "NONE_UNLESS_LEDGER_SHOWS_15_DATES", "too_early": "ALL_NEW_ALPHA_LAB_EXPERIMENTS"},
+               "broker_calls": 0}
     path = LAB_ROOT / "weekly" / f"alpha_lab_weekly_{utc_now().strftime('%G-W%V')}.json"
     write_immutable(path, payload); return {"ok": True, "path": str(path), "broker_calls": 0}
 
