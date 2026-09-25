@@ -33,7 +33,7 @@ def evaluate():
  payload={"title":"SYSTEM2_CANONICAL_ALPHA_REVIEW","created_at":utc_now().isoformat(),"research_only":True,"non_trading":True,"contract_hash":read_json(CONTRACT,{ }).get("artifact_hash"),"duplicates_detected":duplicates,"duplicates_excluded":duplicates,"analytical_authority_used":"SEP25 corrective/direct immutable cohorts only","alpha_waterfall":"PENDING_NO_MATURE_OUTCOMES","rows":out,"canonical_rows":rows,"performance":{"runtime_scope":"single Sep25 authoritative membership","peak_rss":"NOT_MEASURED","output_bytes":"bounded"}}
  return write_immutable(ROOT/"reports"/("canonical_alpha_evaluation_"+utc_now().strftime("%Y%m%dT%H%M%SZ")+".json"),payload)
 def test():
- assert date_equal([{"intended_session":"a","outcome_state":"VALID","SPY_adjusted_return":1},{"intended_session":"a","outcome_state":"VALID","SPY_adjusted_return":3},{"intended_session":"b","outcome_state":"VALID","SPY_adjusted_return":9}])["date_equal_mean"]==5
+ assert date_equal([{"intended_session":"a","outcome_state":"VALID","SPY_adjusted_return":1},{"intended_session":"a","outcome_state":"VALID","SPY_adjusted_return":3},{"intended_session":"b","outcome_state":"VALID","SPY_adjusted_return":9}])["date_equal_mean"]==5.5
  assert gate(14)=="COLLECTING" and gate(15)=="EARLY_EVIDENCE"
  return {"ok":True,"broker_calls":0,"production_changes":0}
 def main():
