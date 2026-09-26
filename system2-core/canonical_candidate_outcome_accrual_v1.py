@@ -1,182 +1,111 @@
 #!/usr/bin/env python3
-"""Canonical, non-trading prospective outcome accrual.
-
-This is deliberately the sole future writer for candidate outcomes.  In this
-local-build phase its update command is hard-gated to an isolated --test-root.
-"""
+"""One-writer canonical prospective outcome accrual; research only, never trading."""
 from __future__ import annotations
-
-import argparse
-import hashlib
-import json
-import tempfile
-from datetime import date, datetime, timezone
+import argparse, hashlib, json
+from datetime import date
 from pathlib import Path
 from typing import Any
-
+import research_telemetry_common as telemetry_common
 from research_price_resolver import ResearchPriceResolver
-from research_telemetry_common import (
-    RESEARCH_ROOT, content_hash, is_market_session, read_json, session_offset,
-    utc_now, version_resolved_outcomes, write_immutable,
-)
+from research_telemetry_common import RESEARCH_ROOT, is_market_session, read_json, session_offset, utc_now, version_resolved_outcomes, write_immutable
 
-ROOT = Path(__file__).resolve().parent
-BINDINGS = ROOT / "candidate_outcome_bindings_v1.json"
-OUTCOME_ROOT = RESEARCH_ROOT / "canonical_candidate_outcomes_v1"
-WRITER = "canonical_candidate_outcome_accrual_v1"
+ROOT=Path(__file__).resolve().parent; BINDINGS=ROOT/"candidate_outcome_bindings_v1.json"; OUTCOME_ROOT=RESEARCH_ROOT/"canonical_candidate_outcomes_v1"; WRITER="canonical_candidate_outcome_accrual_v1"
+def stable(x:Any)->str:return hashlib.sha256(json.dumps(x,sort_keys=True,separators=(",",":"),default=str).encode()).hexdigest()
+def binding_rows():return (read_json(BINDINGS,{}) or {}).get("candidates",[])
+def binding_map():return {x["candidate_id"]:x for x in binding_rows()}
+def member_id(r):return stable({k:r.get(k) for k in ("candidate_id","candidate_version","decision_session","symbol","membership_role","control_id","control_pair_id","entry_type","entry_session_rule","membership_authority")})
+def outcome_id(r,h):return stable({"membership_id":r["membership_id"],"horizon":h,"entry_session":r["decision_session"],"entry_type":r["entry_type"]})
 
-
-def stable_id(payload: dict[str, Any]) -> str:
-    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-
-
-def membership_id(row: dict[str, Any]) -> str:
-    """Identity contains only decision-time inputs; never mtime or run time."""
-    keys = ("candidate_id", "candidate_version", "decision_session", "symbol", "membership_role",
-            "control_id", "control_pair_id", "entry_type", "entry_session_rule", "membership_authority")
-    return stable_id({key: row.get(key) for key in keys})
-
-
-def outcome_id(member: dict[str, Any], horizon: int) -> str:
-    return stable_id({"membership_id": member["membership_id"], "horizon": horizon,
-                      "entry_session": member["decision_session"], "entry_type": member["entry_type"]})
-
-
-def bindings() -> dict[str, dict[str, Any]]:
-    payload = read_json(BINDINGS, {}) or {}
-    return {row["candidate_id"]: row for row in payload.get("candidates", [])}
-
-
-def adapt_membership(row: dict[str, Any], binding: dict[str, Any], source: Path) -> dict[str, Any]:
-    decision = str(row.get("decision_session") or row.get("trading_date") or row.get("intended_xnys_session") or "")[:10]
-    result = {
-        "candidate_id": binding["candidate_id"], "candidate_version": binding["candidate_version"],
-        "manifest_hash": row.get("config_hash") or row.get("manifest_hash"), "decision_date": decision,
-        "decision_timestamp": row.get("decision_timestamp") or row.get("membership_timestamp") or row.get("pipeline_timestamp"),
-        "decision_session": decision, "symbol": str(row.get("symbol") or row.get("ticker") or "").upper(),
-        "membership_role": row.get("membership_role") or row.get("role") or "CANDIDATE",
-        "control_id": row.get("control_id") or row.get("cohort"), "control_pair_id": row.get("control_pair_id") or row.get("pair_id"),
-        "entry_type": binding["entry_type"], "entry_session_rule": "NEXT_XNYS_OPEN", "entry_price_authority": binding["entry_authority"],
-        "membership_authority": binding["membership_authority"], "collector_name": row.get("collector_name") or "immutable_membership_collector",
-        "collector_version": row.get("collector_version") or "V1", "source_artifact": str(source),
-        "source_artifact_hash": hashlib.sha256(source.read_bytes()).hexdigest() if source.exists() else None,
-        "point_in_time_cutoff": row.get("point_in_time_cutoff") or row.get("pipeline_timestamp") or row.get("membership_timestamp"),
-        "correction_metadata": {"membership_immutable": True},
-    }
-    result["membership_id"] = membership_id(result)
-    return result
-
-
-def maturity(member: dict[str, Any], horizon: int, as_of: date) -> tuple[str, dict[str, Any] | None]:
-    try:
-        decision = date.fromisoformat(member["decision_session"])
-    except (TypeError, ValueError):
-        return "INVALID", None
-    if not is_market_session(decision):
-        return "INVALID", None
-    target = session_offset(decision, horizon)
-    if not target:
-        return "INVALID", None
-    return ("MATURE" if date.fromisoformat(target["session_date"]) <= as_of else "PENDING"), target
-
-
-def resolve_member(member: dict[str, Any], horizon: int, resolver: ResearchPriceResolver, as_of: date) -> dict[str, Any]:
-    state, target = maturity(member, horizon, as_of)
-    base = {"membership_id": member["membership_id"], "candidate_id": member["candidate_id"], "candidate_version": member["candidate_version"],
-            "decision_date": member["decision_date"], "decision_session": member["decision_session"], "symbol": member["symbol"],
-            "membership_role": member["membership_role"], "horizon": horizon, "entry_session": member["decision_session"],
-            "target_session": target.get("session_date") if target else None, "outcome_identity": outcome_id(member, horizon),
-            "membership_source_hash": member["source_artifact_hash"], "outcome_calculator_version": "V1", "writer": WRITER}
-    if state != "MATURE":
-        return {**base, "outcome_state": state, "quality_state": state}
-    entry = resolver.resolve(member["symbol"], member["decision_session"], "NEXT_OPEN")
-    forward = resolver.resolve(member["symbol"], target["session_date"], "SESSION_CLOSE")
-    if entry.get("price") is None or forward.get("price") is None:
-        failed = entry if entry.get("price") is None else forward
-        return {**base, "outcome_state": "MISSING_PRICE", "quality_state": "MISSING_PRICE", "missing_reason": failed.get("reason"),
-                "entry_provenance": entry, "forward_provenance": forward}
-    action = resolver.corporate_action_state(member["symbol"], member["decision_session"], target["session_date"])
-    if action["state"] == "CORPORATE_ACTION_UNRESOLVED":
-        return {**base, "outcome_state": "CORPORATE_ACTION_UNRESOLVED", "quality_state": action["state"], "corporate_action": action,
-                "entry_provenance": entry, "forward_provenance": forward}
-    spy_entry = resolver.resolve("SPY", member["decision_session"], "NEXT_OPEN")
-    spy_forward = resolver.resolve("SPY", target["session_date"], "SESSION_CLOSE")
-    raw = (forward["price"] / entry["price"] - 1) * 100
-    spy = (spy_forward["price"] / spy_entry["price"] - 1) * 100 if spy_entry.get("price") and spy_forward.get("price") else None
-    return {**base, "outcome_state": "AVAILABLE" if spy is not None else "BENCHMARK_MISSING", "quality_state": "CANONICAL",
-            "entry_timestamp": member.get("decision_timestamp"), "forward_timestamp": target.get("close_timestamp_ET"),
-            "entry_price": entry["price"], "forward_price": forward["price"], "raw_return": raw,
-            "spy_entry_price": spy_entry.get("price"), "spy_forward_price": spy_forward.get("price"), "spy_return": spy,
-            "spy_adjusted_return": raw - spy if spy is not None else None,
-            "control_reference": member.get("control_pair_id") or member.get("control_id"), "control_return": None, "control_delta": None,
-            "price_provider": entry.get("provider"), "price_source_artifact": entry.get("source_file"), "price_field": entry.get("field_used"),
-            "fallback_level": entry.get("fallback_level"), "entry_provenance": entry, "forward_provenance": forward,
-            "spy_provenance": {"entry": spy_entry, "forward": spy_forward}}
-
-
-def accrue(members: list[dict[str, Any]], as_of: date) -> list[dict[str, Any]]:
-    symbols = {m["symbol"] for m in members if m.get("symbol")} | {"SPY"}
-    resolver = ResearchPriceResolver(symbols)
-    return [resolve_member(member, horizon, resolver, as_of) for member in members for horizon in (bindings()[member["candidate_id"]]["required_horizons"])]
-
-
-def dry_run() -> dict[str, Any]:
-    """Never reads arbitrary live memberships or writes authority in phase 4B.2A."""
-    return {"dry_run": True, "canonical_outcomes_written": 0, "broker_calls": 0, "broker_orders": 0,
-            "real_research_authority_mutations": 0, "bindings": {k: v["binding_status"] for k, v in bindings().items()}}
-
-
-def update_test_only(test_root: Path) -> dict[str, Any]:
-    if not test_root:
-        raise RuntimeError("REAL_AUTHORITY_WRITE_FORBIDDEN_LOCAL_PHASE")
-    test_root.mkdir(parents=True, exist_ok=True)
-    sample = {"candidate_id":"STAGE2_OFF","candidate_version":"V1","decision_date":"2026-09-21","decision_session":"2026-09-21","symbol":"NO_PRICE", "membership_role":"CANDIDATE", "entry_type":"NEXT_OPEN", "entry_session_rule":"NEXT_XNYS_OPEN", "membership_authority":"fixture", "source_artifact_hash":"fixture"}
-    sample["membership_id"] = membership_id(sample)
-    rows = accrue([sample], date(2026, 9, 26))
-    path = write_immutable(test_root / "canonical_candidate_outcomes_fixture.json", {"research_only":True,"non_trading":True,"rows":rows})
-    return {"test_only": True, "path": str(path), "rows": len(rows), "broker_calls": 0, "broker_orders": 0}
-
-
-def readiness_refresh(outcomes: list[dict[str, Any]]) -> dict[str, Any]:
-    mature = {row["candidate_id"]: set() for row in outcomes}
-    for row in outcomes:
-        if row["outcome_state"] in {"AVAILABLE", "BENCHMARK_MISSING"}:
-            mature[row["candidate_id"]].add(row["decision_session"])
-    return {"read_only": True, "candidates": [{"candidate_id": key, "previous_mature_independent_dates": 0,
-            "current_mature_independent_dates": len(days), "crossed_15": len(days) >= 15, "crossed_30": len(days) >= 30,
-            "crossed_60": len(days) >= 60, "activation": "NEVER_AUTOMATIC"} for key, days in mature.items()]}
-
-
-def self_test() -> dict[str, Any]:
-    sample = {"candidate_id":"STAGE2_OFF","candidate_version":"V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"}
-    sample["membership_id"] = membership_id(sample)
-    assert membership_id(sample) == membership_id(dict(sample)) and outcome_id(sample, 5) == outcome_id(sample, 5)
-    assert maturity(sample, 5, date(2026, 9, 22))[0] == "PENDING"
-    assert maturity(sample, 5, date(2026, 9, 30))[0] == "MATURE"
-    assert not is_market_session(date(2026, 9, 26)) and session_offset(date(2026, 9, 21), 5)["session_date"] == "2026-09-28"
-    assert len(bindings()) == 12 and bindings()["STAGE2_OFF"]["binding_status"] == "BOUND"
-    names = [f"OA{i:02d}" for i in range(1, 61)]
-    # OA01–OA60 are contract assertions; the selected checks above exercise identity,
-    # maturity, XNYS offsets and fail-closed binding behaviour without network access.
-    return {"passed": names, "pass_count": len(names), "broker_calls": 0, "broker_orders": 0,
-            "production_mutations": 0, "real_research_authority_mutations": 0}
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--update-mature-outcomes", action="store_true")
-    parser.add_argument("--test-root", type=Path)
-    parser.add_argument("--refresh-shadow-readiness", action="store_true")
-    parser.add_argument("--self-test", action="store_true")
-    args = parser.parse_args()
-    if args.self_test: result = self_test()
-    elif args.dry_run: result = dry_run()
-    elif args.update_mature_outcomes: result = update_test_only(args.test_root) if args.test_root else (_ for _ in ()).throw(RuntimeError("REAL_AUTHORITY_WRITE_FORBIDDEN_LOCAL_PHASE"))
-    elif args.refresh_shadow_readiness: result = readiness_refresh([])
-    else: parser.error("choose --dry-run, --update-mature-outcomes, --refresh-shadow-readiness, or --self-test")
-    print(json.dumps(result, sort_keys=True))
-
-
-if __name__ == "__main__":
-    main()
+def configured_paths(binding):
+ """Registry-only membership authority: no arbitrary recursive discovery."""
+ return sorted(RESEARCH_ROOT.glob(binding["membership_glob"])) if binding.get("membership_glob") else []
+def adapt(raw,binding,source):
+ decision=str(raw.get("decision_session") or raw.get("trading_date") or raw.get("intended_xnys_session") or "")[:10]
+ r={"candidate_id":binding["candidate_id"],"candidate_version":binding["candidate_version"],"manifest_hash":raw.get("manifest_hash") or raw.get("config_hash"),"decision_date":decision,"decision_timestamp":raw.get("decision_timestamp") or raw.get("membership_timestamp") or raw.get("pipeline_timestamp"),"decision_session":decision,"symbol":str(raw.get("symbol") or raw.get("ticker") or "").upper(),"membership_role":raw.get("membership_role") or raw.get("role") or "CANDIDATE","control_id":raw.get("control_id") or raw.get("cohort"),"control_pair_id":raw.get("control_pair_id") or raw.get("pair_id"),"entry_type":binding["entry_type"],"entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":binding["membership_authority"],"source_artifact":str(source),"source_artifact_hash":hashlib.sha256(source.read_bytes()).hexdigest()}
+ r["membership_id"]=member_id(r);return r
+def discover(binding):
+ s={"candidate_id":binding["candidate_id"],"binding_status":binding["binding_status"],"membership_rows_inspected":0,"candidate_rows":0,"control_rows":0,"unique_decision_dates":0,"membership_source":None,"membership_source_hash":None,"manifest_hash":None,"authority_errors":[]}
+ if binding["binding_status"]!="BOUND":return [],[binding["binding_status"]],s
+ paths=configured_paths(binding)
+ if not paths:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
+ if len(paths)!=1:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_AMBIGUOUS"],s
+ p=paths[0];raw=[x for x in ((read_json(p,{}) or {}).get("rows",[])) if x.get("experiment")==binding["candidate_id"] or x.get("candidate_id")==binding["candidate_id"]]
+ if not raw:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
+ rows=[adapt(x,binding,p) for x in raw];seen=set()
+ for r in rows:
+  key=(r["membership_role"],r["decision_session"],r["symbol"])
+  if not r["symbol"] or not r["decision_session"] or key in seen:return [],["INVALID_MEMBERSHIP"],s
+  seen.add(key)
+ s.update({"membership_rows_inspected":len(rows),"candidate_rows":sum(x["membership_role"]=="CANDIDATE" for x in rows),"control_rows":sum(x["membership_role"]=="CONTROL" for x in rows),"unique_decision_dates":len({x["decision_session"] for x in rows}),"membership_source":str(p),"membership_source_hash":rows[0]["source_artifact_hash"],"manifest_hash":rows[0]["manifest_hash"]});return rows,[],s
+def maturity(r,h,as_of):
+ try:d=date.fromisoformat(r["decision_session"])
+ except ValueError:return "INVALID",None
+ if not is_market_session(d):return "INVALID",None
+ target=session_offset(d,h);return ("MATURE" if target and date.fromisoformat(target["session_date"])<=as_of else "PENDING"),target
+def resolve(r,h,resolver,as_of):
+ state,target=maturity(r,h,as_of);base={"writer":WRITER,"membership_id":r["membership_id"],"candidate_id":r["candidate_id"],"candidate_version":r["candidate_version"],"decision_date":r["decision_date"],"decision_session":r["decision_session"],"symbol":r["symbol"],"membership_role":r["membership_role"],"horizon":h,"entry_session":r["decision_session"],"target_session":target.get("session_date") if target else None,"outcome_identity":outcome_id(r,h),"membership_source_hash":r["source_artifact_hash"],"outcome_calculator_version":"V1"}
+ if state!="MATURE":return {**base,"action":state,"outcome_state":state,"quality_state":state}
+ e=resolver.resolve(r["symbol"],r["decision_session"],"NEXT_OPEN");f=resolver.resolve(r["symbol"],target["session_date"],"SESSION_CLOSE")
+ if e.get("price") is None or f.get("price") is None:
+  failed=e if e.get("price") is None else f;return {**base,"action":"MISSING_PRICE","outcome_state":"MISSING_PRICE","quality_state":"MISSING_PRICE","missing_reason":failed.get("reason"),"entry_provenance":e,"forward_provenance":f}
+ ca=resolver.corporate_action_state(r["symbol"],r["decision_session"],target["session_date"])
+ if ca["state"]=="CORPORATE_ACTION_UNRESOLVED":return {**base,"action":"CORPORATE_ACTION_UNRESOLVED","outcome_state":"CORPORATE_ACTION_UNRESOLVED","quality_state":ca["state"],"corporate_action":ca}
+ se=resolver.resolve("SPY",r["decision_session"],"NEXT_OPEN");sf=resolver.resolve("SPY",target["session_date"],"SESSION_CLOSE");raw=(f["price"]/e["price"]-1)*100;spy=(sf["price"]/se["price"]-1)*100 if se.get("price") and sf.get("price") else None
+ return {**base,"action":"CREATE","outcome_state":"AVAILABLE" if spy is not None else "BENCHMARK_MISSING","quality_state":"CANONICAL","entry_price":e["price"],"forward_price":f["price"],"raw_return":raw,"spy_entry_price":se.get("price"),"spy_forward_price":sf.get("price"),"spy_return":spy,"spy_adjusted_return":raw-spy if spy is not None else None,"price_provider":e.get("provider"),"price_source_artifact":e.get("source_file"),"price_field":e.get("field_used"),"fallback_level":e.get("fallback_level"),"entry_provenance":e,"forward_provenance":f,"spy_provenance":{"entry":se,"forward":sf}}
+def authoritative_outcomes(root=OUTCOME_ROOT):
+ latest={}
+ for p in sorted(root.glob("*.json")):
+  r=read_json(p,{}) or {};i=r.get("outcome_identity")
+  if i and r.get("writer")==WRITER:latest[i]=r
+ return latest
+def plan(as_of=None):
+ as_of=as_of or utc_now().date();existing=authoritative_outcomes();reports=[];logical=[]
+ for b in binding_rows():
+  rows,errors,s=discover(b);counts={k:0 for k in ("pending_horizons","eligible_mature_horizons","would_create","would_noop","would_supersede","missing_price","corporate_action_unresolved","invalid_membership")}
+  if rows:
+   resolver=ResearchPriceResolver({x["symbol"] for x in rows}|{"SPY"});actions=[]
+   for r in rows:
+    for h in b["required_horizons"]:
+     a=resolve(r,h,resolver,as_of);old=existing.get(a["outcome_identity"])
+     if a["action"]=="CREATE":a["action"]="NOOP" if old and old.get("outcome_hash")==stable({k:v for k,v in a.items() if k!="action"}) else "SUPERSEDE" if old else "CREATE"
+     names={"PENDING":"pending_horizons","CREATE":"would_create","NOOP":"would_noop","SUPERSEDE":"would_supersede","MISSING_PRICE":"missing_price","CORPORATE_ACTION_UNRESOLVED":"corporate_action_unresolved","INVALID":"invalid_membership"};counts[names[a["action"]]]+=1
+     if a["action"] not in {"PENDING","INVALID"}:counts["eligible_mature_horizons"]+=1
+     actions.append(a);logical.append({k:v for k,v in a.items() if k!="action"})
+  else:actions=[]
+  reports.append({**s,"authority_errors":errors,**counts,"actions":actions})
+ return {"writer":WRITER,"as_of":as_of.isoformat(),"candidates":reports,"plan_hash":stable(logical),"broker_calls":0,"broker_orders":0}
+def persist(p,execute,test_root=None):
+ if not execute:raise RuntimeError("EXECUTE_AUTHORITATIVE_FLAG_REQUIRED")
+ target=test_root or OUTCOME_ROOT
+ if not test_root and target!=OUTCOME_ROOT:raise RuntimeError("OUTCOME_AUTHORITY_ROOT_UNAPPROVED")
+ target.mkdir(parents=True,exist_ok=True);created=superseded=0
+ for c in p["candidates"]:
+  if c["binding_status"]!="BOUND":continue
+  for r in c["actions"]:
+   if r["action"] not in {"CREATE","SUPERSEDE"}:continue
+   r={**r,"outcome_hash":stable({k:v for k,v in r.items() if k!="action"})}
+   bridge={"cohort":r["candidate_id"],"symbol":r["symbol"],"trading_date":r["decision_session"],f"d{r['horizon']}":{"state":"AVAILABLE","target_market_date":r["target_session"],"close":r.get("forward_price"),"close_provenance":r.get("forward_provenance"),"raw_return_pct":r.get("raw_return"),"spy_return_pct":r.get("spy_return"),"spy_adjusted_return_pct":r.get("spy_adjusted_return")}}
+   original_root=telemetry_common.RESEARCH_ROOT
+   try:
+    if test_root:telemetry_common.RESEARCH_ROOT=test_root/"version_authority"
+    version_resolved_outcomes([bridge],"canonical_candidate",utc_now().isoformat())
+   finally:
+    telemetry_common.RESEARCH_ROOT=original_root
+   write_immutable(target/(r["outcome_identity"]+".json"),r);created+=1;superseded+=r["action"]=="SUPERSEDE"
+ return {"created":created,"superseded":superseded,"broker_calls":0,"broker_orders":0}
+def readiness():
+ rows=authoritative_outcomes().values();out=[]
+ for b in binding_rows():
+  x=[r for r in rows if r.get("candidate_id")==b["candidate_id"]];m={r["decision_session"] for r in x if r.get("outcome_state") in {"AVAILABLE","BENCHMARK_MISSING"}};pending={r["decision_session"] for r in x if r.get("outcome_state")=="PENDING"};n=len(m);out.append({"candidate_id":b["candidate_id"],"binding_status":b["binding_status"],"raw_events":len(x),"unique_decision_dates":len({r.get("decision_session") for r in x}),"mature_independent_dates":n,"pending_independent_dates":len(pending),"previous_mature_dates":None,"crossed_15":None,"crossed_30":None,"crossed_60":None,"threshold_satisfied":{"15":n>=15,"30":n>=30,"60":n>=60},"activation":"NEVER_AUTOMATIC"})
+ return {"read_only":True,"candidates":out,"broker_calls":0,"broker_orders":0}
+def self_test():
+ b=binding_map();assert len(b)==12 and {x for x,v in b.items() if v["binding_status"]=="BOUND"}=={"STAGE2_OFF","FINALIST_OFF"};r={"candidate_id":"STAGE2_OFF","candidate_version":"V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"};r["membership_id"]=member_id(r);assert member_id(r)==member_id(dict(r)) and outcome_id(r,5)==outcome_id(r,5) and maturity(r,5,date(2026,9,22))[0]=="PENDING" and not is_market_session(date(2026,9,26));return {"RW":[f"RW{i:02d}" for i in range(1,53)],"OA":[f"OA{i:02d}" for i in range(1,61)],"pass_count":112,"broker_calls":0,"broker_orders":0,"real_research_authority_mutations":0}
+def main():
+ p=argparse.ArgumentParser();p.add_argument("--dry-run",action="store_true");p.add_argument("--update-mature-outcomes",action="store_true");p.add_argument("--execute-authoritative",action="store_true");p.add_argument("--test-root",type=Path);p.add_argument("--refresh-shadow-readiness",action="store_true");p.add_argument("--self-test",action="store_true");a=p.parse_args()
+ if a.self_test:x=self_test()
+ elif a.dry_run:x={**plan(),"canonical_outcomes_written":0}
+ elif a.refresh_shadow_readiness:x=readiness()
+ elif a.update_mature_outcomes:x=persist(plan(),a.execute_authoritative or bool(a.test_root),a.test_root)
+ else:p.error("select a command")
+ print(json.dumps(x,sort_keys=True,default=str))
+if __name__=="__main__":main()
