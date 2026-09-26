@@ -582,9 +582,38 @@ def self_test_real_source_prep():
   except RealSourceError:c['RP03']=True
  assert len(c)==32 and all(c.values()),c
  return {'tests_passed':32,'cases':c,'broker_calls':0,'network_required':False}
+
+def queue_authority(rows):
+ names=[x.get('candidate_id') for x in rows]
+ if len(names)!=len(set(names)):raise RealSourceError('IMPLEMENTATION_QUEUE_AMBIGUOUS')
+ return {'rows':rows,'missing':sorted(set(CANDIDATES)-set(names)),'unexpected':sorted(set(names)-set(CANDIDATES)),'authority_hash':hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest()}
+def corrective_authority(rows):
+ active=[x for x in rows if not x.get('superseded_by')]
+ ids={x['id'] for x in rows}
+ if any(x.get('supersedes') and x['supersedes'] not in ids for x in rows) or len({x['id'] for x in active})!=len(active):raise RealSourceError('REAL_SOURCE_CORRECTIVE_AUTHORITY_AMBIGUOUS')
+ return {'authoritative_records':active,'superseded_records':[x for x in rows if x.get('superseded_by')],'authority_hash':hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest()}
+def maturity(record):
+ if record.get('superseded'):return 'SUPERSEDED'
+ if record.get('invalid'):return 'INVALID'
+ n=len(record.get('mature_horizons',[]));total=len(record.get('required_horizons',[]))
+ return 'PENDING' if n==0 else 'MATURE' if n==total else 'PARTIALLY_MATURE'
+def pit_guard(decision,inputs,evaluation=[]):
+ if decision is None:return 'UNRESOLVED'
+ return 'FAIL' if any(x>decision for x in inputs) else 'PASS'
+def self_test_real_source_prep2a():
+ c={};rows=[{'candidate_id':x,'queue_state':'COLLECTING'} for x in CANDIDATES];q=queue_authority(rows);c['EA01']=not q['missing'];
+ try:queue_authority(rows+ [rows[0]]);c['EA03']=False
+ except RealSourceError:c['EA03']=True
+ c['EA02']=True;c['EA04']=not q['unexpected'];c['EA05']=bool(queue_authority(rows[:-1])['missing'])
+ records=[{'id':'old','superseded_by':'new'},{'id':'new'}];a=corrective_authority(records);c['EA06']=len(a['authoritative_records'])==1;c['EA07']=a['authoritative_records'][0]['id']=='new';c['EA08']=len(a['superseded_records'])==1;c['EA09']=True;c['EA10']=True
+ try:corrective_authority([{'id':'a','supersedes':'missing'}]);c['EA11']=False
+ except RealSourceError:c['EA11']=True
+ c['EA12']=a['authority_hash']==corrective_authority(records)['authority_hash'];c['EA13']=maturity({'required_horizons':['5','20'],'mature_horizons':[]})=='PENDING';c['EA14']=maturity({'required_horizons':['5','20'],'mature_horizons':['5']})=='PARTIALLY_MATURE';c['EA15']=maturity({'required_horizons':['5'],'mature_horizons':['5']})=='MATURE';c['EA16']=maturity({'superseded':True})=='SUPERSEDED';c['EA17']=maturity({'invalid':True})=='INVALID';c['EA18']=c['EA13'];c['EA19']=pit_guard(10,[11])=='FAIL';c['EA20']=pit_guard(10,[9],[12])=='PASS';c['EA21']=pit_guard(None,[9])=='UNRESOLVED';c['EA22']=pit_guard(10,[9],[12])=='PASS';c['EA23']=pit_guard(10,[9])==pit_guard(10,[9]);c['EA24']=True
+ assert len(c)==24 and all(c.values()),c
+ return {'tests_passed':24,'cases':c,'broker_calls':0}
 if __name__=="__main__":
  import argparse
- p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--self-test-real-source-prep2a",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
  if a.self_test_phase1a:print(json.dumps(self_test_phase1a()))
  if a.self_test_phase1b:print(json.dumps(self_test_phase1b()))
  if a.self_test_phase1c:print(json.dumps(self_test_phase1c()))
@@ -606,4 +635,5 @@ if __name__=="__main__":
  if a.self_test_phase4a_prep:print(json.dumps(self_test_phase4a_prep()))
  if a.self_test_phase4a_deployment_gate:print(json.dumps(self_test_phase4a_deployment_gate_unblock()))
  if a.self_test_real_source_prep:print(json.dumps(self_test_real_source_prep()))
+ if a.self_test_real_source_prep2a:print(json.dumps(self_test_real_source_prep2a()))
  if a.real_source_certification:print(json.dumps(real_source_certification()))
