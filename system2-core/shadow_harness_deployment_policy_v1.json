@@ -1,0 +1,17 @@
+{
+  "schema_version": "1",
+  "mechanism_id": "SHADOW_ISOLATED_SCP_V1",
+  "production_root": "/root/system2-core",
+  "shadow_root": "/root/system2-shadow-harness",
+  "production_root_write_allowed": false,
+  "shadow_root_only": true,
+  "pm2_change_allowed": false,
+  "cron_change_allowed": false,
+  "broker_access_allowed": false,
+  "secret_copy_allowed": false,
+  "database_write_allowed": false,
+  "research_write_allowed": false,
+  "deployment_mode": "ONE_SHOT_MANUAL",
+  "requires_explicit_execute": true,
+  "default_mode": "DRY_RUN"
+}

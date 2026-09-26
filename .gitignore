@@ -39,6 +39,7 @@ system2-core/*_candidates*.json
 system2-core/stage*.json
 system2-core/universe*.json
 system2-core/shadow_*.json
+!system2-core/shadow_harness_deployment_policy_v1.json
 system2-core/x-*.json
 system2-core/x_*.json
 system2-core/*.out
