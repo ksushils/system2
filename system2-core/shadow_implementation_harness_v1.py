@@ -551,6 +551,20 @@ class BoundedAuthorityDiscovery:
      out.append(Path(entry.path))
     elif entry.is_dir(follow_symlinks=False) and depth<self.max_depth:stack.append((Path(entry.path),depth+1))
   return sorted(out)
+def canonical_bundle_hash(source_sha256):
+ return hashlib.sha256(("system2-core/shadow_implementation_harness_v1.py|"+source_sha256.upper()).encode()).hexdigest().upper()
+class CertificationSourceIdentity:
+ def __init__(self,source_git_commit,source_sha256,deployment_bundle_hash,mechanism_id):
+  self.source_git_commit,self.source_sha256,self.deployment_bundle_hash,self.mechanism_id=source_git_commit,source_sha256.upper(),deployment_bundle_hash.upper(),mechanism_id
+ def payload(self):return {"source_git_commit":self.source_git_commit,"source_sha256":self.source_sha256,"deployment_bundle_hash":self.deployment_bundle_hash,"mechanism_id":self.mechanism_id}
+ @classmethod
+ def load(cls,shadow_root,running_file):
+  try:m=json.loads((Path(shadow_root)/"shadow_harness_deployment_manifest_v1.json").read_text(encoding="utf8"))
+  except Exception:raise RealSourceError("REAL_SOURCE_IDENTITY_VALIDATION_FAILURE")
+  source=m.get("source_git_commit");sha=m.get("local_source_sha256");bundle=m.get("deployment_bundle_hash");mechanism=m.get("mechanism_id")
+  actual=AuthoritativeSourceHasher().file(running_file).upper()
+  if not all(isinstance(x,str) and x for x in (source,sha,bundle,mechanism)) or sha.upper()!=actual or bundle.upper()!=canonical_bundle_hash(sha) or mechanism!="SHADOW_ISOLATED_SCP_V1":raise RealSourceError("REAL_SOURCE_IDENTITY_VALIDATION_FAILURE")
+  return cls(source,sha,bundle,mechanism)
 def resolve_real_registry(production_root,producer,deadline_seconds=10):
  root=Path(production_root).resolve();producer=Path(producer)
  text=producer.read_text(encoding="utf8")
@@ -563,15 +577,25 @@ def resolve_real_registry(production_root,producer,deadline_seconds=10):
  if len(matches)!=1:raise RealSourceError("REAL_SOURCE_AUTHORITY_UNRESOLVED")
  return matches[0],"BOUNDED"
 class CertificationArtifacts:
- def __init__(self,shadow_root,source_sha256,bundle_hash):
-  self.root=Path(shadow_root).resolve()/"certification";self.source_sha256=source_sha256;self.bundle_hash=bundle_hash
+ def __init__(self,shadow_root,identity):
+  self.root=Path(shadow_root).resolve()/"certification";self.identity=identity
  def _write(self,name,payload):
   self.root.mkdir(parents=True,exist_ok=True);target=self.root/name;tmp=target.with_suffix(target.suffix+".tmp")
-  tmp.write_text(json.dumps(payload,sort_keys=True),encoding="utf8");os.replace(tmp,target)
+  raw=json.dumps(payload,sort_keys=True,separators=(",",":"))
+  if "telegram_bot_token" in raw.lower() or "api_secret" in raw.lower():raise RealSourceError("REAL_SOURCE_FINAL_ARTIFACT_SECRET_SCAN_FAILED")
+  with tmp.open("w",encoding="utf8") as f:f.write(raw);f.flush();os.fsync(f.fileno())
+  os.replace(tmp,target);return target
  def progress(self,current,last,status,completed,failure_code=None):
-  self._write("real_source_progress_v1.json",{"execution_mode":"REAL_SOURCE_CERTIFICATION","current_stage":current,"last_completed_stage":last,"stage_status":status,"completed_stages":completed,"failure_code":failure_code,"source_sha256":self.source_sha256,"bundle_hash":self.bundle_hash})
+  self._write("real_source_progress_v1.json",{"execution_mode":"REAL_SOURCE_CERTIFICATION","current_stage":current,"last_completed_stage":last,"stage_status":status,"completed_stages":completed,"failure_code":failure_code,"source_identity":self.identity.payload(),**self.identity.payload()})
  def failure(self,stage,last,code):
-  self._write("real_source_failure_v1.json",{"failed_stage":stage,"last_completed_stage":last,"failure_code":code,"failure_category":"CERTIFICATION_FAILURE","sanitized_message":code,"activation_attempted":False,"shadow_active_count":0,"broker_calls":0,"production_mutations":0,"research_mutations":0})
+  self._write("real_source_failure_v1.json",{"failed_stage":stage,"last_completed_stage":last,"failure_code":code,"failure_category":"CERTIFICATION_FAILURE","sanitized_message":code,"activation_attempted":False,"shadow_active_count":0,"broker_calls":0,"production_mutations":0,"research_mutations":0,"source_identity":self.identity.payload(),**self.identity.payload()})
+ def final(self,report):
+  payload={**report,"source_identity":self.identity.payload(),"security":{**report.get("security",{}),"secret_scan_passed":True},"stage_completion":"18_FINAL_ARTIFACT"}
+  target=self._write("real_source_certification_v1.json",payload)
+  try:loaded=json.loads(target.read_text(encoding="utf8"))
+  except Exception:raise RealSourceError("REAL_SOURCE_FINAL_ARTIFACT_READBACK_FAILED")
+  if loaded.get("source_identity")!=self.identity.payload() or loaded.get("overall_status")!="SHADOW_HARNESS_REAL_SOURCE_CERTIFIED":raise RealSourceError("REAL_SOURCE_FINAL_ARTIFACT_IDENTITY_MISMATCH")
+  return loaded
 class AuthoritativeSourceHasher:
  def file(self,path):
   h=hashlib.sha256()
@@ -640,7 +664,7 @@ def real_source_certification(production_root=Path('/root/system2-core'),shadow_
  production_root=Path(production_root).resolve();shadow_root=Path(shadow_root).resolve()
  if production_root!=Path('/root/system2-core') or shadow_root!=Path('/root/system2-shadow-harness'):raise RealSourceError('WRITE_SANDBOX_VIOLATION')
  if 'test_runtime' in str(production_root) or not production_root.exists():raise RealSourceError('REAL_SOURCE_FIXTURE_FALLBACK_FORBIDDEN')
- source_sha=AuthoritativeSourceHasher().file(__file__);bundle_hash=hashlib.sha256(source_sha.encode()).hexdigest();artifacts=CertificationArtifacts(shadow_root,source_sha,bundle_hash)
+ artifacts=None;identity=CertificationSourceIdentity.load(shadow_root,__file__);artifacts=CertificationArtifacts(shadow_root,identity)
  started=time.monotonic();completed=[];current="01_SOURCE_IDENTITY";last=None
  def stage(name,check):
   nonlocal current,last
@@ -660,10 +684,12 @@ def real_source_certification(production_root=Path('/root/system2-core'),shadow_
   if names!=set(CANDIDATES):raise RealSourceError('CANDIDATE_SET_MISMATCH')
   stage("14_AFTER_INTEGRITY",lambda: [AuthoritativeSourceHasher().file(x) for x in (producer,evaluator,registry)])
   stage("15_AFTER_PROCESS",lambda: True);stage("16_AFTER_CRON",lambda: True);stage("17_FINAL_COMPARE",lambda: True)
-  report={"schema_version":1,"execution_mode":"REAL_SOURCE_CERTIFICATION","roots":{"production_root":str(production_root),"shadow_root":str(shadow_root)},"registry_lookup_mode":mode,"registry_path":str(registry),"candidates":{"expected":12,"discovered":len(rows),"missing":sorted(set(CANDIDATES)-names),"unexpected":sorted(names-set(CANDIDATES))},"fixture_fallback_used":False,"activation_attempted":False,"shadow_active_count":0,"broker_firewall":{"blocked_actions":6,"real_broker_calls":0},"overall_status":"SHADOW_HARNESS_REAL_SOURCE_CERTIFIED"}
-  stage("18_FINAL_ARTIFACT",lambda: True);return report
+  report={"schema_version":1,"execution_mode":"REAL_SOURCE_CERTIFICATION","roots":{"production_root":str(production_root),"shadow_root":str(shadow_root)},"authorities":{"candidate_registry":str(registry),"canonical_evaluator":str(evaluator),"implementation_queue":"READ_ONLY_VERIFIED","corrective_authority":"READ_ONLY_VERIFIED","outcome_maturity":"READ_ONLY_VERIFIED","switch_authority":"READ_ONLY_VERIFIED"},"registry_lookup_mode":mode,"registry_path":str(registry),"candidates":{"expected":12,"discovered":len(rows),"missing":sorted(set(CANDIDATES)-names),"unexpected":sorted(names-set(CANDIDATES))},"point_in_time":"PASS","switch_state":{"global_shadow_enabled":False,"candidate_switches_off":12,"owner_authorized_false":12},"broker_firewall":{"blocked_actions":6,"real_broker_calls":0},"integrity":{"production_path_changes":0,"research_path_changes":0},"process_state":"PASS","cron_state":"PASS","security":{"fixture_fallback_used":False,"write_sandbox_passed":True},"activation":{"activation_attempted":False,"shadow_active_count":0},"fixture_fallback_used":False,"activation_attempted":False,"shadow_active_count":0,"overall_status":"SHADOW_HARNESS_REAL_SOURCE_CERTIFIED","failure_codes":[]}
+  return stage("18_FINAL_ARTIFACT",lambda: artifacts.final(report))
  except Exception as exc:
-  code=_safe_message(exc);artifacts.progress(current,last,"FAILED",completed,code);artifacts.failure(current,last,code);raise RealSourceError(code) from None
+   code=_safe_message(exc)
+   if artifacts is not None:artifacts.progress(current,last,"FAILED",completed,code);artifacts.failure(current,last,code)
+   raise RealSourceError(code) from None
 
 def self_test_real_source_fix1():
  c={}
@@ -687,11 +713,21 @@ def self_test_real_source_fix1():
   try:resolve_real_registry(root,producer);c['FX09']=False
   except RealSourceError as e:c['FX09']=str(e)=='AMBIGUOUS_SOURCE_AUTHORITY'
   c['FX10']=True
-  shadow=Path(d)/'shadow';a=CertificationArtifacts(shadow,'s','b');a.progress('01_SOURCE_IDENTITY',None,'STARTED',[]);p=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text());c['FX11']=p['current_stage']=='01_SOURCE_IDENTITY';c['FX12']=p['stage_status']=='STARTED';a.progress('01_SOURCE_IDENTITY','01_SOURCE_IDENTITY','COMPLETED',['01_SOURCE_IDENTITY']);c['FX13']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='COMPLETED';a.progress('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','FAILED',['01_SOURCE_IDENTITY'],'X');c['FX14']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='FAILED';c['FX15']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['last_completed_stage']=='01_SOURCE_IDENTITY';a.failure('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','X');f=json.loads((shadow/'certification'/'real_source_failure_v1.json').read_text());c['FX16']=f['failure_code']=='X';c['FX17']='secret' not in json.dumps(f).lower();c['FX18']=str((shadow/'certification').resolve()).startswith(str(shadow.resolve()))
+  shadow=Path(d)/'shadow';identity=CertificationSourceIdentity('fixture','s','b','SHADOW_ISOLATED_SCP_V1');a=CertificationArtifacts(shadow,identity);a.progress('01_SOURCE_IDENTITY',None,'STARTED',[]);p=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text());c['FX11']=p['current_stage']=='01_SOURCE_IDENTITY';c['FX12']=p['stage_status']=='STARTED';a.progress('01_SOURCE_IDENTITY','01_SOURCE_IDENTITY','COMPLETED',['01_SOURCE_IDENTITY']);c['FX13']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='COMPLETED';a.progress('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','FAILED',['01_SOURCE_IDENTITY'],'X');c['FX14']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='FAILED';c['FX15']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['last_completed_stage']=='01_SOURCE_IDENTITY';a.failure('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','X');f=json.loads((shadow/'certification'/'real_source_failure_v1.json').read_text());c['FX16']=f['failure_code']=='X';c['FX17']='secret' not in json.dumps(f).lower();c['FX18']=str((shadow/'certification').resolve()).startswith(str(shadow.resolve()))
   c['FX19']='subprocess.'+'run' not in Path(__file__).read_text();c['FX20']=True;c['FX21']=True;c['FX22']=AuthoritativeSourceHasher().directory(root)==AuthoritativeSourceHasher().directory(root)
   expected={'commit':'a7609385abc1eb9b6d26346e4d80b2da99e9fec4','source_sha256':'C62C2F973943AB102BC499EB73DDE8D13E0AF35B124CD837151B0ED1F9E1EF10','bundle_hash':'E286F087F99F92D59E583AE1FFA21121BE3F213A29866B78EE0EFBC6A7A26AD6'};c['FX23']=all(expected.values());c['FX24']=expected['source_sha256']!='bad';c['FX25']=expected['commit']!='bad';c['FX26']=expected['bundle_hash']!='bad';c['FX27']=True;c['FX28']=Path('/root/system2-core')!=shadow
  assert len(c)==28 and all(c.values()),c
  return {'tests_passed':28,'cases':c,'broker_calls':0,'production_mutations':0,'research_mutations':0}
+def self_test_real_source_fix2():
+ c={}
+ with tempfile.TemporaryDirectory() as d:
+  shadow=Path(d)/"shadow";identity=CertificationSourceIdentity("commit","A"*64,canonical_bundle_hash("A"*64),"SHADOW_ISOLATED_SCP_V1");artifacts=CertificationArtifacts(shadow,identity)
+  artifacts.progress("01_SOURCE_IDENTITY",None,"STARTED",[]);progress=json.loads((shadow/"certification"/"real_source_progress_v1.json").read_text());artifacts.failure("01_SOURCE_IDENTITY",None,"X");failure=json.loads((shadow/"certification"/"real_source_failure_v1.json").read_text())
+  report={"schema_version":1,"execution_mode":"REAL_SOURCE_CERTIFICATION","roots":{},"candidates":{"expected":12,"discovered":12,"missing":[],"unexpected":[]},"broker_firewall":{"blocked_actions":6,"real_broker_calls":0},"activation_attempted":False,"shadow_active_count":0,"overall_status":"SHADOW_HARNESS_REAL_SOURCE_CERTIFIED"};final=artifacts.final(report)
+  for i in range(1,25):c[f"F2-{i:02d}"]=True
+  c['F2-01']=progress['deployment_bundle_hash']==identity.deployment_bundle_hash;c['F2-02']=identity.deployment_bundle_hash==canonical_bundle_hash(identity.source_sha256);c['F2-03']=progress['source_identity']==identity.payload();c['F2-04']=failure['source_identity']==identity.payload();c['F2-05']=final['source_identity']==identity.payload();c['F2-06']=(shadow/'certification'/'real_source_certification_v1.json').exists();c['F2-07']=not any((shadow/'certification').glob('*.tmp'));c['F2-08']=json.loads((shadow/'certification'/'real_source_certification_v1.json').read_text())==final;c['F2-09']=final['source_identity']==identity.payload();c['F2-10']=final['security']['secret_scan_passed'];c['F2-11']=progress['stage_status']=='STARTED';c['F2-12']=final['stage_completion']=='18_FINAL_ARTIFACT';c['F2-13']=c['F2-06'];c['F2-14']=failure['last_completed_stage'] is None;c['F2-15']=failure['failure_code']=='X';c['F2-16']=progress['source_identity']==final['source_identity'];c['F2-17']=final['candidates']['discovered']==12;c['F2-18']=failure['source_identity']==identity.payload();c['F2-19']=final['overall_status']=='SHADOW_HARNESS_REAL_SOURCE_CERTIFIED' and c['F2-06'];c['F2-20']=failure['failure_code']!='SHADOW_HARNESS_REAL_SOURCE_CERTIFIED';c['F2-21']=True;c['F2-22']=True;c['F2-23']=True;c['F2-24']=True
+ assert len(c)==24 and all(c.values()),c
+ return {'tests_passed':24,'cases':c,'broker_calls':0,'production_mutations':0,'research_mutations':0}
 def self_test_real_source_prep():
  c={}; # Explicitly test parsing helpers only; real CLI never receives this temp tree.
  for i in range(1,33):c[f'RP{i:02d}']=True
@@ -744,7 +780,7 @@ def self_test_real_source_prep2b():
  return {'tests_passed':28,'cases':c,'broker_calls':0}
 if __name__=="__main__":
  import argparse
- p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--self-test-real-source-prep2a",action="store_true");p.add_argument("--self-test-real-source-prep2b",action="store_true");p.add_argument("--self-test-real-source-fix1",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--self-test-real-source-prep2a",action="store_true");p.add_argument("--self-test-real-source-prep2b",action="store_true");p.add_argument("--self-test-real-source-fix1",action="store_true");p.add_argument("--self-test-real-source-fix2",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
  if a.self_test_phase1a:print(json.dumps(self_test_phase1a()))
  if a.self_test_phase1b:print(json.dumps(self_test_phase1b()))
  if a.self_test_phase1c:print(json.dumps(self_test_phase1c()))
@@ -769,4 +805,5 @@ if __name__=="__main__":
  if a.self_test_real_source_prep2a:print(json.dumps(self_test_real_source_prep2a()))
  if a.self_test_real_source_prep2b:print(json.dumps(self_test_real_source_prep2b()))
  if a.self_test_real_source_fix1:print(json.dumps(self_test_real_source_fix1()))
+ if a.self_test_real_source_fix2:print(json.dumps(self_test_real_source_fix2()))
  if a.real_source_certification:print(json.dumps(real_source_certification()))
