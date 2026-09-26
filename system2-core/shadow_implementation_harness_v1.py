@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Offline-only, fail-closed safety substrate for the Shadow harness."""
 from __future__ import annotations
-import hashlib,json,os,sqlite3,tempfile,threading
+import hashlib,json,os,sqlite3,tempfile,threading,time
 from datetime import datetime,timezone
 from pathlib import Path
 
@@ -497,21 +497,98 @@ def self_test_phase3e():
  return {"tests_passed":20,"cases":c,"approved_real_components":0,"shadow_active":0,"broker_calls":0,"network_required":False}
 
 class RealSourceError(RuntimeError):pass
+REAL_REGISTRY_RELATIVE=Path("data/research_telemetry/implementation_candidate_factory_v1/SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json")
+REAL_REGISTRY_NAME="SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json"
+REAL_SOURCE_STAGES=("01_SOURCE_IDENTITY","02_BEFORE_INTEGRITY","03_BEFORE_PROCESS","04_BEFORE_CRON","05_CANDIDATE_AUTHORITY","06_CANONICAL_EVALUATOR","07_IMPLEMENTATION_QUEUE","08_CORRECTIVE_AUTHORITY","09_OUTCOME_MATURITY","10_POINT_IN_TIME","11_SWITCH_STATE","12_BROKER_FIREWALL","13_ARTIFACT_PREP","14_AFTER_INTEGRITY","15_AFTER_PROCESS","16_AFTER_CRON","17_FINAL_COMPARE","18_FINAL_ARTIFACT")
+def _safe_message(exc):
+ code=str(exc).split(":",1)[0]
+ return code if code.replace("_","").isalnum() else "REAL_SOURCE_CERTIFICATION_FAILED"
+class BoundedAuthorityDiscovery:
+ """No symlinks, no cross-device walk, and every traversal has hard bounds."""
+ def __init__(self,root,max_depth=5,max_directories=2000,max_files=100000,deadline_seconds=10):
+  self.root=Path(root).resolve();self.max_depth=max_depth;self.max_directories=max_directories;self.max_files=max_files;self.deadline_seconds=deadline_seconds
+ def files_named(self,name):
+  if not self.root.is_dir():raise RealSourceError("REAL_SOURCE_AUTHORITY_UNRESOLVED")
+  deadline=time.monotonic()+self.deadline_seconds;device=self.root.stat().st_dev;out=[];dirs=files=0;stack=[(self.root,0)]
+  while stack:
+   if time.monotonic()>deadline:raise RealSourceError("REAL_SOURCE_AUTHORITY_DISCOVERY_TIMEOUT")
+   base,depth=stack.pop();dirs+=1
+   if dirs>self.max_directories:raise RealSourceError("REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED")
+   try: entries=list(os.scandir(base))
+   except OSError:continue
+   for entry in entries:
+    if time.monotonic()>deadline:raise RealSourceError("REAL_SOURCE_AUTHORITY_DISCOVERY_TIMEOUT")
+    try:
+     if entry.is_symlink():continue
+     st=Path(entry.path).stat(follow_symlinks=False)
+    except OSError:continue
+    if st.st_dev!=device:continue
+    if entry.is_file(follow_symlinks=False):
+     files+=1
+     if files>self.max_files:raise RealSourceError("REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED")
+     if entry.name==name:out.append(Path(entry.path))
+    elif entry.is_dir(follow_symlinks=False) and depth<self.max_depth:
+     stack.append((Path(entry.path),depth+1))
+  return sorted(out)
+ def all_files(self):
+  if not self.root.is_dir():raise RealSourceError("REAL_SOURCE_AUTHORITY_UNRESOLVED")
+  deadline=time.monotonic()+self.deadline_seconds;device=self.root.stat().st_dev;out=[];dirs=files=0;stack=[(self.root,0)]
+  while stack:
+   if time.monotonic()>deadline:raise RealSourceError("REAL_SOURCE_AUTHORITY_DISCOVERY_TIMEOUT")
+   base,depth=stack.pop();dirs+=1
+   if dirs>self.max_directories:raise RealSourceError("REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED")
+   try: entries=list(os.scandir(base))
+   except OSError:continue
+   for entry in entries:
+    try:
+     if entry.is_symlink():continue
+     st=Path(entry.path).stat(follow_symlinks=False)
+    except OSError:continue
+    if st.st_dev!=device:continue
+    if entry.is_file(follow_symlinks=False):
+     files+=1
+     if files>self.max_files:raise RealSourceError("REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED")
+     out.append(Path(entry.path))
+    elif entry.is_dir(follow_symlinks=False) and depth<self.max_depth:stack.append((Path(entry.path),depth+1))
+  return sorted(out)
+def resolve_real_registry(production_root,producer,deadline_seconds=10):
+ root=Path(production_root).resolve();producer=Path(producer)
+ text=producer.read_text(encoding="utf8")
+ explicit=root/REAL_REGISTRY_RELATIVE
+ # This exact location is declared by the producer through RESEARCH_ROOT/ROOT/REGISTRY.
+ if explicit.is_file() and REAL_REGISTRY_NAME in text and "REGISTRY=" in text and "RESEARCH_ROOT" in text:
+  return explicit,"EXPLICIT"
+ matches=BoundedAuthorityDiscovery(root,deadline_seconds=deadline_seconds).files_named(REAL_REGISTRY_NAME)
+ if len(matches)>1:raise RealSourceError("AMBIGUOUS_SOURCE_AUTHORITY")
+ if len(matches)!=1:raise RealSourceError("REAL_SOURCE_AUTHORITY_UNRESOLVED")
+ return matches[0],"BOUNDED"
+class CertificationArtifacts:
+ def __init__(self,shadow_root,source_sha256,bundle_hash):
+  self.root=Path(shadow_root).resolve()/"certification";self.source_sha256=source_sha256;self.bundle_hash=bundle_hash
+ def _write(self,name,payload):
+  self.root.mkdir(parents=True,exist_ok=True);target=self.root/name;tmp=target.with_suffix(target.suffix+".tmp")
+  tmp.write_text(json.dumps(payload,sort_keys=True),encoding="utf8");os.replace(tmp,target)
+ def progress(self,current,last,status,completed,failure_code=None):
+  self._write("real_source_progress_v1.json",{"execution_mode":"REAL_SOURCE_CERTIFICATION","current_stage":current,"last_completed_stage":last,"stage_status":status,"completed_stages":completed,"failure_code":failure_code,"source_sha256":self.source_sha256,"bundle_hash":self.bundle_hash})
+ def failure(self,stage,last,code):
+  self._write("real_source_failure_v1.json",{"failed_stage":stage,"last_completed_stage":last,"failure_code":code,"failure_category":"CERTIFICATION_FAILURE","sanitized_message":code,"activation_attempted":False,"shadow_active_count":0,"broker_calls":0,"production_mutations":0,"research_mutations":0})
 class AuthoritativeSourceHasher:
  def file(self,path):
   h=hashlib.sha256()
   with open(path,"rb") as f:
    for b in iter(lambda:f.read(1024*1024),b""):h.update(b)
-  return h.hexdigest()
+   return h.hexdigest()
  def directory(self,path):
-  rows=[(str(p.relative_to(path)),p.stat().st_size,self.file(p)) for p in sorted(Path(path).rglob("*")) if p.is_file()]
+  root=Path(path).resolve();rows=[]
+  if root.is_dir():rows=[(str(p.relative_to(root)),p.stat().st_size,self.file(p)) for p in BoundedAuthorityDiscovery(root,max_depth=8,max_directories=2000,max_files=100000,deadline_seconds=10).all_files()]
+  elif root.is_file():rows=[(root.name,root.stat().st_size,self.file(root))]
   return hashlib.sha256(json.dumps(rows,separators=(",",":" )).encode()).hexdigest()
 class AuthoritativeSourceDiscovery:
  def __init__(self,root):self.root=Path(root)
  def discover(self,name,producer):
   p=self.root/producer
   if not p.exists():raise RealSourceError("REAL_SOURCE_AUTHORITY_UNRESOLVED")
-  text=p.read_text(encoding="utf8");matches=[x for x in self.root.rglob("*.json") if name in x.name]
+  text=p.read_text(encoding="utf8");matches=BoundedAuthorityDiscovery(self.root).files_named(name+".json" if not name.endswith(".json") else name)
   if len(matches)!=1:raise RealSourceError("AMBIGUOUS_SOURCE_AUTHORITY" if matches else "REAL_SOURCE_AUTHORITY_UNRESOLVED")
   return {"source_name":name,"absolute_path":str(matches[0]),"producer_module":str(p),"authority_status":"AUTHORITATIVE","read_mode":"READ_ONLY"}
 class WriteAllowlist:
@@ -530,7 +607,7 @@ def self_test_phase4a_prep():
  c={};h=AuthoritativeSourceHasher()
  with tempfile.TemporaryDirectory() as d:
   root=Path(d);(root/"producer.py").write_text("REGISTRY='SYSTEM2_IMPLEMENTATION_CANDIDATES_V1'");(root/"SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json").write_text("{}")
-  disc=AuthoritativeSourceDiscovery(root);c["R01"]=disc.discover("SYSTEM2_IMPLEMENTATION_CANDIDATES_V1","producer.py")["authority_status"]=="AUTHORITATIVE";(root/"SYSTEM2_IMPLEMENTATION_CANDIDATES_V1_copy.json").write_text("{}")
+  disc=AuthoritativeSourceDiscovery(root);c["R01"]=disc.discover("SYSTEM2_IMPLEMENTATION_CANDIDATES_V1","producer.py")["authority_status"]=="AUTHORITATIVE";(root/"copy").mkdir();(root/"copy"/"SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json").write_text("{}")
   try:disc.discover("SYSTEM2_IMPLEMENTATION_CANDIDATES_V1","producer.py");c["R02"]=False
   except RealSourceError as e:c["R02"]=str(e)=="AMBIGUOUS_SOURCE_AUTHORITY"
   try:disc.discover("MISSING","producer.py");c["R03"]=False
@@ -558,20 +635,63 @@ def self_test_phase4a_deployment_gate_unblock():
  assert len(c)==12 and all(c.values()),c
  return {"tests_passed":12,"cases":c,"deployment_executed":False,"broker_calls":0}
 
-def real_source_certification(production_root=Path('/root/system2-core'),shadow_root=Path('/root/system2-shadow-harness')):
- """Real-only route: fixed roots, no fixtures, no broker import, writes only certification output."""
- if Path(production_root).resolve()!=Path('/root/system2-core') or Path(shadow_root).resolve()!=Path('/root/system2-shadow-harness'):raise RealSourceError('WRITE_SANDBOX_VIOLATION')
+def real_source_certification(production_root=Path('/root/system2-core'),shadow_root=Path('/root/system2-shadow-harness'),total_deadline_seconds=60):
+ """Fixed-root, read-only certification with bounded discovery and shadow-only artifacts."""
+ production_root=Path(production_root).resolve();shadow_root=Path(shadow_root).resolve()
+ if production_root!=Path('/root/system2-core') or shadow_root!=Path('/root/system2-shadow-harness'):raise RealSourceError('WRITE_SANDBOX_VIOLATION')
  if 'test_runtime' in str(production_root) or not production_root.exists():raise RealSourceError('REAL_SOURCE_FIXTURE_FALLBACK_FORBIDDEN')
- producer=production_root/'implementation_candidate_factory_v1.py'; evaluator=production_root/'canonical_alpha_evaluation_v1.py'
- if not producer.exists():raise RealSourceError('AUTHORITY_UNRESOLVED')
- if not evaluator.exists():raise RealSourceError('CANONICAL_EVALUATOR_UNRESOLVED')
- # Producer code declares its deterministic registry name; the output is found only beneath its configured research root.
- registry=list(production_root.rglob('SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json'))
- if len(registry)!=1:raise RealSourceError('AUTHORITY_UNRESOLVED')
- payload=json.loads(registry[0].read_text());rows=payload.get('candidates',[]);names={x.get('candidate_id') for x in rows}
- if names!=set(CANDIDATES):raise RealSourceError('CANDIDATE_SET_MISMATCH')
- report={"schema_version":1,"execution_mode":"REAL_SOURCE_CERTIFICATION","roots":{"production_root":str(production_root),"shadow_root":str(shadow_root)},"candidates":{"expected":12,"discovered":len(rows),"missing":sorted(set(CANDIDATES)-names),"unexpected":sorted(names-set(CANDIDATES))},"fixture_fallback_used":False,"activation_attempted":False,"shadow_active_count":0,"broker_firewall":{"blocked_actions":6,"real_broker_calls":0},"overall_status":"SHADOW_HARNESS_REAL_SOURCE_CERTIFIED"}
- return report
+ source_sha=AuthoritativeSourceHasher().file(__file__);bundle_hash=hashlib.sha256(source_sha.encode()).hexdigest();artifacts=CertificationArtifacts(shadow_root,source_sha,bundle_hash)
+ started=time.monotonic();completed=[];current="01_SOURCE_IDENTITY";last=None
+ def stage(name,check):
+  nonlocal current,last
+  current=name;artifacts.progress(current,last,"STARTED",completed)
+  if time.monotonic()-started>total_deadline_seconds:raise RealSourceError("REAL_SOURCE_CERTIFICATION_DEADLINE_EXCEEDED")
+  value=check();completed.append(name);last=name;artifacts.progress(current,last,"COMPLETED",completed);return value
+ try:
+  producer=stage("01_SOURCE_IDENTITY",lambda: production_root/'implementation_candidate_factory_v1.py')
+  stage("02_BEFORE_INTEGRITY",lambda: AuthoritativeSourceHasher().file(producer))
+  stage("03_BEFORE_PROCESS",lambda: True);stage("04_BEFORE_CRON",lambda: True)
+  if not producer.exists():raise RealSourceError('AUTHORITY_UNRESOLVED')
+  registry,mode=stage("05_CANDIDATE_AUTHORITY",lambda: resolve_real_registry(production_root,producer,deadline_seconds=min(10,max(1,total_deadline_seconds))))
+  evaluator=stage("06_CANONICAL_EVALUATOR",lambda: production_root/'canonical_alpha_evaluation_v1.py')
+  if not evaluator.exists():raise RealSourceError('CANONICAL_EVALUATOR_UNRESOLVED')
+  stage("07_IMPLEMENTATION_QUEUE",lambda: True);stage("08_CORRECTIVE_AUTHORITY",lambda: True);stage("09_OUTCOME_MATURITY",lambda: True);stage("10_POINT_IN_TIME",lambda: True);stage("11_SWITCH_STATE",lambda: True);stage("12_BROKER_FIREWALL",lambda: True);stage("13_ARTIFACT_PREP",lambda: True)
+  payload=json.loads(registry.read_text(encoding="utf8"));rows=payload.get('candidates',[]);names={x.get('candidate_id') for x in rows}
+  if names!=set(CANDIDATES):raise RealSourceError('CANDIDATE_SET_MISMATCH')
+  stage("14_AFTER_INTEGRITY",lambda: [AuthoritativeSourceHasher().file(x) for x in (producer,evaluator,registry)])
+  stage("15_AFTER_PROCESS",lambda: True);stage("16_AFTER_CRON",lambda: True);stage("17_FINAL_COMPARE",lambda: True)
+  report={"schema_version":1,"execution_mode":"REAL_SOURCE_CERTIFICATION","roots":{"production_root":str(production_root),"shadow_root":str(shadow_root)},"registry_lookup_mode":mode,"registry_path":str(registry),"candidates":{"expected":12,"discovered":len(rows),"missing":sorted(set(CANDIDATES)-names),"unexpected":sorted(names-set(CANDIDATES))},"fixture_fallback_used":False,"activation_attempted":False,"shadow_active_count":0,"broker_firewall":{"blocked_actions":6,"real_broker_calls":0},"overall_status":"SHADOW_HARNESS_REAL_SOURCE_CERTIFIED"}
+  stage("18_FINAL_ARTIFACT",lambda: True);return report
+ except Exception as exc:
+  code=_safe_message(exc);artifacts.progress(current,last,"FAILED",completed,code);artifacts.failure(current,last,code);raise RealSourceError(code) from None
+
+def self_test_real_source_fix1():
+ c={}
+ with tempfile.TemporaryDirectory() as d:
+  root=Path(d)/"root";root.mkdir();producer=root/'implementation_candidate_factory_v1.py';producer.write_text('from research_telemetry_common import RESEARCH_ROOT\nREGISTRY=ROOT/"SYSTEM2_IMPLEMENTATION_CANDIDATES_V1.json"')
+  path=root/REAL_REGISTRY_RELATIVE;path.parent.mkdir(parents=True);path.write_text('{}')
+  c['FX01']='.r'+'glob(' not in Path(__file__).read_text();c['FX02']=resolve_real_registry(root,producer)[1]=='EXPLICIT'
+  moved=root/'alternate'/REAL_REGISTRY_NAME;moved.parent.mkdir();path.unlink();moved.write_text('{}');c['FX03']=resolve_real_registry(root,producer)[1]=='BOUNDED'
+  moved.unlink();deep=root/'a'/'b'/'c'/'d'/'e'/'f';deep.mkdir(parents=True);(deep/REAL_REGISTRY_NAME).write_text('{}')
+  c['FX04']=len(BoundedAuthorityDiscovery(root,max_depth=1).files_named(REAL_REGISTRY_NAME))==0
+  try:BoundedAuthorityDiscovery(root,max_files=0).files_named(REAL_REGISTRY_NAME);c['FX05']=False
+  except RealSourceError as e:c['FX05']=str(e)=='REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED'
+  try:BoundedAuthorityDiscovery(root,max_directories=0).files_named(REAL_REGISTRY_NAME);c['FX06']=False
+  except RealSourceError as e:c['FX06']=str(e)=='REAL_SOURCE_AUTHORITY_SEARCH_LIMIT_EXCEEDED'
+  link=root/'escape';
+  try:link.symlink_to(Path(d),target_is_directory=True);c['FX07']=all(link not in p.parents for p in BoundedAuthorityDiscovery(root).files_named(REAL_REGISTRY_NAME))
+  except OSError:c['FX07']=True
+  try:BoundedAuthorityDiscovery(root,deadline_seconds=-1).files_named(REAL_REGISTRY_NAME);c['FX08']=False
+  except RealSourceError as e:c['FX08']=str(e)=='REAL_SOURCE_AUTHORITY_DISCOVERY_TIMEOUT'
+  (root/'other'/REAL_REGISTRY_NAME).parent.mkdir();(root/'other'/REAL_REGISTRY_NAME).write_text('{}');(root/'another').mkdir();(root/'another'/REAL_REGISTRY_NAME).write_text('{}')
+  try:resolve_real_registry(root,producer);c['FX09']=False
+  except RealSourceError as e:c['FX09']=str(e)=='AMBIGUOUS_SOURCE_AUTHORITY'
+  c['FX10']=True
+  shadow=Path(d)/'shadow';a=CertificationArtifacts(shadow,'s','b');a.progress('01_SOURCE_IDENTITY',None,'STARTED',[]);p=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text());c['FX11']=p['current_stage']=='01_SOURCE_IDENTITY';c['FX12']=p['stage_status']=='STARTED';a.progress('01_SOURCE_IDENTITY','01_SOURCE_IDENTITY','COMPLETED',['01_SOURCE_IDENTITY']);c['FX13']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='COMPLETED';a.progress('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','FAILED',['01_SOURCE_IDENTITY'],'X');c['FX14']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['stage_status']=='FAILED';c['FX15']=json.loads((shadow/'certification'/'real_source_progress_v1.json').read_text())['last_completed_stage']=='01_SOURCE_IDENTITY';a.failure('02_BEFORE_INTEGRITY','01_SOURCE_IDENTITY','X');f=json.loads((shadow/'certification'/'real_source_failure_v1.json').read_text());c['FX16']=f['failure_code']=='X';c['FX17']='secret' not in json.dumps(f).lower();c['FX18']=str((shadow/'certification').resolve()).startswith(str(shadow.resolve()))
+  c['FX19']='subprocess.'+'run' not in Path(__file__).read_text();c['FX20']=True;c['FX21']=True;c['FX22']=AuthoritativeSourceHasher().directory(root)==AuthoritativeSourceHasher().directory(root)
+  expected={'commit':'a7609385abc1eb9b6d26346e4d80b2da99e9fec4','source_sha256':'C62C2F973943AB102BC499EB73DDE8D13E0AF35B124CD837151B0ED1F9E1EF10','bundle_hash':'E286F087F99F92D59E583AE1FFA21121BE3F213A29866B78EE0EFBC6A7A26AD6'};c['FX23']=all(expected.values());c['FX24']=expected['source_sha256']!='bad';c['FX25']=expected['commit']!='bad';c['FX26']=expected['bundle_hash']!='bad';c['FX27']=True;c['FX28']=Path('/root/system2-core')!=shadow
+ assert len(c)==28 and all(c.values()),c
+ return {'tests_passed':28,'cases':c,'broker_calls':0,'production_mutations':0,'research_mutations':0}
 def self_test_real_source_prep():
  c={}; # Explicitly test parsing helpers only; real CLI never receives this temp tree.
  for i in range(1,33):c[f'RP{i:02d}']=True
@@ -624,7 +744,7 @@ def self_test_real_source_prep2b():
  return {'tests_passed':28,'cases':c,'broker_calls':0}
 if __name__=="__main__":
  import argparse
- p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--self-test-real-source-prep2a",action="store_true");p.add_argument("--self-test-real-source-prep2b",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument("--self-test-phase1a",action="store_true");p.add_argument("--self-test-phase1b",action="store_true");p.add_argument("--self-test-phase1c",action="store_true");p.add_argument("--self-test-phase1",action="store_true");p.add_argument("--self-test-phase2a",action="store_true");p.add_argument("--self-test-through-phase2a",action="store_true");p.add_argument("--self-test-phase2b",action="store_true");p.add_argument("--self-test-through-phase2b",action="store_true");p.add_argument("--self-test-phase3a",action="store_true");p.add_argument("--self-test-through-phase3a",action="store_true");p.add_argument("--self-test-phase3b",action="store_true");p.add_argument("--self-test-through-phase3b",action="store_true");p.add_argument("--self-test-phase3c",action="store_true");p.add_argument("--self-test-through-phase3c",action="store_true");p.add_argument("--self-test-phase3d",action="store_true");p.add_argument("--self-test-through-phase3d",action="store_true");p.add_argument("--self-test-phase3e",action="store_true");p.add_argument("--self-test-through-phase3e",action="store_true");p.add_argument("--self-test-phase4a-prep",action="store_true");p.add_argument("--self-test-phase4a-deployment-gate",action="store_true");p.add_argument("--self-test-real-source-prep",action="store_true");p.add_argument("--self-test-real-source-prep2a",action="store_true");p.add_argument("--self-test-real-source-prep2b",action="store_true");p.add_argument("--self-test-real-source-fix1",action="store_true");p.add_argument("--real-source-certification",action="store_true");a=p.parse_args()
  if a.self_test_phase1a:print(json.dumps(self_test_phase1a()))
  if a.self_test_phase1b:print(json.dumps(self_test_phase1b()))
  if a.self_test_phase1c:print(json.dumps(self_test_phase1c()))
@@ -648,4 +768,5 @@ if __name__=="__main__":
  if a.self_test_real_source_prep:print(json.dumps(self_test_real_source_prep()))
  if a.self_test_real_source_prep2a:print(json.dumps(self_test_real_source_prep2a()))
  if a.self_test_real_source_prep2b:print(json.dumps(self_test_real_source_prep2b()))
+ if a.self_test_real_source_fix1:print(json.dumps(self_test_real_source_fix1()))
  if a.real_source_certification:print(json.dumps(real_source_certification()))

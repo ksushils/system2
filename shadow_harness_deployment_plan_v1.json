@@ -1,0 +1,12 @@
+{
+  "phase": "4A-REAL-BIND-FIX1",
+  "status": "READY_FOR_FUTURE_OWNER_AUTHORIZED_UPGRADE_ONLY",
+  "discovery": {"local_mechanism": "UNKNOWN", "remote_evidence": "NON_GIT_RUNTIME; no proven transfer mechanism", "confidence": "LOW"},
+  "source_identity": {"local_git_commit": "a7609385abc1eb9b6d26346e4d80b2da99e9fec4", "source_sha256": "C62C2F973943AB102BC499EB73DDE8D13E0AF35B124CD837151B0ED1F9E1EF10", "bundle_hash": "E286F087F99F92D59E583AE1FFA21121BE3F213A29866B78EE0EFBC6A7A26AD6"},
+  "historical_system2_deployment_mechanism": "UNKNOWN",
+  "shadow_harness_deployment_mechanism": "SHADOW_ISOLATED_SCP_V1",
+  "authoritative_shadow_mechanism": "SHADOW_ISOLATED_SCP_V1",
+  "remote": {"production_root": "/root/system2-core", "intended_shadow_root": "/root/system2-shadow-harness", "target_exists": true, "target_isolated": true, "target_provenance": "VERIFIED_EXISTING_SHADOW_DEPLOYMENT"},
+  "requirements": {"pm2_change": false, "cron_change": false, "broker_access": false, "production_write": false, "database_write": false, "secret_copy": false},
+  "deployment": {"allowed": true, "controlled_shadow_upgrade": "ALLOWED_ONLY_IF_PREVIOUS_COMMIT_SOURCE_AND_BUNDLE_MATCH", "block_reasons": [], "proposed_command": "REVIEW ONLY: verify existing provenance, then isolated replacement only after owner authorization", "verification_command": "REVIEW ONLY: sha256sum /root/system2-shadow-harness/shadow_implementation_harness_v1.py", "rollback_command": "REVIEW ONLY: restore verified previous isolated harness"}
+}
