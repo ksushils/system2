@@ -1,8 +1,13 @@
 {
   "phase": "4A-REAL-BIND-FIX1",
+  "source_identity": {
+    "source_git_commit": "4233aa3a20e16addc2747fcc5bc2c257ec7cb253",
+    "source_sha256": "7DD970DB0B4A4D61E7994E3F5DA54F04DF7090654CAC8E6362F14300E3017663",
+    "deployment_bundle_hash": "C7CF47E335E81805D0FF73D1B5042F11959E2EB62E32CC80AB5C3CDDA6C11977"
+  },
   "status": "READY_FOR_FUTURE_OWNER_AUTHORIZED_UPGRADE_ONLY",
   "discovery": {"local_mechanism": "UNKNOWN", "remote_evidence": "NON_GIT_RUNTIME; no proven transfer mechanism", "confidence": "LOW"},
-  "source_identity": {"local_git_commit": "a7609385abc1eb9b6d26346e4d80b2da99e9fec4", "source_sha256": "C62C2F973943AB102BC499EB73DDE8D13E0AF35B124CD837151B0ED1F9E1EF10", "bundle_hash": "E286F087F99F92D59E583AE1FFA21121BE3F213A29866B78EE0EFBC6A7A26AD6"},
+  "previous_source_identity": {"local_git_commit": "a7609385abc1eb9b6d26346e4d80b2da99e9fec4", "source_sha256": "C62C2F973943AB102BC499EB73DDE8D13E0AF35B124CD837151B0ED1F9E1EF10", "bundle_hash": "E286F087F99F92D59E583AE1FFA21121BE3F213A29866B78EE0EFBC6A7A26AD6"},
   "historical_system2_deployment_mechanism": "UNKNOWN",
   "shadow_harness_deployment_mechanism": "SHADOW_ISOLATED_SCP_V1",
   "authoritative_shadow_mechanism": "SHADOW_ISOLATED_SCP_V1",

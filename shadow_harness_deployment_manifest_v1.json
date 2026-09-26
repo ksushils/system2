@@ -1,7 +1,9 @@
 {
   "schema_version": 2,
   "phase": "4A-REAL-BIND-FIX1",
-  "generated_from_git_commit": "9196a2be4abdb7df4a018437e24d326c632d2eb2",
+  "source_git_commit": "4233aa3a20e16addc2747fcc5bc2c257ec7cb253",
+  "generated_from_git_commit": "4233aa3a20e16addc2747fcc5bc2c257ec7cb253",
+  "repository_head_at_generation": "4233aa3a20e16addc2747fcc5bc2c257ec7cb253",
   "local_repository_root": "C:/Users/user/Documents/system 2/pmf-runtime-git",
   "local_source_file": "system2-core/shadow_implementation_harness_v1.py",
   "local_source_sha256": "7DD970DB0B4A4D61E7994E3F5DA54F04DF7090654CAC8E6362F14300E3017663",
