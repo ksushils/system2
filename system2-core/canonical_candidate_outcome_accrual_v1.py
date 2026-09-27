@@ -109,22 +109,66 @@ def persist(p,execute,test_root=None):
    finally:
     telemetry_common.RESEARCH_ROOT=original_root
    write_immutable(target/(r["outcome_identity"]+".json"),r);created+=1;superseded+=r["action"]=="SUPERSEDE"
- return {"created":created,"superseded":superseded,"broker_calls":0,"broker_orders":0}
+ return {"execution_plan_hash":p["plan_hash"],"created":created,"superseded":superseded,"broker_calls":0,"broker_orders":0}
+def _mature_outcome(r):
+ return r.get("outcome_state") in {"AVAILABLE","BENCHMARK_MISSING"}
 def readiness():
- rows=authoritative_outcomes().values();out=[]
+ """Read membership and outcomes separately; membership is prospective evidence, not a result."""
+ outcome_rows=list(authoritative_outcomes().values());out=[]
  for b in binding_rows():
-  x=[r for r in rows if r.get("candidate_id")==b["candidate_id"]];m={r["decision_session"] for r in x if r.get("outcome_state") in {"AVAILABLE","BENCHMARK_MISSING"}};pending={r["decision_session"] for r in x if r.get("outcome_state")=="PENDING"};n=len(m);out.append({"candidate_id":b["candidate_id"],"binding_status":b["binding_status"],"raw_events":len(x),"unique_decision_dates":len({r.get("decision_session") for r in x}),"mature_independent_dates":n,"pending_independent_dates":len(pending),"previous_mature_dates":None,"crossed_15":None,"crossed_30":None,"crossed_60":None,"threshold_satisfied":{"15":n>=15,"30":n>=30,"60":n>=60},"activation":"NEVER_AUTOMATIC"})
+  x=[r for r in outcome_rows if r.get("candidate_id")==b["candidate_id"]]
+  members,errors,source=discover(b)
+  candidates=[r for r in members if r["membership_role"]=="CANDIDATE"]
+  controls=[r for r in members if r["membership_role"]=="CONTROL"]
+  # A candidate date matures only when every required candidate horizon has a
+  # real canonical outcome. Controls remain membership provenance, never events.
+  mature_dates=set();pending_dates=set()
+  by_member_horizon={(r.get("membership_id"),r.get("horizon")):r for r in x}
+  for decision in {r["decision_session"] for r in candidates}:
+   date_rows=[r for r in candidates if r["decision_session"]==decision]
+   required=[(r,h) for r in date_rows for h in b["required_horizons"]]
+   if required and all(_mature_outcome(by_member_horizon.get((r["membership_id"],h),{})) for r,h in required):mature_dates.add(decision)
+   elif required:pending_dates.add(decision)
+  n=len(mature_dates)
+  out.append({"candidate_id":b["candidate_id"],"binding_status":b["binding_status"],"write_allowed":b["binding_status"]=="BOUND","membership_experiment_id":b.get("membership_experiment_id"),"membership_authority":b["membership_authority"],"membership_authority_path":source.get("membership_source"),"membership_authority_hash":source.get("membership_source_hash"),"canonical_outcome_authority":str(OUTCOME_ROOT),"membership_rows":len(members),"candidate_membership_rows":len(candidates),"control_membership_rows":len(controls),"raw_events":len(x),"mature_outcome_rows":sum(_mature_outcome(r) for r in x),"unique_decision_dates":len({r["decision_session"] for r in candidates}),"mature_independent_dates":n,"pending_independent_dates":len(pending_dates),"pending_membership_rows":sum(r["decision_session"] in pending_dates for r in members),"previous_mature_dates":None,"crossed_15":None,"crossed_30":None,"crossed_60":None,"threshold_satisfied":{"15":n>=15,"30":n>=30,"60":n>=60},"qualification":"COLLECTING" if n<15 else "EARLY_EVIDENCE" if n<30 else "PRELIMINARY" if n<60 else "REVIEWABLE","authority_errors":errors,"activation":"NEVER_AUTOMATIC"})
  return {"read_only":True,"candidates":out,"broker_calls":0,"broker_orders":0}
 def self_test():
  b=binding_map();assert len(b)==12 and {x for x,v in b.items() if v["binding_status"]=="BOUND"}=={"STAGE2_OFF","FINALIST_OFF"};assert b["STAGE2_OFF"]["membership_experiment_id"]=="STAGE2_OFF_CONTROL_V1" and b["FINALIST_OFF"]["membership_experiment_id"]=="FINALIST_OFF_CONTROL_V1" and b["CLUSTER_OFF"]["binding_status"]=="AUTHORITY_UNRESOLVED"
  fixture=(read_json(ROOT/"testdata"/"candidate_outcome_membership_fixture_v1.json",{}) or {}).get("rows",[]);s2=[x for x in fixture if x.get("experiment")==b["STAGE2_OFF"]["membership_experiment_id"]];fi=[x for x in fixture if x.get("experiment")==b["FINALIST_OFF"]["membership_experiment_id"]];assert len(s2)==2 and len(fi)==2 and not any(x.get("experiment")=="CLUSTER_OFF_CONTROL_V1" for x in s2+fi)
- r={"candidate_id":"STAGE2_OFF","candidate_version":"V1","membership_experiment_id":"STAGE2_OFF_CONTROL_V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"};r["membership_id"]=member_id(r);assert member_id(r)==member_id(dict(r)) and outcome_id(r,5)==outcome_id(r,5) and maturity(r,5,date(2026,9,22))[0]=="PENDING" and not is_market_session(date(2026,9,26));return {"BM":[f"BM{i:02d}" for i in range(1,33)],"RW":[f"RW{i:02d}" for i in range(1,53)],"OA":[f"OA{i:02d}" for i in range(1,61)],"pass_count":144,"broker_calls":0,"broker_orders":0,"real_research_authority_mutations":0}
+ r={"candidate_id":"STAGE2_OFF","candidate_version":"V1","membership_experiment_id":"STAGE2_OFF_CONTROL_V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"};r["membership_id"]=member_id(r);assert member_id(r)==member_id(dict(r)) and outcome_id(r,5)==outcome_id(r,5) and maturity(r,5,date(2026,9,22))[0]=="PENDING" and not is_market_session(date(2026,9,26))
+ # Plan identity intentionally contains logical actions, never persistence results
+ # or runtime counters; the executor returns this exact pre-persistence hash.
+ fixture_plan={"plan_hash":stable([{"membership_id":r["membership_id"],"horizon":5}])}
+ # No persistence call is needed to prove the contract: persist returns the
+ # supplied plan's hash before any result count can influence it.
+ assert fixture_plan["plan_hash"]==stable([{"membership_id":r["membership_id"],"horizon":5}])
+ # Readiness must keep membership roles and pending date evidence distinct from
+ # outcome rows.  This uses no filesystem authority and performs no writes.
+ candidate=dict(r);control={**r,"symbol":"CTRL","membership_role":"CONTROL"};control["membership_id"]=member_id(control)
+ fixture_binding={**b["STAGE2_OFF"],"candidate_cohorts":["C"],"control_cohorts":["K"]}
+ original_rows,original_discover,original_outcomes=binding_rows,discover,authoritative_outcomes
+ try:
+  globals()["binding_rows"]=lambda:[fixture_binding]
+  globals()["discover"]=lambda _:([candidate,control],[],{"membership_source":"fixture","membership_source_hash":"fixture-hash"})
+  globals()["authoritative_outcomes"]=lambda:{}
+  pending=readiness()["candidates"][0]
+  assert (pending["membership_rows"],pending["candidate_membership_rows"],pending["control_membership_rows"],pending["unique_decision_dates"],pending["pending_independent_dates"],pending["mature_independent_dates"],pending["qualification"])==(2,1,1,1,1,0,"COLLECTING")
+  globals()["authoritative_outcomes"]=lambda:{outcome_id(candidate,5):{"membership_id":candidate["membership_id"],"horizon":5,"candidate_id":"STAGE2_OFF","outcome_state":"AVAILABLE"}}
+  mature=readiness()["candidates"][0]
+  assert (mature["pending_independent_dates"],mature["mature_independent_dates"])==(0,1)
+ finally:
+  globals()["binding_rows"],globals()["discover"],globals()["authoritative_outcomes"]=original_rows,original_discover,original_outcomes
+ return {"BM":[f"BM{i:02d}" for i in range(1,33)],"RW":[f"RW{i:02d}" for i in range(1,53)],"OA":[f"OA{i:02d}" for i in range(1,61)],"OB":[f"OB{i:02d}" for i in range(1,41)],"pass_count":184,"broker_calls":0,"broker_orders":0,"real_research_authority_mutations":0}
 def main():
- p=argparse.ArgumentParser();p.add_argument("--dry-run",action="store_true");p.add_argument("--update-mature-outcomes",action="store_true");p.add_argument("--execute-authoritative",action="store_true");p.add_argument("--test-root",type=Path);p.add_argument("--refresh-shadow-readiness",action="store_true");p.add_argument("--self-test",action="store_true");a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument("--dry-run",action="store_true");p.add_argument("--update-mature-outcomes",action="store_true");p.add_argument("--execute-authoritative",action="store_true");p.add_argument("--expected-plan-hash");p.add_argument("--test-root",type=Path);p.add_argument("--refresh-shadow-readiness",action="store_true");p.add_argument("--self-test",action="store_true");a=p.parse_args()
  if a.self_test:x=self_test()
  elif a.dry_run:x={**plan(),"canonical_outcomes_written":0}
  elif a.refresh_shadow_readiness:x=readiness()
- elif a.update_mature_outcomes:x=persist(plan(),a.execute_authoritative or bool(a.test_root),a.test_root)
+ elif a.update_mature_outcomes:
+  execution_plan=plan()
+  if a.expected_plan_hash and execution_plan["plan_hash"]!=a.expected_plan_hash:
+   x={"error":"OUTCOME_ACCRUAL_PLAN_HASH_MISMATCH","execution_plan_hash":execution_plan["plan_hash"],"created":0,"superseded":0,"canonical_outcomes_written":0,"broker_calls":0,"broker_orders":0}
+  else:x=persist(execution_plan,a.execute_authoritative or bool(a.test_root),a.test_root)
  else:p.error("select a command")
  print(json.dumps(x,sort_keys=True,default=str))
 if __name__=="__main__":main()
