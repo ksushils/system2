@@ -19,7 +19,7 @@ from typing import Any
 
 ROOT = Path(os.environ.get("SYSTEM2_CORE_ROOT", Path(__file__).resolve().parent)).resolve()
 RESEARCH_ROOT = ROOT / "data" / "research_telemetry"
-MANIFEST = RESEARCH_ROOT / "implementation_candidate_factory_v1" / "manifests" / "STAGE1_REDESIGN_V1.json"
+MANIFEST = ROOT / "stage1_redesign_manifest_v1.json"
 OUTPUT_ROOT = RESEARCH_ROOT / "stage1_redesign_v1"
 EXPERIMENT = "STAGE1_REDESIGN_V1"
 PRIMARY_HORIZON = 5
@@ -129,9 +129,17 @@ def membership(plan_data: dict[str, Any]) -> dict[str, Any]:
             }
             item["membership_id"] = digest(item)
             members.append(item)
-    return {
+    payload = {
         "schema_version": 1, "immutable_membership": True, "research_only": True, "non_trading": True,
         "experiment_id": EXPERIMENT, "created_at": now, "plan_hash": plan_data["plan_hash"],
+        # These establish this cohort as a first-class, immutable authority for
+        # the existing bounded canonical-outcome binder.  They deliberately
+        # identify the already-authoritative Stage1 source run, rather than
+        # inventing a second decision run.
+        "authoritative_for_session": True,
+        "intended_xnys_session": plan["session"],
+        "run_id": plan["source"]["run_id"],
+        "pipeline_timestamp": plan["source"]["pipeline_timestamp"],
         "source": plan["source"], "experiment_manifest_hash": plan["manifest_hash"],
         "comparison": "SAME_DECISION_DATE_AGGREGATE", "overlap_statistics": {
             "candidate": plan_data["candidate_count"], "control": plan_data["control_count"],
@@ -139,6 +147,8 @@ def membership(plan_data: dict[str, Any]) -> dict[str, Any]:
             "control_only": plan_data["control_only_count"],
         }, "rows": members,
     }
+    payload["artifact_hash"] = digest(payload)
+    return payload
 
 
 def run(session: str | None, execute: bool, expected_plan_hash: str | None) -> dict[str, Any]:
