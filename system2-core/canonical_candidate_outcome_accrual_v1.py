@@ -26,21 +26,29 @@ def adapt(raw,binding,source):
  r={"candidate_id":binding["candidate_id"],"candidate_version":binding["candidate_version"],"membership_experiment_id":binding.get("membership_experiment_id"),"manifest_hash":raw.get("manifest_hash") or raw.get("config_hash"),"decision_date":decision,"decision_timestamp":raw.get("decision_timestamp") or raw.get("membership_timestamp") or raw.get("pipeline_timestamp"),"decision_session":decision,"symbol":str(raw.get("symbol") or raw.get("ticker") or "").upper(),"membership_role":role,"control_id":raw.get("control_id") or cohort,"control_pair_id":raw.get("control_pair_id") or raw.get("pair_id"),"entry_type":binding["entry_type"],"entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":binding["membership_authority"],"source_artifact":str(source),"source_artifact_hash":hashlib.sha256(source.read_bytes()).hexdigest()}
  r["membership_id"]=member_id(r);return r
 def discover(binding):
- s={"candidate_id":binding["candidate_id"],"binding_status":binding["binding_status"],"membership_experiment_id":binding.get("membership_experiment_id"),"write_allowed":binding["binding_status"]=="BOUND","membership_rows_inspected":0,"candidate_rows":0,"control_rows":0,"unique_decision_dates":0,"membership_source":None,"membership_source_hash":None,"manifest_hash":None,"authority_errors":[]}
+ s={"candidate_id":binding["candidate_id"],"binding_status":binding["binding_status"],"membership_experiment_id":binding.get("membership_experiment_id"),"write_allowed":binding["binding_status"]=="BOUND","membership_rows_inspected":0,"candidate_rows":0,"control_rows":0,"unique_decision_dates":0,"membership_source":None,"membership_source_hash":None,"membership_sources":[],"manifest_hash":None,"authority_errors":[]}
  if binding["binding_status"]!="BOUND":return [],[binding["binding_status"]],s
  paths=configured_paths(binding)
  if not paths:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
- if len(paths)!=1:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_AMBIGUOUS"],s
- p=paths[0];experiment=binding.get("membership_experiment_id")
+ experiment=binding.get("membership_experiment_id")
  if not experiment:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
- raw=[x for x in ((read_json(p,{}) or {}).get("rows",[])) if x.get("experiment")==experiment]
- if not raw:return [],["BOUND_MEMBERSHIP_EXPERIMENT_ZERO_ROWS"],s
- rows=[adapt(x,binding,p) for x in raw];seen=set()
+ rows=[];sources=[]
+ for p in paths:
+  payload=read_json(p,{}) or {}
+  session=str(payload.get("intended_xnys_session") or "")[:10]
+  authority=telemetry_common.session_authority(session) if session else None
+  if not payload.get("immutable_membership") or not payload.get("authoritative_for_session") or not authority or authority.get("run_id")!=payload.get("run_id"):
+   return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_AMBIGUOUS"],s
+  raw=[x for x in payload.get("rows",[]) if x.get("experiment")==experiment]
+  if raw:
+   rows.extend(adapt(x,binding,p) for x in raw);sources.append({"path":str(p),"hash":hashlib.sha256(p.read_bytes()).hexdigest(),"run_id":payload.get("run_id"),"session":session})
+ if not rows:return [],["BOUND_MEMBERSHIP_EXPERIMENT_ZERO_ROWS"],s
+ seen=set()
  for r in rows:
   key=(r["membership_role"],r["decision_session"],r["symbol"])
   if not r["symbol"] or not r["decision_session"] or not r["membership_role"] or key in seen:return [],["INVALID_MEMBERSHIP"],s
   seen.add(key)
- s.update({"membership_rows_inspected":len(rows),"candidate_rows":sum(x["membership_role"]=="CANDIDATE" for x in rows),"control_rows":sum(x["membership_role"]=="CONTROL" for x in rows),"unique_decision_dates":len({x["decision_session"] for x in rows}),"membership_source":str(p),"membership_source_hash":rows[0]["source_artifact_hash"],"manifest_hash":rows[0]["manifest_hash"]});return rows,[],s
+ s.update({"membership_rows_inspected":len(rows),"candidate_rows":sum(x["membership_role"]=="CANDIDATE" for x in rows),"control_rows":sum(x["membership_role"]=="CONTROL" for x in rows),"unique_decision_dates":len({x["decision_session"] for x in rows}),"membership_source":sources[0]["path"] if len(sources)==1 else None,"membership_source_hash":sources[0]["hash"] if len(sources)==1 else stable(sources),"membership_sources":sources,"manifest_hash":rows[0]["manifest_hash"]});return rows,[],s
 def maturity(r,h,as_of):
  try:d=date.fromisoformat(r["decision_session"])
  except ValueError:return "INVALID",None
