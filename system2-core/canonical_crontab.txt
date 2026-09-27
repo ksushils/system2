@@ -11,6 +11,9 @@ CRON_TZ=UTC
 2 3 * * 2-6 cd /root/system2-core && .venv/bin/python stage1_v2_shadow_router.py create >> /root/system2-core/logs/stage1_v2_shadow_router.log 2>&1
 23 3 * * 2-6 cd /root/system2-core && .venv/bin/python stage1_v2_shadow_router.py update >> /root/system2-core/logs/stage1_v2_shadow_router.log 2>&1
 
+# Stage1 redesign research: freeze immutable V2 ALPHA_ELIGIBLE / V1 PASS memberships only after source readiness; no price, broker, or production work.
+25 3 * * 2-6 cd /root/system2-core && .venv/bin/python stage1_redesign_membership_runner_v1.py >> /root/system2-core/logs/stage1_redesign_membership_v1.log 2>&1
+
 # Research telemetry retention: estimated upper bound ~0.72 GiB/year; retain 1095 days (~2.2 GiB).
 35 4 * * 0 cd /root/system2-core && .venv/bin/python prospective_research_telemetry.py retention >> /root/system2-core/logs/research_telemetry.log 2>&1
 
