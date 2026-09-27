@@ -46,8 +46,9 @@ def maturity(r,h,as_of):
  except ValueError:return "INVALID",None
  if not is_market_session(d):return "INVALID",None
  target=session_offset(d,h);return ("MATURE" if target and date.fromisoformat(target["session_date"])<=as_of else "PENDING"),target
+def base_action(r,h,target):return {"writer":WRITER,"membership_id":r["membership_id"],"candidate_id":r["candidate_id"],"candidate_version":r["candidate_version"],"decision_date":r["decision_date"],"decision_session":r["decision_session"],"symbol":r["symbol"],"membership_role":r["membership_role"],"horizon":h,"entry_session":r["decision_session"],"target_session":target.get("session_date") if target else None,"outcome_identity":outcome_id(r,h),"membership_source_hash":r["source_artifact_hash"],"outcome_calculator_version":"V1"}
 def resolve(r,h,resolver,as_of):
- state,target=maturity(r,h,as_of);base={"writer":WRITER,"membership_id":r["membership_id"],"candidate_id":r["candidate_id"],"candidate_version":r["candidate_version"],"decision_date":r["decision_date"],"decision_session":r["decision_session"],"symbol":r["symbol"],"membership_role":r["membership_role"],"horizon":h,"entry_session":r["decision_session"],"target_session":target.get("session_date") if target else None,"outcome_identity":outcome_id(r,h),"membership_source_hash":r["source_artifact_hash"],"outcome_calculator_version":"V1"}
+ state,target=maturity(r,h,as_of);base=base_action(r,h,target)
  if state!="MATURE":return {**base,"action":state,"outcome_state":state,"quality_state":state}
  e=resolver.resolve(r["symbol"],r["decision_session"],"NEXT_OPEN");f=resolver.resolve(r["symbol"],target["session_date"],"SESSION_CLOSE")
  if e.get("price") is None or f.get("price") is None:
@@ -63,21 +64,33 @@ def authoritative_outcomes(root=OUTCOME_ROOT):
   if i and r.get("writer")==WRITER:latest[i]=r
  return latest
 def plan(as_of=None):
- as_of=as_of or utc_now().date();existing=authoritative_outcomes();reports=[];logical=[]
+ """Maturity-first planner: no resolver/cache work unless a horizon is mature."""
+ import time
+ started=time.monotonic();as_of=as_of or utc_now().date();existing=authoritative_outcomes();reports=[];logical=[];resolver_initializations=0;price_requests=0;price_resolved=0;maturity_started=time.monotonic()
  for b in binding_rows():
   rows,errors,s=discover(b);counts={k:0 for k in ("pending_horizons","eligible_mature_horizons","would_create","would_noop","would_supersede","missing_price","corporate_action_unresolved","invalid_membership")}
   if rows:
-   resolver=ResearchPriceResolver({x["symbol"] for x in rows}|{"SPY"});actions=[]
+   actions=[];eligible=[]
    for r in rows:
     for h in b["required_horizons"]:
-     a=resolve(r,h,resolver,as_of);old=existing.get(a["outcome_identity"])
+     state,target=maturity(r,h,as_of)
+     if state!="MATURE":
+      a={**base_action(r,h,target),"action":state,"outcome_state":state,"quality_state":state}
+      actions.append(a)
+      logical.append({k:v for k,v in a.items() if k!="action"})
+      counts[{"PENDING":"pending_horizons","INVALID":"invalid_membership"}[state]]+=1
+     else:eligible.append((r,h))
+   if eligible:
+    resolver=ResearchPriceResolver({r["symbol"] for r,h in eligible}|{"SPY"});resolver_initializations+=1;price_requests+=len(eligible)*4
+    for r,h in eligible:
+     a=resolve(r,h,resolver,as_of);price_resolved+=1;old=existing.get(a["outcome_identity"])
      if a["action"]=="CREATE":a["action"]="NOOP" if old and old.get("outcome_hash")==stable({k:v for k,v in a.items() if k!="action"}) else "SUPERSEDE" if old else "CREATE"
      names={"PENDING":"pending_horizons","CREATE":"would_create","NOOP":"would_noop","SUPERSEDE":"would_supersede","MISSING_PRICE":"missing_price","CORPORATE_ACTION_UNRESOLVED":"corporate_action_unresolved","INVALID":"invalid_membership"};counts[names[a["action"]]]+=1
      if a["action"] not in {"PENDING","INVALID"}:counts["eligible_mature_horizons"]+=1
      actions.append(a);logical.append({k:v for k,v in a.items() if k!="action"})
   else:actions=[]
   reports.append({**s,"authority_errors":errors,**counts,"actions":actions})
- return {"writer":WRITER,"as_of":as_of.isoformat(),"candidates":reports,"plan_hash":stable(logical),"broker_calls":0,"broker_orders":0}
+ return {"writer":WRITER,"as_of":as_of.isoformat(),"candidates":reports,"plan_hash":stable(logical),"price_resolver_initializations":resolver_initializations,"price_requests_planned":price_requests,"price_requests_resolved":price_resolved,"maturity_phase_elapsed_ms":round((time.monotonic()-maturity_started)*1000,3),"planner_elapsed_ms":round((time.monotonic()-started)*1000,3),"broker_calls":0,"broker_orders":0}
 def persist(p,execute,test_root=None):
  if not execute:raise RuntimeError("EXECUTE_AUTHORITATIVE_FLAG_REQUIRED")
  target=test_root or OUTCOME_ROOT
