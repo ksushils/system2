@@ -98,6 +98,10 @@ CRON_TZ=UTC
 # Weekly scoped backup retention: n8n 7 daily + 4 weekly; labelled release/checkpoint/critical/forensic artifacts protected. Also cleans rebuildable npm cache only when disk >=80%.
 45 4 * * 0 cd /root/system2-core && .venv/bin/python backup_retention.py --apply >> /root/system2-core/logs/backup_retention.log 2>&1
 
+# Derived cumulative reports only: retains newest three structurally complete snapshots
+# in the two explicitly approved scoreboard families. Never traverses research authority.
+55 4 * * 0 cd /root/system2-core && .venv/bin/python derived_scoreboard_retention_v1.py --execute >> /root/system2-core/logs/derived_scoreboard_retention_v1.log 2>&1
+
 # Intraday bar recorder - additive raw bars only; no fund.json writes, PMF setter, auto-exec, selection, scoring, gates, or sizing changes.
 45 15 * * 1-5 cd /root/system2-core && .venv/bin/python intraday_bar_recorder.py --window-minutes 120 >> logs/intraday_bar_recorder.log 2>&1
 
