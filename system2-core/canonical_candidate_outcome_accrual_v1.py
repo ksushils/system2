@@ -48,7 +48,11 @@ def discover(binding):
   authority=telemetry_common.session_authority(session) if session else None
   if not payload.get("immutable_membership") or not payload.get("authoritative_for_session") or not authority or authority.get("run_id")!=payload.get("run_id"):
    return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_AMBIGUOUS"],s
-  raw=[x for x in payload.get("rows",[]) if x.get("experiment")==experiment]
+  # Legacy direct-control artifacts use ``experiment``; the Stage1 redesign
+  # adapter uses the explicit immutable ``experiment_id`` contract.  Accept
+  # either spelling only when it exactly matches this binding's declared
+  # experiment ID.
+  raw=[x for x in payload.get("rows",[]) if (x.get("experiment") or x.get("experiment_id"))==experiment]
   if raw:
    rows.extend(adapt(x,binding,p) for x in raw);sources.append({"path":str(p),"hash":hashlib.sha256(p.read_bytes()).hexdigest(),"run_id":payload.get("run_id"),"session":session})
  if not rows:return [],["BOUND_MEMBERSHIP_EXPERIMENT_ZERO_ROWS"],s
