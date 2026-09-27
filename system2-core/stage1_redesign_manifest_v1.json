@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "contract": "SYSTEM2_STAGE1_REDESIGN_V1",
+  "experiment_id": "STAGE1_REDESIGN_V1",
+  "research_only": true,
+  "non_trading": true,
+  "candidate": "Stage1 V2 classification = ALPHA_ELIGIBLE",
+  "control": "incumbent production Stage1 V1 classification = PASS",
+  "comparison": "SAME_DECISION_DATE_AGGREGATE",
+  "matching": "NONE",
+  "overlap": "ALLOWED_AND_RETAINED",
+  "entry": "NEXT_OPEN",
+  "primary": {
+    "horizon_sessions": 5,
+    "metric": "candidate_minus_control_spy_adjusted_return",
+    "aggregation": "DATE_EQUAL"
+  },
+  "diagnostic_horizons_sessions": [1, 3, 7],
+  "evidence_gates": {
+    "collecting_below_mature_dates": 15,
+    "early_evidence_at_mature_dates": 15,
+    "shadow_review_eligible_at_mature_dates": 30
+  },
+  "shadow_activation": "MANUAL_OWNER_REVIEW_ONLY",
+  "supersedes": null
+}
