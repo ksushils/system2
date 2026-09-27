@@ -3,8 +3,8 @@
   "runner": "canonical_evidence_pipeline_runner_v1",
   "research_only": true,
   "expected_sha256": {
-    "canonical_candidate_outcome_accrual_v1.py": "fa0349680c902b767468294cb5f409262b47d0a5168fb1bb3659ce8a9202675b",
-    "candidate_outcome_bindings_v1.json": "8c58acb15b61ba90ae79e9ae39eeda98d0782ad07ddde74b0ee27770605be49d",
+    "canonical_candidate_outcome_accrual_v1.py": "afac77f6a65b20399a1d667944ef67e1a75c4abe2a5a1e165a9da1b3eb9f62c4",
+    "candidate_outcome_bindings_v1.json": "add319144d5e74a5dbc68e25c3247ad02156cc277f6dc94f93f4a2841867d2f2",
     "canonical_alpha_evaluation_v1.py": "7f1506d65d6d6cc0d707aa4bd81eb21ab40707b62b4ffb522957d3e23f4398f9"
   },
   "lock_path": "/run/lock/system2-canonical-evidence.lock",
