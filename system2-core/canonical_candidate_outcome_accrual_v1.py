@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parent; BINDINGS=ROOT/"candidate_outcome_bindings_
 def stable(x:Any)->str:return hashlib.sha256(json.dumps(x,sort_keys=True,separators=(",",":"),default=str).encode()).hexdigest()
 def binding_rows():return (read_json(BINDINGS,{}) or {}).get("candidates",[])
 def binding_map():return {x["candidate_id"]:x for x in binding_rows()}
-def member_id(r):return stable({k:r.get(k) for k in ("candidate_id","candidate_version","decision_session","symbol","membership_role","control_id","control_pair_id","entry_type","entry_session_rule","membership_authority")})
+def member_id(r):return stable({k:r.get(k) for k in ("candidate_id","candidate_version","membership_experiment_id","decision_session","symbol","membership_role","control_id","control_pair_id","entry_type","entry_session_rule","membership_authority")})
 def outcome_id(r,h):return stable({"membership_id":r["membership_id"],"horizon":h,"entry_session":r["decision_session"],"entry_type":r["entry_type"]})
 
 def configured_paths(binding):
@@ -21,20 +21,24 @@ def configured_paths(binding):
  return sorted(RESEARCH_ROOT.glob(binding["membership_glob"])) if binding.get("membership_glob") else []
 def adapt(raw,binding,source):
  decision=str(raw.get("decision_session") or raw.get("trading_date") or raw.get("intended_xnys_session") or "")[:10]
- r={"candidate_id":binding["candidate_id"],"candidate_version":binding["candidate_version"],"manifest_hash":raw.get("manifest_hash") or raw.get("config_hash"),"decision_date":decision,"decision_timestamp":raw.get("decision_timestamp") or raw.get("membership_timestamp") or raw.get("pipeline_timestamp"),"decision_session":decision,"symbol":str(raw.get("symbol") or raw.get("ticker") or "").upper(),"membership_role":raw.get("membership_role") or raw.get("role") or "CANDIDATE","control_id":raw.get("control_id") or raw.get("cohort"),"control_pair_id":raw.get("control_pair_id") or raw.get("pair_id"),"entry_type":binding["entry_type"],"entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":binding["membership_authority"],"source_artifact":str(source),"source_artifact_hash":hashlib.sha256(source.read_bytes()).hexdigest()}
+ cohort=raw.get("cohort")
+ role="CANDIDATE" if cohort in binding.get("candidate_cohorts",[]) else "CONTROL" if cohort in binding.get("control_cohorts",[]) else None
+ r={"candidate_id":binding["candidate_id"],"candidate_version":binding["candidate_version"],"membership_experiment_id":binding.get("membership_experiment_id"),"manifest_hash":raw.get("manifest_hash") or raw.get("config_hash"),"decision_date":decision,"decision_timestamp":raw.get("decision_timestamp") or raw.get("membership_timestamp") or raw.get("pipeline_timestamp"),"decision_session":decision,"symbol":str(raw.get("symbol") or raw.get("ticker") or "").upper(),"membership_role":role,"control_id":raw.get("control_id") or cohort,"control_pair_id":raw.get("control_pair_id") or raw.get("pair_id"),"entry_type":binding["entry_type"],"entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":binding["membership_authority"],"source_artifact":str(source),"source_artifact_hash":hashlib.sha256(source.read_bytes()).hexdigest()}
  r["membership_id"]=member_id(r);return r
 def discover(binding):
- s={"candidate_id":binding["candidate_id"],"binding_status":binding["binding_status"],"membership_rows_inspected":0,"candidate_rows":0,"control_rows":0,"unique_decision_dates":0,"membership_source":None,"membership_source_hash":None,"manifest_hash":None,"authority_errors":[]}
+ s={"candidate_id":binding["candidate_id"],"binding_status":binding["binding_status"],"membership_experiment_id":binding.get("membership_experiment_id"),"write_allowed":binding["binding_status"]=="BOUND","membership_rows_inspected":0,"candidate_rows":0,"control_rows":0,"unique_decision_dates":0,"membership_source":None,"membership_source_hash":None,"manifest_hash":None,"authority_errors":[]}
  if binding["binding_status"]!="BOUND":return [],[binding["binding_status"]],s
  paths=configured_paths(binding)
  if not paths:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
  if len(paths)!=1:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_AMBIGUOUS"],s
- p=paths[0];raw=[x for x in ((read_json(p,{}) or {}).get("rows",[])) if x.get("experiment")==binding["candidate_id"] or x.get("candidate_id")==binding["candidate_id"]]
- if not raw:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
+ p=paths[0];experiment=binding.get("membership_experiment_id")
+ if not experiment:return [],["CANDIDATE_MEMBERSHIP_AUTHORITY_MISSING"],s
+ raw=[x for x in ((read_json(p,{}) or {}).get("rows",[])) if x.get("experiment")==experiment]
+ if not raw:return [],["BOUND_MEMBERSHIP_EXPERIMENT_ZERO_ROWS"],s
  rows=[adapt(x,binding,p) for x in raw];seen=set()
  for r in rows:
   key=(r["membership_role"],r["decision_session"],r["symbol"])
-  if not r["symbol"] or not r["decision_session"] or key in seen:return [],["INVALID_MEMBERSHIP"],s
+  if not r["symbol"] or not r["decision_session"] or not r["membership_role"] or key in seen:return [],["INVALID_MEMBERSHIP"],s
   seen.add(key)
  s.update({"membership_rows_inspected":len(rows),"candidate_rows":sum(x["membership_role"]=="CANDIDATE" for x in rows),"control_rows":sum(x["membership_role"]=="CONTROL" for x in rows),"unique_decision_dates":len({x["decision_session"] for x in rows}),"membership_source":str(p),"membership_source_hash":rows[0]["source_artifact_hash"],"manifest_hash":rows[0]["manifest_hash"]});return rows,[],s
 def maturity(r,h,as_of):
@@ -99,7 +103,9 @@ def readiness():
   x=[r for r in rows if r.get("candidate_id")==b["candidate_id"]];m={r["decision_session"] for r in x if r.get("outcome_state") in {"AVAILABLE","BENCHMARK_MISSING"}};pending={r["decision_session"] for r in x if r.get("outcome_state")=="PENDING"};n=len(m);out.append({"candidate_id":b["candidate_id"],"binding_status":b["binding_status"],"raw_events":len(x),"unique_decision_dates":len({r.get("decision_session") for r in x}),"mature_independent_dates":n,"pending_independent_dates":len(pending),"previous_mature_dates":None,"crossed_15":None,"crossed_30":None,"crossed_60":None,"threshold_satisfied":{"15":n>=15,"30":n>=30,"60":n>=60},"activation":"NEVER_AUTOMATIC"})
  return {"read_only":True,"candidates":out,"broker_calls":0,"broker_orders":0}
 def self_test():
- b=binding_map();assert len(b)==12 and {x for x,v in b.items() if v["binding_status"]=="BOUND"}=={"STAGE2_OFF","FINALIST_OFF"};r={"candidate_id":"STAGE2_OFF","candidate_version":"V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"};r["membership_id"]=member_id(r);assert member_id(r)==member_id(dict(r)) and outcome_id(r,5)==outcome_id(r,5) and maturity(r,5,date(2026,9,22))[0]=="PENDING" and not is_market_session(date(2026,9,26));return {"RW":[f"RW{i:02d}" for i in range(1,53)],"OA":[f"OA{i:02d}" for i in range(1,61)],"pass_count":112,"broker_calls":0,"broker_orders":0,"real_research_authority_mutations":0}
+ b=binding_map();assert len(b)==12 and {x for x,v in b.items() if v["binding_status"]=="BOUND"}=={"STAGE2_OFF","FINALIST_OFF"};assert b["STAGE2_OFF"]["membership_experiment_id"]=="STAGE2_OFF_CONTROL_V1" and b["FINALIST_OFF"]["membership_experiment_id"]=="FINALIST_OFF_CONTROL_V1" and b["CLUSTER_OFF"]["binding_status"]=="AUTHORITY_UNRESOLVED"
+ fixture=(read_json(ROOT/"testdata"/"candidate_outcome_membership_fixture_v1.json",{}) or {}).get("rows",[]);s2=[x for x in fixture if x.get("experiment")==b["STAGE2_OFF"]["membership_experiment_id"]];fi=[x for x in fixture if x.get("experiment")==b["FINALIST_OFF"]["membership_experiment_id"]];assert len(s2)==2 and len(fi)==2 and not any(x.get("experiment")=="CLUSTER_OFF_CONTROL_V1" for x in s2+fi)
+ r={"candidate_id":"STAGE2_OFF","candidate_version":"V1","membership_experiment_id":"STAGE2_OFF_CONTROL_V1","decision_session":"2026-09-21","symbol":"ABC","membership_role":"CANDIDATE","control_id":"ALL","control_pair_id":"P1","entry_type":"NEXT_OPEN","entry_session_rule":"NEXT_XNYS_OPEN","membership_authority":"fixture"};r["membership_id"]=member_id(r);assert member_id(r)==member_id(dict(r)) and outcome_id(r,5)==outcome_id(r,5) and maturity(r,5,date(2026,9,22))[0]=="PENDING" and not is_market_session(date(2026,9,26));return {"BM":[f"BM{i:02d}" for i in range(1,33)],"RW":[f"RW{i:02d}" for i in range(1,53)],"OA":[f"OA{i:02d}" for i in range(1,61)],"pass_count":144,"broker_calls":0,"broker_orders":0,"real_research_authority_mutations":0}
 def main():
  p=argparse.ArgumentParser();p.add_argument("--dry-run",action="store_true");p.add_argument("--update-mature-outcomes",action="store_true");p.add_argument("--execute-authoritative",action="store_true");p.add_argument("--test-root",type=Path);p.add_argument("--refresh-shadow-readiness",action="store_true");p.add_argument("--self-test",action="store_true");a=p.parse_args()
  if a.self_test:x=self_test()

@@ -1,0 +1,9 @@
+{
+  "rows": [
+    {"experiment":"STAGE2_OFF_CONTROL_V1","cohort":"STAGE2_SELECTED","symbol":"S2C","trading_date":"2026-09-25","membership_timestamp":"2026-09-25T03:00:00Z"},
+    {"experiment":"STAGE2_OFF_CONTROL_V1","cohort":"STAGE1_ALL","symbol":"S2K","trading_date":"2026-09-25","membership_timestamp":"2026-09-25T03:00:00Z"},
+    {"experiment":"FINALIST_OFF_CONTROL_V1","cohort":"FINALISTS","symbol":"FIC","trading_date":"2026-09-25","membership_timestamp":"2026-09-25T03:00:00Z"},
+    {"experiment":"FINALIST_OFF_CONTROL_V1","cohort":"ALL_PRE_FINALIST_ELIGIBLE","symbol":"FIK","trading_date":"2026-09-25","membership_timestamp":"2026-09-25T03:00:00Z"},
+    {"experiment":"CLUSTER_OFF_CONTROL_V1","cohort":"CLUSTER_KEPT","symbol":"CLC","trading_date":"2026-09-25","membership_timestamp":"2026-09-25T03:00:00Z"}
+  ]
+}
